@@ -106,12 +106,12 @@ void cImage::CompileImage(void)
 			jasSuma1 *= adj.mainLightIntensity;
 			jasSuma2 *= adj.mainLightIntensity;
 
-			col.R = pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf8.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR + adj.globalIlum * pixel.ambientBuf16.R
-					/ 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-			col.G = pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf8.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG + adj.globalIlum * pixel.ambientBuf16.G
-					/ 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-			col.B = pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf8.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB + adj.globalIlum * pixel.ambientBuf16.B
-					/ 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
+			col.R = pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf8.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
+					+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
+			col.G = pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf8.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
+					+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
+			col.B = pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf8.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
+					+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 
 			double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;
 			double glowN = 1.0 - glow;
