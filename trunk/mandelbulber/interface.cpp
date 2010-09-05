@@ -478,20 +478,20 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->hybridFormula4 = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula4)));
 		params->hybridFormula5 = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula5)));
 
+		double imageScale;
 		int scale = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.combo_imageScale));
-		if (scale == 0) SCALE = 10;
-		if (scale == 1) SCALE = 8;
-		if (scale == 2) SCALE = 6;
-		if (scale == 3) SCALE = 4;
-		if (scale == 4) SCALE = 3;
-		if (scale == 5) SCALE = 2;
-		if (scale == 6) SCALE = 1;
-		if (scale == 7) SCALE = 2;
-		if (scale == 8) SCALE = 4;
-		if (scale == 9) SCALE = 6;
-		if (scale == 10) SCALE = 8;
-		if (scale < 7) SCALE_ZOOM = false;
-		else SCALE_ZOOM = true;
+		if (scale == 0) imageScale = 1.0/10.0;
+		if (scale == 1) imageScale = 1.0/8.0;
+		if (scale == 2) imageScale = 1.0/6.0;
+		if (scale == 3) imageScale = 1.0/4.0;
+		if (scale == 4) imageScale = 1.0/3.0;
+		if (scale == 5) imageScale = 1.0/2.0;
+		if (scale == 6) imageScale = 1.0;
+		if (scale == 7) imageScale = 2.0;
+		if (scale == 8) imageScale = 4.0;
+		if (scale == 9) imageScale = 6.0;
+		if (scale == 10) imageScale = 8.0;
+		Interface_data.imageScale = imageScale;
 
 		params->imageFormat = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboImageFormat));
 
@@ -845,16 +845,10 @@ void CreateInterface(sParamRender *default_settings)
 
 	//obszar rysowania
 	darea = gtk_drawing_area_new();
-	if (SCALE_ZOOM)
-	{
-		gtk_widget_set_size_request(darea, width * SCALE, height * SCALE);
-		gtk_widget_set_size_request(window2, width * SCALE + 24, height * SCALE + 24);
-	}
-	else
-	{
-		gtk_widget_set_size_request(darea, width / SCALE, height / SCALE);
-		gtk_widget_set_size_request(window2, width * SCALE + 24, height * SCALE + 24);
-	}
+
+	gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
+	gtk_widget_set_size_request(window2, mainImage->GetPreviewWidth() + 24, mainImage->GetPreviewHeight() + 24);
+
 	gtk_signal_connect(GTK_OBJECT(darea), "expose-event", GTK_SIGNAL_FUNC(on_darea_expose), NULL);
 	gtk_signal_connect(GTK_OBJECT(darea), "motion_notify_event", (GtkSignalFunc) motion_notify_event, NULL);
 	gtk_signal_connect(GTK_OBJECT(darea), "button_press_event", GTK_SIGNAL_FUNC(pressed_button_on_image), NULL);

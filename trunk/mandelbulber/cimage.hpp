@@ -11,9 +11,6 @@
 #include <gtk-2.0/gtk/gtk.h>
 
 //global variables
-extern int SCALE;
-extern bool SCALE_ZOOM;
-
 struct sRGB8
 {
 	unsigned char R;
@@ -121,11 +118,12 @@ public:
   sEffectColours* GetEffectColours(void) {return &ecol;}
   sImageSwitches* GetImageSwitches(void) {return &sw;}
   unsigned char* ConvertTo8bit(void);
-  unsigned char* CreatePreview(int w, int h);
+  unsigned char* CreatePreview(double scale);
   void UpdatePreview(void);
   unsigned char* GetPreviewPtr(void);
   bool IsPreview(void);
   void RedrawInWidget(GtkWidget *dareaWidget);
+  double GetPreviewScale() {return previewScale;}
 
 private:
   sRGB8 Interpolation(float x, float y);

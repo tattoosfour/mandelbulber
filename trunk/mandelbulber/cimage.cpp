@@ -12,9 +12,6 @@
 #include "cimage.hpp"
 
 //global variables
-int SCALE = 1;
-bool SCALE_ZOOM = false;
-
 cImage::cImage(int w, int h)
 {
 	width = w;
@@ -242,14 +239,17 @@ sRGB8 cImage::Interpolation(float x, float y)
 	return colour;
 }
 
-unsigned char* cImage::CreatePreview(int w, int h)
+unsigned char* cImage::CreatePreview(double scale)
 {
+	int w = width * scale;
+	int h = height * scale;
 	if (previewAllocated) delete preview;
 	preview = new sRGB8[w * h];
-	memset(image8, 0, sizeof(sRGB8) * (w * h));
+	memset(preview, 0, sizeof(sRGB8) * (w * h));
 	previewAllocated = true;
 	previewWidth = w;
 	previewHeight = h;
+	previewScale = scale;
 	unsigned char* ptr = (unsigned char*) preview;
 	return ptr;
 }
@@ -269,7 +269,6 @@ void cImage::UpdatePreview(void)
 		{
 			float scaleX = (float) width / w;
 			float scaleY = (float) height / h;
-			printf("scaleX = %f, scaleY = %f\n", scaleX, scaleY);
 
 			//number of pixels to sum
 			int countX = (float) width / w + 1;
@@ -342,16 +341,8 @@ void cImage::RedrawInWidget(GtkWidget *dareaWidget)
 {
 	if (IsPreview())
 	{
-		if (SCALE_ZOOM)
-		{
-			gdk_draw_rgb_image(dareaWidget->window, dareaWidget->style->fg_gc[GTK_STATE_NORMAL], 0, 0, width * SCALE, height * SCALE, GDK_RGB_DITHER_MAX, GetPreviewPtr(), width * SCALE
-					* 3);
-		}
-		else
-		{
-			gdk_draw_rgb_image(dareaWidget->window, dareaWidget->style->fg_gc[GTK_STATE_NORMAL], 0, 0, width / SCALE, height / SCALE, GDK_RGB_DITHER_MAX, GetPreviewPtr(), width / SCALE
-					* 3);
-		}
+		gdk_draw_rgb_image(dareaWidget->window, dareaWidget->style->fg_gc[GTK_STATE_NORMAL], 0, 0, GetPreviewWidth(), GetPreviewHeight(), GDK_RGB_DITHER_MAX, GetPreviewPtr(),
+				GetPreviewWidth() * 3);
 	}
 }
 
