@@ -87,22 +87,22 @@ public:
 	~cImage();
 	void ChangeSize(int w, int h);
 	void ClearImage(void);
-	void PutPixelImage(int x, int y, sRGB16 pixel)	{if (x >= 0 && x < width && y >= 0 && y < height) image16[x + y * width] = pixel;	}
-  void PutPixelZBuffer(int x, int y, float pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].zBuffer = pixel;}
-	void PutPixelShadow(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].shadowsBuf16 = pixel;}
-	void PutPixelShading(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].shadingBuf16 = pixel;}
-	void PutPixelSpecular(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].specularBuf16 = pixel;}
-	void PutPixelAuxLight(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxLight = pixel;}
-  void PutPixelAuxSpecular(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxSpecular = pixel;}
-  void PutPixelGlow(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].glowBuf16 = pixel;}
-  void PutPixelReflect(int x, int y, sRGB8 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].reflectBuf8 = pixel;}
-  void PutPixelAmbient(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].ambientBuf16 = pixel;}
-  void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].colorIndexBuf16 = pixel;}
-  void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}
-  void PutPixelAlpha(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].alpha = pixel;}
-  sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width];}
-  short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha;}
-  float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer;}
+	inline void PutPixelImage(int x, int y, sRGB16 pixel)	{if (x >= 0 && x < width && y >= 0 && y < height) image16[x + y * width] = pixel;	}
+	inline void PutPixelZBuffer(int x, int y, float pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].zBuffer = pixel;}
+	inline void PutPixelShadow(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].shadowsBuf16 = pixel;}
+	inline void PutPixelShading(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].shadingBuf16 = pixel;}
+	inline void PutPixelSpecular(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].specularBuf16 = pixel;}
+	inline void PutPixelAuxLight(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxLight = pixel;}
+	inline void PutPixelAuxSpecular(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxSpecular = pixel;}
+	inline void PutPixelGlow(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].glowBuf16 = pixel;}
+	inline void PutPixelReflect(int x, int y, sRGB8 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].reflectBuf8 = pixel;}
+	inline void PutPixelAmbient(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].ambientBuf16 = pixel;}
+	inline void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].colorIndexBuf16 = pixel;}
+	inline void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}
+	inline void PutPixelAlpha(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].alpha = pixel;}
+  inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width];}
+  inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha;}
+  inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer;}
   void CompileImage(void);
   void SetPalette(sRGB *palette);
   sRGB* GetPalettePtr() {return palette;}
