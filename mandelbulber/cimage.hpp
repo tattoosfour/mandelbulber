@@ -11,7 +11,8 @@
 #include <gtk-2.0/gtk/gtk.h>
 
 //global variables
-
+extern int SCALE;
+extern bool SCALE_ZOOM;
 
 struct sRGB8
 {
