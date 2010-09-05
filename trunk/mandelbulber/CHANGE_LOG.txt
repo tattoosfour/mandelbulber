@@ -1,0 +1,168 @@
+Version history
+v0.91
+- added stereoscopic rendering
+- added displaying value of camera distance between actual position and from last keyframe
+- added displaying value of estimated camera distance from fractal surface
+- added spherical perspective (fish eye effect)
+- added roll (y axis) rotation of view
+- moving and rotation camera tools cane use also roll rotation angle (disable by "Rotation without using gamma angle")
+- when SSAO and Ambient occlusion based on rays are enabled the program displays warning message and disables SSAO
+- fixed bug in ambient occlusion algorithm (before used only part of lightmap texture) and small optimization (elimination of dark rays)
+- fixed bug: rgbbuf32 was not used at all and consumes a lot of memory
+- fixed bug: in keyframe animation mode colour palette was taken from last keyframe file - now from actual settings (from GUI)
+
+v0.90
+- added hybrid formula - all formulas can be used in sequence
+- added "Hybrid formula" tab to GUI for all hybrid formula parameters
+- added "Absolute distance mode" option in 3D Navigator
+- actual distance between camera and viewpoint in displayed in 3D Navigator
+- program remembers last selected files in file choosers
+- on title bar is displayed name of last saved/loaded settings file
+- all colour palette is stored in settings file (not only random seed)
+- colour palette can be grabbed from selected image
+- added logfile - all important program step are recorded in file
+- Menger Sponge formula was changed to IFS Kaleidoscopic vesrion (a little slower but compatible with other formulas)
+- fixed bug: fixed problem with compiling program on Crux Linux
+- source files: fractal formulas was cleaned up
+
+v0.85
+- added animation of different parameters by sound envelope, and envelope of selected sound frequency bands
+- added command-line mode. Program can work without GUI on enviromnents without any display drivers
+- after pressing "Record key-frame" button, program tries to load next keyframe if exists 
+- GUI redesign: image tab was divided into image and shaders tabs
+- animation can be rendered also into PNG and PNG with alpha channel image sequence
+
+v0.80
+- added colour palette view
+- added offset slider for colour palette (real time image update)
+- added "Random palette" button for creating random palette (real time image update)
+- added edit field for keyframe files in "Select file paths" window
+- added "intensity" parameter for each IFS symetry vector. 0.0 -> no reflection, 1.0 -> normal reflection
+- added file choosers for all file paths in "Select file paths" window
+- added xenodreambuie's fractal formula (http://www.fractalforums.com/3d-fractal-generation/true-3d-mandlebrot-type-fractal/msg8246/#msg8246)
+- more accurate calculation of new view-point position after "zoom by click"
+- improved coloring method for Tglad's formula (Mandelbox)
+- auto-saving of images now is disabled by default - can be activaded using "Auto-save" checkbox on "Image" tab
+- removed limitaions for size of env-map texture and light-map textures (was 512x512)
+- all parameters for IFS symetry vectors can be also animated using key-frames
+- fixed bug: exp10(x) function was implemented as pow(x,10) - should be pow(10,x) - wrong calculation of fog distance and depth of field focus
+
+v0.72
+- added undo and redo buttons (100 levels of undo)
+- undo buffer in saved in files and is available after restarting the program
+- fixed bug: IFS_distance parameter was not saved and loaded
+- fixed bug: missed libpng-14-14.dll in package for Windows
+- fixed bug: backgroud image disappeared when close-up was lower than 1e-10
+
+v0.71
+- reorganized buttons for key-frames - now are on bottom of window
+- fixed bug: start_frame and end_frame parameters weren't refreshed in edit fields after loading parameters
+- fixed memory leak: missed deallocation memory for fractalParams
+- fixed memory leak: missed g_thread_join() function in PostRendering_SSAO() (8MB per each thread creation!!!)
+
+v0.70
+- added key-frame animation mode
+- added catmull-rom interpolation for key-frame animation
+- added saving images in PNG format
+- added saving images in PNG 16-bit format
+- added saving images in PNG format with alpha channel
+- all fractal formulas can be mixed with IFS Kaleidoscopic formula (Kaleidoscopic IFS Folding mode)
+- rendering of fractal and all shaders generate alpha channel
+- fixed bug in CRotationMatrix::Null(void)
+
+v0.60
+- added Kaleidoscopic IFS formula
+- added "Kaleidoscopic IFS" tab in GUI for all IFS parameters
+- fixed problem with loading settigns files generated in older versions of program (all missing parameters are filled by default values)
+- rewritten all algebraic functions in whole program (all use new CVector3 and CMatrix33 classes)
+
+v0.51
+- fixed Random() function (problem on Windows)
+
+v0.50
+- added "Light sorces" tab in GUI
+- main light is configurable (colour, angle)
+- added random auxilaty lightsources
+- added 4 configurable lightsources
+- improved environment mapping reflection. Now is calculated real reflection vector
+- improved specular highlight effect
+- all shaders in C source was moved to separate file
+
+v0.43
+- added possibility to move camera up, down, left and right in 3D navigator
+- zooming by mouse click can be disabled
+- changed default camera position in "Init 3D navigator" function
+- changed coloring algorithm for Mandelbox (Tglad's) formula. Now color in not depended on number of iterations and distance.
+- added spherical folding mode to modify all fractal formulas
+- modified shading formula
+- Screen Space Ambient Occlusion (SSAO) is rendered using mutiple CPU cores
+
+v0.42
+- fixed fatal bug with updating fog effect during interface initialisation
+
+v0.41
+- added post rendering effect based on z-buffer: Depth Of Field
+- improved coloring method for Mandelbulbs
+- slider for fog visibility changed to logarytmic scale
+- added information on progress bar about rendering post effects
+- stop button is able to terminate rendering post effects
+- added "About..." tab in GUI
+- fixed problem with g_thread initialization
+
+
+v0.40
+- flight speed is adjustable during record mode by mouse clicking (left/right button)
+- flight path record can be continued from last position stored in path file ("Continue recording" button)
+- each shading effect is rendered into separate layer (higher memory consumption)
+- shaders can be adjusted after finishing rendering 
+- compiling of all image layers is on-fly
+- changed default folders in file requsters
+- added "Save image as..." button for saving image after adjustments
+- added post rendering effect based on z-buffer: fog 
+- added post rendering effect based on z-buffer: screen space ambient occlusion
+- added "Post effects" tab in GUI
+- added analytic distance estimation for Tglad's Mandelbox formula (faster rendering)
+- added analytic distance estimation for Menger sponge formula (faster rendering)
+- fixed bug in Przekolor() function (coloring formula)
+- fixed bug in memory allocation for colour palette
+- added error handling for missed textures (error messages)
+- settings file was expanded for post rendering effect settings
+
+
+v0.30
+- added Tglad's "folding" algorithm for all formulas
+- added edit fields for changing formula folding parameters
+- added edit field for changing color frequency
+- added scrolls in main render window
+- changing image scale in window is possible during rendering
+- added closing-up by mouse clicking on image
+- fake ambient occusion mode is only enabled in trigonometric formulas
+- rebuided all settings files
+
+v0.21
+- added "sphere" formula - shaders testing mode
+- added tool-tips
+- fixed bug with hanging refreshing of image in window after using Stop button
+- created windows port
+- all textures are loaded using cTexture class
+- optimised conditions in CalculateInterations() funsction
+- added fractal coloring algorithm
+
+v0.20
+- added simple animation mode (record flight path in low lesolution and render)
+- added fractal formulas: Menger Sponge, Tglad's and z=-sin(theta) version of z^2+c
+- added spherical wrapped textured background
+- added gradient background
+- fixed some memory leaks
+- fixed bug with arrow icons
+
+v0.11
+- added detecting of number of CPU cores
+- code was little cleaned up
+- GUI was grouped into tabs
+- added 3D navigator tool
+
+v0.1 (04.02.2010)
+- first alfa release
+
+ 
