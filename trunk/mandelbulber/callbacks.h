@@ -16,6 +16,7 @@ extern CVector3 last_keyframe_position;
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event);
 gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data);
+gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data);
 gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);

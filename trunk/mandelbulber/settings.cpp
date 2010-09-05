@@ -197,8 +197,6 @@ void ParamsReleaseMem(sParamRender *fractParam)
 
 void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 {
-	printf("Fog front: %f",params.doubles.imageAdjustments.fogVisibilityFront);
-
 	if (special == 0)
 	{
 		special = new sParamSpecial;

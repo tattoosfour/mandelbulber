@@ -28,6 +28,9 @@ sNoGUIdata noGUIdata;
 GtkWidget *window2, *window_histogram, *window_interface;
 GtkWidget *darea, *darea2, *darea3;
 GtkWidget *dareaPalette;
+int scrollbarSize;
+int lastWindowWidth;
+int lastWindowHeight;
 
 char lastFilenameImage[1000];
 char lastFilenameSettings[1000];
@@ -491,6 +494,16 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		if (scale == 8) imageScale = 4.0;
 		if (scale == 9) imageScale = 6.0;
 		if (scale == 10) imageScale = 8.0;
+		if (scale == 11)
+		{
+			int winWidth;
+			int winHeight;
+			gtk_window_get_size(GTK_WINDOW(window2),&winWidth,&winHeight);
+			winWidth-=scrollbarSize;
+			winHeight-=scrollbarSize;
+			imageScale = (double)winWidth / params->image_width;
+			if(params->image_height*imageScale > winHeight) imageScale = (double)winHeight / params->image_height;
+		}
 		Interface_data.imageScale = imageScale;
 
 		params->imageFormat = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboImageFormat));
@@ -830,14 +843,13 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 
 void CreateInterface(sParamRender *default_settings)
 {
-	int width = mainImage->GetWidth();
-	int height = mainImage->GetHeight();
-
 	//------------- glowne okno renderowania
 	window2 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window2), "Mandelbulb Render Window");
 	g_signal_connect(G_OBJECT(window2), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(window2), "delete_event", G_CALLBACK(gtk_main_quit), NULL);
+	gtk_widget_add_events(GTK_WIDGET(window2), GDK_CONFIGURE);
+  g_signal_connect(G_OBJECT(window2), "configure-event", G_CALLBACK(WindowReconfigured), NULL);
 
 	//glowny box w oknie
 	GtkWidget *box1 = gtk_vbox_new(FALSE, 0);
@@ -847,7 +859,9 @@ void CreateInterface(sParamRender *default_settings)
 	darea = gtk_drawing_area_new();
 
 	gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
-	gtk_widget_set_size_request(window2, mainImage->GetPreviewWidth() + 24, mainImage->GetPreviewHeight() + 24);
+	gtk_window_set_default_size(GTK_WINDOW(window2), mainImage->GetPreviewWidth() + 16, mainImage->GetPreviewHeight() + 16);
+	lastWindowWidth = mainImage->GetPreviewWidth()+16;
+	lastWindowHeight = mainImage->GetPreviewHeight()+16;
 
 	gtk_signal_connect(GTK_OBJECT(darea), "expose-event", GTK_SIGNAL_FUNC(on_darea_expose), NULL);
 	gtk_signal_connect(GTK_OBJECT(darea), "motion_notify_event", (GtkSignalFunc) motion_notify_event, NULL);
@@ -867,6 +881,12 @@ void CreateInterface(sParamRender *default_settings)
 
 	//wyswietlenie wszystkich widgetow
 	gtk_widget_show_all(window2);
+
+	//get scrollbar size
+	GtkWidget *hscrollbar = gtk_scrolled_window_get_hscrollbar(GTK_SCROLLED_WINDOW(scrolled_window));
+	GtkAllocation scrollBarAllocation;
+	gtk_widget_get_allocation (hscrollbar,&scrollBarAllocation);
+	scrollbarSize = scrollBarAllocation.height;
 
 	//------------------- okno histogramu iteracji ------------
 
@@ -1248,7 +1268,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "4");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "6");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "8");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.combo_imageScale), 6);
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "Fit to window");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.combo_imageScale), 11);
 	//image format
 	Interface.comboImageFormat = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "JPEG");

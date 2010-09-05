@@ -691,7 +691,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 	//turn off refreshing if resolution is very low
 	bool bo_refreshing = true;
-	if (width * height <= 320 * 240)
+	if (width * height <= 200 * 200)
 	{
 		bo_refreshing = false;
 	}
@@ -742,7 +742,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	}
 
 	//refresh GUI
-	if (!noGUI)
+	if (!noGUI && bo_refreshing)
 	{
 		while (gtk_events_pending())
 			gtk_main_iteration();
@@ -1128,7 +1128,7 @@ void MainRender(void)
 	WriteLog("rgbbuf allocated");
 
 	//waiting for refresh window
-	g_usleep(500000);
+	g_usleep(100000);
 	if (!noGUI)
 	{
 		for (int i = 0; i < 10; i++)
