@@ -569,6 +569,9 @@ extern int y_mouse;
 extern bool programClosed;
 extern bool interfaceCreated;
 extern bool paletteViewCreated;
+extern int scrollbarSize;
+extern int lastWindowWidth;
+extern int lastWindowHeight;
 
 extern char lastFilenameImage[1000];
 extern char lastFilenameSettings[1000];

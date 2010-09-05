@@ -142,6 +142,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 	return true;
 }
 
+
 //----------- close program
 gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -149,6 +150,20 @@ gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 	printf("Rendering terminated\n");
 	return FALSE;
 }
+
+gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data)
+{
+  int width = event->configure.width;
+  int height = event->configure.height;
+  printf("width = %d, height = %d\n",width,height);
+
+  if(width != lastWindowWidth || height != lastWindowHeight)
+  {
+  	ChangedComboScale(Interface.combo_imageScale,NULL);
+  }
+  return false;
+}
+
 
 gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
@@ -159,6 +174,7 @@ gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user
 	}
 	else return false;
 }
+
 
 gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
@@ -1023,10 +1039,17 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 	if (scale == 8) imageScale = 4.0;
 	if (scale == 9) imageScale = 6.0;
 	if (scale == 10) imageScale = 8.0;
+	if (scale == 11)
+	{
+		int winWidth;
+		int winHeight;
+		gtk_window_get_size(GTK_WINDOW(window2), &winWidth, &winHeight);
+		winWidth -= scrollbarSize;
+		winHeight -= scrollbarSize;
+		imageScale = (double) winWidth / mainImage->GetWidth();
+		if (mainImage->GetHeight() * imageScale > winHeight) imageScale = (double) winHeight / mainImage->GetHeight();
+	}
 	Interface_data.imageScale = imageScale;
-
-	int width = mainImage->GetWidth();
-	int height = mainImage->GetHeight();
 
 	mainImage->CreatePreview(imageScale);
 	gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
@@ -1699,3 +1722,4 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 	}
 	gtk_widget_destroy(dialog);
 }
+
