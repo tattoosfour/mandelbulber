@@ -128,57 +128,6 @@ void NowaPaleta(sRGB *p, double nasycenie)
  }
  */
 
-void ScaleImage(guchar *imageBig, guchar *imageSmall)
-{
-	int width = mainImage->GetWidth();
-	int height = mainImage->GetHeight();
-
-	if (!SCALE_ZOOM)
-	{
-		int factor = SCALE * SCALE;
-		for (int y = 0; y < height / SCALE; y++)
-		{
-			for (int x = 0; x < width / SCALE; x++)
-			{
-				int rSuma = 0;
-				int gSuma = 0;
-				int bSuma = 0;
-				guint64 adres2 = ((guint64) y * (width / SCALE) + x) * 3;
-				for (int j = 0; j < SCALE; j++)
-				{
-					for (int i = 0; i < SCALE; i++)
-					{
-						guint64 adres = (((guint64) y * SCALE + j) * width + x * SCALE + i) * 3;
-						rSuma += imageBig[adres];
-						gSuma += imageBig[adres + 1];
-						bSuma += imageBig[adres + 2];
-					}
-				}
-				imageSmall[adres2] = rSuma / factor;
-				imageSmall[adres2 + 1] = gSuma / factor;
-				imageSmall[adres2 + 2] = bSuma / factor;
-			}
-		}
-	}
-	else
-	{
-		for (int y = 0; y < height * SCALE; y++)
-		{
-			for (int x = 0; x < width * SCALE; x++)
-			{
-				guint64 adres = (((guint64) y / SCALE) * width + x / SCALE) * 3;
-				guint64 adres2 = ((guint64) y * (width * SCALE) + x) * 3;
-				int R = imageBig[adres];
-				int G = imageBig[adres + 1];
-				int B = imageBig[adres + 2];
-				imageSmall[adres2] = R;
-				imageSmall[adres2 + 1] = G;
-				imageSmall[adres2 + 2] = B;
-			}
-		}
-	}
-}
-
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 {
 	isPostRendering = true;

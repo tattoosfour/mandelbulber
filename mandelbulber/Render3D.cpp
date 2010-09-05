@@ -968,7 +968,7 @@ int main(int argc, char *argv[])
 	WriteLog("complexImage allocated");
 
 	//allocating memory for image in window
-	mainImage->CreatePreview(width, height);
+	mainImage->CreatePreview(1.0);
 	WriteLog("Memory allocated for preview");
 
 	//allocating memory for lights
@@ -1118,24 +1118,13 @@ void MainRender(void)
 		mainImage->SetPalette(noGUIdata.fractparams.palette);
 	}
 
-	if (SCALE_ZOOM)
+	mainImage->CreatePreview(Interface_data.imageScale);
+
+	if (!noGUI)
 	{
-		mainImage->CreatePreview(width * SCALE, height * SCALE);
-		if (!noGUI)
-		{
-			gtk_widget_set_size_request(darea, width * SCALE, height * SCALE);
-		}
-		//gtk_widget_set_size_request(window2, IMAGE_WIDTH * SCALE, IMAGE_HEIGHT * SCALE);
+		gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
 	}
-	else
-	{
-		mainImage->CreatePreview(width / SCALE, height / SCALE);
-		if (!noGUI)
-		{
-			gtk_widget_set_size_request(darea, width / SCALE, height / SCALE);
-		}
-		//gtk_widget_set_size_request(window2, IMAGE_WIDTH / SCALE, IMAGE_HEIGHT / SCALE);
-	}
+
 	WriteLog("rgbbuf allocated");
 
 	//waiting for refresh window
@@ -1371,16 +1360,10 @@ void MainRender(void)
 			}
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
-			if (SCALE_ZOOM)
-			{
-				delta_xm = x_mouse - width * SCALE / 2;
-				delta_ym = y_mouse - height * SCALE / 2;
-			}
-			else
-			{
-				delta_xm = x_mouse - width / SCALE / 2;
-				delta_ym = y_mouse - height / SCALE / 2;
-			}
+
+				delta_xm = x_mouse - width / mainImage->GetPreviewScale() / 2;
+				delta_ym = y_mouse - height / mainImage->GetPreviewScale() / 2;
+
 
 			if (fractParam.recordMode)
 			{

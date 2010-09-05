@@ -496,6 +496,8 @@ struct sInterface_data
 {
 	bool disableInitRefresh;
 
+	double imageScale;
+
 	double brightness;
 	double imageGamma;
 	double shadows;

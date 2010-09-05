@@ -48,16 +48,8 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 		int x = event->x;
 		int z = event->y;
 
-		if (SCALE_ZOOM)
-		{
-			x = x / SCALE;
-			z = z / SCALE;
-		}
-		else
-		{
-			x = x * SCALE;
-			z = z * SCALE;
-		}
+		x = x / mainImage->GetPreviewScale();
+		z = z / mainImage->GetPreviewScale();
 
 		int width = mainImage->GetWidth();
 		int height = mainImage->GetHeight();
@@ -1019,33 +1011,26 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 {
 	GtkComboBox *combo = GTK_COMBO_BOX(widget);
 	int scale = gtk_combo_box_get_active(combo);
-	if (scale == 0) SCALE = 10;
-	if (scale == 1) SCALE = 8;
-	if (scale == 2) SCALE = 6;
-	if (scale == 3) SCALE = 4;
-	if (scale == 4) SCALE = 3;
-	if (scale == 5) SCALE = 2;
-	if (scale == 6) SCALE = 1;
-	if (scale == 7) SCALE = 2;
-	if (scale == 8) SCALE = 4;
-	if (scale == 9) SCALE = 6;
-	if (scale == 10) SCALE = 8;
-	if (scale < 7) SCALE_ZOOM = false;
-	else SCALE_ZOOM = true;
+	double imageScale;
+	if (scale == 0) imageScale = 1.0/10.0;
+	if (scale == 1) imageScale = 1.0/8.0;
+	if (scale == 2) imageScale = 1.0/6.0;
+	if (scale == 3) imageScale = 1.0/4.0;
+	if (scale == 4) imageScale = 1.0/3.0;
+	if (scale == 5) imageScale = 1.0/2.0;
+	if (scale == 6) imageScale = 1.0;
+	if (scale == 7) imageScale = 2.0;
+	if (scale == 8) imageScale = 4.0;
+	if (scale == 9) imageScale = 6.0;
+	if (scale == 10) imageScale = 8.0;
+	Interface_data.imageScale = imageScale;
 
 	int width = mainImage->GetWidth();
 	int height = mainImage->GetHeight();
 
-	if (SCALE_ZOOM)
-	{
-		mainImage->CreatePreview(width * SCALE, height * SCALE);
-		gtk_widget_set_size_request(darea, width * SCALE, height * SCALE);
-	}
-	else
-	{
-		mainImage->CreatePreview(width / SCALE, height / SCALE);
-		gtk_widget_set_size_request(darea, width / SCALE, height / SCALE);
-	}
+	mainImage->CreatePreview(imageScale);
+	gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
+
 	mainImage->ConvertTo8bit();
 	mainImage->UpdatePreview();
 	mainImage->RedrawInWidget(darea);
