@@ -392,6 +392,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
 
+		params->image_width = (params->image_width/16)*16;
+		params->image_height = (params->image_height/16)*16;
+
 		special->paletteOffset.active = false;
 		special->fogVisibility.active = false;
 		special->fogVisibilityFront.active = false;
@@ -1985,6 +1988,9 @@ void CreateInterface(sParamRender *default_settings)
 	//Writing default settings
 	WriteInterface(default_settings);
 	interfaceCreated = true;
+	renderRequest = false;
+
+  g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
 
 	gdk_threads_enter();
 	gtk_main();

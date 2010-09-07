@@ -83,9 +83,9 @@ void cImage::CompileImage(void)
 	double fog_visibility = pow(10, adj.fogVisibility / 10 - 2.0);
 	double fog_visibility_front = pow(10, adj.fogVisibilityFront / 10 - 2.0) - 10.0;
 
-	for (int y = 0; y < height; y++)
+	for (int y = 0; y < height; y += progressiveFactor)
 	{
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < width; x += progressiveFactor)
 		{
 			sRGB col = { 0, 0, 0 };
 			int address = x + y * width;
@@ -147,6 +147,20 @@ void cImage::CompileImage(void)
 
 			complexImage[address] = pixel;
 			image16[address] = newPixel16;
+		}
+		for (int x = 0; x <= width - progressiveFactor; x += progressiveFactor)
+		{
+			sRGB16 pixel = image16[x + y * width];
+			int alpha = complexImage[x + y * width].alpha;
+			for (int yy = 0; yy < progressiveFactor; yy++)
+			{
+				for (int xx = 0; xx < progressiveFactor; xx++)
+				{
+					if (xx == 0 && yy == 0) continue;
+					image16[x + xx + (y + yy) * width] = pixel;
+					complexImage[x + xx + (y + yy) * width].alpha = alpha;
+				}
+			}
 		}
 	}
 }
@@ -343,6 +357,24 @@ void cImage::RedrawInWidget(GtkWidget *dareaWidget)
 	{
 		gdk_draw_rgb_image(dareaWidget->window, dareaWidget->style->fg_gc[GTK_STATE_NORMAL], 0, 0, GetPreviewWidth(), GetPreviewHeight(), GDK_RGB_DITHER_MAX, GetPreviewPtr(),
 				GetPreviewWidth() * 3);
+	}
+}
+
+void cImage::Squares(int y, int pFactor)
+{
+	progressiveFactor = pFactor;
+	for (int x = 0; x <= width - pFactor; x += pFactor)
+	{
+		sComplexImage pixel = complexImage[x + y * width];
+
+		for (int yy = 0; yy < pFactor; yy++)
+		{
+			for (int xx = 0; xx < pFactor; xx++)
+			{
+				if (xx == 0 && yy == 0) continue;
+				complexImage[x + xx + (y + yy) * width] = pixel;
+			}
+		}
 	}
 }
 

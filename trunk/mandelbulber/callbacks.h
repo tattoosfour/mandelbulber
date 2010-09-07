@@ -12,7 +12,9 @@
 
 extern double last_navigator_step;
 extern CVector3 last_keyframe_position;
+extern bool renderRequest;
 
+gboolean CallerTimerLoop(GtkWidget *widget);
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event);
 gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data);

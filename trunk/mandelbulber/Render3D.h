@@ -20,6 +20,8 @@ struct sParam
 {
   int start;
   int z;
+  int progressive;
+  int progressiveStart;
   sParamRender param;
   cImage *image;
 };
