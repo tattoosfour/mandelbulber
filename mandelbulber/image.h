@@ -29,6 +29,7 @@ struct sSSAOparams
 	int quality;
 	int done;
 	bool fishEye;
+	int progressive;
 };
 
 

@@ -59,9 +59,6 @@ bool isRendering = false;
 bool isPostRendering = false;
 
 int *thread_done;
-GThread *threadMainRender;
-GError *errMainRender;
-int nicMainRender;
 
 cImage *mainImage;
 
@@ -84,12 +81,18 @@ void *MainThread(void *ptr)
 
 	//initialising variables
 	int start = parametry->start;
+	start = (start / 16) * 16;
 	int z = parametry->z;
 	int thread_number = z;
 	cImage *image = parametry->image;
+	int progressive = parametry->progressive;
+	int progressiveStart = parametry->progressiveStart;
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 	WriteLogDouble("Thread started", thread_number);
+
+	sRGB8 black8 = { 0, 0, 0 };
+	sRGB16 black16 = { 0, 0, 0 };
 
 	//printf("Thread #%d started\n", z + 1);
 	sParamRender param = parametry->param;
@@ -223,7 +226,7 @@ void *MainThread(void *ptr)
 		if (pass == 1) start = 0;
 
 		//main loop for z values
-		for (z = start; z < height; z++)
+		for (z = start; z <= height - progressive; z += progressive)
 		{
 			//checking if some another thread is not rendering the same z
 			if (thread_done[z] == 0)
@@ -234,13 +237,15 @@ void *MainThread(void *ptr)
 				WriteLogDouble("Started rendering line", z);
 
 				//main loop for x values
-				for (int x = 0; x < width; x++)
+				for (int x = 0; x <= width - progressive; x += progressive)
 				{
 					//checking if program was not closed
 					if (programClosed)
 					{
 						return NULL;
 					}
+
+					if (progressive < progressiveStart && x % (progressive * 2) == 0 && z % (progressive * 2) == 0) continue;
 
 					//------------- finding fractal surface ---------------------------
 
@@ -480,7 +485,7 @@ void *MainThread(void *ptr)
 							shadow16 = shadowOutput.R * 4096.0;
 						}
 
-						image->PutPixelShadow(x,z,shadow16);
+						image->PutPixelShadow(x, z, shadow16);
 
 						//******* calculate global illumination (ambient occlusion)
 
@@ -508,14 +513,13 @@ void *MainThread(void *ptr)
 							{
 								AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vn);
 							}
+							sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
+							image->PutPixelAmbient(x, z, globalLight);
 						}
-
-						sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
-						image->PutPixelAmbient(x,z,globalLight);
 
 						//calculate shading based on angle of incidence
 						sShaderOutput shade = MainShading(vn, lightVector);
-						image->PutPixelShading(x,z,shade.R*4096.0);
+						image->PutPixelShading(x, z, shade.R * 4096.0);
 
 						int numberOfLights = lightsPlaced;
 						if (numberOfLights < 4) numberOfLights = 4;
@@ -540,20 +544,19 @@ void *MainThread(void *ptr)
 							}
 						}
 						sRGB16 shadeAux16 = { shadeAuxSum.R * 4096.0, shadeAuxSum.G * 4096.0, shadeAuxSum.B * 4096.0 };
-						image->PutPixelAuxLight(x,z,shadeAux16);
+						image->PutPixelAuxLight(x, z, shadeAux16);
 
 						sRGB16 specularAux16 = { specularAuxSum.R * 4096.0, specularAuxSum.G * 4096.0, specularAuxSum.B * 4096.0 };
-						image->PutPixelAuxSpecular(x,z,specularAux16);
+						image->PutPixelAuxSpecular(x, z, specularAux16);
 
 						//calculate specular reflection effect
 						sShaderOutput specular = MainSpecular(vn, lightVector, viewVector);
-						image->PutPixelSpecular(x,z,specular.R * 4096.0);
+						image->PutPixelSpecular(x, z, specular.R * 4096.0);
 
 						//calculate environment mapping reflection effect
 						sShaderOutput envMapping = EnvMapping(vn, viewVector, envmap_texture);
 						sRGB8 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
-						image->PutPixelReflect(x,z,reflection);
-
+						image->PutPixelReflect(x, z, reflection);
 
 						//coloured surface of fractal
 						int colorIndex = 0;
@@ -570,15 +573,25 @@ void *MainThread(void *ptr)
 								colorIndex = nrKol;
 							}
 						}
-						image->PutPixelColor(x,z,colorIndex);
+						image->PutPixelColor(x, z, colorIndex);
 
 						//zBuffer
-						image->PutPixelZBuffer(x,z,y);
+						image->PutPixelZBuffer(x, z, y);
+						image->PutPixelBackground(x, z, black16);
 
 					}//end if found
 
 					else
 					{
+						//image->PutPixelAmbient(x, z, black16);
+						image->PutPixelAuxLight(x, z, black16);
+						image->PutPixelAuxSpecular(x, z, black16);
+						image->PutPixelColor(x, z, 0);
+						image->PutPixelReflect(x, z, black8);
+						image->PutPixelShading(x, z, 0);
+						image->PutPixelShadow(x, z, 0);
+						image->PutPixelSpecular(x, z, 0);
+
 						//------------- render 3D background
 						if (textured_background)
 						{
@@ -621,7 +634,7 @@ void *MainThread(void *ptr)
 							pixel16.R = pixel.R * 256;
 							pixel16.G = pixel.G * 256;
 							pixel16.B = pixel.B * 256;
-							image->PutPixelBackground(x,z,pixel16);
+							image->PutPixelBackground(x, z, pixel16);
 							//PutPixelAlfa(x, z, pixel.R * 256, pixel.G * 256, pixel.B * 256, 65536, 1.0);
 						}
 						else
@@ -632,20 +645,25 @@ void *MainThread(void *ptr)
 							pixel.R = (background_color1.R * Ngrad + background_color2.R * grad);
 							pixel.G = (background_color1.G * Ngrad + background_color2.G * grad);
 							pixel.B = (background_color1.B * Ngrad + background_color2.B * grad);
-							image->PutPixelBackground(x,z,pixel);
+							image->PutPixelBackground(x, z, pixel);
 							//PutPixelAlfa(x, z, backR, backG, backB, 65536, 1.0);
 						}
-						image->PutPixelZBuffer(x,z,1e20);
+						image->PutPixelZBuffer(x, z, 1e20);
 					}
 
 					//drawing transparent glow
-					image->PutPixelGlow(x,z,counter);
+					image->PutPixelGlow(x, z, counter);
 
 				}//next x
 
+				image->Squares(z, progressive);
+
 				done++;
 
-				double percent_done = (double) done / height * 100.0;
+				double progressiveDone;
+				if (progressive == progressiveStart) progressiveDone = 0;
+				else progressiveDone = 0.25 / (progressive * progressive);
+				double percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 				double time = real_clock() - start_time;
 				double time_to_go = (100.0 - percent_done) * time / percent_done;
 				int togo_time_s = (int) time_to_go % 60;
@@ -691,10 +709,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 	//turn off refreshing if resolution is very low
 	bool bo_refreshing = true;
-	if (width * height <= 200 * 200)
-	{
-		bo_refreshing = false;
-	}
 
 	//clearing histogram tables
 	for (int i = 0; i < 64; i++)
@@ -709,7 +723,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	DE_counter = 0;
 	Pixel_counter = 0;
 	Missed_DE_counter = 0;
-	done = 0;
 	start_time = real_clock();
 
 	//initialising threads
@@ -717,117 +730,132 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	GThread *Thread[NR_THREADS + 1];
 	GError *err[NR_THREADS + 1];
 	sParam thread_param[NR_THREADS];
-	for (int i = 0; i < NR_THREADS; i++)
-	{
-		err[i] = NULL;
-	}
-	for (int i = 0; i < height; i++)
-	{
-		thread_done[i] = 0;
-	}
-	WriteLog("Threads data prepared");
 
-	//running rendering threads in background
-	for (int i = 0; i < NR_THREADS; i++)
-	{
-		//sending some parameters to thread
-		thread_param[i].start = i * height / NR_THREADS;
-		thread_param[i].z = i;
-		thread_param[i].param = param;
-		thread_param[i].image = image;
-		//creating thread
-		Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
-		WriteLogDouble("Thread created", i);
-		//printf("Rendering thread #%d created\n", i + 1);
-	}
+	int progressiveStart = 16;
 
-	//refresh GUI
-	if (!noGUI && bo_refreshing)
-	{
-		while (gtk_events_pending())
-			gtk_main_iteration();
+	int refresh_index = 0;
+	int refresh_skip = 1;
 
-		//refreshing image and histograms during rendering
-		int refresh_index = 0;
-		int refresh_skip = 1;
-		while (done < height - 1 && !programClosed)
+	for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
+	{
+		//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
+		//else bo_refreshing = true;
+
+		done = 0;
+		for (int i = 0; i < NR_THREADS; i++)
 		{
-			g_usleep(100000);
+			err[i] = NULL;
+		}
+		for (int i = 0; i < height; i++)
+		{
+			thread_done[i] = 0;
+		}
+		WriteLog("Threads data prepared");
 
-			refresh_index++;
-			if (refresh_index >= refresh_skip && !param.recordMode)
+		//running rendering threads in background
+		for (int i = 0; i < NR_THREADS; i++)
+		{
+			//sending some parameters to thread
+			thread_param[i].start = i * height / NR_THREADS;
+			thread_param[i].z = i;
+			thread_param[i].param = param;
+			thread_param[i].image = image;
+			thread_param[i].progressive = progressive;
+			thread_param[i].progressiveStart = progressiveStart;
+			//creating thread
+			Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
+			WriteLogDouble("Thread created", i);
+			//printf("Rendering thread #%d created\n", i + 1);
+		}
+
+		//refresh GUI
+		if (!noGUI && bo_refreshing)
+		{
+			while (gtk_events_pending())
+				gtk_main_iteration();
+
+			//refreshing image and histograms during rendering
+
+			while (done < height / progressive - 1 && !programClosed)
 			{
-				double refreshStartTime = real_clock();
-
-				//*** postprocessing
-				//guint *post_bitmap = new guint[IMAGE_WIDTH * IMAGE_HEIGHT * 3];
-				//PostRendering_SSAO(rgbbuf32, post_bitmap, zBuffer, param.persp, param.globalIlum);
-				//Bitmap32to8(post_bitmap, rgbbuf, rgbbuf2);
-				//delete post_bitmap;
-				//end of postprocessing
-
-				if (Interface_data.SSAOEnabled)
+				g_usleep(100000);
+				if (progressive < progressiveStart)
 				{
-					PostRendering_SSAO(image, param.doubles.persp, Interface_data.SSAOQuality / 2);
-					WriteLog("SSAO rendered");
-				}
-				image->CompileImage();
-				WriteLog("Image compiled");
+					refresh_index++;
+					//if (image->IsPreview()) mainImage->RedrawInWidget(darea);
 
-				if (image->IsPreview())
-				{
-					image->ConvertTo8bit();
-					WriteLog("Image converted into 8-bit");
-					image->UpdatePreview();
-					WriteLog("Preview created");
-					if (outputDarea != NULL)
+					if (refresh_index >= refresh_skip && !param.recordMode)
 					{
-						DrawHistogram();
-						DrawHistogram2();
-						WriteLog("Histograms refreshed");
-						image->RedrawInWidget(outputDarea);
-						WriteLog("Image redrawed in window");
+						double refreshStartTime = real_clock();
+
+						if (Interface_data.SSAOEnabled)
+						{
+							PostRendering_SSAO(image, param.doubles.persp, Interface_data.SSAOQuality / 2);
+							WriteLog("SSAO rendered");
+						}
+						image->CompileImage();
+						WriteLog("Image compiled");
+
+						if (image->IsPreview())
+						{
+							image->ConvertTo8bit();
+							WriteLog("Image converted into 8-bit");
+							image->UpdatePreview();
+							WriteLog("Preview created");
+							if (outputDarea != NULL)
+							{
+								DrawHistogram();
+								DrawHistogram2();
+								WriteLog("Histograms refreshed");
+								image->RedrawInWidget(outputDarea);
+								WriteLog("Image redrawed in window");
+							}
+						}
+
+						double refreshEndTime = real_clock();
+						//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
+						refresh_skip = (refreshEndTime - refreshStartTime) * 50;
+						refresh_index = 0;
+						WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
 					}
 				}
 
-				double refreshEndTime = real_clock();
-				//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
-				refresh_skip = (refreshEndTime - refreshStartTime) * 100;
-				refresh_index = 0;
-				WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
+				if (outputDarea != NULL)
+				{
+					//progress bar
+					char progressText[1000];
+					double progressiveDone;
+					if (progressive == progressiveStart) progressiveDone = 0;
+					else progressiveDone = 0.25 / (progressive * progressive);
+					double percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+					double time = real_clock() - start_time;
+					double time_to_go = (100.0 - percent_done) * time / percent_done;
+					int togo_time_s = (int) time_to_go % 60;
+					int togo_time_min = (int) (time_to_go / 60) % 60;
+					int togo_time_h = time_to_go / 3600;
+					int time_s = (int) time % 60;
+					int time_min = (int) (time / 60) % 60;
+					int time_h = time / 3600;
+					double iterations_per_sec = N_counter / time;
+					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
+							iterations_per_sec);
+					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+					gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
+				}
+				//refreshing GUI
+				while (gtk_events_pending())
+					gtk_main_iteration();
 			}
-
-			if (outputDarea != NULL)
-			{
-				//progress bar
-				char progressText[1000];
-				double percent_done = (double) done / height * 100.0;
-				double time = real_clock() - start_time;
-				double time_to_go = (100.0 - percent_done) * time / percent_done;
-				int togo_time_s = (int) time_to_go % 60;
-				int togo_time_min = (int) (time_to_go / 60) % 60;
-				int togo_time_h = time_to_go / 3600;
-				int time_s = (int) time % 60;
-				int time_min = (int) (time / 60) % 60;
-				int time_h = time / 3600;
-				double iterations_per_sec = N_counter / time;
-				sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
-						iterations_per_sec);
-				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), (double) done / height);
-			}
-			//refreshing GUI
-			while (gtk_events_pending())
-				gtk_main_iteration();
 		}
-	}
-	//when rendered all of image lines wait for finishing threads
-	for (int i = 0; i < NR_THREADS; i++)
-	{
-		g_thread_join(Thread[i]);
-		WriteLogDouble("Thread finish confirmed", i);
-		//printf("Rendering thread #%d finished\n", i + 1);
-	}
+		//when rendered all of image lines wait for finishing threads
+		for (int i = 0; i < NR_THREADS; i++)
+		{
+			g_thread_join(Thread[i]);
+			WriteLogDouble("Thread finish confirmed", i);
+			//printf("Rendering thread #%d finished\n", i + 1);
+		}
+		if (programClosed) break;
+	}//next progress
 	printf("\n");
 
 	//refreshing image
@@ -838,14 +866,14 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	//Bitmap32to8(post_bitmap, rgbbuf, rgbbuf2);
 	//delete post_bitmap;
 	//end of postprocessing
-	if (Interface_data.SSAOEnabled)
+	if (Interface_data.SSAOEnabled && !programClosed)
 	{
 		PostRendering_SSAO(image, param.doubles.persp, Interface_data.SSAOQuality);
 		WriteLog("SSAO rendered");
 	}
 	image->CompileImage();
 	WriteLog("Image compiled");
-	if (param.DOFEnabled)
+	if (param.DOFEnabled && !programClosed)
 	{
 		double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 2.0) - 1.0 / param.doubles.persp;
 		PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus, param.doubles.persp);
@@ -871,7 +899,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				WriteLog("Image redrawed in window");
 			}
 		}
+	}
 
+	if (!noGUI)
+	{
 		if (outputDarea != NULL)
 		{
 			char progressText[1000];
@@ -1113,7 +1144,7 @@ void MainRender(void)
 	WriteLog("complexImage allocated");
 	printf("Memory for image: %d MB\n", mainImage->GetUsedMB());
 
-	if(noGUI)
+	if (noGUI)
 	{
 		mainImage->SetPalette(noGUIdata.fractparams.palette);
 	}
@@ -1361,9 +1392,8 @@ void MainRender(void)
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
 
-				delta_xm = x_mouse - width / mainImage->GetPreviewScale() / 2;
-				delta_ym = y_mouse - height / mainImage->GetPreviewScale() / 2;
-
+			delta_xm = x_mouse - width / mainImage->GetPreviewScale() / 2;
+			delta_ym = y_mouse - height / mainImage->GetPreviewScale() / 2;
 
 			if (fractParam.recordMode)
 			{
@@ -1409,7 +1439,8 @@ void MainRender(void)
 
 				//saving coordinates to file
 				pFile_coordinates = fopen(fractParam.file_path, "a");
-				fprintf(pFile_coordinates, "%.10f %.10f %.10f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alfa, fractParam.doubles.beta);
+				fprintf(pFile_coordinates, "%.10f %.10f %.10f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alfa,
+						fractParam.doubles.beta);
 				fclose(pFile_coordinates);
 				WriteLog("Coordinate saved");
 			}
@@ -1419,7 +1450,8 @@ void MainRender(void)
 			{
 				//loading coordinates
 				int n;
-				n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alfa, &fractParam.doubles.beta);
+				n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alfa,
+						&fractParam.doubles.beta);
 				if (n <= 0)
 				{
 					foundLastFrame = true;

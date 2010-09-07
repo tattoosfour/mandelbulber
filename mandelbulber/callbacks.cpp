@@ -32,6 +32,7 @@
 
 double last_navigator_step;
 CVector3 last_keyframe_position;
+bool renderRequest = false;
 
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 {
@@ -41,13 +42,32 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 	return TRUE;
 }
 
+gboolean CallerTimerLoop(GtkWidget *widget)
+{
+	if (isRendering && renderRequest)
+	{
+		programClosed = true;
+		isPostRendering = false;
+	}
+
+	if (!isRendering && renderRequest)
+	{
+		renderRequest = false;
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		MainRender();
+	}
+	return true;
+}
+
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 {
-	if (!isRendering && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable)))
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable)))
 	{
 		int x = event->x;
 		int z = event->y;
-
 		x = x / mainImage->GetPreviewScale();
 		z = z / mainImage->GetPreviewScale();
 
@@ -114,13 +134,18 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 			WriteInterface(&params);
+			ParamsReleaseMem(&params);
 			Interface_data.animMode = false;
 			Interface_data.playMode = false;
 			Interface_data.recordMode = false;
 			Interface_data.continueRecord = false;
-			MainRender();
+
+			programClosed = true;
+			isPostRendering = false;
+			renderRequest = true;
+
+			printf("Event finished\n");
 		}
-		ParamsReleaseMem(&params);
 	}
 	else
 	{
@@ -142,7 +167,6 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 	return true;
 }
 
-
 //----------- close program
 gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -153,17 +177,15 @@ gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 
 gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data)
 {
-  int width = event->configure.width;
-  int height = event->configure.height;
-  printf("width = %d, height = %d\n",width,height);
+	int width = event->configure.width;
+	int height = event->configure.height;
 
-  if(width != lastWindowWidth || height != lastWindowHeight)
-  {
-  	ChangedComboScale(Interface.combo_imageScale,NULL);
-  }
-  return false;
+	if (width != lastWindowWidth || height != lastWindowHeight)
+	{
+		ChangedComboScale(Interface.combo_imageScale, NULL);
+	}
+	return false;
 }
-
 
 gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
@@ -174,7 +196,6 @@ gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user
 	}
 	else return false;
 }
-
 
 gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
@@ -235,21 +256,21 @@ void destroy(GtkWidget *widget, gpointer data)
 
 void StartRendering(GtkWidget *widget, gpointer data)
 {
-	if (!isRendering)
-	{
-		sParamRender params;
-		ParamsAllocMem(&params);
-		ReadInterface(&params);
-		undoBuffer.SaveUndo(&params);
-		ParamsReleaseMem(&params);
+	sParamRender params;
+	ParamsAllocMem(&params);
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+	ParamsReleaseMem(&params);
 
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
 }
 
 void PressedAnimationRecord(GtkWidget *widget, gpointer data)
@@ -552,15 +573,16 @@ void PressedNavigatorUp(GtkWidget *widget, gpointer data)
 	}
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -590,15 +612,16 @@ void PressedNavigatorDown(GtkWidget *widget, gpointer data)
 	}
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -628,15 +651,16 @@ void PressedNavigatorLeft(GtkWidget *widget, gpointer data)
 	}
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -665,15 +689,16 @@ void PressedNavigatorRight(GtkWidget *widget, gpointer data)
 	}
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -717,15 +742,16 @@ void PressedNavigatorMoveUp(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -769,15 +795,16 @@ void PressedNavigatorMoveDown(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -821,15 +848,16 @@ void PressedNavigatorMoveLeft(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -873,15 +901,16 @@ void PressedNavigatorMoveRight(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -926,15 +955,16 @@ void PressedNavigatorForward(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -974,15 +1004,16 @@ void PressedNavigatorBackward(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -1011,15 +1042,16 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 	WriteInterface(&params);
-	if (!isRendering)
-	{
-		Interface_data.animMode = false;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = false;
-		MainRender();
-	}
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
+
 	ParamsReleaseMem(&params);
 }
 
@@ -1028,12 +1060,12 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 	GtkComboBox *combo = GTK_COMBO_BOX(widget);
 	int scale = gtk_combo_box_get_active(combo);
 	double imageScale;
-	if (scale == 0) imageScale = 1.0/10.0;
-	if (scale == 1) imageScale = 1.0/8.0;
-	if (scale == 2) imageScale = 1.0/6.0;
-	if (scale == 3) imageScale = 1.0/4.0;
-	if (scale == 4) imageScale = 1.0/3.0;
-	if (scale == 5) imageScale = 1.0/2.0;
+	if (scale == 0) imageScale = 1.0 / 10.0;
+	if (scale == 1) imageScale = 1.0 / 8.0;
+	if (scale == 2) imageScale = 1.0 / 6.0;
+	if (scale == 3) imageScale = 1.0 / 4.0;
+	if (scale == 4) imageScale = 1.0 / 3.0;
+	if (scale == 5) imageScale = 1.0 / 2.0;
 	if (scale == 6) imageScale = 1.0;
 	if (scale == 7) imageScale = 2.0;
 	if (scale == 8) imageScale = 4.0;

@@ -142,10 +142,10 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			int ptr = x+y*width;
-			temp_image[ptr] = image->GetPixelImage(x,y);
-			temp_alpha[ptr] = image->GetPixelAlpha(x,y);
-			temp_sort[ptr].z = image->GetPixelZBuffer(x,y);
+			int ptr = x + y * width;
+			temp_image[ptr] = image->GetPixelImage(x, y);
+			temp_alpha[ptr] = image->GetPixelAlpha(x, y);
+			temp_sort[ptr].z = image->GetPixelZBuffer(x, y);
 			temp_sort[ptr].i = ptr;
 		}
 	}
@@ -174,7 +174,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		int ii = temp_sort[height * width - i - 1].i;
 		int x = ii % width;
 		int y = ii / width;
-		double z = image->GetPixelZBuffer(x,y);
+		double z = image->GetPixelZBuffer(x, y);
 		double blur = fabs((double) z - neutral) / (z - min) * deep;
 		if (blur > 100) blur = 100.0;
 		int size = blur;
@@ -197,15 +197,15 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 					if (op > 0.0)
 					{
 						double opN = 1.0 - op;
-						sRGB16 old = image->GetPixelImage(xx,yy);
-						unsigned old_alpha = image->GetPixelAlpha(xx,yy);
+						sRGB16 old = image->GetPixelImage(xx, yy);
+						unsigned old_alpha = image->GetPixelAlpha(xx, yy);
 						sRGB16 pixel;
 						pixel.R = old.R * opN + center.R * op;
 						pixel.G = old.G * opN + center.G * op;
 						pixel.B = old.B * opN + center.B * op;
 						unsigned short alpha = old_alpha * opN + center_alpha * op;
-						image->PutPixelImage(xx,yy,pixel);
-						image->PutPixelAlpha(xx,yy,alpha);
+						image->PutPixelImage(xx, yy, pixel);
+						image->PutPixelAlpha(xx, yy, alpha);
 					}
 				}
 			}
@@ -254,6 +254,7 @@ void ThreadSSAO(void *ptr)
 	cImage *image = param->image;
 	int width = image->GetWidth();
 	int height = image->GetHeight();
+	int progressive = param->progressive;
 
 	double *cosinus = new double[quality];
 	double *sinus = new double[quality];
@@ -269,12 +270,12 @@ void ThreadSSAO(void *ptr)
 	bool sphericalPersp = param->fishEye;
 	double fov = param->persp;
 
-	for (int y = threadNo; y < height; y += NR_THREADS)
+	for (int y = threadNo * progressive; y < height; y += NR_THREADS * progressive)
 	{
 
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < width; x += progressive)
 		{
-			double z = image->GetPixelZBuffer(x,y);
+			double z = image->GetPixelZBuffer(x, y);
 			double total_ambient = 0;
 
 			if (z < 1e19)
@@ -313,7 +314,7 @@ void ThreadSSAO(void *ptr)
 
 						if ((int) xx == (int) x && (int) yy == (int) y) continue;
 						if (xx < 0 || xx > width - 1 || yy < 0 || yy > height - 1) continue;
-						double z2 = image->GetPixelZBuffer(xx,yy);
+						double z2 = image->GetPixelZBuffer(xx, yy);
 
 						double xx2, yy2;
 						if (sphericalPersp)
@@ -351,10 +352,21 @@ void ThreadSSAO(void *ptr)
 
 			}
 
-			sRGB16 ambient = {total_ambient * 4096.0,total_ambient * 4096.0,total_ambient * 4096.0};
-			image->PutPixelAmbient(x,y,ambient);
+			sRGB16 ambient = { total_ambient * 4096.0, total_ambient * 4096.0, total_ambient * 4096.0 };
+			image->PutPixelAmbient(x, y, ambient);
 		}
-
+		for (int x = 0; x <= width - progressive; x += progressive)
+		{
+			sRGB16 pixel = image->GetPixelAmbient(x,y);
+			for (int yy = 0; yy < progressive; yy++)
+			{
+				for (int xx = 0; xx < progressive; xx++)
+				{
+					if (xx == 0 && yy == 0) continue;
+					image->PutPixelAmbient(xx,yy,pixel);
+				}
+			}
+		}
 		param->done++;
 
 		if (!isPostRendering) break;
@@ -386,6 +398,8 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 		err[i] = NULL;
 	}
 
+	int progressive = image->progressiveFactor;
+
 	for (int i = 0; i < NR_THREADS; i++)
 	{
 		//sending some parameters to thread
@@ -393,8 +407,9 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 		thread_param[i].image = image;
 		thread_param[i].persp = persp;
 		thread_param[i].fishEye = Interface_data.fishEye;
-		thread_param[i].quality = quality;
+		thread_param[i].quality = quality * sqrt(1.0 / progressive);
 		thread_param[i].done = 0;
+		thread_param[i].progressive = image->progressiveFactor;
 
 		//creating thread
 		Thread[i] = g_thread_create((GThreadFunc) ThreadSSAO, &thread_param[i], TRUE, &err[i]);
@@ -426,7 +441,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 				while (gtk_events_pending())
 					gtk_main_iteration();
 			}
-		} while (total_done < height && isPostRendering);
+		} while (total_done < height/progressive && isPostRendering);
 
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Screen Space Ambient Occlusion. Done 100%");
 		while (gtk_events_pending())
@@ -572,7 +587,7 @@ void DrawPalette(sRGB *palette)
 		GdkGC *GC = gdk_gc_new(dareaPalette->window);
 		for (int i = 0; i < 640; i++)
 		{
-			int number = (int) (i*256.0/colWidth + Interface_data.palette_offset*256.0);
+			int number = (int) (i * 256.0 / colWidth + Interface_data.palette_offset * 256.0);
 			sRGB color = mainImage->IndexToColour(number);
 			GdkColor gdk_color = { 0, color.R * 256, color.G * 256, color.B * 256 };
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
@@ -582,71 +597,71 @@ void DrawPalette(sRGB *palette)
 }
 
 /*
-void StoreImage8(sComplexImage *image, sRGB8 *image8)
-{
-	for (int y = 0; y < IMAGE_HEIGHT; y++)
-	{
-		for (int x = 0; x < IMAGE_WIDTH; x++)
-		{
-			unsigned int address = x + y * IMAGE_WIDTH;
-			image8[address].R = image[address].image.R / 256;
-			image8[address].G = image[address].image.G / 256;
-			image8[address].B = image[address].image.B / 256;
-		}
-	}
-}
+ void StoreImage8(sComplexImage *image, sRGB8 *image8)
+ {
+ for (int y = 0; y < IMAGE_HEIGHT; y++)
+ {
+ for (int x = 0; x < IMAGE_WIDTH; x++)
+ {
+ unsigned int address = x + y * IMAGE_WIDTH;
+ image8[address].R = image[address].image.R / 256;
+ image8[address].G = image[address].image.G / 256;
+ image8[address].B = image[address].image.B / 256;
+ }
+ }
+ }
 
-void MakeStereoImage(sRGB8 *left, sRGB8 *right, guchar *stereoImage)
-{
-	for (int y = 0; y < IMAGE_HEIGHT; y++)
-	{
-		for (int x = 0; x < IMAGE_WIDTH; x++)
-		{
-			unsigned int addressSource = x + y * IMAGE_WIDTH;
-			unsigned int addressDest = (x + y * IMAGE_WIDTH * 2) * 3;
-			stereoImage[addressDest + 0] = right[addressSource].R;
-			stereoImage[addressDest + 1] = right[addressSource].G;
-			stereoImage[addressDest + 2] = right[addressSource].B;
-			stereoImage[addressDest + 0 + IMAGE_WIDTH * 3] = left[addressSource].R;
-			stereoImage[addressDest + 1 + IMAGE_WIDTH * 3] = left[addressSource].G;
-			stereoImage[addressDest + 2 + IMAGE_WIDTH * 3] = left[addressSource].B;
-		}
-	}
-}
+ void MakeStereoImage(sRGB8 *left, sRGB8 *right, guchar *stereoImage)
+ {
+ for (int y = 0; y < IMAGE_HEIGHT; y++)
+ {
+ for (int x = 0; x < IMAGE_WIDTH; x++)
+ {
+ unsigned int addressSource = x + y * IMAGE_WIDTH;
+ unsigned int addressDest = (x + y * IMAGE_WIDTH * 2) * 3;
+ stereoImage[addressDest + 0] = right[addressSource].R;
+ stereoImage[addressDest + 1] = right[addressSource].G;
+ stereoImage[addressDest + 2] = right[addressSource].B;
+ stereoImage[addressDest + 0 + IMAGE_WIDTH * 3] = left[addressSource].R;
+ stereoImage[addressDest + 1 + IMAGE_WIDTH * 3] = left[addressSource].G;
+ stereoImage[addressDest + 2 + IMAGE_WIDTH * 3] = left[addressSource].B;
+ }
+ }
+ }
 
-void StereoPreview(guchar *stereoImage)
-{
-	guchar *preview = new guchar[IMAGE_WIDTH * IMAGE_HEIGHT * 3];
-	memset(preview, 0, IMAGE_WIDTH * IMAGE_HEIGHT * 3);
-	for (int y = 0; y < IMAGE_HEIGHT / 2; y++)
-	{
-		for (int x = 0; x < IMAGE_WIDTH; x++)
-		{
-			int R = 0;
-			int G = 0;
-			int B = 0;
-			unsigned int addressDest = (x + (y + IMAGE_HEIGHT / 4) * IMAGE_WIDTH) * 3;
-			for (int i = 0; i < 2; i++)
-			{
-				for (int j = 0; j < 2; j++)
-				{
-					unsigned int addressSource = ((x * 2 + i) + (y * 2 + j) * IMAGE_WIDTH * 2) * 3;
-					R += stereoImage[addressSource + 0];
-					G += stereoImage[addressSource + 1];
-					B += stereoImage[addressSource + 2];
-				}
-			}
-			R = R / 4;
-			G = G / 4;
-			B = B / 4;
-			preview[addressDest + 0] = R;
-			preview[addressDest + 1] = G;
-			preview[addressDest + 2] = B;
-		}
-	}
-	ScaleImage(preview, rgbbuf);
-	RedrawImage(darea, rgbbuf);
-	delete preview;
-}
-*/
+ void StereoPreview(guchar *stereoImage)
+ {
+ guchar *preview = new guchar[IMAGE_WIDTH * IMAGE_HEIGHT * 3];
+ memset(preview, 0, IMAGE_WIDTH * IMAGE_HEIGHT * 3);
+ for (int y = 0; y < IMAGE_HEIGHT / 2; y++)
+ {
+ for (int x = 0; x < IMAGE_WIDTH; x++)
+ {
+ int R = 0;
+ int G = 0;
+ int B = 0;
+ unsigned int addressDest = (x + (y + IMAGE_HEIGHT / 4) * IMAGE_WIDTH) * 3;
+ for (int i = 0; i < 2; i++)
+ {
+ for (int j = 0; j < 2; j++)
+ {
+ unsigned int addressSource = ((x * 2 + i) + (y * 2 + j) * IMAGE_WIDTH * 2) * 3;
+ R += stereoImage[addressSource + 0];
+ G += stereoImage[addressSource + 1];
+ B += stereoImage[addressSource + 2];
+ }
+ }
+ R = R / 4;
+ G = G / 4;
+ B = B / 4;
+ preview[addressDest + 0] = R;
+ preview[addressDest + 1] = G;
+ preview[addressDest + 2] = B;
+ }
+ }
+ ScaleImage(preview, rgbbuf);
+ RedrawImage(darea, rgbbuf);
+ delete preview;
+ }
+ */
 
