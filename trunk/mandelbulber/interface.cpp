@@ -520,6 +520,17 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 			params->SSAOEnabled = false;
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
 		}
+
+		if (!params->SSAOEnabled && !params->global_ilumination && params->doubles.imageAdjustments.reflect > 0)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+					"Warning! For reflection effect the Screen Space Ambient Occlusion (SSAO) effect has to be activated");
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+			params->SSAOEnabled = true;
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
+		}
+
 	}
 	if (params->formula == trig_DE || params->formula == menger_sponge || params->formula == kaleidoscopic || params->formula == tglad) params->analitycDE = true;
 	else params->analitycDE = false;
