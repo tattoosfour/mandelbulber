@@ -583,7 +583,7 @@ void *MainThread(void *ptr)
 
 					else
 					{
-						//image->PutPixelAmbient(x, z, black16);
+						image->PutPixelAmbient(x, z, black16);
 						image->PutPixelAuxLight(x, z, black16);
 						image->PutPixelAuxSpecular(x, z, black16);
 						image->PutPixelColor(x, z, 0);
