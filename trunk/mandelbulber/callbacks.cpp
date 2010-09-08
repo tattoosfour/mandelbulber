@@ -44,13 +44,13 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 
 gboolean CallerTimerLoop(GtkWidget *widget)
 {
-	if (isRendering && renderRequest)
+	if (isRendering && renderRequest && !Interface_data.animMode)
 	{
 		programClosed = true;
 		isPostRendering = false;
 	}
 
-	if (!isRendering && renderRequest)
+	if (!isRendering && renderRequest && !Interface_data.animMode)
 	{
 		renderRequest = false;
 		Interface_data.animMode = false;
@@ -64,7 +64,7 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable)))
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable)) && !Interface_data.animMode)
 	{
 		int x = event->x;
 		int z = event->y;

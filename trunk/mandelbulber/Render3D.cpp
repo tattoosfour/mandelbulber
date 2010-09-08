@@ -732,6 +732,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	sParam thread_param[NR_THREADS];
 
 	int progressiveStart = 16;
+	image->progressiveFactor = progressiveStart;
 
 	int refresh_index = 0;
 	int refresh_skip = 1;
@@ -784,7 +785,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					refresh_index++;
 					//if (image->IsPreview()) mainImage->RedrawInWidget(darea);
 
-					if (refresh_index >= refresh_skip && !param.recordMode)
+					if (refresh_index >= refresh_skip)
 					{
 						double refreshStartTime = real_clock();
 
@@ -1316,7 +1317,7 @@ void MainRender(void)
 	if (Interface_data.keyframeMode) printf("Found %d keyframes\n", maxKeyNumber);
 
 	//loading keyframes in keyframe animation mode
-	CMorph morph(maxKeyNumber, sizeof(sParamRenderD));
+	CMorph morph(maxKeyNumber, sizeof(sParamRenderD)/sizeof(double));
 	CMorph morphIFS(maxKeyNumber, 8 * IFS_number_of_vectors);
 	double *IFSdouble = new double[8 * IFS_number_of_vectors];
 	WriteLog("Memory for morphing allocated");
@@ -1392,8 +1393,8 @@ void MainRender(void)
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
 
-			delta_xm = x_mouse - width / mainImage->GetPreviewScale() / 2;
-			delta_ym = y_mouse - height / mainImage->GetPreviewScale() / 2;
+			delta_xm = x_mouse - width * mainImage->GetPreviewScale() / 2;
+			delta_ym = y_mouse - height * mainImage->GetPreviewScale() / 2;
 
 			if (fractParam.recordMode)
 			{
