@@ -1,4 +1,4 @@
-MANDELBULBER 0.91
+MANDELBULBER 0.92
 
 autor: Krzysztof Marczak
 contact: buddhi1980@gmail.com

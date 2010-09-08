@@ -1,4 +1,13 @@
 Version history
+
+v0.92
+- progressive rendering of image (first in very low resolution and then in higher and higer)
+- all camarea changes (zoom by click, 3D navigator) immediately stop rendering and start with new settings
+- better environment mapping effect
+- added "Fit to window" zoom option. In this mode the image is scaled with window.
+- added front distance for fog effect
+- source code: created cImage class - most of code was changed to use this class
+
 v0.91
 - added stereoscopic rendering
 - added displaying value of camera distance between actual position and from last keyframe
