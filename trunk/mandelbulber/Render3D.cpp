@@ -1317,7 +1317,7 @@ void MainRender(void)
 	if (Interface_data.keyframeMode) printf("Found %d keyframes\n", maxKeyNumber);
 
 	//loading keyframes in keyframe animation mode
-	CMorph morph(maxKeyNumber, sizeof(sParamRenderD)/sizeof(double));
+	CMorph morph(maxKeyNumber, sizeof(sParamRenderD) / sizeof(double));
 	CMorph morphIFS(maxKeyNumber, 8 * IFS_number_of_vectors);
 	double *IFSdouble = new double[8 * IFS_number_of_vectors];
 	WriteLog("Memory for morphing allocated");
@@ -1370,9 +1370,19 @@ void MainRender(void)
 		if (noGUI && noGUIdata.endFrame < 99999) startFrame = noGUIdata.endFrame;
 	}
 
-	CVector3 last_vp_position = fractParam.doubles.vp;
+	cImage *secondEyeImage;
+	unsigned char *stereoImage = 0;
+	if (fractParam.stereoEnabled)
+	{
+		autoSaveImage = true;
+		secondEyeImage = new cImage(width, height);
+		secondEyeImage->SetPalette(mainImage->GetPalettePtr());
+		secondEyeImage->CreatePreview(Interface_data.imageScale);
+		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments,fractParam.effectColours,fractParam.imageSwitches);
+		stereoImage = new unsigned char[width * height * 3 * 2];
+	}
 
-	if (fractParam.stereoEnabled) autoSaveImage = true;
+	CVector3 last_vp_position = fractParam.doubles.vp;
 
 	printf("************ Rendering frames *************\n");
 	WriteLog("************ Rendering frames *************");
@@ -1565,9 +1575,6 @@ void MainRender(void)
 
 			CVector3 eyeLeft, eyeRight;
 			int numberOfEyes = 1;
-			sRGB8 *stereoLeftImage = 0;
-			sRGB8 *stereoRightImage = 0;
-			guchar *stereoImage = 0;
 			if (fractParam.stereoEnabled)
 			{
 				CRotationMatrix mRotForEyes;
@@ -1578,9 +1585,7 @@ void MainRender(void)
 				eyeLeft = fractParam.doubles.vp - mRotForEyes.RotateVector(baseVectorForEyes);
 				eyeRight = fractParam.doubles.vp + mRotForEyes.RotateVector(baseVectorForEyes);
 				numberOfEyes = 2;
-				stereoLeftImage = new sRGB8[width * height];
-				stereoRightImage = new sRGB8[width * height];
-				stereoImage = new guchar[width * height * 3 * 2];
+
 			}
 
 			//if number of eyes = 2 (stereo) then render two times
@@ -1599,38 +1604,32 @@ void MainRender(void)
 				}
 
 				//clear image
-				mainImage->ClearImage();
-				WriteLog("Image cleared");
 
-				//printf("starting rendering\n");
-				Render(fractParam, mainImage, darea);
-				WriteLog("Image rendered");
-				//printf("Rendering of frame finished\n");
 
-				if (fractParam.stereoEnabled)
+				if (eye == 0)
 				{
-					if (eye == 0)
+					mainImage->ClearImage();
+					WriteLog("Image cleared");
+					Render(fractParam, mainImage, darea);
+					WriteLog("Image rendered");
+				}
+				else if (eye == 1)
+				{
+					secondEyeImage->ClearImage();
+					WriteLog("Image cleared");
+					Render(fractParam, secondEyeImage, darea);
+					WriteLog("Image rendered");
+					MakeStereoImage(mainImage, secondEyeImage, stereoImage);
+					WriteLog("Stereo image maked");
+					StereoPreview(mainImage,stereoImage);
+					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
+					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
+					WriteLog("Stereo image saved");
+					if (!noGUI)
 					{
-						//StoreImage8(complexImage, stereoLeftImage);
-						WriteLog("Left image stored");
-					}
-
-					if (eye == 1)
-					{
-						//StoreImage8(complexImage, stereoRightImage);
-						WriteLog("Right image stored");
-						//MakeStereoImage(stereoLeftImage, stereoRightImage, stereoImage);
-						WriteLog("Stereo image maked");
-						//StereoPreview(stereoImage);
-						IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
-						//SaveJPEG(filename2, 100, IMAGE_WIDTH * 2, IMAGE_HEIGHT, (JSAMPLE*) stereoImage);
-						WriteLog("Stereo image saved");
-						if (!noGUI)
-						{
-							char progressText[1000];
-							sprintf(progressText, "Stereoscopic image was saved to: %s", filename2);
-							gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-						}
+						char progressText[1000];
+						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2);
+						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 					}
 				}
 
@@ -1670,13 +1669,6 @@ void MainRender(void)
 				index = 9999999;
 			}
 
-			if (fractParam.stereoEnabled)
-			{
-				delete stereoLeftImage;
-				delete stereoRightImage;
-				delete stereoImage;
-			}
-
 			last_vp_position = fractParam.doubles.vp;
 
 			if (programClosed) break;
@@ -1702,6 +1694,12 @@ void MainRender(void)
 	ParamsReleaseMem(&fractParam);
 	WriteLog("Released memory for fractal params");
 
+	if (fractParam.stereoEnabled)
+	{
+		delete secondEyeImage;
+		delete stereoImage;
+		WriteLog("Released memory for stereo image");
+	}
 	printf("Rendering finished\n");
 	WriteLog("Rendering completely finished");
 	isRendering = false;

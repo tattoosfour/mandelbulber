@@ -41,19 +41,15 @@ extern guint64 histogram[256];
 extern unsigned int histogram2[1000];
 
 void NowaPaleta(sRGB *p, double nasycenie);
-//void PutPixel(int x, int y, int R, int G, int B);
-//void PutPixelAlfa(int x, int y, int R, int G, int B, int alfa, double skip_f);
 void Bitmap32to8(sComplexImage *cImage, guchar *bitmapa8, guchar *bitmapa8_big);
 void DrawHistogram(void);
 void DrawHistogram2(void);
-//void ShadedBackground(bool losuj, sRGB col1, sRGB col2);
-//void BitmapBackground(guchar *tlo, int width, int height);
 void PostRendering_SSAO(cImage *image, double persp, int quality);
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp);
 void DrawPalette(sRGB *palette);
 void StoreImage8(sComplexImage *image, sRGB8 *image8);
-void MakeStereoImage(sRGB8 *left, sRGB8 *right, guchar *stereoImage);
-void StereoPreview(guchar *stereoImage);
-void ScaleImage(guchar *imageBig, guchar *imageSmall);
+void MakeStereoImage(cImage *left, cImage *right, guchar *stereoImage);
+void StereoPreview(cImage *temoraryImage, guchar *stereoImage);
+
 
 #endif /* IMAGE_H_ */
