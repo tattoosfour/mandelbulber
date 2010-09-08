@@ -52,82 +52,6 @@ void NowaPaleta(sRGB *p, double nasycenie)
 	p[255].B = 255;
 }
 
-//*********************** PutPixel ************************
-//rysowanie pixela na 3x32-bitowej bitmapie
-//we: 	x,y - współrzędne piksela
-//		R,G,B - kolor (składowe 16-bitowe)
-/*
- void PutPixel(int x, int y, int R, int G, int B)
- {
- if (x >= 0 && x < IMAGE_WIDTH && y >= 0 && y < IMAGE_HEIGHT)
- {
- guint64 adres = ((guint64) x + y * IMAGE_WIDTH) * 3;
- if (R > 65279) R = 65279;
- if (G > 65279) G = 65279;
- if (B > 65279) B = 65279;
- if (R < 0) R = 0;
- if (G < 0) G = 0;
- if (B < 0) B = 0;
- rgbbuf32[adres] = R;
- rgbbuf32[adres + 1] = G;
- rgbbuf32[adres + 2] = B;
- }
- }
- */
-
-//*********************** PutPixelAlfa ********************
-//rysowanie pixela na 3x32-bitowej bitmapie z przezroczystoscia
-//we: 	x,y - współrzędne piksela
-//		R,G,B - kolor (składowe 16-bitowe)
-//		alfa - wsp. przenikania 0-65536
-/*
- void PutPixelAlfa(int x, int y, int R, int G, int B, int alfa, double skip_f)
- {
- if (x >= 0 && x < IMAGE_WIDTH && y >= 0 && y < IMAGE_HEIGHT)
- {
- guint64 adres = ((guint64) x + y * IMAGE_WIDTH) * 3;
- if (R > 16777216) R = 16777216;
- if (G > 16777216) G = 16777216;
- if (B > 16777216) B = 16777216;
- if (alfa > 65279) alfa = 65279;
- if (R < 0) R = 0;
- if (G < 0) G = 0;
- if (B < 0) B = 0;
- if (alfa < 0) alfa = 0;
- double a = alfa / 65536.0;
- double aN = 1.0 - a;
- double aPow = pow(aN, skip_f);
- double aPowN = 1.0 - aPow;
- unsigned int oldR = rgbbuf32[adres];
- unsigned int oldG = rgbbuf32[adres + 1];
- unsigned int oldB = rgbbuf32[adres + 2];
- //rgbbuf32[adres] = ((unsigned int) oldR * alfaN + (unsigned int) R * alfa) / 65536;
- //rgbbuf32[adres + 1] = ((unsigned int) oldG * alfaN + (unsigned int) G * alfa) / 65536;
- //rgbbuf32[adres + 2] = ((unsigned int) oldB * alfaN + (unsigned int) B * alfa) / 65536;
- rgbbuf32[adres] = (oldR * aPow + R * aPowN);
- rgbbuf32[adres + 1] = (oldG * aPow + G * aPowN);
- rgbbuf32[adres + 2] = (oldB * aPow + B * aPowN);
-
- }
- }
- */
-
-//*********************** Bitmap32to8 *********************
-//konwersja bitmapy 3x32-bitowej na 24-bitową
-//we:	bitmapa32 - 3x32-bitowa bitmapa
-//wy:	bitmapa8 - 24-bitowa bitmapa
-/*void Bitmap32to8(sComplexImage *cImage, guchar *bitmapa8, guchar *bitmapa8_big)
- {
- for (int i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++)
- {
- bitmapa8_big[i * 3] = cImage[i].image.R / 256;
- bitmapa8_big[i * 3 + 1] = cImage[i].image.G / 256;
- bitmapa8_big[i * 3 + 2] = cImage[i].image.B / 256;
- }
- ScaleImage(bitmapa8_big, bitmapa8);
- }
- */
-
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 {
 	isPostRendering = true;
@@ -357,13 +281,13 @@ void ThreadSSAO(void *ptr)
 		}
 		for (int x = 0; x <= width - progressive; x += progressive)
 		{
-			sRGB16 pixel = image->GetPixelAmbient(x,y);
+			sRGB16 pixel = image->GetPixelAmbient(x, y);
 			for (int yy = 0; yy < progressive; yy++)
 			{
 				for (int xx = 0; xx < progressive; xx++)
 				{
 					if (xx == 0 && yy == 0) continue;
-					image->PutPixelAmbient(xx,yy,pixel);
+					image->PutPixelAmbient(xx, yy, pixel);
 				}
 			}
 		}
@@ -441,7 +365,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 				while (gtk_events_pending())
 					gtk_main_iteration();
 			}
-		} while (total_done < height/progressive && isPostRendering);
+		} while (total_done < height / progressive && isPostRendering);
 
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Screen Space Ambient Occlusion. Done 100%");
 		while (gtk_events_pending())
@@ -508,75 +432,6 @@ void DrawHistogram2(void)
 	}
 }
 
-//************************** ShadedBackgroud *****************************
-/*
- void ShadedBackground(bool losuj, sRGB col1, sRGB col2)
- {
- static double wsp1, wsp2, wsp3, wsp4, wsp5, wsp6, wsp7, wsp8;
- if (losuj)
- {
- wsp1 = Random(1000) / 200.0 + 0.1;
- wsp2 = Random(1000) / 200.0 + 0.1;
- wsp3 = Random(1000) / 200.0 + 0.1;
- wsp4 = Random(1000) / 200.0 + 0.1;
- wsp5 = Random(1000) / 200.0 + 0.1;
- wsp6 = Random(1000) / 200.0 + 0.1;
- wsp7 = Random(1000) / 200.0 + 0.1;
- wsp8 = Random(1000) / 200.0 + 0.1;
- }
- for (int y = 0; y < IMAGE_HEIGHT; y++)
- {
-
- for (int x = 0; x < IMAGE_WIDTH; x++)
- {
-
- double xx = (double) x / IMAGE_WIDTH;
- double yy = (double) y / IMAGE_HEIGHT;
- int nrkolor = 1024.0 * (2.0 + sin(xx * wsp1 + wsp5) * cos(yy * wsp2 + wsp6) + sin(xx * wsp3 + wsp7) * cos(yy * wsp4 + wsp8));
- sRGB color = Przekolor(nrkolor, paleta, 256);
- int R = color.R * 256;
- int G = color.G * 256;
- int B = color.B * 256;
- nrkolor = 1024.0 + 1024.0 * (2.0 + sin(xx * wsp5 + wsp1) * cos(yy * wsp6 + wsp2) + sin(xx * wsp7 + wsp3) * cos(yy * wsp8 + wsp4));
- color = Przekolor(nrkolor, paleta, 256);
- R = (R + color.R * 256) / 2;
- G = (G + color.G * 256) / 2;
- B = (B + color.B * 256) / 2;
-
- //PutPixel(x, y, R / 4, G / 4, B / 4);
-
-
- PutPixel(x, y, 0, 0, 0);
- }
-
- }
- }
- */
-
-//************************** BitmapBackgroud *****************************
-/*
- void BitmapBackground(guchar *tlo, int width, int height)
- {
- double scaleX = (double) width / (IMAGE_WIDTH + 2);
- double scaleY = (double) height / (IMAGE_HEIGHT + 2);
- for (int y = 0; y < IMAGE_WIDTH; y++)
- {
- for (int x = 0; x < IMAGE_HEIGHT; x++)
- {
- int xx = x * scaleX;
- int yy = y * scaleY;
- for (int i = 0; i < 3; i++)
- {
-
- int adres1 = (x + y * IMAGE_WIDTH) * 3 + i;
- int adres2 = (xx + yy * width) * 3 + i;
- rgbbuf32[adres1] = tlo[adres2] * 256;
- }
- }
- }
- }
- */
-
 void DrawPalette(sRGB *palette)
 {
 	mainImage->SetPalette(palette);
@@ -596,72 +451,66 @@ void DrawPalette(sRGB *palette)
 	}
 }
 
-/*
- void StoreImage8(sComplexImage *image, sRGB8 *image8)
- {
- for (int y = 0; y < IMAGE_HEIGHT; y++)
- {
- for (int x = 0; x < IMAGE_WIDTH; x++)
- {
- unsigned int address = x + y * IMAGE_WIDTH;
- image8[address].R = image[address].image.R / 256;
- image8[address].G = image[address].image.G / 256;
- image8[address].B = image[address].image.B / 256;
- }
- }
- }
+void MakeStereoImage(cImage *left, cImage *right, guchar *stereoImage)
+{
+	int width = left->GetWidth();
+	int height = left->GetHeight();
 
- void MakeStereoImage(sRGB8 *left, sRGB8 *right, guchar *stereoImage)
- {
- for (int y = 0; y < IMAGE_HEIGHT; y++)
- {
- for (int x = 0; x < IMAGE_WIDTH; x++)
- {
- unsigned int addressSource = x + y * IMAGE_WIDTH;
- unsigned int addressDest = (x + y * IMAGE_WIDTH * 2) * 3;
- stereoImage[addressDest + 0] = right[addressSource].R;
- stereoImage[addressDest + 1] = right[addressSource].G;
- stereoImage[addressDest + 2] = right[addressSource].B;
- stereoImage[addressDest + 0 + IMAGE_WIDTH * 3] = left[addressSource].R;
- stereoImage[addressDest + 1 + IMAGE_WIDTH * 3] = left[addressSource].G;
- stereoImage[addressDest + 2 + IMAGE_WIDTH * 3] = left[addressSource].B;
- }
- }
- }
+	sRGB8 *left8 = (sRGB8*)left->ConvertTo8bit();
+	sRGB8 *right8 = (sRGB8*)right->ConvertTo8bit();
 
- void StereoPreview(guchar *stereoImage)
- {
- guchar *preview = new guchar[IMAGE_WIDTH * IMAGE_HEIGHT * 3];
- memset(preview, 0, IMAGE_WIDTH * IMAGE_HEIGHT * 3);
- for (int y = 0; y < IMAGE_HEIGHT / 2; y++)
- {
- for (int x = 0; x < IMAGE_WIDTH; x++)
- {
- int R = 0;
- int G = 0;
- int B = 0;
- unsigned int addressDest = (x + (y + IMAGE_HEIGHT / 4) * IMAGE_WIDTH) * 3;
- for (int i = 0; i < 2; i++)
- {
- for (int j = 0; j < 2; j++)
- {
- unsigned int addressSource = ((x * 2 + i) + (y * 2 + j) * IMAGE_WIDTH * 2) * 3;
- R += stereoImage[addressSource + 0];
- G += stereoImage[addressSource + 1];
- B += stereoImage[addressSource + 2];
- }
- }
- R = R / 4;
- G = G / 4;
- B = B / 4;
- preview[addressDest + 0] = R;
- preview[addressDest + 1] = G;
- preview[addressDest + 2] = B;
- }
- }
- ScaleImage(preview, rgbbuf);
- RedrawImage(darea, rgbbuf);
- delete preview;
- }
- */
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			unsigned int addressSource = x + y * width;
+			unsigned int addressDest = (x + y * width * 2) * 3;
+			stereoImage[addressDest + 0] = right8[addressSource].R;
+			stereoImage[addressDest + 1] = right8[addressSource].G;
+			stereoImage[addressDest + 2] = right8[addressSource].B;
+			stereoImage[addressDest + 0 + width * 3] = left8[addressSource].R;
+			stereoImage[addressDest + 1 + width * 3] = left8[addressSource].G;
+			stereoImage[addressDest + 2 + width * 3] = left8[addressSource].B;
+		}
+	}
+}
+
+
+void StereoPreview(cImage *temporaryImage, guchar *stereoImage)
+{
+	guchar *image8 = temporaryImage->ConvertTo8bit();
+	int width = temporaryImage->GetWidth();
+	int height = temporaryImage->GetHeight();
+	memset(image8,0,width*height*sizeof(sRGB8));
+
+	for (int y = 0; y < height / 2; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			int R = 0;
+			int G = 0;
+			int B = 0;
+			unsigned int addressDest = (x + (y + height / 4) * width) * 3;
+			for (int i = 0; i < 2; i++)
+			{
+				for (int j = 0; j < 2; j++)
+				{
+					unsigned int addressSource = ((x * 2 + i) + (y * 2 + j) * width * 2) * 3;
+					R += stereoImage[addressSource + 0];
+					G += stereoImage[addressSource + 1];
+					B += stereoImage[addressSource + 2];
+				}
+			}
+			R = R / 4;
+			G = G / 4;
+			B = B / 4;
+			image8[addressDest + 0] = R;
+			image8[addressDest + 1] = G;
+			image8[addressDest + 2] = B;
+		}
+	}
+	temporaryImage->UpdatePreview();
+	temporaryImage->RedrawInWidget(darea);
+}
+
 
