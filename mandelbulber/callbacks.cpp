@@ -57,7 +57,9 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 		Interface_data.playMode = false;
 		Interface_data.recordMode = false;
 		Interface_data.continueRecord = false;
+		gdk_threads_enter();
 		MainRender();
+		gdk_threads_leave();
 	}
 	return true;
 }
