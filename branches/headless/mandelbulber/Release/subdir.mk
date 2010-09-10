@@ -56,13 +56,6 @@ CPP_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Render3D.o: ../Render3D.cpp
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	g++ -O2 -march=native -mfpmath=387,sse -ffast-math -Wall -c -fmessage-length=0 `pkg-config --cflags gtk+-2.0 gthread-2.0;` -MMD -MP -MF"$(@:%.o=%.d)" -MT"Render3D.d" -o"$@" "$<"
-	@echo 'Finished building: $<'
-	@echo ' '
-
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
