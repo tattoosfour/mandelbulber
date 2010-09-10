@@ -37,12 +37,12 @@ bool CSound::Load(char *file)
 
 		if(loaded)
 		{
-			delete wave;
-			delete envelope;
-			delete spectrumA;
-			delete spectrumB;
-			delete spectrumC;
-			delete spectrumD;
+			delete[] wave;
+			delete[] envelope;
+			delete[] spectrumA;
+			delete[] spectrumB;
+			delete[] spectrumC;
+			delete[] spectrumD;
 			animframes = 0;
 		}
 		wave = new double[frames];
@@ -57,7 +57,7 @@ bool CSound::Load(char *file)
 			sample /= channels;
 			wave[i] = sample;
 		}
-		delete sndBuff;
+		delete[] sndBuff;
 		loaded = true;
 	}
 	return loaded;
@@ -246,8 +246,8 @@ void CSound::DoFFT(int bandMin[4], int bandMax[4])
 	NormalizeVolume(spectrumC);
 	NormalizeVolume(spectrumD);
 
-	delete FFTbufferIn;
-	delete FFTbufferOut;
+	delete[] FFTbufferIn;
+	delete[] FFTbufferOut;
 }
 
 //----------- swap ----------------

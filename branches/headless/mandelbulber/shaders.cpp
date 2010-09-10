@@ -330,7 +330,7 @@ void PlaceRandomLights(sParamRender *fractParams)
 {
 	srand(fractParams->auxLightRandomSeed);
 
-	delete Lights;
+	delete[] Lights;
 	Lights = new sLight[fractParams->auxLightNumber + 4];
 
 	sFractal calcParam;

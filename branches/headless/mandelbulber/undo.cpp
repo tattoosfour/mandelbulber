@@ -105,8 +105,11 @@ bool CParamsUndo::GetRedo(sParamRender *params)
 void CParamsUndo::SaveStatus(void)
 {
 	FILE *file = fopen("undo/undo.state", "w");
-	fprintf(file,"%d %d %d",count,last,level);
-	fclose(file);
+	if (file)
+	{
+		fprintf(file,"%d %d %d",count,last,level);
+		fclose(file);
+	}
 }
 
 void CParamsUndo::LoadStatus(void)
@@ -115,6 +118,7 @@ void CParamsUndo::LoadStatus(void)
 	if(file)
 	{
 		int result = fscanf(file,"%d %d %d",&count,&last,&level);
+		(void)result;
 		printf("Undo status: count=%d, last=%d, level=%d\n",count,last,level);
 		fclose(file);
 	}
