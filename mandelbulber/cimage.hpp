@@ -8,6 +8,7 @@
 #ifndef CIMAGE_HPP_
 #define CIMAGE_HPP_
 
+#include <stdlib.h>
 #include <gtk-2.0/gtk/gtk.h>
 
 //global variables
@@ -100,10 +101,10 @@ public:
 	inline void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].colorIndexBuf16 = pixel;}
 	inline void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}
 	inline void PutPixelAlpha(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].alpha = pixel;}
-  inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width];}
-  inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha;}
-  inline sRGB16 GetPixelAmbient(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].ambientBuf16;}
-  inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer;}
+  inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width]; abort();}
+  inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha; abort();}
+  inline sRGB16 GetPixelAmbient(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].ambientBuf16; abort();}
+  inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer; abort();}
   void CompileImage(void);
   void SetPalette(sRGB *palette);
   sRGB* GetPalettePtr() {return palette;}
