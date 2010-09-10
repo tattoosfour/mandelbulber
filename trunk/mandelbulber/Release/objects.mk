@@ -4,4 +4,4 @@
 
 USER_OBJS :=
 
-LIBS := -ljpeg -lsndfile
+LIBS := -ljpeg -lsndfile -lpng
