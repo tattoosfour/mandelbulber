@@ -182,17 +182,17 @@ void ParamsAllocMem(sParamRender *fractParam)
 
 void ParamsReleaseMem(sParamRender *fractParam)
 {
-	delete fractParam->IFSDirection;
-	delete fractParam->IFSDistance;
-	delete fractParam->IFSAlfa;
-	delete fractParam->IFSBeta;
-	delete fractParam->IFSGamma;
-	delete fractParam->IFSEnabled;
-	delete fractParam->IFSRot;
-	delete fractParam->IFSIntensity;
-	if (fractParam->formulaSequence != 0) delete fractParam->formulaSequence;
-	if (fractParam->hybridPowerSequence != 0) delete fractParam->hybridPowerSequence;
-	delete fractParam->palette;
+	delete[] fractParam->IFSDirection;
+	delete[] fractParam->IFSDistance;
+	delete[] fractParam->IFSAlfa;
+	delete[] fractParam->IFSBeta;
+	delete[] fractParam->IFSGamma;
+	delete[] fractParam->IFSEnabled;
+	delete[] fractParam->IFSRot;
+	delete[] fractParam->IFSIntensity;
+	if (fractParam->formulaSequence != 0) delete[] fractParam->formulaSequence;
+	if (fractParam->hybridPowerSequence != 0) delete[] fractParam->hybridPowerSequence;
+	delete[] fractParam->palette;
 }
 
 void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)

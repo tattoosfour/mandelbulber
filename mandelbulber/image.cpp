@@ -162,9 +162,9 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 	}
 
 	isPostRendering = false;
-	delete temp_image;
-	delete temp_alpha;
-	delete temp_sort;
+	delete[] temp_image;
+	delete[] temp_alpha;
+	delete[] temp_sort;
 }
 
 void ThreadSSAO(void *ptr)
@@ -295,8 +295,8 @@ void ThreadSSAO(void *ptr)
 
 		if (!isPostRendering) break;
 	}
-	delete sinus;
-	delete cosinus;
+	delete[] sinus;
+	delete[] cosinus;
 
 }
 
