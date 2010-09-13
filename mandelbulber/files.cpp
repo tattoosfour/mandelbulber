@@ -258,7 +258,7 @@ void SavePNG(char *filename, int quality, int width, int height, png_byte *image
 
 	png_write_end(png_ptr, NULL);
 
-	delete row_pointers;
+	delete[] row_pointers;
 
 	fclose(fp);
 }
@@ -327,7 +327,7 @@ void SavePNG16(char *filename, int quality, int width, int height, png_byte *ima
 
 	png_write_end(png_ptr, NULL);
 
-	delete row_pointers;
+	delete[] row_pointers;
 
 	fclose(fp);
 }
@@ -409,8 +409,8 @@ void SavePNG16Alpha(char *filename, int quality, int width, int height, png_byte
 
 	png_write_end(png_ptr, NULL);
 
-	delete row_pointers;
-	delete image16;
+	delete[] row_pointers;
+	delete[] image16;
 
 	fclose(fp);
 }

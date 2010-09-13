@@ -57,7 +57,9 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 		Interface_data.playMode = false;
 		Interface_data.recordMode = false;
 		Interface_data.continueRecord = false;
+		gdk_threads_enter();
 		MainRender();
+		gdk_threads_leave();
 	}
 	return true;
 }
@@ -1280,8 +1282,8 @@ void RecalculateIFSParams(sParamRender *params)
 void CreateFormulaSequence(sParamRender *params)
 {
 
-	if (params->formulaSequence != 0) delete params->formulaSequence;
-	if (params->hybridPowerSequence != 0) delete params->hybridPowerSequence;
+	if (params->formulaSequence != 0) delete[] params->formulaSequence;
+	if (params->hybridPowerSequence != 0) delete[] params->hybridPowerSequence;
 	params->formulaSequence = new enumFractalFormula[params->N];
 	params->hybridPowerSequence = new double[params->N];
 	WriteLog("Allocated memory for hybrid formula sequence");
