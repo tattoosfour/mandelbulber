@@ -1696,7 +1696,7 @@ void MainRender(void)
 
 	if (fractParam.stereoEnabled)
 	{
-		delete[] secondEyeImage;
+		delete secondEyeImage;
 		delete[] stereoImage;
 		WriteLog("Released memory for stereo image");
 	}
