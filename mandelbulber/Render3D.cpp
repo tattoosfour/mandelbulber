@@ -693,7 +693,7 @@ void *MainThread(void *ptr)
 		}//next z
 	}// next pass
 	WriteLogDouble("Thread finished", thread_number);
-	delete vectorsAround;
+	delete[] vectorsAround;
 	return 0;
 
 }
@@ -921,7 +921,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
-	delete thread_done;
+	delete[] thread_done;
 }
 
 //******************************** Get number of CPU cores *************
@@ -1367,7 +1367,7 @@ void MainRender(void)
 		startFrame = fractParam.startFrame;
 		endFrame = fractParam.endFrame;
 		if (noGUI && noGUIdata.startFrame > 0) startFrame = noGUIdata.startFrame;
-		if (noGUI && noGUIdata.endFrame < 99999) startFrame = noGUIdata.endFrame;
+		if (noGUI && noGUIdata.endFrame < 99999) endFrame = noGUIdata.endFrame;
 	}
 
 	cImage *secondEyeImage;
@@ -1689,15 +1689,15 @@ void MainRender(void)
 	WriteLog("Released memory for envmap texture");
 	delete fractParam.lightmapTexture;
 	WriteLog("Released memory for lightmap texture");
-	delete IFSdouble;
+	delete[] IFSdouble;
 	WriteLog("Released memory for IFS params");
 	ParamsReleaseMem(&fractParam);
 	WriteLog("Released memory for fractal params");
 
 	if (fractParam.stereoEnabled)
 	{
-		delete secondEyeImage;
-		delete stereoImage;
+		delete[] secondEyeImage;
+		delete[] stereoImage;
 		WriteLog("Released memory for stereo image");
 	}
 	printf("Rendering finished\n");
