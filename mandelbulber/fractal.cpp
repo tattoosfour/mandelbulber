@@ -361,6 +361,10 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 
 				break;
 			}
+			case hybrid:
+				break;
+			case none:
+				break;
 		}
 
 		//************************** iteration terminate conditions *****************

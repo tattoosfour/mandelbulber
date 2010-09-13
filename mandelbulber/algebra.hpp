@@ -63,18 +63,21 @@ public:
 		x += vector.x;
 		y += vector.y;
 		z += vector.z;
+		return *this;
 	}
 	inline CVector3& operator-=(const CVector3 &vector)
 	{
 		x -= vector.x;
 		y -= vector.y;
 		z -= vector.z;
+		return *this;
 	}
 	inline CVector3& operator*=(const double &scalar)
 	{
 		x *= scalar;
 		y *= scalar;
 		z *= scalar;
+		return *this;
 	}
 	inline double Length(void)
 	{
