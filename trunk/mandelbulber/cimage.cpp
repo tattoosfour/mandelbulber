@@ -23,12 +23,12 @@ cImage::cImage(int w, int h)
 
 cImage::~cImage()
 {
-	delete complexImage;
-	delete image16;
-	delete image8;
-	delete gammaTable;
-	delete palette;
-	if (previewAllocated) delete preview;
+	delete[] complexImage;
+	delete[] image16;
+	delete[] image8;
+	delete[] gammaTable;
+	delete[] palette;
+	if (previewAllocated) delete[] preview;
 }
 
 void cImage::AllocMem(void)
@@ -50,9 +50,9 @@ void cImage::AllocMem(void)
 
 void cImage::ChangeSize(int w, int h)
 {
-	delete complexImage;
-	delete image16;
-	delete image8;
+	delete[] complexImage;
+	delete[] image16;
+	delete[] image8;
 	width = w;
 	height = h;
 	AllocMem();
@@ -257,7 +257,7 @@ unsigned char* cImage::CreatePreview(double scale)
 {
 	int w = width * scale;
 	int h = height * scale;
-	if (previewAllocated) delete preview;
+	if (previewAllocated) delete[] preview;
 	preview = new sRGB8[w * h];
 	memset(preview, 0, sizeof(sRGB8) * (w * h));
 	previewAllocated = true;

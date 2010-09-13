@@ -100,10 +100,10 @@ public:
 	inline void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].colorIndexBuf16 = pixel;}
 	inline void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}
 	inline void PutPixelAlpha(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].alpha = pixel;}
-  inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width];}
-  inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha;}
-  inline sRGB16 GetPixelAmbient(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].ambientBuf16;}
-  inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer;}
+  inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width]; else return Black16();}
+  inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha; else return 0;}
+  inline sRGB16 GetPixelAmbient(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].ambientBuf16; else return Black16();}
+  inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer; else return 1e20;}
   void CompileImage(void);
   void SetPalette(sRGB *palette);
   sRGB* GetPalettePtr() {return palette;}
@@ -131,6 +131,7 @@ public:
 private:
   sRGB8 Interpolation(float x, float y);
 	void AllocMem(void);
+	inline sRGB16 Black16(void) {sRGB16 black = {0,0,0};return black;}
   sComplexImage *complexImage;
 	sRGB16 *image16;
 	sRGB8 *image8;

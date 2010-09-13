@@ -1370,7 +1370,7 @@ void MainRender(void)
 		if (noGUI && noGUIdata.endFrame < 99999) endFrame = noGUIdata.endFrame;
 	}
 
-	cImage *secondEyeImage;
+	cImage *secondEyeImage = 0;
 	unsigned char *stereoImage = 0;
 	if (fractParam.stereoEnabled)
 	{
