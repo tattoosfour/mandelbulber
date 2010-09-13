@@ -43,7 +43,7 @@ cTexture::cTexture(char *filename)
 			}
 		}
 
-		delete jbitmap;
+		delete[] jbitmap;
 
 	}
 	else
@@ -56,7 +56,7 @@ cTexture::cTexture(char *filename)
 //destructor
 cTexture::~cTexture(void)
 {
-	delete bitmap;
+	delete[] bitmap;
 }
 
 //read pixel

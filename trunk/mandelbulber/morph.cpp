@@ -22,13 +22,12 @@ CMorph::CMorph(int size, int recordSize)
 
 CMorph::~CMorph()
 {
-
 	for (int i = 0; i < count; i++)
 	{
-		delete dataSets[i];
+		delete[] dataSets[i];
 	}
-	delete dataSets;
-	delete output;
+	delete[] dataSets;
+	delete[] output;
 }
 
 void CMorph::AddData(int index, double *data)
