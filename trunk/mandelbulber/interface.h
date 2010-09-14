@@ -71,6 +71,7 @@ struct sInterface
 	GtkWidget *boxArrows3;
 	GtkWidget *boxNavigation;
 	GtkWidget *boxNavigationButtons;
+	GtkWidget *boxNavigationZooming;
 	GtkWidget *boxFractal;
 	GtkWidget *boxLimits;
 	GtkWidget *boxJulia;
@@ -414,6 +415,7 @@ struct sInterface
 	GtkWidget *checkSoundEnabled;
 	GtkWidget *checkHybridCyclic;
 	GtkWidget *checkNavigatorAbsoluteDistance;
+	GtkWidget *checkNavigatorGoToSurface;
 	GtkWidget *checkFishEye;
 	GtkWidget *checkStraightRotation;
 	GtkWidget *checkStereoEnabled;

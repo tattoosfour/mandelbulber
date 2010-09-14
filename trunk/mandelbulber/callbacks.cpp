@@ -116,7 +116,15 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			}
 			else
 			{
-				double delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
+				double delta_y;
+				if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
+				{
+					delta_y = 0;
+				}
+				else
+				{
+					delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
+				}
 				double y2 = ((y - delta_y) * params.doubles.zoom);
 				vector.x = x2 * persp_factor;
 				vector.y = y2;
