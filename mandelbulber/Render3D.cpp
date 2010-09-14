@@ -1133,35 +1133,23 @@ void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
 	fractParam->continueRecord = Interface_data.continueRecord;
 }
 
-//****************************8 MAIN called by "Render" button
-void MainRender(void)
+//Init main image and window
+void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea)
 {
-	isRendering = true;
-
-	//allocating memory for fractal parameters
-	sParamRender fractParam;
-	sParamSpecial fractSpecial;
-
-	InitMainParameters(&fractParam, &fractSpecial);
-
-	//image size
-	int width = fractParam.image_width;
-	int height = fractParam.image_height;
-
-	mainImage->ChangeSize(width, height);
+	image->ChangeSize(width, height);
 	WriteLog("complexImage allocated");
-	printf("Memory for image: %d MB\n", mainImage->GetUsedMB());
+	printf("Memory for image: %d MB\n", image->GetUsedMB());
 
 	if (noGUI)
 	{
-		mainImage->SetPalette(noGUIdata.fractparams.palette);
+		image->SetPalette(noGUIdata.fractparams.palette);
 	}
 
-	mainImage->CreatePreview(Interface_data.imageScale);
+	image->CreatePreview(previewScale);
 
 	if (!noGUI)
 	{
-		gtk_widget_set_size_request(darea, mainImage->GetPreviewWidth(), mainImage->GetPreviewHeight());
+		gtk_widget_set_size_request(drawingArea, image->GetPreviewWidth(), image->GetPreviewHeight());
 	}
 
 	WriteLog("rgbbuf allocated");
@@ -1177,8 +1165,24 @@ void MainRender(void)
 		}
 	}
 	WriteLog("Windows refreshed");
+	printf("Memory for image reallocated\n");
+}
 
-	printf("Memory reallocated\n");
+//****************************8 MAIN called by "Render" button
+void MainRender(void)
+{
+	isRendering = true;
+
+	//allocating memory for fractal parameters
+	sParamRender fractParam;
+	sParamSpecial fractSpecial;
+
+	InitMainParameters(&fractParam, &fractSpecial);
+
+	//image size
+	int width = fractParam.image_width;
+	int height = fractParam.image_height;
+	InitMainImage(mainImage,width,height,Interface_data.imageScale, darea);
 
 	//loading texture for environment mapping
 	fractParam.envmapTexture = new cTexture(fractParam.file_envmap);
@@ -1385,7 +1389,7 @@ void MainRender(void)
 		secondEyeImage = new cImage(width, height);
 		secondEyeImage->SetPalette(mainImage->GetPalettePtr());
 		secondEyeImage->CreatePreview(Interface_data.imageScale);
-		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments,fractParam.effectColours,fractParam.imageSwitches);
+		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments, fractParam.effectColours, fractParam.imageSwitches);
 		stereoImage = new unsigned char[width * height * 3 * 2];
 	}
 
@@ -1628,7 +1632,7 @@ void MainRender(void)
 					WriteLog("Image rendered");
 					MakeStereoImage(mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image maked");
-					StereoPreview(mainImage,stereoImage);
+					StereoPreview(mainImage, stereoImage);
 					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
 					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
