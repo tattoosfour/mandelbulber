@@ -1,8 +1,11 @@
-MANDELBULBER 0.92
+MANDELBULBER 0.93
 
-autor: Krzysztof Marczak
+project leader: Krzysztof Marczak
+project members: knighty, makemeunsee, Marius Schilder
+
 contact: buddhi1980@gmail.com
 www: http://sourceforge.net/projects/mandelbulber/
+SVN: http://code.google.com/p/mandelbulber/
 
 LICENCE: GNU GPL v3.0
 
