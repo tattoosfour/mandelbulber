@@ -91,6 +91,7 @@ struct sInterface
 	GtkWidget *boxAnimation;
 	GtkWidget *boxAnimationButtons;
 	GtkWidget *boxAnimationEdits;
+	GtkWidget *boxAnimationEdits2;
 	GtkWidget *boxTgladFolding;
 	GtkWidget *boxSphericalFolding;
 	GtkWidget *boxSaveImage;
@@ -157,6 +158,7 @@ struct sInterface
 	GtkWidget *frFilenames;
 	GtkWidget *frLoadSave;
 	GtkWidget *frAnimation;
+	GtkWidget *frAnimationFrames;
 	GtkWidget *frPostFog;
 	GtkWidget *frPostSSAO;
 	GtkWidget *frPostDOF;

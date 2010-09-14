@@ -999,6 +999,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxAnimation = gtk_vbox_new(FALSE, 1);
 	Interface.boxAnimationButtons = gtk_hbox_new(FALSE, 1);
 	Interface.boxAnimationEdits = gtk_hbox_new(FALSE, 1);
+	Interface.boxAnimationEdits2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxTgladFolding = gtk_hbox_new(FALSE, 1);
 	Interface.boxSphericalFolding = gtk_hbox_new(FALSE, 1);
 	Interface.boxSaveImage = gtk_hbox_new(FALSE, 1);
@@ -1066,6 +1067,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frColors = gtk_frame_new("Colors");
 	Interface.frLoadSave = gtk_frame_new("Settings");
 	Interface.frAnimation = gtk_frame_new("Flight animation");
+	Interface.frAnimationFrames = gtk_frame_new("Frames to render");
 	Interface.frPostFog = gtk_frame_new("Fog");
 	Interface.frPostSSAO = gtk_frame_new("Screen space ambient occlusion");
 	Interface.frPostDOF = gtk_frame_new("Depth of field");
@@ -1710,10 +1712,12 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationEdits, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("100", "Frames per key:", 5, Interface.edit_animationFramesPerKey), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("0", "Start frame:", 5, Interface.edit_animationStartFrame), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("1000", "End frame:", 5, Interface.edit_animationEndFrame), false, false, 1);
-
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.label_keyframeInfo, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frAnimationFrames, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frAnimationFrames), Interface.boxAnimationEdits2);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("0", "Start frame:", 5, Interface.edit_animationStartFrame), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("1000", "End frame:", 5, Interface.edit_animationEndFrame), false, false, 1);
 
 	//---- tab pot effects
 	//frame fog
