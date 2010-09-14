@@ -1103,6 +1103,36 @@ int main(int argc, char *argv[])
 	return (0);
 }
 
+//Init parameters
+void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
+{
+	ParamsAllocMem(fractParam);
+	WriteLog("Memory allocated for fractal parameters");
+
+	//reading parameters from interface
+	if (!noGUI)
+	{
+		ReadInterface(fractParam, fractSpecial);
+		printf("Data has been read from interface\n");
+		WriteLog("Data got from interface");
+	}
+	else
+	{
+		memcpy(fractParam, &noGUIdata.fractparams, sizeof(sParamRender));
+		ReadInterface(fractParam, fractSpecial);
+		Interface_data.imageFormat = noGUIdata.imageFormat;
+		WriteLog("Data got from interface");
+	}
+
+	fractParam->doubles.min_y = -10; //-1e10
+
+	//animation/render mode
+	fractParam->playMode = Interface_data.playMode;
+	fractParam->animMode = Interface_data.animMode;
+	fractParam->recordMode = Interface_data.recordMode;
+	fractParam->continueRecord = Interface_data.continueRecord;
+}
+
 //****************************8 MAIN called by "Render" button
 void MainRender(void)
 {
@@ -1111,31 +1141,8 @@ void MainRender(void)
 	//allocating memory for fractal parameters
 	sParamRender fractParam;
 	sParamSpecial fractSpecial;
-	ParamsAllocMem(&fractParam);
-	WriteLog("Memory allocated for fractal parameters");
 
-	//reading parameters from interface
-	if (!noGUI)
-	{
-		ReadInterface(&fractParam, &fractSpecial);
-		printf("Data has been read from interface\n");
-		WriteLog("Data got from interface");
-	}
-	else
-	{
-		memcpy(&fractParam, &noGUIdata.fractparams, sizeof(sParamRender));
-		ReadInterface(&fractParam, &fractSpecial);
-		Interface_data.imageFormat = noGUIdata.imageFormat;
-		WriteLog("Data got from interface");
-	}
-
-	fractParam.doubles.min_y = -10; //-1e10
-
-	//animation/render mode
-	fractParam.playMode = Interface_data.playMode;
-	fractParam.animMode = Interface_data.animMode;
-	fractParam.recordMode = Interface_data.recordMode;
-	fractParam.continueRecord = Interface_data.continueRecord;
+	InitMainParameters(&fractParam, &fractSpecial);
 
 	//image size
 	int width = fractParam.image_width;
