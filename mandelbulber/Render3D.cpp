@@ -1662,12 +1662,12 @@ void MainRender(void)
 					else if (Interface_data.imageFormat == imgFormatPNG16)
 					{
 						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
-						SavePNG16(filename2, 100, width, height, (png_byte*) rgbbuf2);
+						SavePNG16(filename2, 100, width, height, mainImage);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
 					{
 						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
-						SavePNG16Alpha(filename2, 100, width, height, (png_byte*) rgbbuf2);
+						SavePNG16Alpha(filename2, 100, width, height, mainImage);
 					}
 					printf("Image saved: %s\n", filename2);
 					WriteLog("Image saved");

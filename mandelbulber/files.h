@@ -16,6 +16,7 @@ extern "C"
 {
 #include <jpeglib.h>
 }
+#include "cimage.hpp"
 
 struct my_error_mgr
 {
@@ -41,8 +42,8 @@ int LoadJPEG(char *filename, JSAMPLE *image);
 bool CheckJPEGsize(char *filename, int *width, int *height);
 void SaveJPEG(char *filename, int quality, int width, int height, JSAMPLE *image);
 void SavePNG(char *filename, int quality, int width, int height, png_byte *image);
-void SavePNG16(char *filename, int quality, int width, int height, png_byte *image);
-void SavePNG16Alpha(char *filename, int quality, int width, int height, png_byte *image);
+void SavePNG16(char *filename, int quality, int width, int height, cImage *image);
+void SavePNG16Alpha(char *filename, int quality, int width, int height, cImage *image);
 bool FileIfExist(char *filename);
 void WriteLog(const char *text);
 void WriteLogDouble(const char *text, double value);

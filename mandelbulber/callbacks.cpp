@@ -500,7 +500,7 @@ void PressedSaveImagePNG16(GtkWidget *widget, gpointer data)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		SavePNG16(filename, 100, mainImage->GetWidth(), mainImage->GetHeight(), (JSAMPLE*) mainImage->ConvertTo8bit());
+		SavePNG16(filename, 100, mainImage->GetWidth(), mainImage->GetHeight(), mainImage);
 		strcpy(lastFilenameImage, filename);
 	}
 	gtk_widget_destroy(dialog);
@@ -519,7 +519,7 @@ void PressedSaveImagePNG16Alpha(GtkWidget *widget, gpointer data)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		SavePNG16Alpha(filename, 100, mainImage->GetWidth(), mainImage->GetHeight(), (JSAMPLE*) mainImage->ConvertTo8bit());
+		SavePNG16Alpha(filename, 100, mainImage->GetWidth(), mainImage->GetHeight(), mainImage);
 		strcpy(lastFilenameImage, filename);
 	}
 	gtk_widget_destroy(dialog);
