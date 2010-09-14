@@ -732,6 +732,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	sParam thread_param[NR_THREADS];
 
 	int progressiveStart = 16;
+	if(param.recordMode) progressiveStart = 1;
 	image->progressiveFactor = progressiveStart;
 
 	int refresh_index = 0;
@@ -1374,12 +1375,28 @@ void MainRender(void)
 	int startFrame = 0;
 	int endFrame = 100000;
 
-	if (Interface_data.keyframeMode)
+	if (Interface_data.keyframeMode || Interface_data.playMode)
 	{
 		startFrame = fractParam.startFrame;
 		endFrame = fractParam.endFrame;
 		if (noGUI && noGUIdata.startFrame > 0) startFrame = noGUIdata.startFrame;
 		if (noGUI && noGUIdata.endFrame < 99999) endFrame = noGUIdata.endFrame;
+	}
+
+	//rewinding coordinates file to the first startFame
+	if(fractParam.playMode)
+	{
+		for(int i=0;i<startFrame; i++)
+		{
+			int n;
+			n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alfa,
+					&fractParam.doubles.beta);
+			if (n <= 0)
+			{
+				fclose(pFile_coordinates);
+				return;
+			}
+		}
 	}
 
 	cImage *secondEyeImage = 0;
