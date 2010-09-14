@@ -976,6 +976,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxAngle = gtk_hbox_new(FALSE, 1);
 	Interface.boxNavigation = gtk_vbox_new(FALSE, 1);
 	Interface.boxNavigationButtons = gtk_hbox_new(FALSE, 1);
+	Interface.boxNavigationZooming = gtk_hbox_new(FALSE, 1);
 	Interface.boxZoom = gtk_hbox_new(FALSE, 1);
 	Interface.boxArrows = gtk_hbox_new(FALSE, 1);
 	Interface.boxArrows2 = gtk_vbox_new(FALSE, 1);
@@ -1340,9 +1341,11 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkSoundEnabled = gtk_check_button_new_with_label("Enable animation by sound");
 	Interface.checkHybridCyclic = gtk_check_button_new_with_label("Cyclic loop");
 	Interface.checkNavigatorAbsoluteDistance = gtk_check_button_new_with_label("Absolute distance mode");
+	Interface.checkNavigatorGoToSurface = gtk_check_button_new_with_label("Go close to indicated surface");
 	Interface.checkFishEye = gtk_check_button_new_with_label("Fish eye");
 	Interface.checkStraightRotation = gtk_check_button_new_with_label("Rotation without\nusing gamma\nangle");
 	Interface.checkStereoEnabled = gtk_check_button_new_with_label("Enable stereoscopic rendering");
+
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1536,7 +1539,9 @@ void CreateInterface(sParamRender *default_settings)
 			1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(10.0), "Rotation step in degrees", 5, Interface.edit_step_rotation), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(5.0), "Mouse click close-up ratio", 5, Interface.edit_mouse_click_distance), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.checkZoomClickEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationZooming, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkZoomClickEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkNavigatorGoToSurface, false, false, 1);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable), true);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.label_NavigatorEstimatedDistance, false, false, 1);
 
