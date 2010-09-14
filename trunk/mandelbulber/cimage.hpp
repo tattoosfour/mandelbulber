@@ -104,6 +104,7 @@ public:
   inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].alpha; else return 0;}
   inline sRGB16 GetPixelAmbient(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].ambientBuf16; else return Black16();}
   inline float GetPixelZBuffer(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return complexImage[x + y * width].zBuffer; else return 1e20;}
+  sRGB16* GetImage16Ptr(void) {return image16;}
   void CompileImage(void);
   void SetPalette(sRGB *palette);
   sRGB* GetPalettePtr() {return palette;}

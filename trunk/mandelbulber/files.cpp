@@ -263,7 +263,7 @@ void SavePNG(char *filename, int quality, int width, int height, png_byte *image
 	fclose(fp);
 }
 
-void SavePNG16(char *filename, int quality, int width, int height, png_byte *image)
+void SavePNG16(char *filename, int quality, int width, int height, cImage *image)
 {
 	/* create file */
 	FILE *fp = fopen(filename, "wb");
@@ -309,7 +309,7 @@ void SavePNG16(char *filename, int quality, int width, int height, png_byte *ima
 	}
 
 	png_bytep *row_pointers = new png_bytep[height];
-	sRGB16 *image16 = (sRGB16*) mainImage->ConvertTo8bit();
+	sRGB16* image16 = image->GetImage16Ptr();
 
 	for (int y = 0; y < height; y++)
 	{
@@ -332,7 +332,7 @@ void SavePNG16(char *filename, int quality, int width, int height, png_byte *ima
 	fclose(fp);
 }
 
-void SavePNG16Alpha(char *filename, int quality, int width, int height, png_byte *image)
+void SavePNG16Alpha(char *filename, int quality, int width, int height, cImage *image)
 {
 	/* create file */
 	FILE *fp = fopen(filename, "wb");
@@ -385,11 +385,11 @@ void SavePNG16Alpha(char *filename, int quality, int width, int height, png_byte
 		for (int x = 0; x < width; x++)
 		{
 			int ptr = x+y*width;
-			sRGB16 pixel = mainImage->GetPixelImage(x,y);
+			sRGB16 pixel = image->GetPixelImage(x,y);
 			image16[ptr].R = pixel.R;
 			image16[ptr].G = pixel.G;
 			image16[ptr].B = pixel.B;
-			image16[ptr].A = mainImage->GetPixelAlpha(x,y);
+			image16[ptr].A = image->GetPixelAlpha(x,y);
 		}
 	}
 
