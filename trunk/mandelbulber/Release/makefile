@@ -2,9 +2,6 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-# All Target
-all: mandelbulber
-
 -include ../makefile.init
 
 RM := rm -rf
@@ -38,6 +35,9 @@ endif
 -include ../makefile.defs
 
 # Add inputs and outputs from these tool invocations to the build variables 
+
+# All Target
+all: mandelbulber
 
 # Tool invocations
 mandelbulber: $(OBJS) $(USER_OBJS)

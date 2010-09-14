@@ -2112,6 +2112,7 @@
 <option id="gnu.cpp.link.option.flags.2042190657" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0 gthread-2.0`" valueType="string"/>
 <option id="gnu.cpp.link.option.libs.1122303556" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="jpeg"/>
+<listOptionValue builtIn="false" value="png"/>
 <listOptionValue builtIn="false" value="sndfile"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.252584371" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

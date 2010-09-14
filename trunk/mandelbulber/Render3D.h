@@ -45,5 +45,6 @@ real_clock(void);
 void MainRender(void);
 void *MainThread(void *ptr);
 void Render(sParamRender param, cImage *image);
+void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial);
 
 #endif /* RENDER3D_H_ */
