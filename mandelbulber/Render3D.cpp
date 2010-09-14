@@ -1168,6 +1168,79 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 	printf("Memory for image reallocated\n");
 }
 
+bool LoadTextures(sParamRender *params)
+{
+	//loading texture for environment mapping
+	params->envmapTexture = new cTexture(params->file_envmap);
+	if (params->envmapTexture->IsLoaded())
+	{
+		printf("Environment map texture loaded\n");
+		WriteLog("Environment map texture loaded");
+	}
+	else
+	{
+		printf("Error! Can't open envmap texture: %s\n", params->file_envmap);
+		WriteLog("Error! Can't open envmap texture");
+		WriteLog(params->file_envmap);
+		if (!noGUI)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error loading envmap texture file: %s",
+					params->file_envmap);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		isRendering = false;
+		return false;
+	}
+
+	//loading texture for ambient occlusion light map
+	params->lightmapTexture = new cTexture(params->file_lightmap);
+	if (params->lightmapTexture->IsLoaded())
+	{
+		printf("Ambient occlusion light map texture loaded\n");
+		WriteLog("Ambient occlusion map texture loaded");
+	}
+	else
+	{
+		printf("Error! Can't open ambient occlusion light map texture:%s\n", params->file_lightmap);
+		WriteLog("Error! Can't open ambient occlusion light map texture");
+		WriteLog(params->file_lightmap);
+		if (!noGUI)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+					"Error! Can't open ambient occlusion light map texture:\n%s", params->file_lightmap);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		isRendering = false;
+		return false;
+	}
+
+	//reading background texture
+	params->backgroundTexture = new cTexture(params->file_background);
+	if (params->backgroundTexture->IsLoaded())
+	{
+		printf("Background texture loaded\n");
+		WriteLog("Background texture loaded");
+	}
+	else
+	{
+		printf("Error! Can't open background texture:%s\n", params->file_background);
+		WriteLog("Error! Can't open background texture");
+		WriteLog(params->file_background);
+		if (!noGUI)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+					"Error! Can't open background texture:\n%s", params->file_background);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		isRendering = false;
+		return false;
+	}
+	return true;
+}
+
 //****************************8 MAIN called by "Render" button
 void MainRender(void)
 {
@@ -1179,61 +1252,13 @@ void MainRender(void)
 
 	InitMainParameters(&fractParam, &fractSpecial);
 
+	if (!LoadTextures(&fractParam)) return;
+
 	//image size
 	int width = fractParam.image_width;
 	int height = fractParam.image_height;
-	InitMainImage(mainImage,width,height,Interface_data.imageScale, darea);
+	InitMainImage(mainImage, width, height, Interface_data.imageScale, darea);
 
-	//loading texture for environment mapping
-	fractParam.envmapTexture = new cTexture(fractParam.file_envmap);
-	if (fractParam.envmapTexture->IsLoaded())
-	{
-		printf("Environment map texture loaded\n");
-		WriteLog("Environment map texture loaded");
-	}
-	else
-	{
-		printf("Error! Can't open envmap texture: %s\n", fractParam.file_envmap);
-		WriteLog("Error! Can't open envmap texture");
-		WriteLog(fractParam.file_envmap);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error loading envmap texture file: %s",
-					fractParam.file_envmap);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		isRendering = false;
-		return;
-	}
-
-	//loading texture for ambient occlusion light map
-	fractParam.lightmapTexture = new cTexture(fractParam.file_lightmap);
-	if (fractParam.lightmapTexture->IsLoaded())
-	{
-		printf("Ambient occlusion light map texture loaded\n");
-		WriteLog("Ambient occlusion map texture loaded");
-	}
-	else
-	{
-		printf("Error! Can't open ambient occlusion light map texture:%s\n", fractParam.file_lightmap);
-		WriteLog("Error! Can't open ambient occlusion light map texture");
-		WriteLog(fractParam.file_lightmap);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-					"Error! Can't open ambient occlusion light map texture:\n%s", fractParam.file_lightmap);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		isRendering = false;
-		return;
-	}
-
-	//generating color palette
-	//srand(fractParam.coloring_seed);
-	//NowaPaleta(paleta, 1.0);
-	WriteLog("New colour palette created");
 	if (!noGUI)
 	{
 		DrawPalette(fractParam.palette);
@@ -1246,30 +1271,6 @@ void MainRender(void)
 		WriteLog("Lights placed");
 	}
 	printf("Lights placed\n");
-
-	//reading background texture
-	cTexture *backgroundTexture = new cTexture(fractParam.file_background);
-	fractParam.backgroundTexture = backgroundTexture;
-	if (fractParam.backgroundTexture->IsLoaded())
-	{
-		printf("Background texture loaded\n");
-		WriteLog("Background texture loaded");
-	}
-	else
-	{
-		printf("Error! Can't open background texture:%s\n", fractParam.file_background);
-		WriteLog("Error! Can't open background texture");
-		WriteLog(fractParam.file_background);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-					"Error! Can't open background texture:\n%s", fractParam.file_background);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		isRendering = false;
-		return;
-	}
 
 	//loading sound
 	if (fractParam.soundEnabled)

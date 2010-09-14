@@ -47,5 +47,6 @@ void *MainThread(void *ptr);
 void Render(sParamRender param, cImage *image);
 void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial);
 void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
+bool LoadTextures(sParamRender *params);
 
 #endif /* RENDER3D_H_ */
