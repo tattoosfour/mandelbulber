@@ -1650,7 +1650,6 @@ void MainRender(void)
 					WriteLog("Image rendered");
 					MakeStereoImage(mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image maked");
-					StereoPreview(mainImage, stereoImage);
 					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
 					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
@@ -1659,6 +1658,7 @@ void MainRender(void)
 						char progressText[1000];
 						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2);
 						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+						StereoPreview(mainImage, stereoImage);
 					}
 				}
 

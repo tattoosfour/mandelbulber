@@ -287,7 +287,7 @@ void ThreadSSAO(void *ptr)
 				for (int xx = 0; xx < progressive; xx++)
 				{
 					if (xx == 0 && yy == 0) continue;
-					image->PutPixelAmbient(xx, yy, pixel);
+					image->PutPixelAmbient(x + xx, y + yy, pixel);
 				}
 			}
 		}
