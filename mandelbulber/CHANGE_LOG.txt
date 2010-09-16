@@ -3,7 +3,7 @@ Version history
 v0.93
 - added switch for zooming mode - enable old zooming behavior 
 - start frame and end frame are used also for render animation in path mode
-- fixed bug: progressive render was during recording flight path - now progressive mode is disabled
+- fixed bug: rendering was progressive during recording flight path - now progressive mode is disabled
 - fixed bug: added proper gdk threading guards in timer callback
 - fixed bug: program crashed during saving image in PNG 16-bit format
 

@@ -1141,11 +1141,6 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 	WriteLog("complexImage allocated");
 	printf("Memory for image: %d MB\n", image->GetUsedMB());
 
-	if (noGUI)
-	{
-		image->SetPalette(noGUIdata.fractparams.palette);
-	}
-
 	image->CreatePreview(previewScale);
 
 	if (!noGUI)
@@ -1250,6 +1245,11 @@ void MainRender(void)
 	//allocating memory for fractal parameters
 	sParamRender fractParam;
 	sParamSpecial fractSpecial;
+
+	if (noGUI)
+	{
+		mainImage->SetPalette(noGUIdata.fractparams.palette);
+	}
 
 	InitMainParameters(&fractParam, &fractSpecial);
 
