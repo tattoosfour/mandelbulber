@@ -660,10 +660,18 @@ void *MainThread(void *ptr)
 
 				done++;
 
-				double progressiveDone;
+				double progressiveDone, percent_done;
 				if (progressive == progressiveStart) progressiveDone = 0;
 				else progressiveDone = 0.25 / (progressive * progressive);
-				double percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+
+				if (progressiveStart == 1)
+				{
+					percent_done = ((double) done / height) * 100.0;
+				}
+				else
+				{
+					percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+				}
 				double time = real_clock() - start_time;
 				double time_to_go = (100.0 - percent_done) * time / percent_done;
 				int togo_time_s = (int) time_to_go % 60;
@@ -732,7 +740,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	sParam thread_param[NR_THREADS];
 
 	int progressiveStart = 16;
-	if(param.recordMode || noGUI) progressiveStart = 1;
+	if (param.recordMode || noGUI) progressiveStart = 1;
 	image->progressiveFactor = progressiveStart;
 
 	int refresh_index = 0;
@@ -826,10 +834,17 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				{
 					//progress bar
 					char progressText[1000];
-					double progressiveDone;
+					double progressiveDone, percent_done;
 					if (progressive == progressiveStart) progressiveDone = 0;
 					else progressiveDone = 0.25 / (progressive * progressive);
-					double percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+					if (progressiveStart == 1)
+					{
+						percent_done = ((double) done / height) * 100.0;
+					}
+					else
+					{
+						percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+					}
 					double time = real_clock() - start_time;
 					double time_to_go = (100.0 - percent_done) * time / percent_done;
 					int togo_time_s = (int) time_to_go % 60;
@@ -1384,9 +1399,9 @@ void MainRender(void)
 	}
 
 	//rewinding coordinates file to the first startFame
-	if(fractParam.playMode)
+	if (fractParam.playMode)
 	{
-		for(int i=0;i<startFrame; i++)
+		for (int i = 0; i < startFrame; i++)
 		{
 			int n;
 			n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alfa,
