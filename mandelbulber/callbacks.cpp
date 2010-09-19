@@ -1442,6 +1442,16 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 		WriteInterface(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		ParamsReleaseMem(&fractParamLoaded);
+
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
 	}
 	else
 	{
@@ -1470,6 +1480,16 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
+
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
 	}
 	else
 	{
