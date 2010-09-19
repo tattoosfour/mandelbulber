@@ -732,7 +732,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	sParam thread_param[NR_THREADS];
 
 	int progressiveStart = 16;
-	if(param.recordMode) progressiveStart = 1;
+	if(param.recordMode || noGUI) progressiveStart = 1;
 	image->progressiveFactor = progressiveStart;
 
 	int refresh_index = 0;

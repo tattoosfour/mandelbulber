@@ -150,8 +150,14 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 			while (gtk_events_pending())
 				gtk_main_iteration();
 		}
-		if (!isPostRendering) break;
 
+		if (i % 1000 == 0)
+		{
+			double percentDone = (double)i/(width*height)*100.0;
+			printf("Rendering Depth Of Field efect. Done %.2f%%       \r", percentDone);
+			fflush(stdout);
+		}
+		if (!isPostRendering) break;
 	}
 
 	if (!noGUI)
@@ -160,6 +166,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
+	printf("Rendering Depth Of Field efect. Done 100%%       \n");
 
 	isPostRendering = false;
 	delete[] temp_image;
@@ -291,6 +298,11 @@ void ThreadSSAO(void *ptr)
 				}
 			}
 		}
+
+		double percentDone = (double) y / height * 100.0;
+		printf("Rendering Screen Space Ambient Occlusion. Done %.2f%%       \r", percentDone);
+		fflush(stdout);
+
 		param->done++;
 
 		if (!isPostRendering) break;
@@ -371,15 +383,12 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
-	else
-	{
-		printf("Rendering Screen Space Ambient Occlusion\n");
-	}
 	for (int i = 0; i < NR_THREADS; i++)
 	{
 		g_thread_join(Thread[i]);
 		//printf("Rendering thread #%d finished\n", i + 1);
 	}
+	printf("Rendering Screen Space Ambient Occlusion. Done 100%%       \n");
 
 	isPostRendering = false;
 }
@@ -456,8 +465,8 @@ void MakeStereoImage(cImage *left, cImage *right, guchar *stereoImage)
 	int width = left->GetWidth();
 	int height = left->GetHeight();
 
-	sRGB8 *left8 = (sRGB8*)left->ConvertTo8bit();
-	sRGB8 *right8 = (sRGB8*)right->ConvertTo8bit();
+	sRGB8 *left8 = (sRGB8*) left->ConvertTo8bit();
+	sRGB8 *right8 = (sRGB8*) right->ConvertTo8bit();
 
 	for (int y = 0; y < height; y++)
 	{
@@ -475,13 +484,12 @@ void MakeStereoImage(cImage *left, cImage *right, guchar *stereoImage)
 	}
 }
 
-
 void StereoPreview(cImage *temporaryImage, guchar *stereoImage)
 {
 	guchar *image8 = temporaryImage->ConvertTo8bit();
 	int width = temporaryImage->GetWidth();
 	int height = temporaryImage->GetHeight();
-	memset(image8,0,width*height*sizeof(sRGB8));
+	memset(image8, 0, width * height * sizeof(sRGB8));
 
 	for (int y = 0; y < height / 2; y++)
 	{
@@ -512,5 +520,4 @@ void StereoPreview(cImage *temporaryImage, guchar *stereoImage)
 	temporaryImage->UpdatePreview();
 	temporaryImage->RedrawInWidget(darea);
 }
-
 
