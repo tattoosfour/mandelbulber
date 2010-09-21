@@ -197,9 +197,11 @@ void ParamsReleaseMem(sParamRender *fractParam)
 
 void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 {
+	bool freeSpecial = false;
 	if (special == 0)
 	{
 		special = new sParamSpecial;
+		freeSpecial = true;
 		memset(special, 0, sizeof(sParamSpecial));
 	}
 
@@ -410,6 +412,9 @@ void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 	fprintf(fileSettings, "palette %s;\n", paletteString);
 
 	fclose(fileSettings);
+
+	delete[] paletteString;
+	if (freeSpecial) delete special;
 }
 
 bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
@@ -417,9 +422,11 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 	DefaultValues(&params);
 	paletteLoadedFromSettingsFile = false;
 
+	bool freeSpecial = false;
 	if (special == 0)
 	{
 		special = new sParamSpecial;
+		freeSpecial = true;
 	}
 	memset(special, 0, sizeof(sParamSpecial));
 
@@ -747,11 +754,13 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 			}
 		}
 
+		if (freeSpecial) delete special;
 		return true;
 	}
 	else
 	{
 		//printf("Can't open settings file: %s\n", filename);
+		if (freeSpecial) delete special;
 		return false;
 	}
 }
