@@ -32,6 +32,9 @@ int scrollbarSize;
 int lastWindowWidth;
 int lastWindowHeight;
 
+sTimelineInterface timelineInterface;
+GtkWidget *timeLineWindow;
+
 char lastFilenameImage[1000];
 char lastFilenameSettings[1000];
 char lastFilenamePalette[1000];
@@ -394,8 +397,8 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
 
-		params->image_width = (params->image_width/16)*16;
-		params->image_height = (params->image_height/16)*16;
+		params->image_width = (params->image_width/8)*8;
+		params->image_height = (params->image_height/8)*8;
 
 		special->paletteOffset.active = false;
 		special->fogVisibility.active = false;
@@ -1160,6 +1163,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buRandomPalette = gtk_button_new_with_label("Random palette");
 	Interface.buLoadSound = gtk_button_new_with_label("Load sound");
 	Interface.buGetPaletteFromImage = gtk_button_new_with_label("Get palette from image");
+	Interface.buTimeline = gtk_button_new_with_label("Timeline");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1397,7 +1401,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_HybridFormula5 = gtk_label_new("Formula #5:");
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.93\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.94\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");
@@ -1480,6 +1484,7 @@ void CreateInterface(sParamRender *default_settings)
 	g_signal_connect(G_OBJECT(Interface.buRandomPalette), "clicked", G_CALLBACK(PressedRandomPalette), NULL);
 	g_signal_connect(G_OBJECT(Interface.buLoadSound), "clicked", G_CALLBACK(PressedLoadSound), NULL);
 	g_signal_connect(G_OBJECT(Interface.buGetPaletteFromImage), "clicked", G_CALLBACK(PressedGetPaletteFromImage), NULL);
+	g_signal_connect(G_OBJECT(Interface.buTimeline), "clicked", G_CALLBACK(PressedTimeline), NULL);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -1984,6 +1989,7 @@ void CreateInterface(sParamRender *default_settings)
 	//Keyframe aniation
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frKeyframeAnimation2, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation2), Interface.boxBottomKeyframeAnimation);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buTimeline, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buAnimationRecordKey2, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buPreviousKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buNextKeyframe, true, true, 1);

@@ -29,6 +29,7 @@
 #include "files.h"
 #include "undo.hpp"
 #include "loadsound.hpp"
+#include "timeline.hpp"
 
 double last_navigator_step;
 CVector3 last_keyframe_position;
@@ -117,7 +118,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			else
 			{
 				double delta_y;
-				if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
+				if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
 				{
 					delta_y = 0;
 				}
@@ -1407,6 +1408,16 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 		LoadSettings(filename2, fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
+
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
 	}
 
 	ParamsReleaseMem(&fractParamToSave);
@@ -1783,5 +1794,14 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 		strcpy(lastFilenamePalette, filename);
 	}
 	gtk_widget_destroy(dialog);
+}
+
+void PressedTimeline(GtkWidget *widget, gpointer data)
+{
+	timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
+	gtk_widget_show(timeLineWindow);
+	timeline = new cTimeline;
+	int numberOfKeyframes = timeline->Initialize(Interface_data.file_keyframes);
 }
 

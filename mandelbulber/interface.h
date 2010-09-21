@@ -234,6 +234,7 @@ struct sInterface
 	GtkWidget *buRandomPalette;
 	GtkWidget *buLoadSound;
 	GtkWidget *buGetPaletteFromImage;
+	GtkWidget *buTimeline;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -496,6 +497,15 @@ struct sDialogFiles
 	GtkWidget *bu_select_sound;
 };
 
+struct sTimelineInterface
+{
+	GtkWidget **darea;
+	GtkWidget *table;
+	GtkAdjustment *layoutHScroller;
+	GtkAdjustment *layoutVScroller;
+	GtkWidget *treeView;
+};
+
 struct sInterface_data
 {
 	bool disableInitRefresh;
@@ -563,6 +573,7 @@ struct sNoGUIdata
 //Global variables
 
 extern sInterface Interface;
+extern sTimelineInterface timelineInterface;
 extern sInterface_data Interface_data;
 extern sNoGUIdata noGUIdata;
 extern GtkWidget *window2, *window_histogram, *window_interface;
@@ -580,6 +591,8 @@ extern int lastWindowHeight;
 extern char lastFilenameImage[1000];
 extern char lastFilenameSettings[1000];
 extern char lastFilenamePalette[1000];
+
+extern GtkWidget *timeLineWindow;
 
 //functions
 char* DoubleToString(double value, sAddData *addData = 0);
