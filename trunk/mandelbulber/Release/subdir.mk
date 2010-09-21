@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../callbacks.cpp \
 ../cimage.cpp \
 ../common_math.cpp \
+../database.cpp \
 ../files.cpp \
 ../fractal.cpp \
 ../image.cpp \
@@ -18,6 +19,7 @@ CPP_SRCS += \
 ../settings.cpp \
 ../shaders.cpp \
 ../texture.cpp \
+../timeline.cpp \
 ../undo.cpp 
 
 OBJS += \
@@ -26,6 +28,7 @@ OBJS += \
 ./callbacks.o \
 ./cimage.o \
 ./common_math.o \
+./database.o \
 ./files.o \
 ./fractal.o \
 ./image.o \
@@ -35,6 +38,7 @@ OBJS += \
 ./settings.o \
 ./shaders.o \
 ./texture.o \
+./timeline.o \
 ./undo.o 
 
 CPP_DEPS += \
@@ -43,6 +47,7 @@ CPP_DEPS += \
 ./callbacks.d \
 ./cimage.d \
 ./common_math.d \
+./database.d \
 ./files.d \
 ./fractal.d \
 ./image.d \
@@ -52,6 +57,7 @@ CPP_DEPS += \
 ./settings.d \
 ./shaders.d \
 ./texture.d \
+./timeline.d \
 ./undo.d 
 
 
