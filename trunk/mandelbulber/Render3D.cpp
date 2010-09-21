@@ -46,8 +46,6 @@ int NR_THREADS;
 JSAMPLE *tekstura;
 JSAMPLE *lightMap;
 
-int done = 0;
-
 //global conters
 guint64 N_counter = 0;
 guint64 Loop_counter = 0;
@@ -57,8 +55,6 @@ int Missed_DE_counter = 0;
 double start_time = 0.0;
 bool isRendering = false;
 bool isPostRendering = false;
-
-int *thread_done;
 
 cImage *mainImage;
 
@@ -229,10 +225,10 @@ void *MainThread(void *ptr)
 		for (z = start; z <= height - progressive; z += progressive)
 		{
 			//checking if some another thread is not rendering the same z
-			if (thread_done[z] == 0)
+			if (parametry->thread_done[z] == 0)
 			{
 				//giving information for another threads that this thread renders this z value
-				thread_done[z] = start + 1;
+				parametry->thread_done[z] = start + 1;
 
 				WriteLogDouble("Started rendering line", z);
 
@@ -282,7 +278,7 @@ void *MainThread(void *ptr)
 					for (double y = min_y; y < max_y; y += stepYpersp)
 					{
 						//recheck threads
-						if (thread_done[z] == start + 1)
+						if (parametry->thread_done[z] == start + 1)
 						{
 
 							//recalculating normalised y to fractal y
@@ -659,7 +655,7 @@ void *MainThread(void *ptr)
 
 				image->Squares(z, progressive);
 
-				done++;
+				(*parametry->done)++;
 
 				double progressiveDone, percent_done;
 				if (progressive == progressiveStart) progressiveDone = 0;
@@ -667,11 +663,11 @@ void *MainThread(void *ptr)
 
 				if (progressiveStart == 1)
 				{
-					percent_done = ((double) done / height) * 100.0;
+					percent_done = ((double) *parametry->done / height) * 100.0;
 				}
 				else
 				{
-					percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+					percent_done = (((double) *parametry->done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 				}
 				double time = real_clock() - start_time;
 				double time_to_go = (100.0 - percent_done) * time / percent_done;
@@ -689,7 +685,7 @@ void *MainThread(void *ptr)
 				fflush(stdout);
 
 				//printing to console some statistics
-				if (done == height - 1)
+				if (*parametry->done == height - 1)
 				{
 					double avg_N = (double) N_counter / Loop_counter;
 					double avg_DE = (double) DE_counter / Pixel_counter;
@@ -734,12 +730,12 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	start_time = real_clock();
 
 	//initialising threads
-	thread_done = new int[height];
+	int *thread_done = new int[height];
 	GThread *Thread[NR_THREADS + 1];
 	GError *err[NR_THREADS + 1];
 	sParam thread_param[NR_THREADS];
 
-	int progressiveStart = 16;
+	int progressiveStart = 8;
 	if (param.recordMode || noGUI) progressiveStart = 1;
 	image->progressiveFactor = progressiveStart;
 
@@ -751,7 +747,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
 		//else bo_refreshing = true;
 
-		done = 0;
+		int done = 0;
 		for (int i = 0; i < NR_THREADS; i++)
 		{
 			err[i] = NULL;
@@ -772,6 +768,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			thread_param[i].image = image;
 			thread_param[i].progressive = progressive;
 			thread_param[i].progressiveStart = progressiveStart;
+			thread_param[i].done = &done;
+			thread_param[i].thread_done = thread_done;
 			//creating thread
 			Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
 			WriteLogDouble("Thread created", i);
@@ -798,16 +796,18 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					{
 						double refreshStartTime = real_clock();
 
-						if (Interface_data.SSAOEnabled)
-						{
-							PostRendering_SSAO(image, param.doubles.persp, Interface_data.SSAOQuality / 2);
-							WriteLog("SSAO rendered");
-						}
-						image->CompileImage();
-						WriteLog("Image compiled");
-
 						if (image->IsPreview())
 						{
+							param.SSAOEnabled = Interface_data.SSAOEnabled;
+							if (param.SSAOEnabled)
+							{
+								param.SSAOQuality = Interface_data.SSAOQuality;
+								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2);
+								WriteLog("SSAO rendered");
+							}
+							image->CompileImage();
+							WriteLog("Image compiled");
+
 							image->ConvertTo8bit();
 							WriteLog("Image converted into 8-bit");
 							image->UpdatePreview();
@@ -883,9 +883,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	//Bitmap32to8(post_bitmap, rgbbuf, rgbbuf2);
 	//delete post_bitmap;
 	//end of postprocessing
-	if (Interface_data.SSAOEnabled && !programClosed)
+	if (param.SSAOEnabled && !programClosed)
 	{
-		PostRendering_SSAO(image, param.doubles.persp, Interface_data.SSAOQuality);
+		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality);
 		WriteLog("SSAO rendered");
 	}
 	image->CompileImage();
