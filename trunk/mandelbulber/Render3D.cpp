@@ -242,6 +242,7 @@ void *MainThread(void *ptr)
 					//checking if program was not closed
 					if (programClosed)
 					{
+						delete[] vectorsAround;
 						return NULL;
 					}
 
@@ -703,7 +704,6 @@ void *MainThread(void *ptr)
 	WriteLogDouble("Thread finished", thread_number);
 	delete[] vectorsAround;
 	return 0;
-
 }
 
 //************************** Render **************************************
@@ -1664,7 +1664,8 @@ void MainRender(void)
 					Render(fractParam, secondEyeImage, darea);
 					WriteLog("Image rendered");
 					MakeStereoImage(mainImage, secondEyeImage, stereoImage);
-					WriteLog("Stereo image maked");
+					WriteLog("Stereo image made");
+					if (!noGUI) StereoPreview(mainImage,stereoImage);
 					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
 					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
