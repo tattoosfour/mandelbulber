@@ -257,9 +257,11 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 //read data from interface
 void ReadInterface(sParamRender *params, sParamSpecial *special)
 {
+	bool freeSpecial = false;
 	if (special == 0)
 	{
 		special = new sParamSpecial;
+	        freeSpecial = true;
 	}
 
 	if (!noGUI)
@@ -585,6 +587,8 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 
 	RecalculateIFSParams(params);
 	CreateFormulaSequence(params);
+
+	if (freeSpecial) delete special;
 }
 
 char* DoubleToString(double value, sAddData *addData)
@@ -616,9 +620,11 @@ IntToString(int value)
 
 void WriteInterface(sParamRender *params, sParamSpecial *special)
 {
+	bool freeSpecial = false;
 	if (special == 0)
 	{
 		special = new sParamSpecial;
+		freeSpecial = true;
 		memset(special, 0, sizeof(sParamSpecial));
 	}
 
@@ -839,6 +845,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 
 	DrawPalette(params->palette);
 
+	if (freeSpecial) delete special;
 }
 
 void AddComboTextsFractalFormula(GtkComboBox *combo)

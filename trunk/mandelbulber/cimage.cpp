@@ -7,6 +7,7 @@
 
 #include <gtk-2.0/gtk/gtk.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "cimage.hpp"
@@ -16,6 +17,7 @@ cImage::cImage(int w, int h)
 {
 	width = w;
 	height = h;
+	previewAllocated = false;
 	AllocMem();
 	gammaTable = new int[65536];
 	palette = new sRGB[256];
@@ -44,6 +46,7 @@ void cImage::AllocMem(void)
 	{
 		fprintf(stderr, "Error! Cannot allocate memory for image (wrong image size\n");
 	}
+	if (previewAllocated) delete[] preview;
 	previewAllocated = false;
 	preview = 0;
 }
@@ -335,7 +338,7 @@ unsigned char* cImage::GetPreviewPtr(void)
 	if (previewAllocated)
 	{
 		ptr = (unsigned char*) preview;
-	}
+	} else abort();
 	return ptr;
 }
 
