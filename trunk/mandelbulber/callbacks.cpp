@@ -1801,7 +1801,14 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 	timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
 	gtk_widget_show(timeLineWindow);
-	timeline = new cTimeline;
-	int numberOfKeyframes = timeline->Initialize(Interface_data.file_keyframes);
+
+	if (timeline->IsCreated())
+	{
+		timeline->RebulidTimelineWindow();
+	}
+	else
+	{
+		timeline->Initialize(Interface_data.file_keyframes);
+	}
 }
 

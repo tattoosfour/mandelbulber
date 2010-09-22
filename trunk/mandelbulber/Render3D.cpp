@@ -38,6 +38,7 @@
 #include "morph.hpp"
 #include "undo.hpp"
 #include "loadsound.hpp"
+#include "timeline.hpp"
 
 bool noGUI = false;
 
@@ -1024,6 +1025,8 @@ int main(int argc, char *argv[])
 	WriteLog("memory for lights allocated");
 	printf("Memory allocated\n");
 
+	timeline = new cTimeline;
+
 	//initialising g_thread
 	if (!g_thread_supported())
 	{
@@ -1749,4 +1752,43 @@ void MainRender(void)
 	WriteLog("Rendering completely finished");
 	isRendering = false;
 }
+
+void ThumbnailRender(char *settingsFile, cImage *miniImage)
+{
+	printf("Rendering keyframe preview: %s\n", settingsFile);
+
+	if (FileIfExist(settingsFile))
+	{
+		sParamRender fractParamLoaded;
+		ParamsAllocMem(&fractParamLoaded);
+		LoadSettings(settingsFile, fractParamLoaded);
+
+		fractParamLoaded.image_width = miniImage->GetWidth();
+		fractParamLoaded.image_height = miniImage->GetHeight();
+		fractParamLoaded.doubles.resolution = 1.0 / fractParamLoaded.image_width;
+		fractParamLoaded.doubles.max_y = 20.0 / fractParamLoaded.doubles.zoom;
+		if (fractParamLoaded.formula == trig_DE || fractParamLoaded.formula == menger_sponge || fractParamLoaded.formula == kaleidoscopic || fractParamLoaded.formula == tglad) fractParamLoaded.analitycDE
+				= true;
+		else fractParamLoaded.analitycDE = false;
+		fractParamLoaded.recordMode = false;
+		fractParamLoaded.animMode = false;
+
+		RecalculateIFSParams(&fractParamLoaded);
+		CreateFormulaSequence(&fractParamLoaded);
+
+		miniImage->ClearImage();
+		miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.effectColours, fractParamLoaded.imageSwitches);
+		miniImage->SetPalette(fractParamLoaded.palette);
+
+		LoadTextures(&fractParamLoaded);
+
+		programClosed = false;
+		isPostRendering = false;
+
+		Render(fractParamLoaded, miniImage, NULL);
+
+		ParamsReleaseMem(&fractParamLoaded);
+	}
+}
+
 

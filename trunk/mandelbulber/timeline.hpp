@@ -11,7 +11,7 @@
 #include "database.hpp"
 #include "cimage.hpp"
 
-void ThumbnailRender(char *settingsFile, cImage *miniImage);
+
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 
 
@@ -29,8 +29,13 @@ public:
 	bool IsCreated(void) {return isCreated;}
 	int Initialize(char *keyframesPath); //returns number of keyframes
 	void GetImage(int index, sRGB8 *image);
+	void DisplayInDrawingArea(int index, GtkWidget *darea);
+	int CheckNumberOfKeyframes(char *keyframesPath);
+	void CreateInterface(int numberOfKeyframes);
+	void RebulidTimelineWindow(void);
 
 private:
+
 	cDatabase *database;
 	int keyframeCount;
 	bool isCreated;
