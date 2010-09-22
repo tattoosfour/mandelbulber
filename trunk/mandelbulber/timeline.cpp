@@ -97,12 +97,21 @@ void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 
 void cTimeline::CreateInterface(int numberOfKeyframes)
 {
+	timelineInterface.scrolledWindow = gtk_scrolled_window_new(NULL,NULL);
+	timelineInterface.windowHadjustment = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
+	timelineInterface.windowVadjustment = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow),GTK_POLICY_ALWAYS,GTK_POLICY_NEVER);
+	timelineInterface.mainBox = gtk_hbox_new(false, 1);
+	timelineInterface.table = gtk_table_new(2, numberOfKeyframes + 1, false);
+
+	gtk_box_pack_start(GTK_BOX(timelineInterface.mainBox), timelineInterface.table, false, false, 1);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow), timelineInterface.mainBox);
+	gtk_container_add(GTK_CONTAINER(timeLineWindow), timelineInterface.scrolledWindow);
+	gtk_widget_show(timelineInterface.mainBox);
+	gtk_widget_show(timelineInterface.table);
+	gtk_widget_show(timelineInterface.scrolledWindow);
 
 	timelineInterface.darea = new GtkWidget*[numberOfKeyframes];
-	timelineInterface.table = gtk_table_new(2, numberOfKeyframes + 1, false);
-	gtk_container_add(GTK_CONTAINER(timeLineWindow), timelineInterface.table);
-	gtk_widget_show(timelineInterface.table);
-
 	char widgetName[7];
 
 	for (int i = 0; i < numberOfKeyframes; i++)
