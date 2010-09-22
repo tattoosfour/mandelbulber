@@ -501,9 +501,11 @@ struct sTimelineInterface
 {
 	GtkWidget **darea;
 	GtkWidget *table;
-	GtkAdjustment *layoutHScroller;
-	GtkAdjustment *layoutVScroller;
-	GtkWidget *treeView;
+	GtkAdjustment *windowHadjustment;
+	GtkAdjustment *windowVadjustment;
+	GtkWidget *scrolledWindow;
+	GtkWidget *layoutContainer;
+	GtkWidget *mainBox;
 };
 
 struct sInterface_data
