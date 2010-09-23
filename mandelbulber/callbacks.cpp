@@ -88,7 +88,9 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 
 		double x2, z2;
 		double aspectRatio = (double) width / height;
-		if (Interface_data.fishEye)
+
+		bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
+		if (fishEye)
 		{
 			x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 			z2 = M_PI * ((double) z / height - 0.5);
@@ -108,7 +110,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 		{
 			double persp_factor = 1.0 + y * params.doubles.persp;
 			CVector3 vector, vector2;
-			if (Interface_data.fishEye)
+			if (fishEye)
 			{
 				double y2 = y * (1.0 - 1.0 / closeUpRatio);
 				vector.x = sin(params.doubles.persp * x2) * y2;
@@ -355,35 +357,12 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 	undoBuffer.SaveUndo(&params);
 	ParamsReleaseMem(&params);
 
-	Interface_data.brightness = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)));
-	Interface_data.imageGamma = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gamma)));
-	Interface_data.shadows = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shadows)));
-	Interface_data.shading = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shading)));
-	Interface_data.ambient = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient)));
-	Interface_data.ambientOcclusion = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient_occlusion)));
-	Interface_data.reflections = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_reflect)));
-	Interface_data.specularity = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_specular)));
-	Interface_data.glow = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_glow)));
-	Interface_data.coloringEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkColoring));
-	Interface_data.coloring_seed = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_seed)));
-	Interface_data.coloring_speed = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_speed)));
-	Interface_data.mainLightIntensity = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightIntensity)));
-
 	GdkColor color;
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
-	Interface_data.glowColor1.R = color.red;
-	Interface_data.glowColor1.G = color.green;
-	Interface_data.glowColor1.B = color.blue;
 
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow2), &color);
-	Interface_data.glowColor2.R = color.red;
-	Interface_data.glowColor2.G = color.green;
-	Interface_data.glowColor2.B = color.blue;
 
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorMainLight), &color);
-	Interface_data.mainLightColour.R = color.red;
-	Interface_data.mainLightColour.G = color.green;
-	Interface_data.mainLightColour.B = color.blue;
 
 	//generating color palette
 	//srand(Interface_data.coloring_seed);
@@ -1129,21 +1108,17 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 {
 	if (Interface_data.disableInitRefresh) return;
 	GdkColor color;
-	Interface_data.fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
-	Interface_data.fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
+
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
-	Interface_data.fogColor.R = color.red;
-	Interface_data.fogColor.G = color.green;
-	Interface_data.fogColor.B = color.blue;
-	Interface_data.fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
+	sRGB color2 = {color.red, color.green, color.blue};
 
 	sImageAdjustments *adj = mainImage->GetImageAdjustments();
-	adj->fogVisibility = Interface_data.fogVisibility;
-	adj->fogVisibilityFront = Interface_data.fogVisibilityFront;
+	adj->fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
+	adj->fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
 	sImageSwitches *sw = mainImage->GetImageSwitches();
-	sw->fogEnabled = Interface_data.fogEnabled;
+	sw->fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
 	sEffectColours *ecol = mainImage->GetEffectColours();
-	ecol->fogColor = Interface_data.fogColor;
+	ecol->fogColor = color2;
 
 	if (!isRendering)
 	{
@@ -1159,13 +1134,15 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 {
 	if (Interface_data.disableInitRefresh) return;
-	Interface_data.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
-	Interface_data.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
+	double SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
+	bool SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
+	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+	bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
 	if (!isRendering)
 	{
-		if (Interface_data.SSAOEnabled)
+		if (SSAOEnabled)
 		{
-			PostRendering_SSAO(mainImage, Interface_data.persp, Interface_data.SSAOQuality);
+			PostRendering_SSAO(mainImage, persp, SSAOQuality, fishEye);
 		}
 		mainImage->CompileImage();
 		mainImage->ConvertTo8bit();
@@ -1182,13 +1159,14 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 	double DOFFocus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
 	double DOFRadius = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius));
 	bool DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
+	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
 	if (!isRendering)
 	{
 		mainImage->CompileImage();
 		if (DOFEnabled)
 		{
-			double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / Interface_data.persp;
-			PostRendering_DOF(mainImage, DOFRadius, DOF_focus, Interface_data.persp);
+			double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / persp;
+			PostRendering_DOF(mainImage, DOFRadius, DOF_focus, persp);
 		}
 		mainImage->ConvertTo8bit();
 		mainImage->UpdatePreview();
@@ -1697,9 +1675,8 @@ void PressedSelectSound(GtkWidget *widget, gpointer data)
 void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 {
 	if (!interfaceCreated) return;
-	Interface_data.palette_offset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
 	sImageAdjustments *adj = mainImage->GetImageAdjustments();
-	adj->paletteOffset = Interface_data.palette_offset;
+	adj->paletteOffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
 	DrawPalette(mainImage->GetPalettePtr());
@@ -1718,10 +1695,10 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 {
 	//srand(clock());
 	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
-	Interface_data.coloring_seed = Random(999999);
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(Interface_data.coloring_seed));
+	int coloring_seed = Random(999999);
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(coloring_seed));
 
-	srand(Interface_data.coloring_seed);
+	srand(coloring_seed);
 	NowaPaleta(mainImage->GetPalettePtr(), 1.0);
 	DrawPalette(mainImage->GetPalettePtr());
 	if (!isRendering && !Interface_data.disableInitRefresh)
@@ -1800,7 +1777,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 {
 	timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
-	gtk_widget_set_size_request (timeLineWindow,4*128,150);
+	gtk_widget_set_size_request (timeLineWindow,4*(128+2)+4,150);
 	gtk_widget_show(timeLineWindow);
 
 	if (timeline->IsCreated())

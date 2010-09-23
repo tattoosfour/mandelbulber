@@ -799,11 +799,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 						if (image->IsPreview())
 						{
-							param.SSAOEnabled = Interface_data.SSAOEnabled;
+							param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
 							if (param.SSAOEnabled)
 							{
-								param.SSAOQuality = Interface_data.SSAOQuality;
-								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2);
+								param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
+								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.fishEye);
 								WriteLog("SSAO rendered");
 							}
 							image->CompileImage();
@@ -886,7 +886,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	//end of postprocessing
 	if (param.SSAOEnabled && !programClosed)
 	{
-		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality);
+		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.fishEye);
 		WriteLog("SSAO rendered");
 	}
 	image->CompileImage();
@@ -1531,7 +1531,6 @@ void MainRender(void)
 			fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 			sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
 			mainImage->SetImageAdjustments(imageAdjustments);
-			Interface_data.persp = fractParam.doubles.persp;
 
 			sprintf(label_text, "Frame: %d, Keyframe %f", index, (double) index / fractParam.framesPerKeyframe);
 			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_keyframeInfo), label_text);
@@ -1557,7 +1556,6 @@ void MainRender(void)
 				fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 				sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
 				mainImage->SetImageAdjustments(imageAdjustments);
-				Interface_data.persp = fractParam.doubles.persp;
 
 				addData++;
 				paramToAdd++;
