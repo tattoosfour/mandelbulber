@@ -312,7 +312,7 @@ void ThreadSSAO(void *ptr)
 
 }
 
-void PostRendering_SSAO(cImage *image, double persp, int quality)
+void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye)
 {
 	isPostRendering = true;
 
@@ -342,7 +342,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality)
 		thread_param[i].threadNo = i;
 		thread_param[i].image = image;
 		thread_param[i].persp = persp;
-		thread_param[i].fishEye = Interface_data.fishEye;
+		thread_param[i].fishEye = fishEye;
 		thread_param[i].quality = quality * sqrt(1.0 / progressive);
 		thread_param[i].done = 0;
 		thread_param[i].progressive = image->progressiveFactor;
@@ -447,11 +447,12 @@ void DrawPalette(sRGB *palette)
 
 	if (paletteViewCreated)
 	{
+		double paletteOffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
 		double colWidth = 10;
 		GdkGC *GC = gdk_gc_new(dareaPalette->window);
 		for (int i = 0; i < 640; i++)
 		{
-			int number = (int) (i * 256.0 / colWidth + Interface_data.palette_offset * 256.0);
+			int number = (int) (i * 256.0 / colWidth + paletteOffset * 256.0);
 			sRGB color = mainImage->IndexToColour(number);
 			GdkColor gdk_color = { 0, color.R * 256, color.G * 256, color.B * 256 };
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);

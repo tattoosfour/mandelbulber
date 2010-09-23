@@ -550,32 +550,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 	strcpy(params->file_keyframes, Interface_data.file_keyframes);
 	strcpy(params->file_sound, Interface_data.file_sound);
 
-	Interface_data.brightness = params->doubles.imageAdjustments.brightness;
-	Interface_data.imageGamma = params->doubles.imageAdjustments.imageGamma;
-	Interface_data.shading = params->doubles.imageAdjustments.shading;
-	Interface_data.shadows = params->doubles.imageAdjustments.directLight;
-	Interface_data.reflections = params->doubles.imageAdjustments.reflect;
-	Interface_data.ambient = params->doubles.imageAdjustments.ambient;
-	Interface_data.specularity = params->doubles.imageAdjustments.specular;
-	Interface_data.ambientOcclusion = params->doubles.imageAdjustments.globalIlum;
-	Interface_data.glow = params->doubles.imageAdjustments.glow_intensity;
-	Interface_data.glowColor1 = params->effectColours.glow_color1;
-	Interface_data.glowColor2 = params->effectColours.glow_color2;
-	Interface_data.coloringEnabled = params->imageSwitches.coloringEnabled;
-	Interface_data.coloring_seed = params->coloring_seed;
-	Interface_data.coloring_speed = params->doubles.imageAdjustments.coloring_speed;
-	Interface_data.fogEnabled = params->imageSwitches.fogEnabled;
-	Interface_data.fogVisibility = params->doubles.imageAdjustments.fogVisibility;
-	Interface_data.fogVisibilityFront = params->doubles.imageAdjustments.fogVisibilityFront;
-	Interface_data.fogColor = params->effectColours.fogColor;
-	Interface_data.persp = params->doubles.persp;
-	Interface_data.SSAOEnabled = params->SSAOEnabled;
-	Interface_data.SSAOQuality = params->SSAOQuality;
-	Interface_data.mainLightIntensity = params->doubles.imageAdjustments.mainLightIntensity;
-	Interface_data.auxLightIntensity = params->doubles.auxLightIntensity;
-	Interface_data.mainLightColour = params->effectColours.mainLightColour;
 	Interface_data.imageFormat = (enumImageFormat) params->imageFormat;
-	Interface_data.fishEye = params->fishEye;
 
 	mainImage->SetImageParameters(params->doubles.imageAdjustments,params->effectColours,params->imageSwitches);
 

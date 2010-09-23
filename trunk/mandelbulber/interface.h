@@ -514,36 +514,6 @@ struct sInterface_data
 
 	double imageScale;
 
-	double brightness;
-	double imageGamma;
-	double shadows;
-	double shading;
-	double ambient;
-	double ambientOcclusion;
-	double reflections;
-	double specularity;
-	double glow;
-	double persp;
-	sRGB glowColor1;
-	sRGB glowColor2;
-	bool coloringEnabled;
-	int coloring_seed;
-	double coloring_speed;
-	double palette_offset;
-	bool fishEye;
-
-	double fogVisibility;
-	double fogVisibilityFront;
-	bool fogEnabled;
-	sRGB fogColor;
-
-	bool SSAOEnabled;
-	int SSAOQuality;
-
-	double mainLightIntensity;
-	double auxLightIntensity;
-	sRGB mainLightColour;
-
 	bool animMode;
 	bool recordMode;
 	bool continueRecord;

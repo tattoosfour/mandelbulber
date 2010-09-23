@@ -44,7 +44,7 @@ void NowaPaleta(sRGB *p, double nasycenie);
 void Bitmap32to8(sComplexImage *cImage, guchar *bitmapa8, guchar *bitmapa8_big);
 void DrawHistogram(void);
 void DrawHistogram2(void);
-void PostRendering_SSAO(cImage *image, double persp, int quality);
+void PostRendering_SSAO(cImage *image, double persp, int quality, bool fisheye);
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp);
 void DrawPalette(sRGB *palette);
 void StoreImage8(sComplexImage *image, sRGB8 *image8);

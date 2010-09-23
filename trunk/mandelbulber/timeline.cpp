@@ -121,7 +121,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 		gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 		gtk_widget_set_name(timelineInterface.darea[i], widgetName);
 
-		gtk_table_attach_defaults(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2);
+		gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2,GTK_EXPAND,GTK_EXPAND,1,0);
 		gtk_widget_show(timelineInterface.darea[i]);
 	}
 }

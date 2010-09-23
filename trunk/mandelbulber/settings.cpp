@@ -719,10 +719,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 
 		params.doubles.max_y = 20.0 / params.doubles.zoom;
 		params.doubles.resolution = 1.0 / params.image_width;
-		Interface_data.brightness = params.doubles.imageAdjustments.brightness;
-		Interface_data.imageGamma = params.doubles.imageAdjustments.imageGamma;
-		Interface_data.coloring_seed = params.coloring_seed;
-		Interface_data.palette_offset = params.doubles.imageAdjustments.paletteOffset;
+
 		strcpy(Interface_data.file_destination, params.file_destination);
 		strcpy(Interface_data.file_background, params.file_background);
 		strcpy(Interface_data.file_envmap, params.file_envmap);
@@ -736,7 +733,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 		if (!paletteLoadedFromSettingsFile)
 		{
 			printf("Palette not found in settings file. Generating random palette\n");
-			srand(Interface_data.coloring_seed);
+			srand(params.coloring_seed);
 			NowaPaleta(params.palette, 1.0);
 		}
 
