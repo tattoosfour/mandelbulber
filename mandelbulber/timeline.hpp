@@ -10,6 +10,7 @@
 
 #include "database.hpp"
 #include "cimage.hpp"
+#include "smartptr.h"
 
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
@@ -36,7 +37,7 @@ public:
 
 private:
 
-	cDatabase *database;
+	smart_ptr<cDatabase> database;
 	int keyframeCount;
 	bool isCreated;
 };
