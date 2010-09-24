@@ -30,7 +30,7 @@ void cDatabase::ClearDatabase()
 	{
 		if (status[i].used)
 		{
-			delete records[i];
+			delete[] records[i];
 		}
 	}
 	delete[] records;
@@ -44,7 +44,7 @@ errorCode cDatabase::SetRecord(int index, char *record, int recordSize)
 	if (index < recordCount)
 	{
 		//delete old data
-		if (status[index].used) delete records[index];
+		if (status[index].used) delete[] records[index];
 
 		//przepisanie danych do rekordu
 		char *data = new char[recordSize];
@@ -107,8 +107,8 @@ int cDatabase::AddRecord(char *record, int recordSize)
 		records_new[i] = records[i];
 		status_new[i] = status[i];
 	}
-	delete records;
-	delete status;
+	delete[] records;
+	delete[] status;
 	records = records_new;
 	status = status_new;
 
@@ -143,8 +143,8 @@ int cDatabase::InsertRecord(int index, char *record, int recordSize)
 		}
 	}
 
-	delete records;
-	delete status;
+	delete[] records;
+	delete[] status;
 	records = records_new;
 	status = status_new;
 
@@ -165,7 +165,7 @@ errorCode cDatabase::DeleteRecord(int index)
 		recordCount--;
 
 		//delete record data
-		if (status[index].used) delete records[index];
+		if (status[index].used) delete[] records[index];
 
 		//database resize
 		char **records_new = new char*[recordCount];
@@ -186,8 +186,8 @@ errorCode cDatabase::DeleteRecord(int index)
 			}
 		}
 
-		delete records;
-		delete status;
+		delete[] records;
+		delete[] status;
 		records = records_new;
 		status = status_new;
 
