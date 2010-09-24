@@ -12,19 +12,19 @@
 #include "settings.h"
 #include "cimage.hpp"
 #include "callbacks.h"
+#include "smartptr.h"
 
 cTimeline *timeline;
 
 cTimeline::cTimeline()
 {
-	database = new cDatabase(1);
+	database.reset(new cDatabase(1));
 	keyframeCount = 0;
 	isCreated = false;
 }
 
 cTimeline::~cTimeline()
 {
-	delete database;
 }
 
 int cTimeline::Initialize(char *keyframesPath)
@@ -32,34 +32,31 @@ int cTimeline::Initialize(char *keyframesPath)
 	int numberOfKeyframes = CheckNumberOfKeyframes(keyframesPath);
 	printf("Found %d keyframes\n", numberOfKeyframes);
 
-	cImage *thumbnail;
+	smart_ptr<cImage> thumbnail;
 
 	CreateInterface(numberOfKeyframes);
 
 	char filename2[1000];
-	sTimelineRecord *record = new sTimelineRecord;
+	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
 	for (int i = 0; i < numberOfKeyframes; i++)
 	{
-		thumbnail = new cImage(128, 128);
+		thumbnail.reset(new cImage(128, 128));
 		IndexFilename(filename2, keyframesPath, (char*) "fract", i);
-		ThumbnailRender(filename2, thumbnail);
+		ThumbnailRender(filename2, thumbnail.ptr());
 		thumbnail->CreatePreview(1.0);
 		thumbnail->ConvertTo8bit();
 		thumbnail->UpdatePreview();
 		memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
 		record->index = i; //only for testing database
 
-		if (i == 0)	database->SetRecord(0, (char*) record, sizeof(sTimelineRecord));
-		else database->AddRecord((char*) record, sizeof(sTimelineRecord));
+		if (i == 0)	database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
+		else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
 
 		DisplayInDrawingArea(i, timelineInterface.darea[i]);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
-		delete thumbnail;
 	}
-
-	delete record;
 
 	isCreated = true;
 	keyframeCount = numberOfKeyframes;
@@ -81,18 +78,16 @@ int cTimeline::CheckNumberOfKeyframes(char *keyframesPath)
 
 void cTimeline::GetImage(int index, sRGB8 *image)
 {
-	sTimelineRecord *record = new sTimelineRecord;
-	database->GetRecord(index, (char*) record);
+	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
+	database->GetRecord(index, (char*) record.ptr());
 	memcpy(image, record->thumbnail, sizeof(sRGB8) * 128 * 128);
-	delete record;
 }
 
 void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 {
-	sRGB8 *image = new sRGB8[128 * 128];
-	timeline->GetImage(index, image);
-	gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image, 128 * 3);
-	delete[] image;
+	smart_array<sRGB8> image(new sRGB8[128 * 128]);
+	timeline->GetImage(index, image.ptr());
+	gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image.ptr(), 128 * 3);
 }
 
 void cTimeline::CreateInterface(int numberOfKeyframes)
