@@ -14,7 +14,7 @@
 #include "callbacks.h"
 #include "smartptr.h"
 
-cTimeline *timeline;
+smart_ptr<cTimeline> timeline;
 
 cTimeline::cTimeline()
 {
@@ -49,7 +49,7 @@ int cTimeline::Initialize(char *keyframesPath)
 		memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
 		record->index = i; //only for testing database
 
-		if (i == 0)	database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
+		if (i == 0) database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
 		else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
 
 		DisplayInDrawingArea(i, timelineInterface.darea[i]);
@@ -76,26 +76,34 @@ int cTimeline::CheckNumberOfKeyframes(char *keyframesPath)
 	return maxKeyNumber;
 }
 
-void cTimeline::GetImage(int index, sRGB8 *image)
+bool cTimeline::GetImage(int index, sRGB8 *image)
 {
+	errorCode err;
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
-	database->GetRecord(index, (char*) record.ptr());
-	memcpy(image, record->thumbnail, sizeof(sRGB8) * 128 * 128);
+	err = database->GetRecord(index, (char*) record.ptr());
+	if (!err)
+	{
+		memcpy(image, record->thumbnail, sizeof(sRGB8) * 128 * 128);
+		return true;
+	}
+	return false;
 }
 
 void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 {
 	smart_array<sRGB8> image(new sRGB8[128 * 128]);
-	timeline->GetImage(index, image.ptr());
-	gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image.ptr(), 128 * 3);
+	if(timeline->GetImage(index, image.ptr()))
+	{
+		gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image.ptr(), 128 * 3);
+	}
 }
 
 void cTimeline::CreateInterface(int numberOfKeyframes)
 {
-	timelineInterface.scrolledWindow = gtk_scrolled_window_new(NULL,NULL);
-	timelineInterface.windowHadjustment = gtk_scrolled_window_get_hadjustment (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
-	timelineInterface.windowVadjustment = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow),GTK_POLICY_ALWAYS,GTK_POLICY_NEVER);
+	timelineInterface.scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+	timelineInterface.windowHadjustment = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
+	timelineInterface.windowVadjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow), GTK_POLICY_ALWAYS, GTK_POLICY_NEVER);
 	timelineInterface.mainBox = gtk_hbox_new(false, 1);
 	timelineInterface.table = gtk_table_new(2, numberOfKeyframes + 1, false);
 
@@ -116,7 +124,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 		gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 		gtk_widget_set_name(timelineInterface.darea[i], widgetName);
 
-		gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2,GTK_EXPAND,GTK_EXPAND,1,0);
+		gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2, GTK_EXPAND, GTK_EXPAND, 1, 0);
 		gtk_widget_show(timelineInterface.darea[i]);
 	}
 }
@@ -124,7 +132,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 void cTimeline::RebulidTimelineWindow(void)
 {
 	CreateInterface(keyframeCount);
-	for(int i=0; i<keyframeCount; i++)
+	for (int i = 0; i < keyframeCount; i++)
 	{
 		DisplayInDrawingArea(i, timelineInterface.darea[i]);
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);

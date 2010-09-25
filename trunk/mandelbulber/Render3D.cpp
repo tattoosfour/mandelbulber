@@ -1025,7 +1025,7 @@ int main(int argc, char *argv[])
 	WriteLog("memory for lights allocated");
 	printf("Memory allocated\n");
 
-	timeline = new cTimeline;
+	timeline.reset(new cTimeline);
 
 	//initialising g_thread
 	if (!g_thread_supported())

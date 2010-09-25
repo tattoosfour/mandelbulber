@@ -29,7 +29,7 @@ public:
 	~cTimeline();
 	bool IsCreated(void) {return isCreated;}
 	int Initialize(char *keyframesPath); //returns number of keyframes
-	void GetImage(int index, sRGB8 *image);
+	bool GetImage(int index, sRGB8 *image);
 	void DisplayInDrawingArea(int index, GtkWidget *darea);
 	int CheckNumberOfKeyframes(char *keyframesPath);
 	void CreateInterface(int numberOfKeyframes);
@@ -42,7 +42,7 @@ private:
 	bool isCreated;
 };
 
-extern cTimeline *timeline;
+extern smart_ptr<cTimeline> timeline;
 
 
 
