@@ -34,6 +34,7 @@ public:
 	int CheckNumberOfKeyframes(char *keyframesPath);
 	void CreateInterface(int numberOfKeyframes);
 	void RebulidTimelineWindow(void);
+	void RecordKeyframe(int index, char *keyframeFile);
 
 private:
 
