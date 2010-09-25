@@ -35,6 +35,7 @@ public:
 	void CreateInterface(int numberOfKeyframes);
 	void RebulidTimelineWindow(void);
 	void RecordKeyframe(int index, char *keyframeFile);
+	void Resize(int newsize);
 
 private:
 
