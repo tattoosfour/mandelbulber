@@ -396,6 +396,7 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 		sParamSpecial fractParamSpecial;
 		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(filename, fractParamLoaded, &fractParamSpecial);
+		Params2InterfaceData(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded, &fractParamSpecial);
 		ParamsReleaseMem(&fractParamLoaded);
 

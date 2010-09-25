@@ -1078,6 +1078,7 @@ int main(int argc, char *argv[])
 				WriteLog("Default settings loaded");
 				printf("Default settings loaded succesfully (settings/default.fract)\n");
 				//creating GTK+ GUI
+				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
 			}
 			else
