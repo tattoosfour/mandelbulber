@@ -720,13 +720,6 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 		params.doubles.max_y = 20.0 / params.doubles.zoom;
 		params.doubles.resolution = 1.0 / params.image_width;
 
-		strcpy(Interface_data.file_destination, params.file_destination);
-		strcpy(Interface_data.file_background, params.file_background);
-		strcpy(Interface_data.file_envmap, params.file_envmap);
-		strcpy(Interface_data.file_lightmap, params.file_lightmap);
-		strcpy(Interface_data.file_path, params.file_path);
-		strcpy(Interface_data.file_keyframes, params.file_keyframes);
-		strcpy(Interface_data.file_sound, params.file_sound);
 		if (params.formula == 1) params.analitycDE = true;
 		else params.analitycDE = false;
 

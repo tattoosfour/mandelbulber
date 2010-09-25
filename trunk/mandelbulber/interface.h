@@ -581,5 +581,7 @@ double atofData(const gchar* text, sAddData *addData = 0);
 void AddComboTextsFractalFormula(GtkComboBox *combo);
 enumFractalFormula FormulaNumberGUI2Data(int formula);
 int FormulaNumberData2GUI(enumFractalFormula formula);
+void Params2InterfaceData(sParamRender *source);
+void InterfaceData2Params(sParamRender *dest);
 
 #endif /* INTERFACE_H_ */

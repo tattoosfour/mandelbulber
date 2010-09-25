@@ -542,13 +542,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 	params->doubles.max_y = 20.0 / params->doubles.zoom;
 	params->doubles.resolution = 1.0 / params->image_width;
 
-	strcpy(params->file_destination, Interface_data.file_destination);
-	strcpy(params->file_background, Interface_data.file_background);
-	strcpy(params->file_envmap, Interface_data.file_envmap);
-	strcpy(params->file_lightmap, Interface_data.file_lightmap);
-	strcpy(params->file_path, Interface_data.file_path);
-	strcpy(params->file_keyframes, Interface_data.file_keyframes);
-	strcpy(params->file_sound, Interface_data.file_sound);
+	InterfaceData2Params(params);
 
 	Interface_data.imageFormat = (enumImageFormat) params->imageFormat;
 
@@ -2230,3 +2224,26 @@ bool ReadComandlineParams(int argc, char *argv[])
 	}
 	return result;
 }
+
+void Params2InterfaceData(sParamRender *source)
+{
+	strcpy(Interface_data.file_destination, source->file_destination);
+	strcpy(Interface_data.file_background, source->file_background);
+	strcpy(Interface_data.file_envmap, source->file_envmap);
+	strcpy(Interface_data.file_lightmap, source->file_lightmap);
+	strcpy(Interface_data.file_path, source->file_path);
+	strcpy(Interface_data.file_keyframes, source->file_keyframes);
+	strcpy(Interface_data.file_sound, source->file_sound);
+}
+
+void InterfaceData2Params(sParamRender *dest)
+{
+	strcpy(dest->file_destination, Interface_data.file_destination);
+	strcpy(dest->file_background, Interface_data.file_background);
+	strcpy(dest->file_envmap, Interface_data.file_envmap);
+	strcpy(dest->file_lightmap, Interface_data.file_lightmap);
+	strcpy(dest->file_path, Interface_data.file_path);
+	strcpy(dest->file_keyframes, Interface_data.file_keyframes);
+	strcpy(dest->file_sound, Interface_data.file_sound);
+}
+
