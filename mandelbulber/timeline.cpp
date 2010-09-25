@@ -92,7 +92,7 @@ bool cTimeline::GetImage(int index, sRGB8 *image)
 void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 {
 	smart_array<sRGB8> image(new sRGB8[128 * 128]);
-	if(timeline->GetImage(index, image.ptr()))
+	if (timeline->GetImage(index, image.ptr()))
 	{
 		gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image.ptr(), 128 * 3);
 	}
@@ -141,18 +141,63 @@ void cTimeline::RebulidTimelineWindow(void)
 
 void cTimeline::RecordKeyframe(int index, char *keyframeFile)
 {
-	if(index < keyframeCount)
+
+	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
+	smart_ptr<cImage> thumbnail(new cImage(128, 128));
+	ThumbnailRender(keyframeFile, thumbnail.ptr());
+	thumbnail->CreatePreview(1.0);
+	thumbnail->ConvertTo8bit();
+	thumbnail->UpdatePreview();
+	memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
+	record->index = index;
+	if (index < keyframeCount)
 	{
-		smart_ptr<sTimelineRecord> record(new sTimelineRecord);
-		smart_ptr<cImage> thumbnail(new cImage(128,128));
-		ThumbnailRender(keyframeFile, thumbnail.ptr());
-		thumbnail->CreatePreview(1.0);
-		thumbnail->ConvertTo8bit();
-		thumbnail->UpdatePreview();
-		memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
-		record->index = index;
 		database->SetRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
-		DisplayInDrawingArea(index, timelineInterface.darea[index]);
+	}
+	else
+	{
+		database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
+		Resize(keyframeCount+1);
+		keyframeCount++;
+	}
+	DisplayInDrawingArea(index, timelineInterface.darea[index]);
+}
+
+void cTimeline::Resize(int newsize)
+{
+	gtk_table_resize(GTK_TABLE(timelineInterface.table),2,newsize + 1);
+
+	//resize array with drawing area widgets
+	GtkWidget **darea_new = new GtkWidget*[newsize];
+	int max;
+	if(newsize<keyframeCount) max = newsize; else max = keyframeCount;
+	for (int i = 0; i < max; i++)
+	{
+		darea_new[i] = timelineInterface.darea[i];
+	}
+	delete[] timelineInterface.darea;
+	timelineInterface.darea = darea_new;
+
+	char widgetName[7];
+	if(newsize>keyframeCount)
+	{
+		for(int i=keyframeCount; i<newsize; i++)
+		{
+			timelineInterface.darea[i] = gtk_drawing_area_new();
+			sprintf(widgetName, "da%d", i);
+			gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
+			gtk_widget_set_name(timelineInterface.darea[i], widgetName);
+			gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2, GTK_EXPAND, GTK_EXPAND, 1, 0);
+			gtk_widget_show(timelineInterface.darea[i]);
+			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
+		}
+	}
+	else
+	{
+		for(int i=newsize; i<keyframeCount; i++)
+		{
+			gtk_widget_destroy(timelineInterface.darea[i]);
+		}
 	}
 }
 

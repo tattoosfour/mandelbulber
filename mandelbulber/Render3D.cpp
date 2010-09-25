@@ -706,7 +706,7 @@ void *MainThread(void *ptr)
 //************************** Render **************************************
 void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 {
-	Interface_data.disableInitRefresh = false;
+
 	programClosed = false;
 	//getting image resolution from parameters
 	int width = image->GetWidth();
@@ -1649,8 +1649,7 @@ void MainRender(void)
 					}
 				}
 
-				//clear image
-
+				Interface_data.disableInitRefresh = false;
 
 				if (eye == 0)
 				{
