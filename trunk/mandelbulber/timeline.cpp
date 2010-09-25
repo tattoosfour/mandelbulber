@@ -139,6 +139,23 @@ void cTimeline::RebulidTimelineWindow(void)
 	}
 }
 
+void cTimeline::RecordKeyframe(int index, char *keyframeFile)
+{
+	if(index < keyframeCount)
+	{
+		smart_ptr<sTimelineRecord> record(new sTimelineRecord);
+		smart_ptr<cImage> thumbnail(new cImage(128,128));
+		ThumbnailRender(keyframeFile, thumbnail.ptr());
+		thumbnail->CreatePreview(1.0);
+		thumbnail->ConvertTo8bit();
+		thumbnail->UpdatePreview();
+		memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
+		record->index = index;
+		database->SetRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
+		DisplayInDrawingArea(index, timelineInterface.darea[index]);
+	}
+}
+
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 	const char* widgetName = gtk_widget_get_name(widget);

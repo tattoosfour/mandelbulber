@@ -1379,6 +1379,8 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	SaveSettings(filename2, fractParamToSave);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
+	timeline->RecordKeyframe(index,filename2);
+
 	index++;
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
 
