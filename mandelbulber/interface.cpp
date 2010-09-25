@@ -33,7 +33,7 @@ int lastWindowWidth;
 int lastWindowHeight;
 
 sTimelineInterface timelineInterface;
-GtkWidget *timeLineWindow;
+GtkWidget *timeLineWindow = 0;
 
 char lastFilenameImage[1000];
 char lastFilenameSettings[1000];

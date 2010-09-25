@@ -404,6 +404,8 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 		char windowTitle[1000];
 		sprintf(windowTitle, "Mandelbulber (%s)", filename);
 		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle);
+
+		timeline.reset(new cTimeline);
 	}
 	gtk_widget_destroy(dialog);
 
@@ -529,6 +531,8 @@ void PressedOkDialogFiles(GtkWidget *widget, gpointer data)
 
 	gtk_widget_destroy(dialog->window_files);
 	delete dialog;
+
+	timeline.reset(new cTimeline);
 }
 
 void PressedCancelDialogFiles(GtkWidget *widget, gpointer data)
@@ -1111,7 +1115,7 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 	GdkColor color;
 
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
-	sRGB color2 = {color.red, color.green, color.blue};
+	sRGB color2 = { color.red, color.green, color.blue };
 
 	sImageAdjustments *adj = mainImage->GetImageAdjustments();
 	adj->fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
@@ -1776,18 +1780,32 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 
 void PressedTimeline(GtkWidget *widget, gpointer data)
 {
-	timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
-	gtk_widget_set_size_request (timeLineWindow,4*(128+2)+4,150);
-	gtk_widget_show(timeLineWindow);
-
-	if (timeline->IsCreated())
+	if (!timeLineWindow)
 	{
-		timeline->RebulidTimelineWindow();
+		timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
+		gtk_widget_set_size_request(timeLineWindow, 4 * (128 + 2) + 4, 150);
+		gtk_widget_show(timeLineWindow);
+		g_signal_connect(G_OBJECT(timeLineWindow), "destroy", G_CALLBACK(DeleteTimelineWindow), &timeLineWindow);
+
+		if (timeline->IsCreated())
+		{
+			timeline->RebulidTimelineWindow();
+		}
+		else
+		{
+			timeline->Initialize(Interface_data.file_keyframes);
+		}
 	}
 	else
 	{
-		timeline->Initialize(Interface_data.file_keyframes);
+		gtk_window_present(GTK_WINDOW(timeLineWindow));
 	}
 }
+
+void DeleteTimelineWindow(GtkWidget *widget, gpointer widget_pointer)
+{
+	gtk_widget_destroyed(widget, (GtkWidget**)widget_pointer);
+}
+
 

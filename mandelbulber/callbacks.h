@@ -78,5 +78,6 @@ void PressedLoadSound(GtkWidget *widget, gpointer data);
 void CreateFormulaSequence(sParamRender *params);
 void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data);
 void PressedTimeline(GtkWidget *widget, gpointer data);
+void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
 
 #endif /* CALLBACKS_H_ */
