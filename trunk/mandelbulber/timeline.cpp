@@ -56,6 +56,8 @@ int cTimeline::Initialize(char *keyframesPath)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
+		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
+		gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
 	}
 
 	isCreated = true;
@@ -115,17 +117,24 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	gtk_widget_show(timelineInterface.scrolledWindow);
 
 	timelineInterface.darea = new GtkWidget*[numberOfKeyframes];
+	timelineInterface.label = new GtkWidget*[numberOfKeyframes];
+
 	char widgetName[7];
+	char labelText[20];
 
 	for (int i = 0; i < numberOfKeyframes; i++)
 	{
 		timelineInterface.darea[i] = gtk_drawing_area_new();
 		sprintf(widgetName, "da%d", i);
+		sprintf(labelText,"keyframe %d",i);
+		timelineInterface.label[i] = gtk_label_new(labelText);
 		gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 		gtk_widget_set_name(timelineInterface.darea[i], widgetName);
 
+		gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.label[i], i, i + 1, 0, 1, GTK_EXPAND, GTK_EXPAND, 1, 0);
 		gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2, GTK_EXPAND, GTK_EXPAND, 1, 0);
 		gtk_widget_show(timelineInterface.darea[i]);
+		gtk_widget_show(timelineInterface.label[i]);
 	}
 }
 
@@ -179,16 +188,20 @@ void cTimeline::Resize(int newsize)
 	timelineInterface.darea = darea_new;
 
 	char widgetName[7];
+	char labelText[20];
 	if(newsize>keyframeCount)
 	{
 		for(int i=keyframeCount; i<newsize; i++)
 		{
 			timelineInterface.darea[i] = gtk_drawing_area_new();
 			sprintf(widgetName, "da%d", i);
+			sprintf(labelText,"keyframe %d",i);
 			gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 			gtk_widget_set_name(timelineInterface.darea[i], widgetName);
+			gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.label[i], i, i + 1, 0, 1, GTK_EXPAND, GTK_EXPAND, 1, 0);
 			gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2, GTK_EXPAND, GTK_EXPAND, 1, 0);
 			gtk_widget_show(timelineInterface.darea[i]);
+			gtk_widget_show(timelineInterface.label[i]);
 			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
 		}
 	}
@@ -212,3 +225,45 @@ gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer use
 	return true;
 }
 
+void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
+{
+	if (event->type == GDK_2BUTTON_PRESS)
+	{
+		const char* widgetName = gtk_widget_get_name(widget);
+		int index = 0;
+		sscanf(widgetName, "da%d", &index);
+		printf("Clicked on keyframe %d\n", index);
+
+		gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+
+		char filename2[1000];
+
+		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+		if (FileIfExist(filename2))
+		{
+			sParamRender fractParamLoaded;
+			ParamsAllocMem(&fractParamLoaded);
+			LoadSettings(filename2, fractParamLoaded);
+			WriteInterface(&fractParamLoaded);
+			last_keyframe_position = fractParamLoaded.doubles.vp;
+			ParamsReleaseMem(&fractParamLoaded);
+
+			Interface_data.animMode = false;
+			Interface_data.playMode = false;
+			Interface_data.recordMode = false;
+			Interface_data.continueRecord = false;
+			Interface_data.keyframeMode = false;
+
+			programClosed = true;
+			isPostRendering = false;
+			renderRequest = true;
+		}
+		else
+		{
+			GtkWidget *dialog =	gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe not exists: %s", filename2);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+			gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+		}
+	}
+}

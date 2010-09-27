@@ -500,6 +500,7 @@ struct sDialogFiles
 struct sTimelineInterface
 {
 	GtkWidget **darea;
+	GtkWidget **label;
 	GtkWidget *table;
 	GtkAdjustment *windowHadjustment;
 	GtkAdjustment *windowVadjustment;
