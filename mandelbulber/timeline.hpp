@@ -14,7 +14,7 @@
 
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
-
+void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event);
 
 struct sTimelineRecord
 {

@@ -1786,7 +1786,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 	{
 		timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
-		gtk_widget_set_size_request(timeLineWindow, 4 * (128 + 2) + 4, 150);
+		gtk_widget_set_size_request(timeLineWindow, 4 * (128 + 2) + 4, 180);
 		gtk_widget_show(timeLineWindow);
 		g_signal_connect(G_OBJECT(timeLineWindow), "destroy", G_CALLBACK(DeleteTimelineWindow), &timeLineWindow);
 
