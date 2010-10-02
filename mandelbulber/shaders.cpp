@@ -473,8 +473,6 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 			int xs = (int) x;
 			int ys = (int) z;
 
-			double sizeFactor = width / 1000.0;
-
 			if (xs >= 0 && xs < width && ys >= 0 && ys < height)
 			{
 
@@ -484,7 +482,7 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 					int G = Lights[i].colour.G;
 					int B = Lights[i].colour.B;
 
-					double size = 100.0 / wsp_persp * Lights[i].intensity / fractParam->doubles.zoom * width * fractParam->doubles.auxLightIntensity / fractParam->auxLightNumber
+					double size = 50.0 / wsp_persp * Lights[i].intensity / fractParam->doubles.zoom * width * fractParam->doubles.auxLightIntensity / fractParam->auxLightNumber
 							* fractParam->doubles.auxLightVisibility;
 
 					int x_start = xs - size * 5 - 1;
@@ -503,8 +501,13 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 						{
 							double dx = xx - x;
 							double dy = yy - z;
-							double r = sqrt(dx * dx + dy * dy) / (sizeFactor);
-							double bright = size / (r * r) / (sizeFactor);
+							double r = sqrt(dx * dx + dy * dy) / size;
+
+							double r2 = sqrt(dx * dx + dy * dy);
+							if (r2 > size * 5) r2 = size * 5;
+							double bellFunction = (cos(r2 * M_PI/(size*5.0)) + 1.0) / 2.0;
+
+							double bright = bellFunction / (r * r);
 							if (bright > 10.0) bright = 10.0;
 
 							sRGB16 oldPixel = image->GetPixelImage(xx,yy);
