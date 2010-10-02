@@ -214,7 +214,7 @@ int cImage::GetUsedMB(void)
 {
 	long int complexSize = width * height * sizeof(sComplexImage);
 	long int image16Size = width * height * sizeof(sRGB16);
-	return (complexSize + image16Size) / 1024 / 124;
+	return (complexSize + image16Size) / 1024 / 1024;
 }
 
 void cImage::SetImageParameters(sImageAdjustments adjustments, sEffectColours effectColours, sImageSwitches switches)

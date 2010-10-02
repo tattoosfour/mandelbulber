@@ -1139,6 +1139,7 @@ void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
 	else
 	{
 		memcpy(fractParam, &noGUIdata.fractparams, sizeof(sParamRender));
+		Params2InterfaceData(&noGUIdata.fractparams);
 		ReadInterface(fractParam, fractSpecial);
 		Interface_data.imageFormat = noGUIdata.imageFormat;
 		WriteLog("Data got from interface");
