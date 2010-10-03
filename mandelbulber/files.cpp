@@ -430,13 +430,13 @@ bool FileIfExist(char *filename)
 void WriteLog(const char *text)
 {
 	FILE *logfile = fopen(logfileName, "a");
-	fprintf(logfile, "%d: %s\n", (int) clock(), text);
+	fprintf(logfile, "%ld: %s\n", (unsigned long int) clock(), text);
 	fclose(logfile);
 }
 
 void WriteLogDouble(const char *text, double value)
 {
 	FILE *logfile = fopen(logfileName, "a");
-	fprintf(logfile, "%d: %s, value = %g\n", (int) clock(), text, value);
+	fprintf(logfile, "%ld: %s, value = %g\n", (unsigned long int) clock(), text, value);
 	fclose(logfile);
 }

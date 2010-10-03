@@ -284,21 +284,31 @@ void ThreadSSAO(void *ptr)
 			}
 
 			sRGB16 ambient = { total_ambient * 4096.0, total_ambient * 4096.0, total_ambient * 4096.0 };
-			image->PutPixelAmbient(x, y, ambient);
-		}
-		for (int x = 0; x <= width - progressive; x += progressive)
-		{
-			sRGB16 pixel = image->GetPixelAmbient(x, y);
-			for (int yy = 0; yy < progressive; yy++)
+			if (!image->IsLowMemMode()) image->PutPixelAmbient(x, y, ambient);
+			else
 			{
-				for (int xx = 0; xx < progressive; xx++)
-				{
-					if (xx == 0 && yy == 0) continue;
-					image->PutPixelAmbient(x + xx, y + yy, pixel);
-				}
+				unsigned int colorIndex = image->GetPixelColor(x,y);
+				sRGB16 oldPixel16 = image->GetPixelImage(x,y);
+				sRGB16 newPixel16 = image->CalculateAmbientPixel(ambient,colorIndex,oldPixel16);
+				image->PutPixelImage(x,y,newPixel16);
 			}
 		}
 
+		if (!image->IsLowMemMode())
+		{
+			for (int x = 0; x <= width - progressive; x += progressive)
+			{
+				sRGB16 pixel = image->GetPixelAmbient(x, y);
+				for (int yy = 0; yy < progressive; yy++)
+				{
+					for (int xx = 0; xx < progressive; xx++)
+					{
+						if (xx == 0 && yy == 0) continue;
+						image->PutPixelAmbient(x + xx, y + yy, pixel);
+					}
+				}
+			}
+		}
 		double percentDone = (double) y / height * 100.0;
 		printf("Rendering Screen Space Ambient Occlusion. Done %.2f%%       \r", percentDone);
 		fflush(stdout);
@@ -336,6 +346,8 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye)
 
 	int progressive = image->progressiveFactor;
 
+	if(image->IsLowMemMode()) progressive = 1;
+
 	for (int i = 0; i < NR_THREADS; i++)
 	{
 		//sending some parameters to thread
@@ -345,7 +357,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye)
 		thread_param[i].fishEye = fishEye;
 		thread_param[i].quality = quality * sqrt(1.0 / progressive);
 		thread_param[i].done = 0;
-		thread_param[i].progressive = image->progressiveFactor;
+		thread_param[i].progressive = progressive;
 
 		//creating thread
 		Thread[i] = g_thread_create((GThreadFunc) ThreadSSAO, &thread_param[i], TRUE, &err[i]);

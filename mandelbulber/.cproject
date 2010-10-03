@@ -21,7 +21,7 @@
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.357391875" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
 <builder buildPath="${workspace_loc:/Render3D2/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.1783816833" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.916700536" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-<option id="gnu.cpp.compiler.option.other.other.1663335763" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags gtk+-2.0 gthread-2.0`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.1663335763" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-g -c -fmessage-length=0 `pkg-config --cflags gtk+-2.0 gthread-2.0`" valueType="string"/>
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1052162193" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1009925742" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.471516305" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
