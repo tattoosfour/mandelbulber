@@ -1370,7 +1370,7 @@ void PressedIFSNormalizeVectors(GtkWidget *widget, gpointer data)
 void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 {
 	char filename2[1000];
-	int index = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationKeyNumber)));
+	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
 
 	sParamRender fractParamToSave;
@@ -1382,7 +1382,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	timeline->RecordKeyframe(index,filename2);
 
 	index++;
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	//loading next keyframe if exists
 	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
@@ -1423,9 +1423,9 @@ void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
 
 void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 {
-	int index = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationKeyNumber)));
+	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	index++;
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	char filename2[1000];
 
@@ -1455,15 +1455,15 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 		index--;
-		gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 	}
 }
 
 void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 {
-	int index = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationKeyNumber)));
+	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	index--;
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	char filename2[1000];
 	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
@@ -1494,7 +1494,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 		gtk_widget_destroy(dialog);
 
 		index++;
-		gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 	}
 }
 
