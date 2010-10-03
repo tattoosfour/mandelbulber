@@ -680,6 +680,7 @@ void *MainThread(void *ptr)
 						double fog_visibility_front = pow(10,  param.doubles.imageAdjustments.fogVisibilityFront / 10 - 2.0) - 10.0;
 						sRGB16 newPixel16 = image->CalculatePixel(pixelData, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
 						image->PutPixelImage(x,z,newPixel16);
+						image->PutPixelAlpha(x,z,alpha2);
 					}
 
 				}//next x
