@@ -1413,7 +1413,7 @@ void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
 	if (!isRendering)
 	{
 		Interface_data .animMode = true;
-		Interface_data.playMode = true;
+		Interface_data.playMode = false;
 		Interface_data.recordMode = false;
 		Interface_data.continueRecord = false;
 		Interface_data.keyframeMode = true;
