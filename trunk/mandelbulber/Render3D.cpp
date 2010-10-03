@@ -426,6 +426,9 @@ void *MainThread(void *ptr)
 					if (counter2 < 256) histogram2[counter2]++;
 					else histogram2[255]++;
 
+					sComplexImage pixelData;
+					memset(&pixelData,0,sizeof(sComplexImage));
+
 					//if fractal surface was found
 					if (found)
 					{
@@ -483,7 +486,8 @@ void *MainThread(void *ptr)
 							shadow16 = shadowOutput.R * 4096.0;
 						}
 
-						image->PutPixelShadow(x, z, shadow16);
+						if(!image->IsLowMemMode()) image->PutPixelShadow(x, z, shadow16);
+						pixelData.shadowsBuf16 = shadow16;
 
 						//******* calculate global illumination (ambient occlusion)
 
@@ -512,12 +516,14 @@ void *MainThread(void *ptr)
 								AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vn);
 							}
 							sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
-							image->PutPixelAmbient(x, z, globalLight);
+							if(!image->IsLowMemMode()) image->PutPixelAmbient(x, z, globalLight);
+							pixelData.ambientBuf16 = globalLight;
 						}
 
 						//calculate shading based on angle of incidence
 						sShaderOutput shade = MainShading(vn, lightVector);
-						image->PutPixelShading(x, z, shade.R * 4096.0);
+						if(!image->IsLowMemMode()) image->PutPixelShading(x, z, shade.R * 4096.0);
+						pixelData.shadingBuf16 = shade.R * 4096;
 
 						int numberOfLights = lightsPlaced;
 						if (numberOfLights < 4) numberOfLights = 4;
@@ -542,19 +548,23 @@ void *MainThread(void *ptr)
 							}
 						}
 						sRGB16 shadeAux16 = { shadeAuxSum.R * 4096.0, shadeAuxSum.G * 4096.0, shadeAuxSum.B * 4096.0 };
-						image->PutPixelAuxLight(x, z, shadeAux16);
+						if(!image->IsLowMemMode()) image->PutPixelAuxLight(x, z, shadeAux16);
+						pixelData.auxLight = shadeAux16;
 
 						sRGB16 specularAux16 = { specularAuxSum.R * 4096.0, specularAuxSum.G * 4096.0, specularAuxSum.B * 4096.0 };
-						image->PutPixelAuxSpecular(x, z, specularAux16);
+						if(!image->IsLowMemMode()) image->PutPixelAuxSpecular(x, z, specularAux16);
+						pixelData.auxSpecular = specularAux16;
 
 						//calculate specular reflection effect
 						sShaderOutput specular = MainSpecular(vn, lightVector, viewVector);
-						image->PutPixelSpecular(x, z, specular.R * 4096.0);
+						if(!image->IsLowMemMode()) image->PutPixelSpecular(x, z, specular.R * 4096.0);
+						pixelData.specularBuf16 = specular.R * 4096.0;
 
 						//calculate environment mapping reflection effect
 						sShaderOutput envMapping = EnvMapping(vn, viewVector, envmap_texture);
 						sRGB8 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
-						image->PutPixelReflect(x, z, reflection);
+						if(!image->IsLowMemMode()) image->PutPixelReflect(x, z, reflection);
+						pixelData.reflectBuf8 = reflection;
 
 						//coloured surface of fractal
 						int colorIndex = 0;
@@ -575,20 +585,26 @@ void *MainThread(void *ptr)
 
 						//zBuffer
 						image->PutPixelZBuffer(x, z, y);
-						image->PutPixelBackground(x, z, black16);
+
+						//no background in this place
+						if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, black16);
+						pixelData.backgroundBuf16 = black16;
 
 					}//end if found
 
 					else
 					{
-						image->PutPixelAmbient(x, z, black16);
-						image->PutPixelAuxLight(x, z, black16);
-						image->PutPixelAuxSpecular(x, z, black16);
-						image->PutPixelColor(x, z, 0);
-						image->PutPixelReflect(x, z, black8);
-						image->PutPixelShading(x, z, 0);
-						image->PutPixelShadow(x, z, 0);
-						image->PutPixelSpecular(x, z, 0);
+						if (!image->IsLowMemMode())
+						{
+							image->PutPixelAmbient(x, z, black16);
+							image->PutPixelAuxLight(x, z, black16);
+							image->PutPixelAuxSpecular(x, z, black16);
+							image->PutPixelColor(x, z, 0);
+							image->PutPixelReflect(x, z, black8);
+							image->PutPixelShading(x, z, 0);
+							image->PutPixelShadow(x, z, 0);
+							image->PutPixelSpecular(x, z, 0);
+						}
 
 						//------------- render 3D background
 						if (textured_background)
@@ -632,8 +648,9 @@ void *MainThread(void *ptr)
 							pixel16.R = pixel.R * 256;
 							pixel16.G = pixel.G * 256;
 							pixel16.B = pixel.B * 256;
-							image->PutPixelBackground(x, z, pixel16);
-							//PutPixelAlfa(x, z, pixel.R * 256, pixel.G * 256, pixel.B * 256, 65536, 1.0);
+							if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, pixel16);
+							pixelData.backgroundBuf16 = pixel16;
+
 						}
 						else
 						{
@@ -643,18 +660,31 @@ void *MainThread(void *ptr)
 							pixel.R = (background_color1.R * Ngrad + background_color2.R * grad);
 							pixel.G = (background_color1.G * Ngrad + background_color2.G * grad);
 							pixel.B = (background_color1.B * Ngrad + background_color2.B * grad);
-							image->PutPixelBackground(x, z, pixel);
+							if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, pixel);
+							pixelData.backgroundBuf16 = pixel;
 							//PutPixelAlfa(x, z, backR, backG, backB, 65536, 1.0);
 						}
 						image->PutPixelZBuffer(x, z, 1e20);
 					}
 
 					//drawing transparent glow
-					image->PutPixelGlow(x, z, counter);
+					if(!image->IsLowMemMode()) image->PutPixelGlow(x, z, counter);
+					pixelData.glowBuf16 = counter;
+
+					if(image->IsLowMemMode())
+					{
+						unsigned short alpha2 = 0;
+						float zBuf = image->GetPixelZBuffer(x,z);
+						unsigned short colorIndex = image->GetPixelColor(x,z);
+						double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0);
+						double fog_visibility_front = pow(10,  param.doubles.imageAdjustments.fogVisibilityFront / 10 - 2.0) - 10.0;
+						sRGB16 newPixel16 = image->CalculatePixel(pixelData, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
+						image->PutPixelImage(x,z,newPixel16);
+					}
 
 				}//next x
 
-				image->Squares(z, progressive);
+				if(!image->IsLowMemMode()) image->Squares(z, progressive);
 
 				(*parametry->done)++;
 
@@ -743,6 +773,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	int refresh_index = 0;
 	int refresh_skip = 1;
 
+	if(image->IsLowMemMode()) image->CalculateGammaTable();
+
 	for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
 	{
 		//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
@@ -800,7 +832,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						if (image->IsPreview())
 						{
 							param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
-							if (param.SSAOEnabled)
+							if (param.SSAOEnabled && !image->IsLowMemMode())
 							{
 								param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
 								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.fishEye);
@@ -879,11 +911,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	//refreshing image
 
 	//*** postprocessing
-	//guint *post_bitmap = new guint[IMAGE_WIDTH * IMAGE_HEIGHT * 3];
-	//PostRendering_SSAO(rgbbuf32, post_bitmap, zBuffer, param.persp, param.globalIlum);
-	//Bitmap32to8(post_bitmap, rgbbuf, rgbbuf2);
-	//delete post_bitmap;
-	//end of postprocessing
+
 	if (param.SSAOEnabled && !programClosed)
 	{
 		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.fishEye);
@@ -1013,7 +1041,8 @@ int main(int argc, char *argv[])
 	int width = 800;
 	int height = 600;
 
-	mainImage = new cImage(width, height);
+	bool lowMemMode = noGUIdata.lowMemMode;
+	mainImage = new cImage(width, height, lowMemMode);
 	WriteLog("complexImage allocated");
 
 	//allocating memory for image in window
@@ -1161,7 +1190,7 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 	WriteLog("complexImage allocated");
 	printf("Memory for image: %d MB\n", image->GetUsedMB());
 
-	image->CreatePreview(previewScale);
+	if(!noGUI) image->CreatePreview(previewScale);
 
 	if (!noGUI)
 	{

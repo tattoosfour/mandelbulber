@@ -538,6 +538,7 @@ struct sNoGUIdata
 	bool animMode;
 	bool playMode;
 	bool keyframeMode;
+	bool lowMemMode;
 	int startFrame;
 	int endFrame;
 	enumImageFormat imageFormat;

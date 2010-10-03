@@ -41,7 +41,6 @@ extern guint64 histogram[256];
 extern unsigned int histogram2[1000];
 
 void NowaPaleta(sRGB *p, double nasycenie);
-void Bitmap32to8(sComplexImage *cImage, guchar *bitmapa8, guchar *bitmapa8_big);
 void DrawHistogram(void);
 void DrawHistogram2(void);
 void PostRendering_SSAO(cImage *image, double persp, int quality, bool fisheye);
