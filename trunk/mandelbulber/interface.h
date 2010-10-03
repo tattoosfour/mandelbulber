@@ -225,9 +225,6 @@ struct sInterface
 	GtkWidget *buIFSNormalizeVectors;
 	GtkWidget *buAnimationRecordKey;
 	GtkWidget *buAnimationRenderFromKeys;
-	GtkWidget *buAnimationRecordKey2;
-	GtkWidget *buNextKeyframe;
-	GtkWidget *buPreviousKeyframe;
 	GtkWidget *buUndo;
 	GtkWidget *buRedo;
 	GtkWidget *buBuddhabrot;
@@ -318,7 +315,6 @@ struct sInterface
 	GtkWidget *edit_IFSOffsetX;
 	GtkWidget *edit_IFSOffsetY;
 	GtkWidget *edit_IFSOffsetZ;
-	GtkWidget *edit_animationKeyNumber;
 	GtkWidget *edit_animationFramesPerKey;
 	GtkWidget *edit_animationStartFrame;
 	GtkWidget *edit_animationEndFrame;
@@ -506,7 +502,15 @@ struct sTimelineInterface
 	GtkAdjustment *windowVadjustment;
 	GtkWidget *scrolledWindow;
 	GtkWidget *layoutContainer;
-	GtkWidget *mainBox;
+	GtkWidget *boxMain;
+	GtkWidget *boxTable;
+	GtkWidget *boxButtons;
+
+	GtkWidget *buAnimationRecordKey2;
+	GtkWidget *buNextKeyframe;
+	GtkWidget *buPreviousKeyframe;
+
+	GtkWidget *editAnimationKeyNumber;
 };
 
 struct sInterface_data

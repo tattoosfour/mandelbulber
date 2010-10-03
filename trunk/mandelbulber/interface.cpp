@@ -1123,9 +1123,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buIFSNormalizeVectors = gtk_button_new_with_label("Normalize symetry vectors");
 	Interface.buAnimationRecordKey = gtk_button_new_with_label("Record key-frame");
 	Interface.buAnimationRenderFromKeys = gtk_button_new_with_label("Render from key-frames");
-	Interface.buAnimationRecordKey2 = gtk_button_new_with_label("Record Key-frame");
-	Interface.buNextKeyframe = gtk_button_new_with_label("Next keyframe (load)");
-	Interface.buPreviousKeyframe = gtk_button_new_with_label("Previous keyframe (load)");
 	Interface.buUndo = gtk_button_new_with_label("Undo");
 	Interface.buRedo = gtk_button_new_with_label("Redo");
 	Interface.buBuddhabrot = gtk_button_new_with_label("Render Buddhabrot");
@@ -1212,7 +1209,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_IFSOffsetY = gtk_entry_new();
 	Interface.edit_IFSOffsetZ = gtk_entry_new();
 	Interface.edit_animationFramesPerKey = gtk_entry_new();
-	Interface.edit_animationKeyNumber = gtk_entry_new();
 	Interface.edit_animationStartFrame = gtk_entry_new();
 	Interface.edit_animationEndFrame = gtk_entry_new();
 	Interface.edit_sound1FreqMin = gtk_entry_new();
@@ -1442,10 +1438,7 @@ void CreateInterface(sParamRender *default_settings)
 	g_signal_connect(G_OBJECT(Interface.buIFSNormalizeOffset), "clicked", G_CALLBACK(PressedIFSNormalizeOffset), NULL);
 	g_signal_connect(G_OBJECT(Interface.buIFSNormalizeVectors), "clicked", G_CALLBACK(PressedIFSNormalizeVectors), NULL);
 	g_signal_connect(G_OBJECT(Interface.buAnimationRecordKey), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
-	g_signal_connect(G_OBJECT(Interface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
 	g_signal_connect(G_OBJECT(Interface.buAnimationRenderFromKeys), "clicked", G_CALLBACK(PressedKeyframeAnimationRender), NULL);
-	g_signal_connect(G_OBJECT(Interface.buNextKeyframe), "clicked", G_CALLBACK(PressedNextKeyframe), NULL);
-	g_signal_connect(G_OBJECT(Interface.buPreviousKeyframe), "clicked", G_CALLBACK(PressedPreviousKeyframe), NULL);
 	g_signal_connect(G_OBJECT(Interface.buUndo), "clicked", G_CALLBACK(PressedUndo), NULL);
 	g_signal_connect(G_OBJECT(Interface.buRedo), "clicked", G_CALLBACK(PressedRedo), NULL);
 	g_signal_connect(G_OBJECT(Interface.buBuddhabrot), "clicked", G_CALLBACK(PressedBuddhabrot), NULL);
@@ -1959,10 +1952,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frKeyframeAnimation2, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation2), Interface.boxBottomKeyframeAnimation);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buTimeline, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buAnimationRecordKey2, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buPreviousKeyframe, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buNextKeyframe, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), CreateEdit("0", "Key no.:", 5, Interface.edit_animationKeyNumber), true, true, 1);
 
 	//progressbar
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.progressBar, false, false, 1);

@@ -102,19 +102,36 @@ void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 
 void cTimeline::CreateInterface(int numberOfKeyframes)
 {
+	timelineInterface.boxMain = gtk_vbox_new(FALSE, 1);
+	timelineInterface.boxButtons = gtk_hbox_new(FALSE, 1);
+
+	timelineInterface.buAnimationRecordKey2 = gtk_button_new_with_label("Record Key-frame");
+	timelineInterface.buNextKeyframe = gtk_button_new_with_label("Next keyframe (load)");
+	timelineInterface.buPreviousKeyframe = gtk_button_new_with_label("Previous keyframe (load)");
+	timelineInterface.editAnimationKeyNumber = gtk_entry_new();
+
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationRecordKey2, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buPreviousKeyframe, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buNextKeyframe, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), CreateEdit("0", "Key no.:", 5, timelineInterface.editAnimationKeyNumber), true, true, 1);
+
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxMain), timelineInterface.boxButtons, true, true, 1);
+
 	timelineInterface.scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	timelineInterface.windowHadjustment = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
 	timelineInterface.windowVadjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow), GTK_POLICY_ALWAYS, GTK_POLICY_NEVER);
-	timelineInterface.mainBox = gtk_hbox_new(false, 1);
+	timelineInterface.boxTable = gtk_hbox_new(false, 1);
 	timelineInterface.table = gtk_table_new(2, numberOfKeyframes + 1, false);
 
-	gtk_box_pack_start(GTK_BOX(timelineInterface.mainBox), timelineInterface.table, false, false, 1);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow), timelineInterface.mainBox);
-	gtk_container_add(GTK_CONTAINER(timeLineWindow), timelineInterface.scrolledWindow);
-	gtk_widget_show(timelineInterface.mainBox);
-	gtk_widget_show(timelineInterface.table);
-	gtk_widget_show(timelineInterface.scrolledWindow);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxTable), timelineInterface.table, false, false, 1);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow), timelineInterface.boxTable);
+
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxMain), timelineInterface.scrolledWindow, true, true, 1);
+	gtk_container_add(GTK_CONTAINER(timeLineWindow), timelineInterface.boxMain);
+
+	gtk_widget_show_all(timeLineWindow);
+
 
 	timelineInterface.darea = new GtkWidget*[numberOfKeyframes];
 	timelineInterface.label = new GtkWidget*[numberOfKeyframes];
@@ -136,6 +153,10 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 		gtk_widget_show(timelineInterface.darea[i]);
 		gtk_widget_show(timelineInterface.label[i]);
 	}
+
+	g_signal_connect(G_OBJECT(timelineInterface.buNextKeyframe), "clicked", G_CALLBACK(PressedNextKeyframe), NULL);
+	g_signal_connect(G_OBJECT(timelineInterface.buPreviousKeyframe), "clicked", G_CALLBACK(PressedPreviousKeyframe), NULL);
+	g_signal_connect(G_OBJECT(timelineInterface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
 }
 
 void cTimeline::RebulidTimelineWindow(void)
@@ -234,7 +255,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		sscanf(widgetName, "da%d", &index);
 		printf("Clicked on keyframe %d\n", index);
 
-		gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 		char filename2[1000];
 
@@ -263,7 +284,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 			GtkWidget *dialog =	gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe not exists: %s", filename2);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
-			gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationKeyNumber), IntToString(index));
+			gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 		}
 	}
 }
