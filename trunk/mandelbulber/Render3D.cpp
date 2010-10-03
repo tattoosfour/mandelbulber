@@ -1428,7 +1428,10 @@ void MainRender(void)
 	if (Interface_data.keyframeMode || Interface_data.playMode)
 	{
 		startFrame = fractParam.startFrame;
+		printf("Start frame = %d\n",fractParam.startFrame);
+
 		endFrame = fractParam.endFrame;
+		if(endFrame > maxKeyNumber * fractParam.framesPerKeyframe) endFrame = maxKeyNumber * fractParam.framesPerKeyframe;
 		if (noGUI && noGUIdata.startFrame > 0) startFrame = noGUIdata.startFrame;
 		if (noGUI && noGUIdata.endFrame < 99999) endFrame = noGUIdata.endFrame;
 	}
