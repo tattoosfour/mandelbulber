@@ -150,7 +150,7 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float
 	return newPixel16;
 }
 
-sRGB16 cImage::CalculateAmbientPixel(sRGB16 ambient16, unsigned int colorIndex, sRGB16 oldPixel16)
+sRGB16 cImage::CalculateAmbientPixel(sRGB16 ambient16, unsigned short colorIndex, sRGB16 oldPixel16)
 {
 	sRGB color = { 256, 256, 256 };
 	if (sw.coloringEnabled)
@@ -170,6 +170,7 @@ sRGB16 cImage::CalculateAmbientPixel(sRGB16 ambient16, unsigned int colorIndex, 
 	if(newB > 65535) newB = 65535;
 
 	sRGB16 newPixel = {newR, newG, newB};
+	//sRGB16 newPixel = {color.R, color.G, color.B};
 	return newPixel;
 }
 
