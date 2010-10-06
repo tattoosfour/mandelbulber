@@ -128,7 +128,7 @@ public:
   void Squares(int y, int progressiveFactor);
   void CalculateGammaTable(void);
   sRGB16 CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront);
-  sRGB16 CalculateAmbientPixel(sRGB16 ambient16, unsigned int colorIndex, sRGB16 oldPixel16);
+  sRGB16 CalculateAmbientPixel(sRGB16 ambient16, unsigned short colorIndex, sRGB16 oldPixel16);
 	int progressiveFactor;
 
 private:

@@ -287,7 +287,7 @@ void ThreadSSAO(void *ptr)
 			if (!image->IsLowMemMode()) image->PutPixelAmbient(x, y, ambient);
 			else
 			{
-				unsigned int colorIndex = image->GetPixelColor(x,y);
+				unsigned short colorIndex = image->GetPixelColor(x,y);
 				sRGB16 oldPixel16 = image->GetPixelImage(x,y);
 				sRGB16 newPixel16 = image->CalculateAmbientPixel(ambient,colorIndex,oldPixel16);
 				image->PutPixelImage(x,y,newPixel16);
