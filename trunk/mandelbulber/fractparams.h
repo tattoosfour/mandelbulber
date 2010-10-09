@@ -151,6 +151,7 @@ struct sParamRender
 	bool hybridCyclic;
 	bool fishEye;
 	bool stereoEnabled;
+	bool quiet;
 	sImageSwitches imageSwitches;
 
 	enumFractalFormula formula; //type of fractal formula

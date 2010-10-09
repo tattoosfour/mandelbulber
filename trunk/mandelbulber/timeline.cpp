@@ -105,13 +105,15 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	timelineInterface.boxMain = gtk_vbox_new(FALSE, 1);
 	timelineInterface.boxButtons = gtk_hbox_new(FALSE, 1);
 
-	timelineInterface.buAnimationRecordKey2 = gtk_button_new_with_label("Record keyframe");
-	timelineInterface.buAnimationDeleteKeyframe = gtk_button_new_with_label("Delete keyframe");
-	timelineInterface.buNextKeyframe = gtk_button_new_with_label("Next keyframe (load)");
-	timelineInterface.buPreviousKeyframe = gtk_button_new_with_label("Previous keyframe (load)");
+	timelineInterface.buAnimationRecordKey2 = gtk_button_new_with_label("Record");
+	timelineInterface.buAnimationInsertKeyframe = gtk_button_new_with_label("Insert after");
+	timelineInterface.buAnimationDeleteKeyframe = gtk_button_new_with_label("Delete");
+	timelineInterface.buNextKeyframe = gtk_button_new_with_label("Next");
+	timelineInterface.buPreviousKeyframe = gtk_button_new_with_label("Previous");
 	timelineInterface.editAnimationKeyNumber = gtk_entry_new();
 
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationRecordKey2, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationInsertKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationDeleteKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buPreviousKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buNextKeyframe, true, true, 1);
@@ -158,6 +160,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	g_signal_connect(G_OBJECT(timelineInterface.buNextKeyframe), "clicked", G_CALLBACK(PressedNextKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buPreviousKeyframe), "clicked", G_CALLBACK(PressedPreviousKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
+	g_signal_connect(G_OBJECT(timelineInterface.buAnimationInsertKeyframe), "clicked", G_CALLBACK(PressedInsertKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationDeleteKeyframe), "clicked", G_CALLBACK(PressedDeleteKeyframe), NULL);
 }
 
@@ -168,10 +171,12 @@ void cTimeline::RebulidTimelineWindow(void)
 	{
 		DisplayInDrawingArea(i, timelineInterface.darea[i]);
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
+		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
+		gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
 	}
 }
 
-void cTimeline::RecordKeyframe(int index, char *keyframeFile)
+void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 {
 
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
@@ -184,7 +189,16 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile)
 	record->index = index;
 	if (index < keyframeCount)
 	{
-		database->SetRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
+		if(modeInsert)
+		{
+			database->InsertRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
+			Resize(keyframeCount+1);
+			keyframeCount++;
+		}
+		else
+		{
+			database->SetRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
+		}
 	}
 	else
 	{
@@ -217,6 +231,8 @@ void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
 		keyframeCount--;
 	}
 }
+
+
 
 void cTimeline::Resize(int newsize)
 {
@@ -262,6 +278,8 @@ void cTimeline::Resize(int newsize)
 			gtk_widget_show(timelineInterface.darea[i]);
 			gtk_widget_show(timelineInterface.label[i]);
 			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
+			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
+			gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
 		}
 	}
 	gtk_widget_queue_draw(timelineInterface.table);
@@ -280,15 +298,15 @@ gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer use
 
 void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 {
+	const char* widgetName = gtk_widget_get_name(widget);
+	int index = 0;
+	sscanf(widgetName, "da%d", &index);
+	printf("Clicked on keyframe %d\n", index);
+
+	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
+
 	if (event->type == GDK_2BUTTON_PRESS)
 	{
-		const char* widgetName = gtk_widget_get_name(widget);
-		int index = 0;
-		sscanf(widgetName, "da%d", &index);
-		printf("Clicked on keyframe %d\n", index);
-
-		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
-
 		char filename2[1000];
 
 		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);

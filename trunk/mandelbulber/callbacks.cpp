@@ -1147,7 +1147,7 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 	{
 		if (SSAOEnabled)
 		{
-			PostRendering_SSAO(mainImage, persp, SSAOQuality, fishEye);
+			PostRendering_SSAO(mainImage, persp, SSAOQuality, fishEye, false);
 		}
 		mainImage->CompileImage();
 		mainImage->ConvertTo8bit();
@@ -1379,7 +1379,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	SaveSettings(filename2, fractParamToSave);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
-	timeline->RecordKeyframe(index,filename2);
+	timeline->RecordKeyframe(index,filename2, false);
 
 	index++;
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
@@ -1406,6 +1406,61 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	}
 
 	ParamsReleaseMem(&fractParamToSave);
+}
+
+void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
+{
+	char filename1[1000];
+	char filename2[1000];
+
+		int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)))+1;
+		int maxIndex = timeline->CheckNumberOfKeyframes(Interface_data.file_keyframes)-1;
+		printf("Maxindex = %d\n",maxIndex);
+
+		if(index > maxIndex) index = maxIndex+1;
+
+		for(int i=maxIndex; i>=index; i--)
+		{
+			IndexFilename(filename1, Interface_data.file_keyframes, (char*) "fract", i);
+			IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", i+1);
+			rename(filename1,filename2);
+		}
+
+		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+
+		sParamRender fractParamToSave;
+		ParamsAllocMem(&fractParamToSave);
+		ReadInterface(&fractParamToSave);
+		SaveSettings(filename2, fractParamToSave);
+		last_keyframe_position = fractParamToSave.doubles.vp;
+
+		timeline->RecordKeyframe(index,filename2, true);
+
+		index++;
+		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
+
+		//loading next keyframe if exists
+		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+		if (FileIfExist(filename2))
+		{
+			sParamRender fractParamLoaded;
+			ParamsAllocMem(&fractParamLoaded);
+			LoadSettings(filename2, fractParamLoaded);
+			WriteInterface(&fractParamLoaded);
+			ParamsReleaseMem(&fractParamLoaded);
+
+			Interface_data.animMode = false;
+			Interface_data.playMode = false;
+			Interface_data.recordMode = false;
+			Interface_data.continueRecord = false;
+			Interface_data.keyframeMode = false;
+
+			programClosed = true;
+			isPostRendering = false;
+			renderRequest = true;
+		}
+
+		ParamsReleaseMem(&fractParamToSave);
 }
 
 void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
