@@ -1036,8 +1036,6 @@ int main(int argc, char *argv[])
 	printf("Detected %d CPUs\n", NR_THREADS);
 	WriteLogDouble("CPUs detected", NR_THREADS);
 
-	NR_THREADS = 1;
-
 	//lokckout for refreshing image during program startup
 	Interface_data.disableInitRefresh = true;
 

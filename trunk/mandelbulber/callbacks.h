@@ -79,5 +79,6 @@ void CreateFormulaSequence(sParamRender *params);
 void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data);
 void PressedTimeline(GtkWidget *widget, gpointer data);
 void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
+void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer);
 
 #endif /* CALLBACKS_H_ */

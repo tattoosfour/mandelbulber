@@ -1810,4 +1810,8 @@ void DeleteTimelineWindow(GtkWidget *widget, gpointer widget_pointer)
 	gtk_widget_destroyed(widget, (GtkWidget**)widget_pointer);
 }
 
-
+void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
+{
+	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+	timeline->DeleteKeyframe(index,Interface_data.file_keyframes);
+}

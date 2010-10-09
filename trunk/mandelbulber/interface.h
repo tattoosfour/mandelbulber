@@ -507,6 +507,7 @@ struct sTimelineInterface
 	GtkWidget *boxButtons;
 
 	GtkWidget *buAnimationRecordKey2;
+	GtkWidget *buAnimationDeleteKeyframe;
 	GtkWidget *buNextKeyframe;
 	GtkWidget *buPreviousKeyframe;
 

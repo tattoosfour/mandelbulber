@@ -105,12 +105,14 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	timelineInterface.boxMain = gtk_vbox_new(FALSE, 1);
 	timelineInterface.boxButtons = gtk_hbox_new(FALSE, 1);
 
-	timelineInterface.buAnimationRecordKey2 = gtk_button_new_with_label("Record Key-frame");
+	timelineInterface.buAnimationRecordKey2 = gtk_button_new_with_label("Record keyframe");
+	timelineInterface.buAnimationDeleteKeyframe = gtk_button_new_with_label("Delete keyframe");
 	timelineInterface.buNextKeyframe = gtk_button_new_with_label("Next keyframe (load)");
 	timelineInterface.buPreviousKeyframe = gtk_button_new_with_label("Previous keyframe (load)");
 	timelineInterface.editAnimationKeyNumber = gtk_entry_new();
 
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationRecordKey2, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationDeleteKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buPreviousKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buNextKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), CreateEdit("0", "Key no.:", 5, timelineInterface.editAnimationKeyNumber), true, true, 1);
@@ -131,7 +133,6 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	gtk_container_add(GTK_CONTAINER(timeLineWindow), timelineInterface.boxMain);
 
 	gtk_widget_show_all(timeLineWindow);
-
 
 	timelineInterface.darea = new GtkWidget*[numberOfKeyframes];
 	timelineInterface.label = new GtkWidget*[numberOfKeyframes];
@@ -157,6 +158,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	g_signal_connect(G_OBJECT(timelineInterface.buNextKeyframe), "clicked", G_CALLBACK(PressedNextKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buPreviousKeyframe), "clicked", G_CALLBACK(PressedPreviousKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
+	g_signal_connect(G_OBJECT(timelineInterface.buAnimationDeleteKeyframe), "clicked", G_CALLBACK(PressedDeleteKeyframe), NULL);
 }
 
 void cTimeline::RebulidTimelineWindow(void)
@@ -193,14 +195,47 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile)
 	DisplayInDrawingArea(index, timelineInterface.darea[index]);
 }
 
+void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
+{
+	char filename[1000];
+	char filename2[1000];
+	IndexFilename(filename, keyframesPath, (char*) "fract", index);
+	if (remove(filename) != 0)
+	{
+		fprintf(stderr, "Error! Cannot delete keyframe file\n");
+	}
+	else
+	{
+		for (int i = index; i < keyframeCount - 1; i++)
+		{
+			IndexFilename(filename, keyframesPath, (char*) "fract", i);
+			IndexFilename(filename2, keyframesPath, (char*) "fract", i + 1);
+			rename(filename2, filename);
+		}
+		database->DeleteRecord(index);
+		Resize(keyframeCount - 1);
+		keyframeCount--;
+	}
+}
+
 void cTimeline::Resize(int newsize)
 {
-	gtk_table_resize(GTK_TABLE(timelineInterface.table),2,newsize + 1);
+	gtk_table_resize(GTK_TABLE(timelineInterface.table), 2, newsize + 1);
+
+	if (newsize < keyframeCount)
+	{
+		for (int i = newsize; i < keyframeCount; i++)
+		{
+			gtk_widget_destroy(timelineInterface.darea[i]);
+			gtk_widget_destroy(timelineInterface.label[i]);
+		}
+	}
 
 	//resize array with drawing area widgets
 	GtkWidget **darea_new = new GtkWidget*[newsize];
 	int max;
-	if(newsize<keyframeCount) max = newsize; else max = keyframeCount;
+	if (newsize < keyframeCount) max = newsize;
+	else max = keyframeCount;
 	for (int i = 0; i < max; i++)
 	{
 		darea_new[i] = timelineInterface.darea[i];
@@ -210,15 +245,18 @@ void cTimeline::Resize(int newsize)
 
 	char widgetName[7];
 	char labelText[20];
-	if(newsize>keyframeCount)
+	if (newsize > keyframeCount)
 	{
-		for(int i=keyframeCount; i<newsize; i++)
+		for (int i = keyframeCount; i < newsize; i++)
 		{
 			timelineInterface.darea[i] = gtk_drawing_area_new();
 			sprintf(widgetName, "da%d", i);
-			sprintf(labelText,"keyframe %d",i);
 			gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 			gtk_widget_set_name(timelineInterface.darea[i], widgetName);
+
+			sprintf(labelText, "keyframe %d", i);
+			timelineInterface.label[i] = gtk_label_new(labelText);
+
 			gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.label[i], i, i + 1, 0, 1, GTK_EXPAND, GTK_EXPAND, 1, 0);
 			gtk_table_attach(GTK_TABLE(timelineInterface.table), timelineInterface.darea[i], i, i + 1, 1, 2, GTK_EXPAND, GTK_EXPAND, 1, 0);
 			gtk_widget_show(timelineInterface.darea[i]);
@@ -226,13 +264,7 @@ void cTimeline::Resize(int newsize)
 			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
 		}
 	}
-	else
-	{
-		for(int i=newsize; i<keyframeCount; i++)
-		{
-			gtk_widget_destroy(timelineInterface.darea[i]);
-		}
-	}
+	gtk_widget_queue_draw(timelineInterface.table);
 }
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
