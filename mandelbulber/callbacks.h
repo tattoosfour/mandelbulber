@@ -59,6 +59,7 @@ void RecalculateIFSParams(sParamRender *params);
 void PressedIFSNormalizeOffset(GtkWidget *widget, gpointer data);
 void PressedIFSNormalizeVectors(GtkWidget *widget, gpointer data);
 void PressedRecordKeyframe(GtkWidget *widget, gpointer data);
+void PressedInsertKeyframe(GtkWidget *widget, gpointer data);
 void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data);
 void PressedPreviousKeyframe(GtkWidget *widget, gpointer data);
 void PressedNextKeyframe(GtkWidget *widget, gpointer data);

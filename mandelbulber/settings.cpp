@@ -929,6 +929,8 @@ void DefaultValues(sParamRender *params)
 	params->doubles.stereoEyeDistance = 0.1;
 	params->stereoEnabled = false;
 
+	params->quiet = false;
+
 	strcpy(params->file_background, "textures/background.jpg");
 	strcpy(params->file_envmap, "textures/envmap.jpg");
 	strcpy(params->file_lightmap, "textures/lightmap.jpg");

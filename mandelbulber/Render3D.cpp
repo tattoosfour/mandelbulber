@@ -712,10 +712,12 @@ void *MainThread(void *ptr)
 				int time_h = time / 3600;
 
 				double iterations_per_sec = N_counter / time;
-				printf("Done %.3f%%, to go = %dh%dm%ds, elapsed = %dh%dm%ds, iter/s = %.0f       \r", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
-						iterations_per_sec);
-				fflush(stdout);
-
+				if (!param.quiet)
+				{
+					printf("Done %.3f%%, to go = %dh%dm%ds, elapsed = %dh%dm%ds, iter/s = %.0f       \r", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
+							iterations_per_sec);
+					fflush(stdout);
+				}
 				//printing to console some statistics
 				if (*parametry->done == height - 1)
 				{
@@ -836,7 +838,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							if (param.SSAOEnabled && !image->IsLowMemMode())
 							{
 								param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
-								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.fishEye);
+								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.fishEye, param.quiet);
 								WriteLog("SSAO rendered");
 							}
 							image->CompileImage();
@@ -915,7 +917,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 	if (param.SSAOEnabled && !programClosed)
 	{
-		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.fishEye);
+		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.fishEye, param.quiet);
 		WriteLog("SSAO rendered");
 	}
 	image->CompileImage();
@@ -1803,6 +1805,7 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage)
 		else fractParamLoaded.analitycDE = false;
 		fractParamLoaded.recordMode = false;
 		fractParamLoaded.animMode = false;
+		fractParamLoaded.quiet = true;
 
 		RecalculateIFSParams(&fractParamLoaded);
 		CreateFormulaSequence(&fractParamLoaded);

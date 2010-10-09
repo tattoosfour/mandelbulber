@@ -186,6 +186,7 @@ void ThreadSSAO(void *ptr)
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 	int progressive = param->progressive;
+	bool quiet = param->quiet;
 
 	double *cosinus = new double[quality];
 	double *sinus = new double[quality];
@@ -310,7 +311,7 @@ void ThreadSSAO(void *ptr)
 			}
 		}
 		double percentDone = (double) y / height * 100.0;
-		printf("Rendering Screen Space Ambient Occlusion. Done %.2f%%       \r", percentDone);
+		if(!quiet) printf("Rendering Screen Space Ambient Occlusion. Done %.2f%%       \r", percentDone);
 		fflush(stdout);
 
 		param->done++;
@@ -322,7 +323,7 @@ void ThreadSSAO(void *ptr)
 
 }
 
-void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye)
+void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, bool quiet)
 {
 	isPostRendering = true;
 
@@ -358,6 +359,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye)
 		thread_param[i].quality = quality * sqrt(1.0 / progressive);
 		thread_param[i].done = 0;
 		thread_param[i].progressive = progressive;
+		thread_param[i].quiet = quiet;
 
 		//creating thread
 		Thread[i] = g_thread_create((GThreadFunc) ThreadSSAO, &thread_param[i], TRUE, &err[i]);
