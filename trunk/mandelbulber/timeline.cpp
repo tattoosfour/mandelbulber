@@ -6,6 +6,7 @@
  */
 
 #include <gtk-2.0/gtk/gtk.h>
+#include <stdlib.h>
 #include "timeline.hpp"
 #include "Render3D.h"
 #include "interface.h"
@@ -111,6 +112,34 @@ void cTimeline::DisplayInDrawingArea(int index, GtkWidget *darea)
 	if (timeline->GetImage(index, image.ptr()))
 	{
 		gdk_draw_rgb_image(darea->window, darea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, 128, 128, GDK_RGB_DITHER_MAX, (unsigned char*) image.ptr(), 128 * 3);
+	}
+
+	int selectedIndex = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+
+	GdkColor color_black = { 0, 0, 0, 0 };
+	GdkColor color_white = { 0, 65535, 65535, 65535 };
+	GdkGC *GC = gdk_gc_new(darea->window);
+	if (selectedIndex == index)
+	{
+		gdk_gc_set_rgb_fg_color(GC, &color_black);
+		gdk_draw_line(darea->window, GC, 0, 0, 127, 0);
+		gdk_draw_line(darea->window, GC, 0, 0, 0, 127);
+		gdk_draw_line(darea->window, GC, 1, 1, 126, 1);
+		gdk_draw_line(darea->window, GC, 1, 1, 1, 126);
+		gdk_gc_set_rgb_fg_color(GC, &color_white);
+		gdk_draw_line(darea->window, GC, 127, 127, 127, 0);
+		gdk_draw_line(darea->window, GC, 127, 127, 0, 127);
+		gdk_draw_line(darea->window, GC, 126, 126, 126, 0);
+		gdk_draw_line(darea->window, GC, 126, 126, 0, 126);
+	}
+	else
+	{
+		gdk_gc_set_rgb_fg_color(GC, &color_white);
+		gdk_draw_line(darea->window, GC, 0, 0, 127, 0);
+		gdk_draw_line(darea->window, GC, 0, 0, 0, 127);
+		gdk_gc_set_rgb_fg_color(GC, &color_black);
+		gdk_draw_line(darea->window, GC, 127, 127, 127, 0);
+		gdk_draw_line(darea->window, GC, 127, 127, 0, 127);
 	}
 }
 
@@ -315,9 +344,9 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 	const char* widgetName = gtk_widget_get_name(widget);
 	int index = 0;
 	sscanf(widgetName, "da%d", &index);
-	printf("Clicked on keyframe %d\n", index);
 
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
+	gtk_widget_queue_draw(timelineInterface.table);
 
 	if (event->type == GDK_2BUTTON_PRESS)
 	{
