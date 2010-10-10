@@ -21,6 +21,7 @@ cTimeline::cTimeline()
 	database.reset(new cDatabase(1));
 	keyframeCount = 0;
 	isCreated = false;
+	isOpened = false;
 }
 
 cTimeline::~cTimeline()
@@ -38,27 +39,40 @@ int cTimeline::Initialize(char *keyframesPath)
 
 	char filename2[1000];
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
+
 	for (int i = 0; i < numberOfKeyframes; i++)
 	{
-		thumbnail.reset(new cImage(128, 128));
-		IndexFilename(filename2, keyframesPath, (char*) "fract", i);
-		ThumbnailRender(filename2, thumbnail.ptr());
-		thumbnail->CreatePreview(1.0);
-		thumbnail->ConvertTo8bit();
-		thumbnail->UpdatePreview();
-		memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
-		record->index = i; //only for testing database
+		if (!database->IsFilled(i))
+		{
+			thumbnail.reset(new cImage(128, 128));
+			IndexFilename(filename2, keyframesPath, (char*) "fract", i);
+			ThumbnailRender(filename2, thumbnail.ptr());
+			thumbnail->CreatePreview(1.0);
+			thumbnail->ConvertTo8bit();
+			thumbnail->UpdatePreview();
+			memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
+			record->index = i; //only for testing database
 
-		if (i == 0) database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
-		else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
-
-		DisplayInDrawingArea(i, timelineInterface.darea[i]);
-		while (gtk_events_pending())
-			gtk_main_iteration();
-		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
-		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
-		gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
+			if (i == 0) database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
+			else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
+		}
+		if (isOpened)
+		{
+			DisplayInDrawingArea(i, timelineInterface.darea[i]);
+			while (gtk_events_pending())
+				gtk_main_iteration();
+			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
+			gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
+			gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
+		}
+		else
+		{
+			isCreated = false;
+			keyframeCount = numberOfKeyframes;
+			return numberOfKeyframes;
+		}
 	}
+	gtk_widget_queue_draw(timelineInterface.table);
 
 	isCreated = true;
 	keyframeCount = numberOfKeyframes;
@@ -146,7 +160,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	{
 		timelineInterface.darea[i] = gtk_drawing_area_new();
 		sprintf(widgetName, "da%d", i);
-		sprintf(labelText,"keyframe %d",i);
+		sprintf(labelText, "keyframe %d", i);
 		timelineInterface.label[i] = gtk_label_new(labelText);
 		gtk_widget_set_size_request(timelineInterface.darea[i], 128, 128);
 		gtk_widget_set_name(timelineInterface.darea[i], widgetName);
@@ -162,6 +176,8 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationInsertKeyframe), "clicked", G_CALLBACK(PressedInsertKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationDeleteKeyframe), "clicked", G_CALLBACK(PressedDeleteKeyframe), NULL);
+
+	isOpened = true;
 }
 
 void cTimeline::RebulidTimelineWindow(void)
@@ -189,10 +205,10 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 	record->index = index;
 	if (index < keyframeCount)
 	{
-		if(modeInsert)
+		if (modeInsert)
 		{
 			database->InsertRecord(index, (char*) record.ptr(), sizeof(sTimelineRecord));
-			Resize(keyframeCount+1);
+			Resize(keyframeCount + 1);
 			keyframeCount++;
 		}
 		else
@@ -203,7 +219,7 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 	else
 	{
 		database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
-		Resize(keyframeCount+1);
+		Resize(keyframeCount + 1);
 		keyframeCount++;
 	}
 	DisplayInDrawingArea(index, timelineInterface.darea[index]);
@@ -231,8 +247,6 @@ void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
 		keyframeCount--;
 	}
 }
-
-
 
 void cTimeline::Resize(int newsize)
 {
@@ -331,7 +345,8 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		}
 		else
 		{
-			GtkWidget *dialog =	gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe not exists: %s", filename2);
+			GtkWidget *dialog =
+					gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe not exists: %s", filename2);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
