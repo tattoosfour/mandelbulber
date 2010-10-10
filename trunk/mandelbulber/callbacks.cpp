@@ -1863,6 +1863,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 void DeleteTimelineWindow(GtkWidget *widget, gpointer widget_pointer)
 {
 	gtk_widget_destroyed(widget, (GtkWidget**)widget_pointer);
+	timeline->isOpened = false;
 }
 
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
