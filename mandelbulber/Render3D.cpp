@@ -1108,7 +1108,7 @@ int main(int argc, char *argv[])
 			if (LoadSettings((char*) "settings/default.fract", fractParamDefault))
 			{
 				WriteLog("Default settings loaded");
-				printf("Default settings loaded succesfully (settings/default.fract)\n");
+				printf("Default settings loaded successfully (settings/default.fract)\n");
 				//creating GTK+ GUI
 				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
@@ -1118,6 +1118,11 @@ int main(int argc, char *argv[])
 				printf("Can't open default settings file: %s/settings/default.fract\n", data_directory);
 				WriteLog("Can't open default settings file");
 				WriteLog(data_directory);
+
+				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+						"Error! Can't open default settings file\n%s/settings/default.fract\nPlease run install scricpt before first program start", data_directory);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
 			}
 		}
 		else
