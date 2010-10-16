@@ -1,5 +1,24 @@
 Version history
 
+v0.94
+
+- Added lowMem mode. When active, the program uses about 3 times less memory. Possible to render much larger images on 32-bit systems. To activate it please start the program with -lowmem parameter.
+- Added Timeline window with keyframes thumbnails
+- Buttons "Record keyframe", "Next keyframe", "Previous keyframe" and edit field "Key no." moved into Timeline window
+- Added "Delete keyframe" function
+- Added "Insert keyframe" function
+- Keyframe can be selected and loaded (double click) from Timeline window
+- "Next keyframe" and "Previous keyframe" buttons also starts rendering.
+- Progressive rendering now is disabled in noGUI mode
+- Fixed bug: program crashed during stereo rendering in noGUI mode
+- Fixed bug: SSAO sometimes generates atrifacts during progressive rendering
+- Fixed bug: images was dark in noGUI mode (colour palette was black)
+- Fixed bug: visible auxiliary lights in very high image resolution was rendered with visible square artifacts
+- Fixed bug: scale of visible auxiliary lights was not correct (size of lights wasn't proportional to square of distance)
+- Fixed bug: Program crashed when start_frame in keyframe mode was greater than zero
+- Fixed memory leaks and uninitialised variables
+- Source code: many changes in program structure. Now there is possible to simultaneous render two different fractals. 
+
 v0.93
 - added switch for zooming mode - enable old zooming behavior 
 - start frame and end frame are used also for render animation in path mode

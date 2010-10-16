@@ -1,4 +1,4 @@
-MANDELBULBER 0.93
+MANDELBULBER 0.94
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder
@@ -11,15 +11,14 @@ LICENCE: GNU GPL v3.0
 
 1. REQUIREMENTS
 
-- Linux OS with installed GTK+2.0 libraries, libjpeg, libsndfile1
+- Linux OS with installed GTK+2.0 libraries (version >2.20), libjpeg, libsndfile1
 - very fast CPU (recomended 2GHz, 4 cores)
 - 500MB RAM
-
 
 2. INSTALATION
 
 Please type:
-sudo ./install
+./install
 
 Program will be automaticaly copied to /usr/bin directory and additinal data to ~/.mandelbulber directory
 
@@ -60,6 +59,7 @@ Syntax:
 mandelbulber [options...] [settings_file]
 options:
   -nogui          - start program without GUI
+  -lowmem         - start program in low memory mode
   -flight         - render flight animation
   -keyframe       - render keyframe animation
   -start N        - start renderig from frame number N

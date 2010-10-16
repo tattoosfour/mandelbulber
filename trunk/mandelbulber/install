@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp src/Release/mandelbulber /usr/bin
+sudo src/Release/mandelbulber /usr/bin
 cp .mandelbulber $HOME/ -a
 
 echo mandelbulber installed successfully
