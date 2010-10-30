@@ -456,6 +456,8 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 	DefaultValues(&params);
 	paletteLoadedFromSettingsFile = false;
 
+	bool newMandelboxParametersLoaded = false;
+
 	bool freeSpecial = false;
 	if (special == 0)
 	{
@@ -732,7 +734,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 				else if (!strcmp(str1, "stereo_enabled")) params.stereoEnabled = atoi(str2);
 				else if (!strcmp(str1, "stereo_eye_distance")) params.doubles.stereoEyeDistance = atof2(str2, locale_dot, &special->stereoEyeDistance);
 
-				else if (!strcmp(str1, "mandelbox_scale")) params.doubles.mandelboxScale = atof2(str2, locale_dot, &special->mandelboxScale);
+				else if (!strcmp(str1, "mandelbox_scale")) {params.doubles.mandelboxScale = atof2(str2, locale_dot, &special->mandelboxScale); newMandelboxParametersLoaded = true;}
 				else if (!strcmp(str1, "mandelbox_folding_limit")) params.doubles.mandelboxFoldingLimit = atof2(str2, locale_dot, &special->mandelboxFoldingLimit);
 				else if (!strcmp(str1, "mandelbox_folding_value")) params.doubles.mandelboxFoldingValue = atof2(str2, locale_dot, &special->mandelboxFoldingValue);
 				else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.doubles.mandelboxFoldingSphericalMin = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalMin);
@@ -796,6 +798,16 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 			printf("Palette not found in settings file. Generating random palette\n");
 			srand(params.coloring_seed);
 			NowaPaleta(params.palette, 1.0);
+		}
+
+		if(!newMandelboxParametersLoaded)
+		{
+			params.doubles.mandelboxScale = params.doubles.power;
+			params.doubles.mandelboxFoldingLimit = params.doubles.foldingLimit;
+			params.doubles.mandelboxFoldingValue = params.doubles.foldingValue;
+			params.doubles.mandelboxFoldingSphericalFixed = params.doubles.foldingSphericalFixed;
+			params.doubles.mandelboxFoldingSphericalMin = params.doubles.foldingSphericalMin;
+			if(params.formula == tglad) params.tgladFoldingMode = false;
 		}
 
 		lightsPlaced = 0;

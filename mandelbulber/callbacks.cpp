@@ -1102,11 +1102,6 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), false);
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
 	}
-
-	if (formula == 8)
-	{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode), true);
-	}
 }
 
 void ChangedSliderFog(GtkWidget *widget, gpointer data)
