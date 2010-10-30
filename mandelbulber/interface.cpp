@@ -906,8 +906,7 @@ void CreateInterface(sParamRender *default_settings)
 	//------------- glowne okno renderowania
 	window2 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window2), "Mandelbulb Render Window");
-	g_signal_connect(G_OBJECT(window2), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-	g_signal_connect(G_OBJECT(window2), "delete_event", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(G_OBJECT(window2), "delete_event", G_CALLBACK(StopRenderingAndQuit), NULL);
 	gtk_widget_add_events(GTK_WIDGET(window2), GDK_CONFIGURE);
   g_signal_connect(G_OBJECT(window2), "configure-event", G_CALLBACK(WindowReconfigured), NULL);
 
@@ -952,8 +951,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	window_histogram = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window_histogram), "left - number of iterations (max 64) / right - number of steps (max. 1000)");
-	g_signal_connect(G_OBJECT(window_histogram), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-	g_signal_connect(G_OBJECT(window_histogram), "delete_event", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(G_OBJECT(window_histogram), "delete_event", G_CALLBACK(StopRenderingAndQuit), NULL);
 
 	//glowny box w oknie
 	GtkWidget *box2 = gtk_vbox_new(FALSE, 0);
@@ -972,8 +970,7 @@ void CreateInterface(sParamRender *default_settings)
 	window_interface = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window_interface), "Mandelbulber (default.fract)");
 	gtk_container_set_border_width(GTK_CONTAINER(window_interface), 10);
-	g_signal_connect(G_OBJECT(window_interface), "delete_event", G_CALLBACK(delete_event), NULL);
-	g_signal_connect(G_OBJECT(window_interface), "destroy", G_CALLBACK(destroy), NULL);
+	g_signal_connect(G_OBJECT(window_interface), "delete_event", G_CALLBACK(StopRenderingAndQuit), NULL);
 
 	//tabs
 	Interface.tabs = gtk_notebook_new();
