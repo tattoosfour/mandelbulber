@@ -180,4 +180,18 @@ double CRotationMatrix::GetGamma(void)
 	return atan2(matrix.m31,matrix.m33);
 }
 
-
+CRotationMatrix CRotationMatrix::Transpose(void)
+{
+	CRotationMatrix m;
+	m.matrix.m11 = matrix.m11;
+	m.matrix.m12 = matrix.m21;
+	m.matrix.m13 = matrix.m31;
+	m.matrix.m21 = matrix.m12;
+	m.matrix.m22 = matrix.m22;
+	m.matrix.m23 = matrix.m32;
+	m.matrix.m31 = matrix.m13;
+	m.matrix.m32 = matrix.m23;
+	m.matrix.m33 = matrix.m33;
+	m.zero = false;
+	return m;
+}

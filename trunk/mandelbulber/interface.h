@@ -47,6 +47,8 @@ struct sInterface
 	GtkWidget *tab_label_shaders;
 	GtkWidget *tab_label_sound;
 	GtkWidget *tab_label_hybrid;
+	GtkWidget *tab_label_mandelbox;
+
 	GtkWidget *tab_box_view;
 	GtkWidget *tab_box_fractal;
 	GtkWidget *tab_box_image;
@@ -58,7 +60,7 @@ struct sInterface
 	GtkWidget *tab_box_shaders;
 	GtkWidget *tab_box_sound;
 	GtkWidget *tab_box_hybrid;
-
+	GtkWidget *tab_box_mandelbox;
 
 	GtkWidget *boxMain;
 	GtkWidget *boxButtons;
@@ -142,12 +144,22 @@ struct sInterface
 	GtkWidget *boxHybrid;
 	GtkWidget *boxStereoscopic;
 	GtkWidget *boxStereoParams;
+	GtkWidget *boxMandelboxMainParams;
+	GtkWidget *boxMandelboxRotations;
+	GtkWidget *boxMandelboxColoring;
+	GtkWidget *boxMandelboxMainParams1;
+	GtkWidget *boxMandelboxMainParams2;
+	GtkWidget *boxMandelboxRotationMain;
+	GtkWidget *boxMandelboxColor1;
+	GtkWidget *boxMandelboxColor2;
+	GtkWidget *boxMandelboxColor3;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
 	GtkWidget *tableArrows2;
 	GtkWidget *tableIFSParams;
 	GtkWidget *tableHybridParams;
+	GtkWidget *tableMandelboxRotations;
 
 	GtkWidget *frCoordinates;
 	GtkWidget *fr3Dnavigator;
@@ -176,6 +188,9 @@ struct sInterface
 	GtkWidget *frSound;
 	GtkWidget *frHybrid;
 	GtkWidget *frStereo;
+	GtkWidget *frMandelboxMainParams;
+	GtkWidget *frMandelboxRotations;
+	GtkWidget *frMandelboxColoring;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -339,6 +354,38 @@ struct sInterface
 	GtkWidget *edit_hybridPower5;
 	GtkWidget *edit_NavigatorAbsoluteDistance;
 	GtkWidget *edit_stereoDistance;
+	GtkWidget *edit_mandelboxScale;
+	GtkWidget *edit_mandelboxFoldingLimit;
+	GtkWidget *edit_mandelboxFoldingValue;
+	GtkWidget *edit_mandelboxSpFoldingFixedRadius;
+	GtkWidget *edit_mandelboxSpFoldingMinRadius;
+	GtkWidget *edit_mandelboxRotationX1Alfa;
+	GtkWidget *edit_mandelboxRotationX1Beta;
+	GtkWidget *edit_mandelboxRotationX1Gamma;
+	GtkWidget *edit_mandelboxRotationX2Alfa;
+	GtkWidget *edit_mandelboxRotationX2Beta;
+	GtkWidget *edit_mandelboxRotationX2Gamma;
+	GtkWidget *edit_mandelboxRotationY1Alfa;
+	GtkWidget *edit_mandelboxRotationY1Beta;
+	GtkWidget *edit_mandelboxRotationY1Gamma;
+	GtkWidget *edit_mandelboxRotationY2Alfa;
+	GtkWidget *edit_mandelboxRotationY2Beta;
+	GtkWidget *edit_mandelboxRotationY2Gamma;
+	GtkWidget *edit_mandelboxRotationZ1Alfa;
+	GtkWidget *edit_mandelboxRotationZ1Beta;
+	GtkWidget *edit_mandelboxRotationZ1Gamma;
+	GtkWidget *edit_mandelboxRotationZ2Alfa;
+	GtkWidget *edit_mandelboxRotationZ2Beta;
+	GtkWidget *edit_mandelboxRotationZ2Gamma;
+	GtkWidget *edit_mandelboxRotationMainAlfa;
+	GtkWidget *edit_mandelboxRotationMainBeta;
+	GtkWidget *edit_mandelboxRotationMainGamma;
+	GtkWidget *edit_mandelboxColorFactorX;
+	GtkWidget *edit_mandelboxColorFactorY;
+	GtkWidget *edit_mandelboxColorFactorZ;
+	GtkWidget *edit_mandelboxColorFactorR;
+	GtkWidget *edit_mandelboxColorFactorSp1;
+	GtkWidget *edit_mandelboxColorFactorSp2;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -416,6 +463,7 @@ struct sInterface
 	GtkWidget *checkFishEye;
 	GtkWidget *checkStraightRotation;
 	GtkWidget *checkStereoEnabled;
+	GtkWidget *checkMandelboxRotationsEnable;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

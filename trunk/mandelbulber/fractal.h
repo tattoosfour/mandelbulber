@@ -88,6 +88,35 @@ struct sFractal
 	enumFractalFormula *formulaSequence;
 	double *hybridPowerSequence;
 	bool hybridCyclic;
+
+	CRotationMatrix mandelboxMainRot;
+	CRotationMatrix mandelboxRot1X;
+	CRotationMatrix mandelboxRot2X;
+	CRotationMatrix mandelboxRot1Y;
+	CRotationMatrix mandelboxRot2Y;
+	CRotationMatrix mandelboxRot1Z;
+	CRotationMatrix mandelboxRot2Z;
+	CRotationMatrix mandelboxRot1Xinv;
+	CRotationMatrix mandelboxRot2Xinv;
+	CRotationMatrix mandelboxRot1Yinv;
+	CRotationMatrix mandelboxRot2Yinv;
+	CRotationMatrix mandelboxRot1Zinv;
+	CRotationMatrix mandelboxRot2Zinv;
+
+	double mandelboxColorFactorX;
+	double mandelboxColorFactorY;
+	double mandelboxColorFactorZ;
+	double mandelboxColorFactorR;
+	double mandelboxColorFactorSp1;
+	double mandelboxColorFactorSp2;
+
+	double mandelboxScale;
+	double mandelboxFoldingLimit;
+	double mandelboxFoldingValue;
+	double mandelboxFoldingSphericalMin;
+	double mandelboxFoldingSphericalFixed;
+
+	bool mandelboxRotationsEnabled;
 };
 
 struct sFractal_ret

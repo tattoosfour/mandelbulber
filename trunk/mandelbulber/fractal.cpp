@@ -47,7 +47,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	double mR2 = minRadius * minRadius;
 	double tglad_factor1 = fR2 / mR2;
 
-	double tgladDE = par.power;
+	double tgladDE = par.mandelboxScale;
 
 	enumFractalFormula actualFormula = par.formula;
 	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) tgladDE = 1.0;
@@ -106,7 +106,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			r = z.Length();
 		}
 
-		if (par.tgladFoldingMode || actualFormula == tglad)
+		if (par.tgladFoldingMode)
 		{
 			if (z.x > par.foldingLimit)
 			{
@@ -139,6 +139,11 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				tgladColor *= 0.9;
 			}
 			r = z.Length();
+		}
+
+		if (par.tgladFoldingMode || actualFormula == tglad)
+		{
+
 		}
 
 		if (par.sphericalFoldingMode)
@@ -302,22 +307,117 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			}
 			case tglad:
 			{
-				double scale = p;
+				if (par.mandelboxRotationsEnabled)
+				{
+					bool lockout = false;
+					z = par.mandelboxRot1X.RotateVector(z);
+					if (z.x > par.foldingLimit)
+					{
+						z.x = par.foldingValue - z.x;
+						tgladColor += par.mandelboxColorFactorX;
+						lockout = true;
+					}
+					z = par.mandelboxRot1Xinv.RotateVector(z);
+
+					z = par.mandelboxRot2X.RotateVector(z);
+					if (!lockout && z.x < -par.foldingLimit)
+					{
+						z.x = -par.foldingValue - z.x;
+						tgladColor += par.mandelboxColorFactorX;
+					}
+					z = par.mandelboxRot2Xinv.RotateVector(z);
+
+					lockout = false;
+					z = par.mandelboxRot1Y.RotateVector(z);
+					if (z.y > par.foldingLimit)
+					{
+						z.y = par.foldingValue - z.y;
+						tgladColor += par.mandelboxColorFactorY;
+						lockout = true;
+					}
+					z = par.mandelboxRot1Yinv.RotateVector(z);
+
+					z = par.mandelboxRot2Y.RotateVector(z);
+					if (!lockout && z.y < -par.foldingLimit)
+					{
+						z.y = -par.foldingValue - z.y;
+						tgladColor += par.mandelboxColorFactorY;
+					}
+					z = par.mandelboxRot2Yinv.RotateVector(z);
+
+					lockout = false;
+					z = par.mandelboxRot1Z.RotateVector(z);
+					if (z.z > par.foldingLimit)
+					{
+						z.z = par.foldingValue - z.z;
+						tgladColor += par.mandelboxColorFactorZ;
+						lockout = true;
+					}
+					z = par.mandelboxRot1Zinv.RotateVector(z);
+
+					z = par.mandelboxRot2Z.RotateVector(z);
+					if (!lockout && z.z < -par.foldingLimit)
+					{
+						z.z = -par.foldingValue - z.z;
+						tgladColor += par.mandelboxColorFactorZ;
+					}
+					z = par.mandelboxRot2Zinv.RotateVector(z);
+				}
+				else
+				{
+					if (z.x > par.foldingLimit)
+					{
+						z.x = par.foldingValue - z.x;
+						tgladColor += par.mandelboxColorFactorX;
+					}
+					else if (z.x < -par.foldingLimit)
+					{
+						z.x = -par.foldingValue - z.x;
+						tgladColor += par.mandelboxColorFactorX;
+					}
+					if (z.y > par.foldingLimit)
+					{
+						z.y = par.foldingValue - z.y;
+						tgladColor += par.mandelboxColorFactorY;
+					}
+					else if (z.y < -par.foldingLimit)
+					{
+						z.y = -par.foldingValue - z.y;
+						tgladColor += par.mandelboxColorFactorY;
+					}
+					if (z.z > par.foldingLimit)
+					{
+						z.z = par.foldingValue - z.z;
+						tgladColor += par.mandelboxColorFactorZ;
+					}
+					else if (z.z < -par.foldingLimit)
+					{
+						z.z = -par.foldingValue - z.z;
+						tgladColor += par.mandelboxColorFactorZ;
+					}
+				}
+
+				r = z.Length();
+
+				double scale = par.mandelboxScale;
 				double r2 = r * r;
 
 				if (r2 < mR2)
 				{
 					z *= tglad_factor1;
 					tgladDE *= tglad_factor1;
-					tgladColor += 1;
+					tgladColor += par.mandelboxColorFactorSp1;
 				}
 				else if (r2 < fR2)
 				{
 					double tglad_factor2 = fR2 / r2;
 					z *= tglad_factor2;
 					tgladDE *= tglad_factor2;
-					tgladColor += 10;
+					tgladColor += par.mandelboxColorFactorSp2;
 				}
+
+				if(par.mandelboxRotationsEnabled) z = par.mandelboxMainRot.RotateVector(z);
+
 				z = z * scale + constant;
 				tgladDE *= scale;
 
@@ -490,7 +590,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	{
 		if (actualFormula == tglad)
 		{
-			retVal.colour = tgladColor * 100.0;
+			retVal.colour = tgladColor * 100.0 + z.Length()*par.mandelboxColorFactorR;
 		}
 		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 		{
