@@ -181,11 +181,13 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 }
 
 //----------- close program
-gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 	programClosed = true;
-	printf("Rendering terminated\n");
-	return FALSE;
+	StopRendering(widget, data);
+	gtk_main_quit();
+	printf("Quitting\n");
+	return true;
 }
 
 gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data)
@@ -259,12 +261,6 @@ gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer
 		}
 	}
 	return true;
-}
-
-//------------- destroy program
-void destroy(GtkWidget *widget, gpointer data)
-{
-	gtk_main_quit();
 }
 
 void StartRendering(GtkWidget *widget, gpointer data)

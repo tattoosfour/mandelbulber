@@ -27,9 +27,10 @@ Program was compiled for x86 CPUs with SSE
 
 3. COMPILATION
 
-Program is prepared for compilation using gcc. Before compilation you need to install libgtk2.0-dev and libsndfile1-dev package
+Program is prepared for compilation using gcc. Before compilation you need to install libgtk2.0-dev, libjpeg8-dev and libsndfile1-dev package
 
 sudo apt-get install libgtk2.0-dev
+sudo apt-get install libjpeg8-dev
 sudo apt-get install libsndfile1-dev
 
 next go to src/Release directory and type:
@@ -39,7 +40,7 @@ make all
 program was compiled for your native CPU. If you have x64 CPU now will be able to render very high resolution images.
 
 go back to mandelbulber directory and type:
-sudo ./install
+./install
 
 Source files was created in Enclipse SDK CDT
 
