@@ -397,6 +397,40 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
 
+		params->mandelboxRotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
+		params->doubles.mandelboxFoldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
+		params->doubles.mandelboxFoldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingLimit);
+		params->doubles.mandelboxFoldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)), &special->mandelboxFoldingSphericalFixed);
+		params->doubles.mandelboxFoldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)), &special->mandelboxFoldingSphericalMin);
+		params->doubles.mandelboxRotationX1Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa)), &special->mandelboxRotationX1Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationX1Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Beta)), &special->mandelboxRotationX1Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationX1Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Gamma)), &special->mandelboxRotationX1Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationX2Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Alfa)), &special->mandelboxRotationX2Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationX2Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Beta)), &special->mandelboxRotationX2Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationX2Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Gamma)), &special->mandelboxRotationX2Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY1Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Alfa)), &special->mandelboxRotationY1Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY1Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Beta)), &special->mandelboxRotationY1Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY1Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Gamma)), &special->mandelboxRotationY1Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY2Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Alfa)), &special->mandelboxRotationY2Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY2Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Beta)), &special->mandelboxRotationY2Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationY2Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Gamma)), &special->mandelboxRotationY2Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ1Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Alfa)), &special->mandelboxRotationZ1Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ1Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Beta)), &special->mandelboxRotationZ1Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ1Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Gamma)), &special->mandelboxRotationZ1Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ2Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Alfa)), &special->mandelboxRotationZ2Alfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ2Beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Beta)), &special->mandelboxRotationZ2Beta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationZ2Gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Gamma)), &special->mandelboxRotationZ2Gamma) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationMainAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainAlfa)), &special->mandelboxRotationMainAlfa) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationMainBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainBeta)), &special->mandelboxRotationMainBeta) / 180.0 * M_PI;
+		params->doubles.mandelboxRotationMainGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainGamma)), &special->mandelboxRotationMainGamma) / 180.0 * M_PI;
+		params->doubles.mandelboxColorFactorR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR)), &special->mandelboxColorFactorR);
+		params->doubles.mandelboxColorFactorX = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX)), &special->mandelboxColorFactorX);
+		params->doubles.mandelboxColorFactorY = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY)), &special->mandelboxColorFactorY);
+		params->doubles.mandelboxColorFactorZ = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ)), &special->mandelboxColorFactorZ);
+		params->doubles.mandelboxColorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)), &special->mandelboxColorFactorSp1);
+		params->doubles.mandelboxColorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)), &special->mandelboxColorFactorSp2);
+		params->doubles.mandelboxScale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)), &special->mandelboxScale);
+
 		params->image_width = (params->image_width/8)*8;
 		params->image_height = (params->image_height/8)*8;
 
@@ -695,6 +729,38 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridIter4), IntToString(params->hybridIters4));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridIter5), IntToString(params->hybridIters5));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_stereoDistance), DoubleToString(params->doubles.stereoEyeDistance, &special->stereoEyeDistance));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR), DoubleToString(params->doubles.mandelboxColorFactorR, &special->mandelboxColorFactorR));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX), DoubleToString(params->doubles.mandelboxColorFactorX, &special->mandelboxColorFactorX));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY), DoubleToString(params->doubles.mandelboxColorFactorY, &special->mandelboxColorFactorY));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ), DoubleToString(params->doubles.mandelboxColorFactorZ, &special->mandelboxColorFactorZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1), DoubleToString(params->doubles.mandelboxColorFactorSp1, &special->mandelboxColorFactorSp1));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2), DoubleToString(params->doubles.mandelboxColorFactorSp2, &special->mandelboxColorFactorSp2));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit), DoubleToString(params->doubles.mandelboxFoldingLimit, &special->mandelboxFoldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->doubles.mandelboxFoldingValue, &special->mandelboxFoldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->doubles.mandelboxFoldingSphericalFixed, &special->mandelboxFoldingSphericalFixed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->doubles.mandelboxFoldingSphericalMin, &special->mandelboxFoldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainAlfa), DoubleToString(params->doubles.mandelboxRotationMainAlfa * 180.0 / M_PI, &special->mandelboxRotationMainAlfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainBeta), DoubleToString(params->doubles.mandelboxRotationMainBeta * 180.0 / M_PI, &special->mandelboxRotationMainBeta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMainGamma), DoubleToString(params->doubles.mandelboxRotationMainGamma * 180.0 / M_PI, &special->mandelboxRotationMainGamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa), DoubleToString(params->doubles.mandelboxRotationX1Alfa * 180.0 / M_PI, &special->mandelboxRotationX1Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Beta), DoubleToString(params->doubles.mandelboxRotationX1Beta * 180.0 / M_PI, &special->mandelboxRotationX1Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Gamma), DoubleToString(params->doubles.mandelboxRotationX1Gamma * 180.0 / M_PI, &special->mandelboxRotationX1Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Alfa), DoubleToString(params->doubles.mandelboxRotationX2Alfa * 180.0 / M_PI, &special->mandelboxRotationX2Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Beta), DoubleToString(params->doubles.mandelboxRotationX2Beta * 180.0 / M_PI, &special->mandelboxRotationX2Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationX2Gamma), DoubleToString(params->doubles.mandelboxRotationX2Gamma * 180.0 / M_PI, &special->mandelboxRotationX2Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Alfa), DoubleToString(params->doubles.mandelboxRotationY1Alfa * 180.0 / M_PI, &special->mandelboxRotationY1Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Beta), DoubleToString(params->doubles.mandelboxRotationY1Beta * 180.0 / M_PI, &special->mandelboxRotationY1Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY1Gamma), DoubleToString(params->doubles.mandelboxRotationY1Gamma * 180.0 / M_PI, &special->mandelboxRotationY1Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Alfa), DoubleToString(params->doubles.mandelboxRotationY2Alfa * 180.0 / M_PI, &special->mandelboxRotationY2Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Beta), DoubleToString(params->doubles.mandelboxRotationY2Beta * 180.0 / M_PI, &special->mandelboxRotationY2Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationY2Gamma), DoubleToString(params->doubles.mandelboxRotationY2Gamma * 180.0 / M_PI, &special->mandelboxRotationY2Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Alfa), DoubleToString(params->doubles.mandelboxRotationZ1Alfa * 180.0 / M_PI, &special->mandelboxRotationZ1Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Beta), DoubleToString(params->doubles.mandelboxRotationZ1Beta * 180.0 / M_PI, &special->mandelboxRotationZ1Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Gamma), DoubleToString(params->doubles.mandelboxRotationZ1Gamma * 180.0 / M_PI, &special->mandelboxRotationZ1Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Alfa), DoubleToString(params->doubles.mandelboxRotationZ2Alfa * 180.0 / M_PI, &special->mandelboxRotationZ2Alfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Beta), DoubleToString(params->doubles.mandelboxRotationZ2Beta * 180.0 / M_PI, &special->mandelboxRotationZ2Beta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Gamma), DoubleToString(params->doubles.mandelboxRotationZ2Gamma * 180.0 / M_PI, &special->mandelboxRotationZ2Gamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->doubles.mandelboxScale, &special->mandelboxScale));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -722,6 +788,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic), params->hybridCyclic);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye), params->fishEye);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable), params->mandelboxRotationsEnabled);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -913,13 +980,14 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.tab_label_view = gtk_label_new("View");
 	Interface.tab_label_fractal = gtk_label_new("Fractal");
-	Interface.tab_label_hybrid = gtk_label_new("Hybrid formula");
+	Interface.tab_label_hybrid = gtk_label_new("Hybrid");
+	Interface.tab_label_mandelbox = gtk_label_new("Mandelbox");
 	Interface.tab_label_shaders = gtk_label_new("Shaders");
 	Interface.tab_label_image = gtk_label_new("Image");
 	Interface.tab_label_animation = gtk_label_new("Animation");
 	Interface.tab_label_posteffects = gtk_label_new("Post effects");
-	Interface.tab_label_lights = gtk_label_new("Light sources");
-	Interface.tab_label_IFS = gtk_label_new("Kaleidoscopic IFS");
+	Interface.tab_label_lights = gtk_label_new("Lights");
+	Interface.tab_label_IFS = gtk_label_new("IFS");
 	Interface.tab_label_sound = gtk_label_new("Sound");
 	Interface.tab_label_about = gtk_label_new("About...");
 
@@ -934,6 +1002,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_box_sound = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_IFS = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_hybrid = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_mandelbox = gtk_vbox_new(FALSE, 1);
 
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_view), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_fractal), 5);
@@ -1029,6 +1098,15 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxHybrid = gtk_vbox_new(FALSE, 1);
 	Interface.boxStereoscopic = gtk_vbox_new(FALSE, 1);
 	Interface.boxStereoParams = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxMainParams = gtk_vbox_new(FALSE, 1);
+	Interface.boxMandelboxRotations = gtk_vbox_new(FALSE, 1);
+	Interface.boxMandelboxColoring = gtk_vbox_new(FALSE, 1);
+	Interface.boxMandelboxMainParams1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxMainParams2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxRotationMain = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxColor1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxColor2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxColor3 = gtk_hbox_new(FALSE, 1);
 
 	//tables
 	Interface.tableLimits = gtk_table_new(2, 3, false);
@@ -1036,6 +1114,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tableArrows2 = gtk_table_new(3, 3, false);
 	Interface.tableIFSParams = gtk_table_new(9, 9, false);
 	Interface.tableHybridParams = gtk_table_new(5, 3, false);
+	Interface.tableMandelboxRotations = gtk_table_new(5, 7, false);
 
 	//frames
 	Interface.frCoordinates = gtk_frame_new("Viewpoint coordinates");
@@ -1064,6 +1143,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frSound = gtk_frame_new("Animation by sound");
 	Interface.frHybrid = gtk_frame_new("Hybrid formula");
 	Interface.frStereo = gtk_frame_new("Stereoscopic rendering");
+	Interface.frMandelboxMainParams = gtk_frame_new("Main Mandelbox parameters");
+	Interface.frMandelboxRotations = gtk_frame_new("Rotation of Mandelbox folding planes");
+	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1232,6 +1314,57 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_hybridPower5 = gtk_entry_new();
 	Interface.edit_NavigatorAbsoluteDistance = gtk_entry_new();
 	Interface.edit_stereoDistance = gtk_entry_new();
+	Interface.edit_mandelboxScale = gtk_entry_new();
+	Interface.edit_mandelboxFoldingLimit = gtk_entry_new();
+	Interface.edit_mandelboxFoldingValue = gtk_entry_new();
+	Interface.edit_mandelboxSpFoldingFixedRadius = gtk_entry_new();
+	Interface.edit_mandelboxSpFoldingMinRadius = gtk_entry_new();
+	Interface.edit_mandelboxRotationX1Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationX1Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationX1Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationX2Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationX2Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationX2Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationY1Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationY1Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationY1Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationY2Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationY2Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationY2Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ1Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ1Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ1Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ2Alfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ2Beta = gtk_entry_new();
+	Interface.edit_mandelboxRotationZ2Gamma = gtk_entry_new();
+	Interface.edit_mandelboxRotationMainAlfa = gtk_entry_new();
+	Interface.edit_mandelboxRotationMainBeta = gtk_entry_new();
+	Interface.edit_mandelboxRotationMainGamma = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorR = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorSp1 = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorSp2 = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorX = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorY = gtk_entry_new();
+	Interface.edit_mandelboxColorFactorZ = gtk_entry_new();
+
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Gamma), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY1Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY1Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY1Gamma), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ1Gamma), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX2Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX2Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX2Gamma), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY2Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY2Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationY2Gamma), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Alfa), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Beta), 5);
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Gamma), 5);
 
 	//combo
 	//		fract type
@@ -1321,7 +1454,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkFishEye = gtk_check_button_new_with_label("Fish eye");
 	Interface.checkStraightRotation = gtk_check_button_new_with_label("Rotation without\nusing gamma\nangle");
 	Interface.checkStereoEnabled = gtk_check_button_new_with_label("Enable stereoscopic rendering");
-
+	Interface.checkMandelboxRotationsEnable = gtk_check_button_new_with_label("Enable rotation of folding planes");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1366,7 +1499,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_HybridFormula5 = gtk_label_new("Formula #5:");
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.94\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.95\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");
@@ -1898,6 +2031,70 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.checkHybridCyclic, false, false, 1);
 
+	//tab Mandelbox
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxMainParams, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxMainParams), Interface.boxMandelboxMainParams);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("2", "Scale", 6, Interface.edit_mandelboxScale), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Folding limit", 6, Interface.edit_mandelboxFoldingLimit), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("2", "Folding value", 6, Interface.edit_mandelboxFoldingValue), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Fixed radius", 6, Interface.edit_mandelboxSpFoldingFixedRadius), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, Interface.edit_mandelboxSpFoldingMinRadius), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.checkMandelboxRotationsEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.boxMandelboxRotationMain, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "Main rotation: alfa", 6, Interface.edit_mandelboxRotationMainAlfa), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "beta", 6, Interface.edit_mandelboxRotationMainBeta), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "gamma", 6, Interface.edit_mandelboxRotationMainGamma), false, false, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Negative plane"), 1, 4, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Positive plane"), 4, 7, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 1, 2, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 2, 3, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 3, 4, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 4, 5, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 5, 6, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 6, 7, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("X Axis"), 0, 1, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX1Alfa, 1, 2, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX1Beta, 2, 3, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX1Gamma, 3, 4, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX2Alfa, 4, 5, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX2Beta, 5, 6, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationX2Gamma, 6, 7, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Y Axis"), 0, 1, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY1Alfa, 1, 2, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY1Beta, 2, 3, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY1Gamma, 3, 4, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY2Alfa, 4, 5, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY2Beta, 5, 6, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationY2Gamma, 6, 7, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Z Axis"), 0, 1, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ1Alfa, 1, 2, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ1Beta, 2, 3, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ1Gamma, 3, 4, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ2Alfa, 4, 5, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ2Beta, 5, 6, 4, 5);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), Interface.edit_mandelboxRotationZ2Gamma, 6, 7, 4, 5);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.tableMandelboxRotations, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxColoring, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxColoring), Interface.boxMandelboxColoring);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor1), CreateEdit("0", "Resultant absolute value component", 6, Interface.edit_mandelboxColorFactorR), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,1", "X plane component", 6, Interface.edit_mandelboxColorFactorX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,2", "Y plane component", 6, Interface.edit_mandelboxColorFactorY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,3", "Z plane component", 6, Interface.edit_mandelboxColorFactorZ), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
+
 	//tab sound
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_sound), Interface.frSound, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frSound), Interface.boxSound);
@@ -1960,12 +2157,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_fractal, Interface.tab_label_fractal);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_IFS, Interface.tab_label_IFS);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_hybrid, Interface.tab_label_hybrid);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_mandelbox, Interface.tab_label_mandelbox);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_view, Interface.tab_label_view);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders, Interface.tab_label_shaders);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_sound, Interface.tab_label_sound);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 

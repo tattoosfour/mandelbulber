@@ -80,6 +80,38 @@ struct sParamRenderD
 	double hybridPower4;
 	double hybridPower5;
 	double stereoEyeDistance;
+	double mandelboxScale;
+	double mandelboxColorFactorX;
+	double mandelboxColorFactorY;
+	double mandelboxColorFactorZ;
+	double mandelboxColorFactorR;
+	double mandelboxColorFactorSp1;
+	double mandelboxColorFactorSp2;
+	double mandelboxRotationMainAlfa;
+	double mandelboxRotationMainBeta;
+	double mandelboxRotationMainGamma;
+	double mandelboxRotationX1Alfa;
+	double mandelboxRotationX1Beta;
+	double mandelboxRotationX1Gamma;
+	double mandelboxRotationX2Alfa;
+	double mandelboxRotationX2Beta;
+	double mandelboxRotationX2Gamma;
+	double mandelboxRotationY1Alfa;
+	double mandelboxRotationY1Beta;
+	double mandelboxRotationY1Gamma;
+	double mandelboxRotationY2Alfa;
+	double mandelboxRotationY2Beta;
+	double mandelboxRotationY2Gamma;
+	double mandelboxRotationZ1Alfa;
+	double mandelboxRotationZ1Beta;
+	double mandelboxRotationZ1Gamma;
+	double mandelboxRotationZ2Alfa;
+	double mandelboxRotationZ2Beta;
+	double mandelboxRotationZ2Gamma;
+	double mandelboxFoldingLimit;
+	double mandelboxFoldingValue;
+	double mandelboxFoldingSphericalMin;
+	double mandelboxFoldingSphericalFixed;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -152,6 +184,7 @@ struct sParamRender
 	bool fishEye;
 	bool stereoEnabled;
 	bool quiet;
+	bool mandelboxRotationsEnabled;
 	sImageSwitches imageSwitches;
 
 	enumFractalFormula formula; //type of fractal formula
@@ -170,6 +203,20 @@ struct sParamRender
 	sEffectColours effectColours;
 
 	CRotationMatrix IFSMainRot;
+
+	CRotationMatrix mandelboxMainRot;
+	CRotationMatrix mandelboxRot1X;
+	CRotationMatrix mandelboxRot2X;
+	CRotationMatrix mandelboxRot1Y;
+	CRotationMatrix mandelboxRot2Y;
+	CRotationMatrix mandelboxRot1Z;
+	CRotationMatrix mandelboxRot2Z;
+	CRotationMatrix mandelboxRot1Xinv;
+	CRotationMatrix mandelboxRot2Xinv;
+	CRotationMatrix mandelboxRot1Yinv;
+	CRotationMatrix mandelboxRot2Yinv;
+	CRotationMatrix mandelboxRot1Zinv;
+	CRotationMatrix mandelboxRot2Zinv;
 
 	sRGB *palette;
 
@@ -272,6 +319,38 @@ struct sParamSpecial
 	sAddData hybridPower4;
 	sAddData hybridPower5;
 	sAddData stereoEyeDistance;
+	sAddData mandelboxScale;
+	sAddData mandelboxColorFactorX;
+	sAddData mandelboxColorFactorY;
+	sAddData mandelboxColorFactorZ;
+	sAddData mandelboxColorFactorR;
+	sAddData mandelboxColorFactorSp1;
+	sAddData mandelboxColorFactorSp2;
+	sAddData mandelboxRotationMainAlfa;
+	sAddData mandelboxRotationMainBeta;
+	sAddData mandelboxRotationMainGamma;
+	sAddData mandelboxRotationX1Alfa;
+	sAddData mandelboxRotationX1Beta;
+	sAddData mandelboxRotationX1Gamma;
+	sAddData mandelboxRotationY1Alfa;
+	sAddData mandelboxRotationY1Beta;
+	sAddData mandelboxRotationY1Gamma;
+	sAddData mandelboxRotationZ1Alfa;
+	sAddData mandelboxRotationZ1Beta;
+	sAddData mandelboxRotationZ1Gamma;
+	sAddData mandelboxRotationX2Alfa;
+	sAddData mandelboxRotationX2Beta;
+	sAddData mandelboxRotationX2Gamma;
+	sAddData mandelboxRotationY2Alfa;
+	sAddData mandelboxRotationY2Beta;
+	sAddData mandelboxRotationY2Gamma;
+	sAddData mandelboxRotationZ2Alfa;
+	sAddData mandelboxRotationZ2Beta;
+	sAddData mandelboxRotationZ2Gamma;
+	sAddData mandelboxFoldingLimit;
+	sAddData mandelboxFoldingValue;
+	sAddData mandelboxFoldingSphericalMin;
+	sAddData mandelboxFoldingSphericalFixed;
 };
 
 #endif /* FRACTPARAMS_H_ */

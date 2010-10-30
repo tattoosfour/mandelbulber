@@ -401,6 +401,40 @@ void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 	fprintfDot(fileSettings, "stereo_eye_distance", params.doubles.stereoEyeDistance, &special->stereoEyeDistance);
 	fprintf(fileSettings, "stereo_enabled %d;\n", params.stereoEnabled);
 
+	fprintfDot(fileSettings, "mandelbox_scale", params.doubles.mandelboxScale, &special->mandelboxScale);
+	fprintfDot(fileSettings, "mandelbox_folding_limit", params.doubles.mandelboxFoldingLimit, &special->mandelboxFoldingLimit);
+	fprintfDot(fileSettings, "mandelbox_folding_value", params.doubles.mandelboxFoldingValue, &special->mandelboxFoldingValue);
+	fprintfDot(fileSettings, "mandelbox_folding_min_radius", params.doubles.mandelboxFoldingSphericalMin, &special->mandelboxFoldingSphericalMin);
+	fprintfDot(fileSettings, "mandelbox_folding_fixed_radius", params.doubles.mandelboxFoldingSphericalFixed, &special->mandelboxFoldingSphericalFixed);
+	fprintfDot(fileSettings, "mandelbox_rotation_main_alfa", params.doubles.mandelboxRotationMainAlfa * 180.0 / M_PI, &special->mandelboxRotationMainAlfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_main_beta", params.doubles.mandelboxRotationMainBeta * 180.0 / M_PI, &special->mandelboxRotationMainBeta);
+	fprintfDot(fileSettings, "mandelbox_rotation_main_gamma", params.doubles.mandelboxRotationMainGamma * 180.0 / M_PI, &special->mandelboxRotationMainGamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_X1_alfa", params.doubles.mandelboxRotationX1Alfa * 180.0 / M_PI, &special->mandelboxRotationX1Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_X1_beta", params.doubles.mandelboxRotationX1Beta * 180.0 / M_PI, &special->mandelboxRotationX1Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_X1_gamma", params.doubles.mandelboxRotationX1Gamma * 180.0 / M_PI, &special->mandelboxRotationX1Gamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_X2_alfa", params.doubles.mandelboxRotationX2Alfa * 180.0 / M_PI, &special->mandelboxRotationX2Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_X2_beta", params.doubles.mandelboxRotationX2Beta * 180.0 / M_PI, &special->mandelboxRotationX2Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_X2_gamma", params.doubles.mandelboxRotationX2Gamma * 180.0 / M_PI, &special->mandelboxRotationX2Gamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y1_alfa", params.doubles.mandelboxRotationY1Alfa * 180.0 / M_PI, &special->mandelboxRotationY1Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y1_beta", params.doubles.mandelboxRotationY1Beta * 180.0 / M_PI, &special->mandelboxRotationY1Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y1_gamma", params.doubles.mandelboxRotationY1Gamma * 180.0 / M_PI, &special->mandelboxRotationY1Gamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y2_alfa", params.doubles.mandelboxRotationY2Alfa * 180.0 / M_PI, &special->mandelboxRotationY2Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y2_beta", params.doubles.mandelboxRotationY2Beta * 180.0 / M_PI, &special->mandelboxRotationY2Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_Y2_gamma", params.doubles.mandelboxRotationY2Gamma * 180.0 / M_PI, &special->mandelboxRotationY2Gamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z1_alfa", params.doubles.mandelboxRotationZ1Alfa * 180.0 / M_PI, &special->mandelboxRotationZ1Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z1_beta", params.doubles.mandelboxRotationZ1Beta * 180.0 / M_PI, &special->mandelboxRotationZ1Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z1_gamma", params.doubles.mandelboxRotationZ1Gamma * 180.0 / M_PI, &special->mandelboxRotationZ1Gamma);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z2_alfa", params.doubles.mandelboxRotationZ2Alfa * 180.0 / M_PI, &special->mandelboxRotationZ2Alfa);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z2_beta", params.doubles.mandelboxRotationZ2Beta * 180.0 / M_PI, &special->mandelboxRotationZ2Beta);
+	fprintfDot(fileSettings, "mandelbox_rotation_Z2_gamma", params.doubles.mandelboxRotationZ2Gamma * 180.0 / M_PI, &special->mandelboxRotationZ2Gamma);
+	fprintfDot(fileSettings, "mandelbox_color_R", params.doubles.mandelboxColorFactorR, &special->mandelboxColorFactorR);
+	fprintfDot(fileSettings, "mandelbox_color_X", params.doubles.mandelboxColorFactorX, &special->mandelboxColorFactorX);
+	fprintfDot(fileSettings, "mandelbox_color_Y", params.doubles.mandelboxColorFactorY, &special->mandelboxColorFactorY);
+	fprintfDot(fileSettings, "mandelbox_color_Z", params.doubles.mandelboxColorFactorZ, &special->mandelboxColorFactorZ);
+	fprintfDot(fileSettings, "mandelbox_color_Sp1", params.doubles.mandelboxColorFactorSp1, &special->mandelboxColorFactorSp1);
+	fprintfDot(fileSettings, "mandelbox_color_Sp2", params.doubles.mandelboxColorFactorSp2, &special->mandelboxColorFactorSp2);
+	fprintf(fileSettings, "mandelbox_rotation_enabled %d;\n", params.mandelboxRotationsEnabled);
+
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
 	fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
@@ -698,6 +732,40 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 				else if (!strcmp(str1, "stereo_enabled")) params.stereoEnabled = atoi(str2);
 				else if (!strcmp(str1, "stereo_eye_distance")) params.doubles.stereoEyeDistance = atof2(str2, locale_dot, &special->stereoEyeDistance);
 
+				else if (!strcmp(str1, "mandelbox_scale")) params.doubles.mandelboxScale = atof2(str2, locale_dot, &special->mandelboxScale);
+				else if (!strcmp(str1, "mandelbox_folding_limit")) params.doubles.mandelboxFoldingLimit = atof2(str2, locale_dot, &special->mandelboxFoldingLimit);
+				else if (!strcmp(str1, "mandelbox_folding_value")) params.doubles.mandelboxFoldingValue = atof2(str2, locale_dot, &special->mandelboxFoldingValue);
+				else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.doubles.mandelboxFoldingSphericalMin = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalMin);
+				else if (!strcmp(str1, "mandelbox_folding_fixed_radius")) params.doubles.mandelboxFoldingSphericalFixed = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalFixed);
+				else if (!strcmp(str1, "mandelbox_rotation_main_alfa")) params.doubles.mandelboxRotationMainAlfa = atof2(str2, locale_dot, &special->mandelboxRotationMainAlfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_main_beta")) params.doubles.mandelboxRotationMainBeta = atof2(str2, locale_dot, &special->mandelboxRotationMainBeta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_main_gamma")) params.doubles.mandelboxRotationMainGamma = atof2(str2, locale_dot, &special->mandelboxRotationMainGamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X1_alfa")) params.doubles.mandelboxRotationX1Alfa = atof2(str2, locale_dot, &special->mandelboxRotationX1Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X1_beta")) params.doubles.mandelboxRotationX1Beta = atof2(str2, locale_dot, &special->mandelboxRotationX1Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X1_gamma")) params.doubles.mandelboxRotationX1Gamma = atof2(str2, locale_dot, &special->mandelboxRotationX1Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X2_alfa")) params.doubles.mandelboxRotationX2Alfa = atof2(str2, locale_dot, &special->mandelboxRotationX2Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X2_beta")) params.doubles.mandelboxRotationX2Beta = atof2(str2, locale_dot, &special->mandelboxRotationX2Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_X2_gamma")) params.doubles.mandelboxRotationX2Gamma = atof2(str2, locale_dot, &special->mandelboxRotationX2Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y1_alfa")) params.doubles.mandelboxRotationY1Alfa = atof2(str2, locale_dot, &special->mandelboxRotationY1Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y1_beta")) params.doubles.mandelboxRotationY1Beta = atof2(str2, locale_dot, &special->mandelboxRotationY1Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y1_gamma")) params.doubles.mandelboxRotationY1Gamma = atof2(str2, locale_dot, &special->mandelboxRotationY1Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y2_alfa")) params.doubles.mandelboxRotationY2Alfa = atof2(str2, locale_dot, &special->mandelboxRotationY2Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y2_beta")) params.doubles.mandelboxRotationY2Beta = atof2(str2, locale_dot, &special->mandelboxRotationY2Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Y2_gamma")) params.doubles.mandelboxRotationY2Gamma = atof2(str2, locale_dot, &special->mandelboxRotationY2Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z1_alfa")) params.doubles.mandelboxRotationZ1Alfa = atof2(str2, locale_dot, &special->mandelboxRotationZ1Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z1_beta")) params.doubles.mandelboxRotationZ1Beta = atof2(str2, locale_dot, &special->mandelboxRotationZ1Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z1_gamma")) params.doubles.mandelboxRotationZ1Gamma = atof2(str2, locale_dot, &special->mandelboxRotationZ1Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z2_alfa")) params.doubles.mandelboxRotationZ2Alfa = atof2(str2, locale_dot, &special->mandelboxRotationZ2Alfa)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z2_beta")) params.doubles.mandelboxRotationZ2Beta = atof2(str2, locale_dot, &special->mandelboxRotationZ2Beta)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_rotation_Z2_gamma")) params.doubles.mandelboxRotationZ2Gamma = atof2(str2, locale_dot, &special->mandelboxRotationZ2Gamma)/ 180.0 * M_PI;
+				else if (!strcmp(str1, "mandelbox_color_R")) params.doubles.mandelboxColorFactorR = atof2(str2, locale_dot, &special->mandelboxColorFactorR);
+				else if (!strcmp(str1, "mandelbox_color_X")) params.doubles.mandelboxColorFactorX = atof2(str2, locale_dot, &special->mandelboxColorFactorX);
+				else if (!strcmp(str1, "mandelbox_color_Y")) params.doubles.mandelboxColorFactorY = atof2(str2, locale_dot, &special->mandelboxColorFactorY);
+				else if (!strcmp(str1, "mandelbox_color_Z")) params.doubles.mandelboxColorFactorZ = atof2(str2, locale_dot, &special->mandelboxColorFactorZ);
+				else if (!strcmp(str1, "mandelbox_color_Sp1")) params.doubles.mandelboxColorFactorSp1 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp1);
+				else if (!strcmp(str1, "mandelbox_color_Sp2")) params.doubles.mandelboxColorFactorSp2 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp2);
+				else if (!strcmp(str1, "mandelbox_rotation_enabled")) params.mandelboxRotationsEnabled = atoi(str2);
+
 				else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 				else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
 				else if (!strcmp(str1, "file_envmap")) strcpy(params.file_envmap, str2);
@@ -732,13 +800,13 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 255)
+		if (lineCounter != 288)
 		{
-			printf("number of lines in settings file (should be 255): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 288): %d\n", lineCounter);
 			if (!noGUI)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
-						"Warning! Settings file was created in older version of Mandelbulber\nfile: %s", filename);
+						"Warning! Settings file was created in other version of Mandelbulber\nfile: %s", filename);
 				gtk_dialog_run(GTK_DIALOG(dialog));
 				gtk_widget_destroy(dialog);
 			}
@@ -925,6 +993,40 @@ void DefaultValues(sParamRender *params)
 	params->doubles.hybridPower4 = 2;
 	params->doubles.hybridPower5 = 2;
 	params->hybridCyclic = false;
+
+	params->doubles.mandelboxColorFactorX = 0.03;
+	params->doubles.mandelboxColorFactorY = 0.05;
+	params->doubles.mandelboxColorFactorZ = 0.07;
+	params->doubles.mandelboxColorFactorR = 0;
+	params->doubles.mandelboxColorFactorSp1 = 0.2;
+	params->doubles.mandelboxColorFactorSp2 = 0.2;
+	params->doubles.mandelboxRotationMainAlfa = 0;
+	params->doubles.mandelboxRotationMainBeta = 0;
+	params->doubles.mandelboxRotationMainGamma = 0;
+	params->doubles.mandelboxRotationX1Alfa = 0;
+	params->doubles.mandelboxRotationX1Beta = 0;
+	params->doubles.mandelboxRotationX1Gamma = 0;
+	params->doubles.mandelboxRotationX2Alfa = 0;
+	params->doubles.mandelboxRotationX2Beta = 0;
+	params->doubles.mandelboxRotationX2Gamma = 0;
+	params->doubles.mandelboxRotationY1Alfa = 0;
+	params->doubles.mandelboxRotationY1Beta = 0;
+	params->doubles.mandelboxRotationY1Gamma = 0;
+	params->doubles.mandelboxRotationY2Alfa = 0;
+	params->doubles.mandelboxRotationY2Beta = 0;
+	params->doubles.mandelboxRotationY2Gamma = 0;
+	params->doubles.mandelboxRotationZ1Alfa = 0;
+	params->doubles.mandelboxRotationZ1Beta = 0;
+	params->doubles.mandelboxRotationZ1Gamma = 0;
+	params->doubles.mandelboxRotationZ2Alfa = 0;
+	params->doubles.mandelboxRotationZ2Beta = 0;
+	params->doubles.mandelboxRotationZ2Gamma = 0;
+	params->doubles.mandelboxFoldingLimit = 1;
+	params->doubles.mandelboxFoldingValue = 2;
+	params->doubles.mandelboxFoldingSphericalMin = 0.5;
+	params->doubles.mandelboxFoldingSphericalFixed = 1.0;
+	params->doubles.mandelboxScale = 2.0;
+	params->mandelboxRotationsEnabled = false;
 
 	params->doubles.stereoEyeDistance = 0.1;
 	params->stereoEnabled = false;

@@ -1217,6 +1217,7 @@ void CopyParams(sParamRender *src, sFractal *dest)
 	dest->foldingValue = src->doubles.foldingValue;
 	dest->foldingSphericalFixed = src->doubles.foldingSphericalFixed;
 	dest->foldingSphericalMin = src->doubles.foldingSphericalMin;
+
 	dest->IFSDirection = src->IFSDirection;
 	dest->IFSDistance = src->IFSDistance;
 	dest->IFSOffset = src->doubles.IFSOffset;
@@ -1235,6 +1236,7 @@ void CopyParams(sParamRender *src, sFractal *dest)
 	dest->IFSAbsX = src->IFSAbsX;
 	dest->IFSAbsY = src->IFSAbsY;
 	dest->IFSAbsZ = src->IFSAbsZ;
+
 	dest->hybridFormula1 = src->hybridFormula1;
 	dest->hybridFormula2 = src->hybridFormula2;
 	dest->hybridFormula3 = src->hybridFormula3;
@@ -1253,6 +1255,35 @@ void CopyParams(sParamRender *src, sFractal *dest)
 	dest->formulaSequence = src->formulaSequence;
 	dest->hybridPowerSequence = src->hybridPowerSequence;
 	dest->hybridCyclic = src->hybridCyclic;
+
+	dest->mandelboxMainRot = src->mandelboxMainRot;
+	dest-> mandelboxRot1X = src->mandelboxRot1X;
+	dest-> mandelboxRot1Y = src->mandelboxRot1Y;
+	dest-> mandelboxRot1Z = src->mandelboxRot1Z;
+	dest-> mandelboxRot2X = src->mandelboxRot2X;
+	dest-> mandelboxRot2Y = src->mandelboxRot2Y;
+	dest-> mandelboxRot2Z = src->mandelboxRot2Z;
+	dest-> mandelboxRot1Xinv = src->mandelboxRot1Xinv;
+	dest-> mandelboxRot1Yinv = src->mandelboxRot1Yinv;
+	dest-> mandelboxRot1Zinv = src->mandelboxRot1Zinv;
+	dest-> mandelboxRot2Xinv = src->mandelboxRot2Xinv;
+	dest-> mandelboxRot2Yinv = src->mandelboxRot2Yinv;
+	dest-> mandelboxRot2Zinv = src->mandelboxRot2Zinv;
+
+	dest->mandelboxScale = src->doubles.mandelboxScale;
+	dest->mandelboxFoldingLimit = src->doubles.mandelboxFoldingLimit;
+	dest->mandelboxFoldingValue = src->doubles.mandelboxFoldingValue;
+	dest->mandelboxFoldingSphericalMin = src->doubles.mandelboxFoldingSphericalMin;
+	dest->mandelboxFoldingSphericalFixed = src->doubles.mandelboxFoldingSphericalFixed;
+
+	dest->mandelboxColorFactorR = src->doubles.mandelboxColorFactorR;
+	dest->mandelboxColorFactorX = src->doubles.mandelboxColorFactorX;
+	dest->mandelboxColorFactorY = src->doubles.mandelboxColorFactorY;
+	dest->mandelboxColorFactorZ = src->doubles.mandelboxColorFactorZ;
+	dest->mandelboxColorFactorSp1 = src->doubles.mandelboxColorFactorSp1;
+	dest->mandelboxColorFactorSp2 = src->doubles.mandelboxColorFactorSp2;
+
+	dest->mandelboxRotationsEnabled  = src->mandelboxRotationsEnabled;
 }
 
 void RecalculateIFSParams(sParamRender *params)
@@ -1269,6 +1300,43 @@ void RecalculateIFSParams(sParamRender *params)
 		params->IFSRot[i].RotateX(params->IFSGamma[i]);
 		params->IFSDirection[i].Normalize();
 	}
+
+	params->mandelboxMainRot.Null();
+	params->mandelboxMainRot.RotateZ(params->doubles.mandelboxRotationMainGamma);
+	params->mandelboxMainRot.RotateY(params->doubles.mandelboxRotationMainBeta);
+	params->mandelboxMainRot.RotateX(params->doubles.mandelboxRotationMainAlfa);
+
+	params->mandelboxRot1X.Null();
+	params->mandelboxRot1X.RotateZ(params->doubles.mandelboxRotationX1Gamma);
+	params->mandelboxRot1X.RotateY(params->doubles.mandelboxRotationX1Beta);
+	params->mandelboxRot1X.RotateX(params->doubles.mandelboxRotationX1Alfa);
+	params->mandelboxRot2X.Null();
+	params->mandelboxRot2X.RotateZ(params->doubles.mandelboxRotationX2Gamma);
+	params->mandelboxRot2X.RotateY(params->doubles.mandelboxRotationX2Beta);
+	params->mandelboxRot2X.RotateX(params->doubles.mandelboxRotationX2Alfa);
+	params->mandelboxRot1Y.Null();
+	params->mandelboxRot1Y.RotateZ(params->doubles.mandelboxRotationY1Gamma);
+	params->mandelboxRot1Y.RotateY(params->doubles.mandelboxRotationY1Beta);
+	params->mandelboxRot1Y.RotateX(params->doubles.mandelboxRotationY1Alfa);
+	params->mandelboxRot2Y.Null();
+	params->mandelboxRot2Y.RotateZ(params->doubles.mandelboxRotationY2Gamma);
+	params->mandelboxRot2Y.RotateY(params->doubles.mandelboxRotationY2Beta);
+	params->mandelboxRot2Y.RotateX(params->doubles.mandelboxRotationY2Alfa);
+	params->mandelboxRot1Z.Null();
+	params->mandelboxRot1Z.RotateZ(params->doubles.mandelboxRotationZ1Gamma);
+	params->mandelboxRot1Z.RotateY(params->doubles.mandelboxRotationZ1Beta);
+	params->mandelboxRot1Z.RotateX(params->doubles.mandelboxRotationZ1Alfa);
+	params->mandelboxRot2Z.Null();
+	params->mandelboxRot2Z.RotateZ(params->doubles.mandelboxRotationZ2Gamma);
+	params->mandelboxRot2Z.RotateY(params->doubles.mandelboxRotationZ2Beta);
+	params->mandelboxRot2Z.RotateX(params->doubles.mandelboxRotationZ2Alfa);
+
+	params->mandelboxRot1Xinv = params->mandelboxRot1X.Transpose();
+	params->mandelboxRot1Yinv = params->mandelboxRot1Y.Transpose();
+	params->mandelboxRot1Zinv = params->mandelboxRot1Z.Transpose();
+	params->mandelboxRot2Xinv = params->mandelboxRot2X.Transpose();
+	params->mandelboxRot2Yinv = params->mandelboxRot2Y.Transpose();
+	params->mandelboxRot2Zinv = params->mandelboxRot2Z.Transpose();
 }
 
 void CreateFormulaSequence(sParamRender *params)

@@ -141,6 +141,7 @@ public:
 	double GetAlfa();
 	double GetBeta();
 	double GetGamma();
+	CRotationMatrix Transpose(void);
 
 private:
 	CMatrix33 matrix;
