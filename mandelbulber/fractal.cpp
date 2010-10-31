@@ -41,9 +41,9 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 
 	CVector3 constant;
 
-	double fixedRadius = par.foldingSphericalFixed;
+	double fixedRadius = par.mandelboxFoldingSphericalFixed;
 	double fR2 = fixedRadius * fixedRadius;
-	double minRadius = par.foldingSphericalMin;
+	double minRadius = par.mandelboxFoldingSphericalMin;
 	double mR2 = minRadius * minRadius;
 	double tglad_factor1 = fR2 / mR2;
 
@@ -311,88 +311,88 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				{
 					bool lockout = false;
 					z = par.mandelboxRot1X.RotateVector(z);
-					if (z.x > par.foldingLimit)
+					if (z.x > par.mandelboxFoldingLimit)
 					{
-						z.x = par.foldingValue - z.x;
+						z.x = par.mandelboxFoldingValue - z.x;
 						tgladColor += par.mandelboxColorFactorX;
 						lockout = true;
 					}
 					z = par.mandelboxRot1Xinv.RotateVector(z);
 
 					z = par.mandelboxRot2X.RotateVector(z);
-					if (!lockout && z.x < -par.foldingLimit)
+					if (!lockout && z.x < -par.mandelboxFoldingLimit)
 					{
-						z.x = -par.foldingValue - z.x;
+						z.x = -par.mandelboxFoldingValue - z.x;
 						tgladColor += par.mandelboxColorFactorX;
 					}
 					z = par.mandelboxRot2Xinv.RotateVector(z);
 
 					lockout = false;
 					z = par.mandelboxRot1Y.RotateVector(z);
-					if (z.y > par.foldingLimit)
+					if (z.y > par.mandelboxFoldingLimit)
 					{
-						z.y = par.foldingValue - z.y;
+						z.y = par.mandelboxFoldingValue - z.y;
 						tgladColor += par.mandelboxColorFactorY;
 						lockout = true;
 					}
 					z = par.mandelboxRot1Yinv.RotateVector(z);
 
 					z = par.mandelboxRot2Y.RotateVector(z);
-					if (!lockout && z.y < -par.foldingLimit)
+					if (!lockout && z.y < -par.mandelboxFoldingLimit)
 					{
-						z.y = -par.foldingValue - z.y;
+						z.y = -par.mandelboxFoldingValue - z.y;
 						tgladColor += par.mandelboxColorFactorY;
 					}
 					z = par.mandelboxRot2Yinv.RotateVector(z);
 
 					lockout = false;
 					z = par.mandelboxRot1Z.RotateVector(z);
-					if (z.z > par.foldingLimit)
+					if (z.z > par.mandelboxFoldingLimit)
 					{
-						z.z = par.foldingValue - z.z;
+						z.z = par.mandelboxFoldingValue - z.z;
 						tgladColor += par.mandelboxColorFactorZ;
 						lockout = true;
 					}
 					z = par.mandelboxRot1Zinv.RotateVector(z);
 
 					z = par.mandelboxRot2Z.RotateVector(z);
-					if (!lockout && z.z < -par.foldingLimit)
+					if (!lockout && z.z < -par.mandelboxFoldingLimit)
 					{
-						z.z = -par.foldingValue - z.z;
+						z.z = -par.mandelboxFoldingValue - z.z;
 						tgladColor += par.mandelboxColorFactorZ;
 					}
 					z = par.mandelboxRot2Zinv.RotateVector(z);
 				}
 				else
 				{
-					if (z.x > par.foldingLimit)
+					if (z.x > par.mandelboxFoldingLimit)
 					{
-						z.x = par.foldingValue - z.x;
+						z.x = par.mandelboxFoldingValue - z.x;
 						tgladColor += par.mandelboxColorFactorX;
 					}
-					else if (z.x < -par.foldingLimit)
+					else if (z.x < -par.mandelboxFoldingLimit)
 					{
-						z.x = -par.foldingValue - z.x;
+						z.x = -par.mandelboxFoldingValue - z.x;
 						tgladColor += par.mandelboxColorFactorX;
 					}
-					if (z.y > par.foldingLimit)
+					if (z.y > par.mandelboxFoldingLimit)
 					{
-						z.y = par.foldingValue - z.y;
+						z.y = par.mandelboxFoldingValue - z.y;
 						tgladColor += par.mandelboxColorFactorY;
 					}
-					else if (z.y < -par.foldingLimit)
+					else if (z.y < -par.mandelboxFoldingLimit)
 					{
-						z.y = -par.foldingValue - z.y;
+						z.y = -par.mandelboxFoldingValue - z.y;
 						tgladColor += par.mandelboxColorFactorY;
 					}
-					if (z.z > par.foldingLimit)
+					if (z.z > par.mandelboxFoldingLimit)
 					{
-						z.z = par.foldingValue - z.z;
+						z.z = par.mandelboxFoldingValue - z.z;
 						tgladColor += par.mandelboxColorFactorZ;
 					}
-					else if (z.z < -par.foldingLimit)
+					else if (z.z < -par.mandelboxFoldingLimit)
 					{
-						z.z = -par.foldingValue - z.z;
+						z.z = -par.mandelboxFoldingValue - z.z;
 						tgladColor += par.mandelboxColorFactorZ;
 					}
 				}
