@@ -13,7 +13,7 @@
 void fprintfDot(FILE *file, const char *string, double value, sAddData *addData = 0);
 double atof2(char *str, bool locale_dot, sAddData *addData = 0);
 void SaveSettings(char *filename, sParamRender params, sParamSpecial *special = 0);
-bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special = 0);
+bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special = 0, bool disableMessages = false);
 void DefaultValues(sParamRender *params);
 void ParamsAllocMem(sParamRender *fractParam);
 void ParamsReleaseMem(sParamRender *fractParam);

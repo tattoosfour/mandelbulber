@@ -1403,7 +1403,7 @@ void MainRender(void)
 
 			sParamRender fractParamLoaded;
 			ParamsAllocMem(&fractParamLoaded);
-			LoadSettings(filename2, fractParamLoaded);
+			LoadSettings(filename2, fractParamLoaded, NULL, true);
 			WriteLogDouble("Keyframe loaded", keyNumber);
 			morph.AddData(keyNumber, (double*) &fractParamLoaded);
 			IFSToMorph(IFSdouble, &fractParamLoaded);
@@ -1799,7 +1799,7 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage)
 	{
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
-		LoadSettings(settingsFile, fractParamLoaded);
+		LoadSettings(settingsFile, fractParamLoaded, NULL, true);
 
 		fractParamLoaded.image_width = miniImage->GetWidth();
 		fractParamLoaded.image_height = miniImage->GetHeight();
