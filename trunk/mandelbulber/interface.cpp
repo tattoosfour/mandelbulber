@@ -2175,7 +2175,6 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_widget_show_all(window_interface);
 
-	ChangedComboScale(NULL, NULL);
 	ChangedComboFormula(NULL, NULL);
 	ChangedTgladFoldingMode(NULL, NULL);
 	ChangedJulia(NULL, NULL);

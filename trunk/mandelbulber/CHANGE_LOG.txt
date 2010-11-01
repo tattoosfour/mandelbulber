@@ -1,5 +1,14 @@
 Version history
 
+v0.95
+- added many new options for Mandelbox formula (rotations of folding planes)
+- improved coloring algorithm for Mandelbox formula
+- added zoom out by right mouse button
+- needless buttons and edit fields are dinamically disabled
+- fixed bug: removed "record keyframe" button which caused program crash
+- fixed bug: adding new keyframs during timeline initializadion causes program crash - now it's blocked during timeline initialization
+- fixed bug: program generated many errors during program closing - applied patch proposed by jwm-art (http://www.fractalforums.com/mandelbulber/mandelbulber-0-94/msg23134/#msg23134)
+
 v0.94
 
 - Added lowMem mode. When active, the program uses about 3 times less memory. Possible to render much larger images on 32-bit systems. To activate it please start the program with -lowmem parameter.
