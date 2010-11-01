@@ -1,4 +1,4 @@
-MANDELBULBER 0.94
+MANDELBULBER 0.95
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder
