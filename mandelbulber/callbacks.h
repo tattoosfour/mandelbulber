@@ -49,6 +49,12 @@ void PressedAnimationContinueRecording(GtkWidget *widget, gpointer data);
 void PressedAnimationRender(GtkWidget *widget, gpointer data);
 void ChangedComboScale(GtkWidget *widget, gpointer data);
 void ChangedComboFormula(GtkWidget *widget, gpointer data);
+void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data);
+void ChangedJulia(GtkWidget *widget, gpointer data);
+void ChangedSphericalFoldingMode(GtkWidget *widget, gpointer data);
+void ChangedLimits(GtkWidget *widget, gpointer data);
+void ChangedMandelboxRotations(GtkWidget *widget, gpointer data);
+
 void ChangedSliderFog(GtkWidget *widget, gpointer data);
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data);
 void PressedDOFUpdate(GtkWidget *widget, gpointer data);

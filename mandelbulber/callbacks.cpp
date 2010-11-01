@@ -1091,8 +1091,8 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 
 void ChangedComboFormula(GtkWidget *widget, gpointer data)
 {
-	GtkComboBox *combo = GTK_COMBO_BOX(widget);
-	int formula = gtk_combo_box_get_active(combo);
+	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
+
 	if (formula == 0 || formula == 1)
 	{
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, true);
@@ -1101,6 +1101,122 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 	{
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), false);
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
+	}
+
+	if (formula == 8)
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, false);
+	}
+
+	if ((formula == 9) || gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode)))
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, false);
+	}
+
+	if (formula == 0 || formula == 1 || formula == 4)
+	{
+		gtk_widget_set_sensitive(Interface.edit_power, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_power, false);
+	}
+
+	if ((formula == 10))
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_hybrid, true);
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
+		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_hybrid, false);
+	}
+}
+
+void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_tglad_folding_1, true);
+		gtk_widget_set_sensitive(Interface.edit_tglad_folding_2, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_tglad_folding_1, false);
+		gtk_widget_set_sensitive(Interface.edit_tglad_folding_2, false);
+	}
+}
+
+void ChangedSphericalFoldingMode(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSphericalFoldingMode)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_spherical_folding_1, true);
+		gtk_widget_set_sensitive(Interface.edit_spherical_folding_2, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_spherical_folding_1, false);
+		gtk_widget_set_sensitive(Interface.edit_spherical_folding_2, false);
+	}
+}
+
+void ChangedJulia(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkJulia)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_julia_a, true);
+		gtk_widget_set_sensitive(Interface.edit_julia_b, true);
+		gtk_widget_set_sensitive(Interface.edit_julia_c, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_julia_a, false);
+		gtk_widget_set_sensitive(Interface.edit_julia_b, false);
+		gtk_widget_set_sensitive(Interface.edit_julia_c, false);
+	}
+}
+
+void ChangedLimits(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkLimits)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_amin, true);
+		gtk_widget_set_sensitive(Interface.edit_amax, true);
+		gtk_widget_set_sensitive(Interface.edit_bmin, true);
+		gtk_widget_set_sensitive(Interface.edit_bmax, true);
+		gtk_widget_set_sensitive(Interface.edit_cmin, true);
+		gtk_widget_set_sensitive(Interface.edit_cmax, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_amin, false);
+		gtk_widget_set_sensitive(Interface.edit_amax, false);
+		gtk_widget_set_sensitive(Interface.edit_bmin, false);
+		gtk_widget_set_sensitive(Interface.edit_bmax, false);
+		gtk_widget_set_sensitive(Interface.edit_cmin, false);
+		gtk_widget_set_sensitive(Interface.edit_cmax, false);
+	}
+}
+
+void ChangedMandelboxRotations(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable)))
+	{
+		gtk_widget_set_sensitive(Interface.tableMandelboxRotations, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.tableMandelboxRotations, false);
 	}
 }
 

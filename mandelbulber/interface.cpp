@@ -399,7 +399,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 
 		params->mandelboxRotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
 		params->doubles.mandelboxFoldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
-		params->doubles.mandelboxFoldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingLimit);
+		params->doubles.mandelboxFoldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingValue);
 		params->doubles.mandelboxFoldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)), &special->mandelboxFoldingSphericalFixed);
 		params->doubles.mandelboxFoldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)), &special->mandelboxFoldingSphericalMin);
 		params->doubles.mandelboxRotationX1Alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa)), &special->mandelboxRotationX1Alfa) / 180.0 * M_PI;
@@ -943,9 +943,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	//get scrollbar size
 	GtkWidget *hscrollbar = gtk_scrolled_window_get_hscrollbar(GTK_SCROLLED_WINDOW(scrolled_window));
-	GtkAllocation scrollBarAllocation;
-	gtk_widget_get_allocation (hscrollbar,&scrollBarAllocation);
-	scrollbarSize = scrollBarAllocation.height;
+	scrollbarSize = hscrollbar->allocation.height;
 
 	//------------------- okno histogramu iteracji ------------
 
@@ -1556,8 +1554,6 @@ void CreateInterface(sParamRender *default_settings)
 	g_signal_connect(G_OBJECT(Interface.buAnimationRecordTrack), "clicked", G_CALLBACK(PressedAnimationRecord), NULL);
 	g_signal_connect(G_OBJECT(Interface.buAnimationContinueRecord), "clicked", G_CALLBACK(PressedAnimationContinueRecording), NULL);
 	g_signal_connect(G_OBJECT(Interface.buAnimationRenderTrack), "clicked", G_CALLBACK(PressedAnimationRender), NULL);
-	g_signal_connect(G_OBJECT(Interface.combo_imageScale), "changed", G_CALLBACK(ChangedComboScale), NULL);
-	g_signal_connect(G_OBJECT(Interface.comboFractType), "changed", G_CALLBACK(ChangedComboFormula), NULL);
 	g_signal_connect(G_OBJECT(Interface.adjustmentFogDepth), "value-changed", G_CALLBACK(ChangedSliderFog), NULL);
 	g_signal_connect(G_OBJECT(Interface.adjustmentFogDepthFront), "value-changed", G_CALLBACK(ChangedSliderFog), NULL);
 	g_signal_connect(G_OBJECT(Interface.checkFogEnabled), "clicked", G_CALLBACK(ChangedSliderFog), NULL);
@@ -1577,6 +1573,14 @@ void CreateInterface(sParamRender *default_settings)
 	g_signal_connect(G_OBJECT(Interface.buLoadSound), "clicked", G_CALLBACK(PressedLoadSound), NULL);
 	g_signal_connect(G_OBJECT(Interface.buGetPaletteFromImage), "clicked", G_CALLBACK(PressedGetPaletteFromImage), NULL);
 	g_signal_connect(G_OBJECT(Interface.buTimeline), "clicked", G_CALLBACK(PressedTimeline), NULL);
+
+	g_signal_connect(G_OBJECT(Interface.combo_imageScale), "changed", G_CALLBACK(ChangedComboScale), NULL);
+	g_signal_connect(G_OBJECT(Interface.comboFractType), "changed", G_CALLBACK(ChangedComboFormula), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkTgladMode), "clicked", G_CALLBACK(ChangedTgladFoldingMode), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkJulia), "clicked", G_CALLBACK(ChangedJulia), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkSphericalFoldingMode), "clicked", G_CALLBACK(ChangedSphericalFoldingMode), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkLimits), "clicked", G_CALLBACK(ChangedLimits), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkMandelboxRotationsEnable), "clicked", G_CALLBACK(ChangedMandelboxRotations), NULL);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -1687,7 +1691,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.checkIFSFoldingMode, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxQuality, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("8,0", "power/scale:", 5, Interface.edit_power), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("8,0", "power:", 5, Interface.edit_power), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "maximum iter:", 5, Interface.edit_maxN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "minimum iter:", 5, Interface.edit_minN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "resolution:", 5, Interface.edit_DE_thresh), false, false, 1);
@@ -2170,6 +2174,14 @@ void CreateInterface(sParamRender *default_settings)
 	CreateTooltips();
 
 	gtk_widget_show_all(window_interface);
+
+	ChangedComboScale(NULL, NULL);
+	ChangedComboFormula(NULL, NULL);
+	ChangedTgladFoldingMode(NULL, NULL);
+	ChangedJulia(NULL, NULL);
+	ChangedSphericalFoldingMode(NULL, NULL);
+	ChangedLimits(NULL, NULL);
+	ChangedMandelboxRotations(NULL, NULL);
 
 	//Writing default settings
 	WriteInterface(default_settings);

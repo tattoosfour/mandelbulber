@@ -49,6 +49,8 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 
 	double tgladDE = par.mandelboxScale;
 
+	double scale = par.mandelboxScale;
+
 	enumFractalFormula actualFormula = par.formula;
 	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) tgladDE = 1.0;
 	double tgladColor = 1.0;
@@ -72,10 +74,12 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	{
 		//buddhabrot[L].point = z;
 
+
 		if (hybridEnabled)
 		{
 			actualFormula = par.formulaSequence[L];
-			p = par.hybridPowerSequence[L];
+			p = par.hybridPowerSequence[L];\
+			scale = p;
 		}
 
 		if (par.IFSFoldingMode)
@@ -139,11 +143,6 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				tgladColor *= 0.9;
 			}
 			r = z.Length();
-		}
-
-		if (par.tgladFoldingMode || actualFormula == tglad)
-		{
-
 		}
 
 		if (par.sphericalFoldingMode)
@@ -399,7 +398,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 
 				r = z.Length();
 
-				double scale = par.mandelboxScale;
+
 				double r2 = r * r;
 
 				if (r2 < mR2)
