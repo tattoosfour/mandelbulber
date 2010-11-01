@@ -416,7 +416,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 					tgladColor += par.mandelboxColorFactorSp2;
 				}
 
-				if(par.mandelboxRotationsEnabled) z = par.mandelboxMainRot.RotateVector(z);
+				z = par.mandelboxMainRot.RotateVector(z);
 
 				z = z * scale + constant;
 				tgladDE *= scale;
