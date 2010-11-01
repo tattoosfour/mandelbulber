@@ -38,6 +38,10 @@ int cTimeline::Initialize(char *keyframesPath)
 
 	CreateInterface(numberOfKeyframes);
 
+	gtk_widget_set_sensitive(timelineInterface.buAnimationDeleteKeyframe, false);
+	gtk_widget_set_sensitive(timelineInterface.buAnimationInsertKeyframe, false);
+	gtk_widget_set_sensitive(timelineInterface.buAnimationRecordKey2, false);
+
 	char filename2[1000];
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
 
@@ -74,6 +78,10 @@ int cTimeline::Initialize(char *keyframesPath)
 		}
 	}
 	gtk_widget_queue_draw(timelineInterface.table);
+
+	gtk_widget_set_sensitive(timelineInterface.buAnimationDeleteKeyframe, true);
+	gtk_widget_set_sensitive(timelineInterface.buAnimationInsertKeyframe, true);
+	gtk_widget_set_sensitive(timelineInterface.buAnimationRecordKey2, true);
 
 	isCreated = true;
 	keyframeCount = numberOfKeyframes;

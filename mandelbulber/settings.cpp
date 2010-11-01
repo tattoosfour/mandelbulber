@@ -451,7 +451,7 @@ void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 	if (freeSpecial) delete special;
 }
 
-bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
+bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, bool disableMessages)
 {
 	DefaultValues(&params);
 	paletteLoadedFromSettingsFile = false;
@@ -815,7 +815,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special)
 		if (lineCounter != 288)
 		{
 			printf("number of lines in settings file (should be 288): %d\n", lineCounter);
-			if (!noGUI)
+			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
 						"Warning! Settings file was created in other version of Mandelbulber\nfile: %s", filename);

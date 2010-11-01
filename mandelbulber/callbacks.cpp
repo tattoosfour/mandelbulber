@@ -78,6 +78,10 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 		int height = mainImage->GetHeight();
 
 		double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
+		if(event->button == 3)
+		{
+			closeUpRatio = 1.0/closeUpRatio;
+		}
 
 		sParamRender params;
 		ParamsAllocMem(&params);
@@ -1449,7 +1453,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	{
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
-		LoadSettings(filename2, fractParamLoaded);
+		LoadSettings(filename2, fractParamLoaded, NULL, true);
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
 
@@ -1504,7 +1508,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 		{
 			sParamRender fractParamLoaded;
 			ParamsAllocMem(&fractParamLoaded);
-			LoadSettings(filename2, fractParamLoaded);
+			LoadSettings(filename2, fractParamLoaded, NULL, true);
 			WriteInterface(&fractParamLoaded);
 			ParamsReleaseMem(&fractParamLoaded);
 
@@ -1548,7 +1552,7 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 	{
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
-		LoadSettings(filename2, fractParamLoaded);
+		LoadSettings(filename2, fractParamLoaded, NULL, true);
 		WriteInterface(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		ParamsReleaseMem(&fractParamLoaded);
@@ -1586,7 +1590,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 	{
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
-		LoadSettings(filename2, fractParamLoaded);
+		LoadSettings(filename2, fractParamLoaded, NULL, true);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
@@ -1621,6 +1625,16 @@ void PressedUndo(GtkWidget *widget, gpointer data)
 		WriteInterface(&undoParams);
 	}
 	ParamsReleaseMem(&undoParams);
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
 }
 
 void PressedRedo(GtkWidget *widget, gpointer data)
@@ -1632,6 +1646,16 @@ void PressedRedo(GtkWidget *widget, gpointer data)
 		WriteInterface(&undoParams);
 	}
 	ParamsReleaseMem(&undoParams);
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
+	Interface_data.continueRecord = false;
+	Interface_data.keyframeMode = false;
+
+	programClosed = true;
+	isPostRendering = false;
+	renderRequest = true;
 }
 
 void PressedBuddhabrot(GtkWidget *widget, gpointer data)
