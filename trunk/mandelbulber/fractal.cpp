@@ -39,6 +39,8 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	double th_dz = 0;
 	double p = par.power; //mandelbulb power
 
+	CRotationMatrix rotM;
+
 	CVector3 constant;
 
 	double fixedRadius = par.mandelboxFoldingSphericalFixed;
@@ -147,18 +149,22 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 
 		if (par.sphericalFoldingMode)
 		{
-			double r2 = r * r;
-			if (r2 < mR2)
+			double fR2_2 = par.foldingSphericalFixed * par.foldingSphericalFixed;
+			double mR2_2 = par.foldingSphericalMin * par.foldingSphericalMin;
+			double r2_2 = r * r;
+			double tglad_factor1_2 = fR2_2 / mR2_2;
+
+			if (r2_2 < mR2_2)
 			{
-				z = z * tglad_factor1;
-				tgladDE *= tglad_factor1;
+				z = z * tglad_factor1_2;
+				tgladDE *= tglad_factor1_2;
 				tgladColor += 1;
 			}
-			else if (r2 < fR2)
+			else if (r2_2 < fR2_2)
 			{
-				double tglad_factor2 = fR2 / r2;
-				z = z * tglad_factor2;
-				tgladDE *= tglad_factor2;
+				double tglad_factor2_2 = fR2_2 / r2_2;
+				z = z * tglad_factor2_2;
+				tgladDE *= tglad_factor2_2;
 				tgladColor += 10;
 			}
 			r = z.Length();
@@ -198,13 +204,88 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				r = z.Length();
 				break;
 			}
+			case mandelbulb2:
+			{
+				double tempR;
+				tempR = sqrt(z.x * z.x + z.y * z.y);
+				z *= (1.0 / tempR);
+				temp = z.x * z.x - z.y * z.y;
+				z.y = 2.0 * z.x * z.y;
+				z.x = temp;
+				z *= tempR;
+
+				tempR = sqrt(z.y * z.y + z.z * z.z);
+				z *= (1.0 / tempR);
+				temp = z.y * z.y - z.z * z.z;
+				z.z = 2.0 * z.y * z.z;
+				z.y = temp;
+				z *= tempR;
+
+				tempR = sqrt(z.x * z.x + z.z * z.z);
+				z *= (1.0 / tempR);
+				temp = z.x * z.x - z.z * z.z;
+				z.z = 2.0 * z.x * z.z;
+				z.x = temp;
+				z *= tempR;
+
+				z = z * r;
+				z += constant;
+				r = z.Length();
+				break;
+			}
+			case mandelbulb3:
+			{
+				double tempR;
+
+				double sign = 1.0;
+				double sign2 = 1.0;
+
+				if (z.x < 0) sign2 = -1.0;
+				tempR = sqrt(z.x * z.x + z.y * z.y);
+				z *= (1.0 / tempR);
+				temp = z.x * z.x - z.y * z.y;
+				z.y = 2.0 * z.x * z.y;
+				z.x = temp;
+				z *= tempR;
+
+				if (z.x < 0) sign = -1.0;
+				tempR = sqrt(z.x * z.x + z.z * z.z);
+				z *= (1.0 / tempR);
+				temp = z.x * z.x - z.z * z.z;
+				z.z = 2.0 * z.x * z.z * sign2;
+				z.x = temp * sign;
+				z *= tempR;
+
+				z = z * r;
+				z += constant;
+				r = z.Length();
+				break;
+			}
+			case mandelbulb4:
+			{
+				double rp = pow(r, p - 1);
+
+				double angZ = atan2(z.y, z.x);
+				double angY = atan2(z.z, z.x);
+				double angX = atan2(z.z, z.y);
+
+				CRotationMatrix rotM;
+				rotM.RotateX(angX * (p - 1));
+				rotM.RotateY(angY * (p - 1));
+				rotM.RotateZ(angZ * (p - 1));
+
+				z = rotM.RotateVector(z) * rp + constant;
+				r = z.Length();
+				break;
+			}
+
 			case xenodreambuie:
 			{
 				double rp = pow(r, p);
 				double th = atan2(z.y, z.x);
 				double ph = acos(z.z / r);
 				if (ph > 0.5 * M_PI)
-				{
+				{	
 					ph = M_PI - ph;
 				}
 				else if (ph < -0.5 * M_PI)

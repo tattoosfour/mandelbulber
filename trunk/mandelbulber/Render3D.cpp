@@ -1439,7 +1439,7 @@ void MainRender(void)
 
 		if (noGUI && noGUIdata.startFrame > 0) startFrame = noGUIdata.startFrame;
 		if (noGUI && noGUIdata.endFrame < 99999) endFrame = noGUIdata.endFrame;
-		if(endFrame > maxKeyNumber * fractParam.framesPerKeyframe) endFrame = maxKeyNumber * fractParam.framesPerKeyframe;
+		if(endFrame > maxKeyNumber * fractParam.framesPerKeyframe && Interface_data.keyframeMode) endFrame = maxKeyNumber * fractParam.framesPerKeyframe;
 	}
 
 	//rewinding coordinates file to the first startFame

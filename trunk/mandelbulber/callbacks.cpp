@@ -1121,7 +1121,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.tab_box_IFS, false);
 	}
 
-	if (formula == 0 || formula == 1 || formula == 4)
+	if (formula == 0 || formula == 1 || formula == 4 || formula == 12)
 	{
 		gtk_widget_set_sensitive(Interface.edit_power, true);
 	}
@@ -1130,7 +1130,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.edit_power, false);
 	}
 
-	if ((formula == 10))
+	if ((formula == 13))
 	{
 		gtk_widget_set_sensitive(Interface.tab_box_hybrid, true);
 		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
@@ -1167,6 +1167,19 @@ void ChangedSphericalFoldingMode(GtkWidget *widget, gpointer data)
 	{
 		gtk_widget_set_sensitive(Interface.edit_spherical_folding_1, false);
 		gtk_widget_set_sensitive(Interface.edit_spherical_folding_2, false);
+	}
+}
+
+void ChangedIFSFoldingMode(GtkWidget *widget, gpointer data)
+{
+	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
+	if ((formula == 9) || gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode)))
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, false);
 	}
 }
 

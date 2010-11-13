@@ -238,6 +238,9 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 7) formula2 = menger_sponge;
 	if (formula == 8) formula2 = tglad;
 	if (formula == 9) formula2 = kaleidoscopic;
+	if (formula == 10) formula2 = mandelbulb2;
+	if (formula == 11) formula2 = mandelbulb3;
+	if (formula == 12) formula2 = mandelbulb4;
 	return formula2;
 }
 
@@ -254,6 +257,9 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == menger_sponge) formula2 = 7;
 	if (formula == tglad) formula2 = 8;
 	if (formula == kaleidoscopic) formula2 = 9;
+	if (formula == mandelbulb2) formula2 = 10;
+	if (formula == mandelbulb3) formula2 = 11;
+	if (formula == mandelbulb4) formula2 = 12;
 	return formula2;
 }
 
@@ -515,7 +521,10 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		if (formula == 7) params->formula = menger_sponge;
 		if (formula == 8) params->formula = tglad;
 		if (formula == 9) params->formula = kaleidoscopic;
-		if (formula == 10) params->formula = hybrid;
+		if (formula == 10) params->formula = mandelbulb2;
+		if (formula == 11) params->formula = mandelbulb3;
+		if (formula == 12) params->formula = mandelbulb4;
+		if (formula == 13) params->formula = hybrid;
 
 		params->hybridFormula1 = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula1)));
 		params->hybridFormula2 = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula2)));
@@ -821,7 +830,10 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	if (params->formula == menger_sponge) formula = 7;
 	if (params->formula == tglad) formula = 8;
 	if (params->formula == kaleidoscopic) formula = 9;
-	if (params->formula == hybrid) formula = 10;
+	if (params->formula == mandelbulb2) formula = 10;
+	if (params->formula == mandelbulb3) formula = 11;
+	if (params->formula == mandelbulb4) formula = 12;
+	if (params->formula == hybrid) formula = 13;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboHybridFormula1), FormulaNumberData2GUI(params->hybridFormula1));
@@ -899,6 +911,9 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Menger sponge");
 	gtk_combo_box_append_text(combo, "Mandelbox");
 	gtk_combo_box_append_text(combo, "Kaleidoscopic IFS");
+	gtk_combo_box_append_text(combo, "Modified Mandelbulb 1");
+	gtk_combo_box_append_text(combo, "Modified Mandelbulb 2");
+	gtk_combo_box_append_text(combo, "Modified Mandelbulb 3");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1374,6 +1389,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Menger sponge");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Tglad's formula (Mandelbox)");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Kaleidoscopic IFS");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 3");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 	//		image scale
@@ -1579,6 +1597,7 @@ void CreateInterface(sParamRender *default_settings)
 	g_signal_connect(G_OBJECT(Interface.checkTgladMode), "clicked", G_CALLBACK(ChangedTgladFoldingMode), NULL);
 	g_signal_connect(G_OBJECT(Interface.checkJulia), "clicked", G_CALLBACK(ChangedJulia), NULL);
 	g_signal_connect(G_OBJECT(Interface.checkSphericalFoldingMode), "clicked", G_CALLBACK(ChangedSphericalFoldingMode), NULL);
+	g_signal_connect(G_OBJECT(Interface.checkIFSFoldingMode), "clicked", G_CALLBACK(ChangedIFSFoldingMode), NULL);
 	g_signal_connect(G_OBJECT(Interface.checkLimits), "clicked", G_CALLBACK(ChangedLimits), NULL);
 	g_signal_connect(G_OBJECT(Interface.checkMandelboxRotationsEnable), "clicked", G_CALLBACK(ChangedMandelboxRotations), NULL);
 
