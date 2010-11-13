@@ -13,7 +13,21 @@
 
 enum enumFractalFormula
 {
-	none = 0, trig_DE = 1, trig = 2, fast_trig = 3, hypercomplex = 4, quaternion = 5, minus_fast_trig = 6, menger_sponge = 7, tglad = 8, kaleidoscopic = 10, xenodreambuie = 11, hybrid = 12
+	none = 0,
+	trig_DE = 1,
+	trig = 2,
+	fast_trig = 3,
+	hypercomplex = 4,
+	quaternion = 5,
+	minus_fast_trig = 6,
+	menger_sponge = 7,
+	tglad = 8,
+	kaleidoscopic = 10,
+	xenodreambuie = 11,
+	hybrid = 12,
+	mandelbulb2 = 13,
+	mandelbulb3 = 14,
+	mandelbulb4 = 15
 };
 
 enum enumCalculationMode
