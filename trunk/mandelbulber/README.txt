@@ -1,10 +1,11 @@
-MANDELBULBER 0.95
+MANDELBULBER 0.96
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder
 
 contact: buddhi1980@gmail.com
-www: http://sourceforge.net/projects/mandelbulber/
+www: http://sites.google.com/site/mandelbulber/
+download site: http://sourceforge.net/projects/mandelbulber/
 SVN: http://code.google.com/p/mandelbulber/
 
 LICENCE: GNU GPL v3.0
@@ -46,9 +47,8 @@ Source files was created in Enclipse SDK CDT
 
 4. TESTED ON:
 
-- Ubuntu 9.10 x64
-- Ubuntu 9.10 x86
-- Debian Squeese
+- Ubuntu 10.10 x64
+- Ubuntu 10.10 x86
 
 5. USAGE
 

@@ -1512,7 +1512,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_HybridFormula5 = gtk_label_new("Formula #5:");
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.95\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.96\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");

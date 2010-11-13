@@ -1,5 +1,11 @@
 Version history
 
+v0.96
+- added 3 new mandelbulb-like formulas
+- fixed bug: spherical fording used wrong parameters
+- fixed bug: when IFS folding mode was activated, there was not possible to set IFS parameters
+- fixed big: rendering of Flight animation didn't working - wrong calculation of last frame number
+
 v0.95
 - added many new options for Mandelbox formula (rotations of folding planes)
 - improved coloring algorithm for Mandelbox formula
