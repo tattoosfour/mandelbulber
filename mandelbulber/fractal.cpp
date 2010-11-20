@@ -767,7 +767,15 @@ double CalculateDistance(sFractal &params, sFractal_ret &ret)
 			ret.distance = params.DE_threshold;
 		}
 
-		//ret.distance = dMin(ret.distance,0.0-params.c);
+		if (params.interiorMode)
+		{
+			if (ret.distance < 0.5 * params.DE_threshold || retval == 256)
+			{
+				ret.distance = params.DE_threshold;
+				ret.max_iter = false;
+			}
+		}
+
 		if (ret.distance < 0) ret.distance = 0;
 
 		return ret.distance;
@@ -822,6 +830,15 @@ double CalculateDistance(sFractal &params, sFractal_ret &ret)
 		if (ret.L < params.minN && ret.distance < params.DE_threshold)
 		{
 			ret.distance = params.DE_threshold;
+		}
+
+		if (params.interiorMode)
+		{
+			if (ret.distance < 0.5 * params.DE_threshold || retval == 256)
+			{
+				ret.distance = params.DE_threshold;
+				ret.max_iter = false;
+			}
 		}
 
 		//ret.distance = dMin(ret.distance,0.0-params.c);

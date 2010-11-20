@@ -28,7 +28,10 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 	double factor = 1.0 * param->doubles.zoom * wsp_persp;
 	double dist = dist_thresh;
 
-	for (double i = dist_thresh; i < factor; i += dist * param->doubles.DE_factor)
+	double start = dist_thresh;
+	if(param->interiorMode) start = dist_thresh*param->doubles.DE_factor*0.5;
+
+	for (double i = start; i < factor; i += dist * param->doubles.DE_factor)
 	{
 		point2 = point + lightVect * i;
 
@@ -43,7 +46,7 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 				dist = dist_thresh * 1.01;
 			}
 		}
-		if (dist < 0.5 * dist_thresh || calcRet.max_iter)
+		if (dist < dist_thresh || calcRet.max_iter)
 		{
 			double shadowing = i / factor;
 			shadow.R = shadowing;
@@ -128,6 +131,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
 		double delta = dist_thresh;
+		if(param->interiorMode) delta = dist_thresh * 0.1;
 
 		double s1, s2, s3, s4;
 		calcParam->N = param->N * 2;

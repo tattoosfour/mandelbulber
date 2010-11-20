@@ -1408,6 +1408,8 @@ void CopyParams(sParamRender *src, sFractal *dest)
 	dest->mandelboxColorFactorSp2 = src->doubles.mandelboxColorFactorSp2;
 
 	dest->mandelboxRotationsEnabled  = src->mandelboxRotationsEnabled;
+
+	dest->interiorMode = src->interiorMode;
 }
 
 void RecalculateIFSParams(sParamRender *params)

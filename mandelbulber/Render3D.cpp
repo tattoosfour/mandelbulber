@@ -198,6 +198,8 @@ void *MainThread(void *ptr)
 
 	//starting point for raymarching
 	double y_scan_start = (0.00001 - 1.0) / persp;
+	min_y = param.doubles.viewDistanceMin/zoom - 1.0/persp;
+	max_y = param.doubles.viewDistanceMax/zoom - 1.0/persp;
 
 	//distance value after raymarching
 	double last_distance = 0;
@@ -231,7 +233,7 @@ void *MainThread(void *ptr)
 				//giving information for another threads that this thread renders this z value
 				parametry->thread_done[z] = start + 1;
 
-				WriteLogDouble("Started rendering line", z);
+				//WriteLogDouble("Started rendering line", z);
 
 				//main loop for x values
 				for (int x = 0; x <= width - progressive; x += progressive)
@@ -360,13 +362,13 @@ void *MainThread(void *ptr)
 									if ((dist < search_limit * dist_thresh)) //1% accuracy of distance
 									{
 										binary = true;
+										if (dist < 0.1 * dist_thresh) Missed_DE_counter++;
 									}
 									else //if distance is OK, end of surface searching
 									{
 										found = true;
 										y_start = y;
 										last_distance = dist;
-
 										//printf("found in distance %e and count %d\n", dist, counter);
 										break;
 									}
@@ -379,7 +381,6 @@ void *MainThread(void *ptr)
 									found = true;
 									y_start = y;
 									last_distance = dist;
-									Missed_DE_counter++;
 									break;
 								}
 
@@ -387,7 +388,7 @@ void *MainThread(void *ptr)
 								if (!binary)
 								{
 									if (sphericalPersp) stepYpersp = dist * DE_factor;
-									else stepYpersp = dist / zoom * DE_factor; //0.75
+									else stepYpersp = (dist-0.5*dist_thresh) / zoom * DE_factor;
 								}
 
 								//step in binary searching mode
@@ -723,10 +724,10 @@ void *MainThread(void *ptr)
 				{
 					double avg_N = (double) N_counter / Loop_counter;
 					double avg_DE = (double) DE_counter / Pixel_counter;
-					printf("Average N = %f, Average DE steps = %f, Faied DE = %d\n", avg_N, avg_DE, Missed_DE_counter);
+					printf("Average N = %f, Average DE steps = %f, Failed DE = %d\n", avg_N, avg_DE, Missed_DE_counter);
 				}
 
-				WriteLogDouble("Rendering line finished", z);
+				//WriteLogDouble("Rendering line finished", z);
 			}//end if thread done
 
 		}//next z
@@ -962,7 +963,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			double iterations_per_sec = N_counter / time;
 			double avg_N = (double) N_counter / Loop_counter;
 			double avg_DE = (double) DE_counter / Pixel_counter;
-			sprintf(progressText, "Rendering done, elapsed %dh%dm%ds, iters/s %.0f, average N %.1f, average DE steps %.1f", time_h, time_min, time_s, iterations_per_sec, avg_N, avg_DE);
+			sprintf(progressText, "Rendering done, elapsed %dh%dm%ds, iters/s %.0f, average N %.1f, avg. DE steps %.1f, failed DE %d", time_h, time_min, time_s, iterations_per_sec, avg_N, avg_DE, Missed_DE_counter);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}

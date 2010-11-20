@@ -112,6 +112,8 @@ struct sParamRenderD
 	double mandelboxFoldingValue;
 	double mandelboxFoldingSphericalMin;
 	double mandelboxFoldingSphericalFixed;
+	double viewDistanceMin;
+	double viewDistanceMax;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -185,6 +187,7 @@ struct sParamRender
 	bool stereoEnabled;
 	bool quiet;
 	bool mandelboxRotationsEnabled;
+	bool interiorMode;
 	sImageSwitches imageSwitches;
 
 	enumFractalFormula formula; //type of fractal formula
@@ -351,6 +354,8 @@ struct sParamSpecial
 	sAddData mandelboxFoldingValue;
 	sAddData mandelboxFoldingSphericalMin;
 	sAddData mandelboxFoldingSphericalFixed;
+	sAddData viewDistanceMin;
+	sAddData viewDistanceMax;
 };
 
 #endif /* FRACTPARAMS_H_ */

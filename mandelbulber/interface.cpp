@@ -402,6 +402,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
+		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)), &special->viewDistanceMin);
+		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)), &special->viewDistanceMax);
+		params->interiorMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode));
 
 		params->mandelboxRotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
 		params->doubles.mandelboxFoldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
@@ -770,6 +773,8 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Beta), DoubleToString(params->doubles.mandelboxRotationZ2Beta * 180.0 / M_PI, &special->mandelboxRotationZ2Beta));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationZ2Gamma), DoubleToString(params->doubles.mandelboxRotationZ2Gamma * 180.0 / M_PI, &special->mandelboxRotationZ2Gamma));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->doubles.mandelboxScale, &special->mandelboxScale));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax, &special->viewDistanceMax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin, &special->viewDistanceMin));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -798,6 +803,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye), params->fishEye);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable), params->mandelboxRotationsEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode), params->interiorMode);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1117,6 +1123,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxMandelboxColor1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor3 = gtk_hbox_new(FALSE, 1);
+	Interface.boxFractalSwitches = gtk_hbox_new(FALSE, 1);
+	Interface.boxViewDistance = gtk_hbox_new(FALSE, 1);
 
 	//tables
 	Interface.tableLimits = gtk_table_new(2, 3, false);
@@ -1145,7 +1153,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frPredefinedLights = gtk_frame_new("Predefined Lights");
 	Interface.frMainLight = gtk_frame_new("Main light source (connected with camera)");
 	Interface.frIFSMain = gtk_frame_new("General IFS parameters");
-	Interface.frIFSParams = gtk_frame_new("Symetry vectors");
+	Interface.frIFSParams = gtk_frame_new("Symmetry vectors");
 	Interface.frKeyframeAnimation = gtk_frame_new("Keyframe animation");
 	Interface.frKeyframeAnimation2 = gtk_frame_new("Key-frames");
 	Interface.frPalette = gtk_frame_new("Colour palette");
@@ -1212,7 +1220,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorMainLight), "Main light source colour");
 	Interface.buDistributeLights = gtk_button_new_with_label("Distribute / update lights");
 	Interface.buIFSNormalizeOffset = gtk_button_new_with_label("Normalize offset vector");
-	Interface.buIFSNormalizeVectors = gtk_button_new_with_label("Normalize symetry vectors");
+	Interface.buIFSNormalizeVectors = gtk_button_new_with_label("Normalize symmetry vectors");
 	Interface.buAnimationRecordKey = gtk_button_new_with_label("Record key-frame");
 	Interface.buAnimationRenderFromKeys = gtk_button_new_with_label("Render from key-frames");
 	Interface.buUndo = gtk_button_new_with_label("Undo");
@@ -1356,6 +1364,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxColorFactorX = gtk_entry_new();
 	Interface.edit_mandelboxColorFactorY = gtk_entry_new();
 	Interface.edit_mandelboxColorFactorZ = gtk_entry_new();
+	Interface.edit_viewMinDistance = gtk_entry_new();
+	Interface.edit_viewMaxDistance = gtk_entry_new();
 
 	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa), 5);
 	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Beta), 5);
@@ -1468,6 +1478,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkStraightRotation = gtk_check_button_new_with_label("Rotation without\nusing gamma\nangle");
 	Interface.checkStereoEnabled = gtk_check_button_new_with_label("Enable stereoscopic rendering");
 	Interface.checkMandelboxRotationsEnable = gtk_check_button_new_with_label("Enable rotation of each folding plane");
+	Interface.checkInteriorMode = gtk_check_button_new_with_label("Interior mode");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1493,9 +1504,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_auxLightPre2 = gtk_label_new("Light #2:");
 	Interface.label_auxLightPre3 = gtk_label_new("Light #3:");
 	Interface.label_auxLightPre4 = gtk_label_new("Light #4:");
-	Interface.label_IFSx = gtk_label_new("symetry x");
-	Interface.label_IFSy = gtk_label_new("symetry y");
-	Interface.label_IFSz = gtk_label_new("symetry z");
+	Interface.label_IFSx = gtk_label_new("symmetry x");
+	Interface.label_IFSy = gtk_label_new("symmetry y");
+	Interface.label_IFSz = gtk_label_new("symmetry z");
 	Interface.label_IFSalfa = gtk_label_new("alfa");
 	Interface.label_IFSbeta = gtk_label_new("beta");
 	Interface.label_IFSgamma = gtk_label_new("gamma");
@@ -1716,7 +1727,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "resolution:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.checkIterThresh, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxFractalSwitches, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkInteriorMode, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxViewDistance, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, Interface.edit_viewMinDistance), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("20", "Maximum render distance:", 10, Interface.edit_viewMaxDistance), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frLimits, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLimits), Interface.boxLimits);
