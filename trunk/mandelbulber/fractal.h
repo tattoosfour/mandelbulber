@@ -103,6 +103,8 @@ struct sFractal
 	double *hybridPowerSequence;
 	bool hybridCyclic;
 
+	bool interiorMode;
+
 	CRotationMatrix mandelboxMainRot;
 	CRotationMatrix mandelboxRot1X;
 	CRotationMatrix mandelboxRot2X;

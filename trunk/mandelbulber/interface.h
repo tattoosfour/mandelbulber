@@ -153,6 +153,8 @@ struct sInterface
 	GtkWidget *boxMandelboxColor1;
 	GtkWidget *boxMandelboxColor2;
 	GtkWidget *boxMandelboxColor3;
+	GtkWidget *boxFractalSwitches;
+	GtkWidget *boxViewDistance;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -386,6 +388,8 @@ struct sInterface
 	GtkWidget *edit_mandelboxColorFactorR;
 	GtkWidget *edit_mandelboxColorFactorSp1;
 	GtkWidget *edit_mandelboxColorFactorSp2;
+	GtkWidget *edit_viewMinDistance;
+	GtkWidget *edit_viewMaxDistance;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -464,6 +468,7 @@ struct sInterface
 	GtkWidget *checkStraightRotation;
 	GtkWidget *checkStereoEnabled;
 	GtkWidget *checkMandelboxRotationsEnable;
+	GtkWidget *checkInteriorMode;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

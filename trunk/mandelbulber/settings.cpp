@@ -435,6 +435,10 @@ void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 	fprintfDot(fileSettings, "mandelbox_color_Sp2", params.doubles.mandelboxColorFactorSp2, &special->mandelboxColorFactorSp2);
 	fprintf(fileSettings, "mandelbox_rotation_enabled %d;\n", params.mandelboxRotationsEnabled);
 
+	fprintfDot(fileSettings, "view_distance_max", params.doubles.viewDistanceMax, &special->viewDistanceMax);
+	fprintfDot(fileSettings, "view_distance_min", params.doubles.viewDistanceMin, &special->viewDistanceMin);
+	fprintf(fileSettings, "interior_mode %d;\n", params.interiorMode);
+
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
 	fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
@@ -768,6 +772,10 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "mandelbox_color_Sp2")) params.doubles.mandelboxColorFactorSp2 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp2);
 				else if (!strcmp(str1, "mandelbox_rotation_enabled")) params.mandelboxRotationsEnabled = atoi(str2);
 
+				else if (!strcmp(str1, "view_distance_max")) params.doubles.viewDistanceMax = atof2(str2, locale_dot, &special->viewDistanceMax);
+				else if (!strcmp(str1, "view_distance_min")) params.doubles.viewDistanceMin = atof2(str2, locale_dot, &special->viewDistanceMin);
+				else if (!strcmp(str1, "interior_mode")) params.interiorMode = atoi(str2);
+
 				else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 				else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
 				else if (!strcmp(str1, "file_envmap")) strcpy(params.file_envmap, str2);
@@ -812,9 +820,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 288)
+		if (lineCounter != 291)
 		{
-			printf("number of lines in settings file (should be 288): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 291): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -1042,6 +1050,10 @@ void DefaultValues(sParamRender *params)
 
 	params->doubles.stereoEyeDistance = 0.1;
 	params->stereoEnabled = false;
+
+	params->interiorMode = false;
+	params->doubles.viewDistanceMin = 1e-15;
+	params->doubles.viewDistanceMax = 50;
 
 	params->quiet = false;
 
