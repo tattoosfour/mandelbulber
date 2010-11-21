@@ -1585,6 +1585,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
 
@@ -1640,6 +1641,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 			sParamRender fractParamLoaded;
 			ParamsAllocMem(&fractParamLoaded);
 			LoadSettings(filename2, fractParamLoaded, NULL, true);
+			KeepOtherSettings(&fractParamLoaded);
 			WriteInterface(&fractParamLoaded);
 			ParamsReleaseMem(&fractParamLoaded);
 
@@ -1684,9 +1686,12 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		ParamsReleaseMem(&fractParamLoaded);
+
+		gtk_widget_queue_draw(timelineInterface.table);
 
 		Interface_data.animMode = false;
 		Interface_data.playMode = false;
@@ -1722,9 +1727,12 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 		sParamRender fractParamLoaded;
 		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		KeepOtherSettings(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		WriteInterface(&fractParamLoaded);
 		ParamsReleaseMem(&fractParamLoaded);
+
+		gtk_widget_queue_draw(timelineInterface.table);
 
 		Interface_data.animMode = false;
 		Interface_data.playMode = false;
@@ -1745,6 +1753,11 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 		index++;
 		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 	}
+}
+
+void PressedTimelineRefresh(GtkWidget *widget, gpointer data)
+{
+	timeline->Refresh();
 }
 
 void PressedUndo(GtkWidget *widget, gpointer data)
@@ -2055,7 +2068,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 	{
 		timeLineWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_title(GTK_WINDOW(timeLineWindow), "Timeline");
-		gtk_widget_set_size_request(timeLineWindow, 4 * (128 + 2) + 4, 200);
+		gtk_widget_set_size_request(timeLineWindow, 4 * (128 + 2) + 4, 230);
 		gtk_widget_show(timeLineWindow);
 		g_signal_connect(G_OBJECT(timeLineWindow), "destroy", G_CALLBACK(DeleteTimelineWindow), &timeLineWindow);
 

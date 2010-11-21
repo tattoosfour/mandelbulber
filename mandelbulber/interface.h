@@ -564,6 +564,7 @@ struct sTimelineInterface
 	GtkWidget *buAnimationDeleteKeyframe;
 	GtkWidget *buNextKeyframe;
 	GtkWidget *buPreviousKeyframe;
+	GtkWidget *buRefresh;
 
 	GtkWidget *editAnimationKeyNumber;
 };

@@ -51,7 +51,7 @@ int cTimeline::Initialize(char *keyframesPath)
 		{
 			thumbnail.reset(new cImage(128, 128));
 			IndexFilename(filename2, keyframesPath, (char*) "fract", i);
-			ThumbnailRender(filename2, thumbnail.ptr());
+			ThumbnailRender(filename2, thumbnail.ptr(), 1);
 			thumbnail->CreatePreview(1.0);
 			thumbnail->ConvertTo8bit();
 			thumbnail->UpdatePreview();
@@ -164,6 +164,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	timelineInterface.buAnimationDeleteKeyframe = gtk_button_new_with_label("Delete");
 	timelineInterface.buNextKeyframe = gtk_button_new_with_label("Next");
 	timelineInterface.buPreviousKeyframe = gtk_button_new_with_label("Previous");
+	timelineInterface.buRefresh = gtk_button_new_with_label("Refresh");
 	timelineInterface.editAnimationKeyNumber = gtk_entry_new();
 
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationRecordKey2, true, true, 1);
@@ -171,6 +172,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buAnimationDeleteKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buPreviousKeyframe, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buNextKeyframe, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buRefresh, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), CreateEdit("0", "Key no.:", 5, timelineInterface.editAnimationKeyNumber), true, true, 1);
 
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxMain), timelineInterface.boxButtons, true, true, 1);
@@ -216,6 +218,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationRecordKey2), "clicked", G_CALLBACK(PressedRecordKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationInsertKeyframe), "clicked", G_CALLBACK(PressedInsertKeyframe), NULL);
 	g_signal_connect(G_OBJECT(timelineInterface.buAnimationDeleteKeyframe), "clicked", G_CALLBACK(PressedDeleteKeyframe), NULL);
+	g_signal_connect(G_OBJECT(timelineInterface.buRefresh), "clicked", G_CALLBACK(PressedTimelineRefresh), NULL);
 
 	isOpened = true;
 }
@@ -237,7 +240,7 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
 	smart_ptr<cImage> thumbnail(new cImage(128, 128));
-	ThumbnailRender(keyframeFile, thumbnail.ptr());
+	ThumbnailRender(keyframeFile, thumbnail.ptr(), 1);
 	thumbnail->CreatePreview(1.0);
 	thumbnail->ConvertTo8bit();
 	thumbnail->UpdatePreview();
@@ -351,6 +354,16 @@ void cTimeline::Reset(void)
 	}
 }
 
+void cTimeline::Refresh(void)
+{
+	gtk_widget_destroy(timelineInterface.boxMain);
+	database.reset(new cDatabase(1));
+	keyframeCount = 0;
+	isCreated = false;
+	isOpened = false;
+	Initialize(Interface_data.file_keyframes);
+}
+
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 	const char* widgetName = gtk_widget_get_name(widget);
@@ -380,7 +393,8 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		{
 			sParamRender fractParamLoaded;
 			ParamsAllocMem(&fractParamLoaded);
-			LoadSettings(filename2, fractParamLoaded);
+			LoadSettings(filename2, fractParamLoaded, NULL, true);
+			KeepOtherSettings(&fractParamLoaded);
 			WriteInterface(&fractParamLoaded);
 			last_keyframe_position = fractParamLoaded.doubles.vp;
 			ParamsReleaseMem(&fractParamLoaded);
@@ -405,3 +419,4 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		}
 	}
 }
+

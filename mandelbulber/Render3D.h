@@ -50,6 +50,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea);
 void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial);
 void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
 bool LoadTextures(sParamRender *params);
-void ThumbnailRender(char *settingsFile, cImage *miniImage);
+void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode);
 
 #endif /* RENDER3D_H_ */
