@@ -69,6 +69,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data);
 void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data);
 void PressedPreviousKeyframe(GtkWidget *widget, gpointer data);
 void PressedNextKeyframe(GtkWidget *widget, gpointer data);
+void PressedTimelineRefresh(GtkWidget *widget, gpointer data);
 void PressedUndo(GtkWidget *widget, gpointer data);
 void PressedRedo(GtkWidget *widget, gpointer data);
 void PressedBuddhabrot(GtkWidget *widget, gpointer data);

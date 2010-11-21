@@ -22,6 +22,7 @@
 #include "shaders.h"
 #include "settings.h"
 #include "algebra.hpp"
+#include "smartptr.h"
 
 bool paletteLoadedFromSettingsFile = false;
 
@@ -1107,4 +1108,37 @@ void MorphToIFS(double *IFSdouble, sParamRender *params)
 		params->IFSDistance[i] = IFSdouble[i * 8 + 6];
 		params->IFSIntensity[i] = IFSdouble[i * 8 + 7];
 	}
+}
+
+void KeepOtherSettings(sParamRender *params)
+{
+	sParamRender paramsTemp;
+	ParamsAllocMem(&paramsTemp);
+	for(int i=0; i<IFS_number_of_vectors; i++)
+	{
+		paramsTemp.IFSAlfa[i] = params->IFSAlfa[i];
+		paramsTemp.IFSBeta[i] = params->IFSBeta[i];
+		paramsTemp.IFSGamma[i] = params->IFSGamma[i];
+		paramsTemp.IFSDistance[i] = params->IFSDistance[i];
+		paramsTemp.IFSIntensity[i] = params->IFSIntensity[i];
+		paramsTemp.IFSDirection[i] = params->IFSDirection[i];
+	}
+
+	int sizeOfDoubles = sizeof(sParamRenderD);
+	smart_ptr<double> doubles(new double[sizeOfDoubles]);
+	memcpy(doubles.ptr(),&params->doubles,sizeOfDoubles);
+
+	ReadInterface(params);
+	memcpy(&params->doubles,doubles.ptr(),sizeOfDoubles);
+
+	for(int i=0; i<IFS_number_of_vectors; i++)
+	{
+		params->IFSAlfa[i] = paramsTemp.IFSAlfa[i];
+		params->IFSBeta[i] = paramsTemp.IFSBeta[i];
+		params->IFSGamma[i] = paramsTemp.IFSGamma[i];
+		params->IFSDistance[i] = paramsTemp.IFSDistance[i];
+		params->IFSIntensity[i] = paramsTemp.IFSIntensity[i];
+		params->IFSDirection[i] = paramsTemp.IFSDirection[i];
+	}
+	ParamsReleaseMem(&paramsTemp);
 }

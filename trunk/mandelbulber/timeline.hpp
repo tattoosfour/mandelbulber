@@ -16,6 +16,7 @@
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event);
 
+
 struct sTimelineRecord
 {
 	int index;
@@ -38,6 +39,7 @@ public:
 	void DeleteKeyframe(int index, char *keyframesPath);
 	void Resize(int newsize);
 	void Reset(void);
+	void Refresh(void);
 	bool isOpened;
 
 private:

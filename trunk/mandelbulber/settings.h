@@ -21,4 +21,5 @@ void IFSToMorph(double *IFSdouble, sParamRender *params);
 void MorphToIFS(double *IFSdouble, sParamRender *params);
 void MakePaletteString(sRGB *palette, char *paletteString);
 void GetPaletteFromString(sRGB *palette, char *paletteString);
+void KeepOtherSettings(sParamRender *params);
 #endif /* SETTINGS_H_ */

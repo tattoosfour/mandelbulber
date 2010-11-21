@@ -1792,15 +1792,21 @@ void MainRender(void)
 	isRendering = false;
 }
 
-void ThumbnailRender(char *settingsFile, cImage *miniImage)
+void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 {
 	printf("Rendering keyframe preview: %s\n", settingsFile);
 
 	if (FileIfExist(settingsFile))
 	{
 		sParamRender fractParamLoaded;
+
 		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(settingsFile, fractParamLoaded, NULL, true);
+
+		if (mode == 1)
+		{
+			KeepOtherSettings(&fractParamLoaded);
+		}
 
 		fractParamLoaded.image_width = miniImage->GetWidth();
 		fractParamLoaded.image_height = miniImage->GetHeight();
@@ -1828,6 +1834,9 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage)
 		Render(fractParamLoaded, miniImage, NULL);
 
 		ParamsReleaseMem(&fractParamLoaded);
+		delete fractParamLoaded.backgroundTexture;
+		delete fractParamLoaded.envmapTexture;
+		delete fractParamLoaded.lightmapTexture;
 	}
 }
 
