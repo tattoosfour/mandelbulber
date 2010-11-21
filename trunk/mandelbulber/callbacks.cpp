@@ -405,7 +405,7 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 		sprintf(windowTitle, "Mandelbulber (%s)", filename);
 		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle);
 
-		timeline.reset(new cTimeline);
+		timeline->Reset();
 	}
 	gtk_widget_destroy(dialog);
 
@@ -532,7 +532,7 @@ void PressedOkDialogFiles(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(dialog->window_files);
 	delete dialog;
 
-	timeline.reset(new cTimeline);
+	timeline->Reset();
 }
 
 void PressedCancelDialogFiles(GtkWidget *widget, gpointer data)
