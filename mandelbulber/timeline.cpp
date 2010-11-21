@@ -58,8 +58,11 @@ int cTimeline::Initialize(char *keyframesPath)
 			memcpy(record->thumbnail, thumbnail->GetPreviewPtr(), sizeof(sRGB8) * 128 * 128);
 			record->index = i; //only for testing database
 
-			if (i == 0) database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
-			else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
+			if(isOpened)
+			{
+				if (i == 0) database->SetRecord(0, (char*) record.ptr(), sizeof(sTimelineRecord));
+				else database->AddRecord((char*) record.ptr(), sizeof(sTimelineRecord));
+			}
 		}
 		if (isOpened)
 		{
@@ -334,6 +337,18 @@ void cTimeline::Resize(int newsize)
 		}
 	}
 	gtk_widget_queue_draw(timelineInterface.table);
+}
+
+void cTimeline::Reset(void)
+{
+	database.reset(new cDatabase(1));
+	keyframeCount = 0;
+	isCreated = false;
+	isOpened = false;
+	if (timeLineWindow)
+	{
+		gtk_widget_destroy(timeLineWindow);
+	}
 }
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)

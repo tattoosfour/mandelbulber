@@ -37,6 +37,7 @@ public:
 	void RecordKeyframe(int index, char *keyframeFile, bool modeInsert);
 	void DeleteKeyframe(int index, char *keyframesPath);
 	void Resize(int newsize);
+	void Reset(void);
 	bool isOpened;
 
 private:
