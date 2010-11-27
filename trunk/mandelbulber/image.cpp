@@ -104,7 +104,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		int size = blur;
 		sRGB16 center = temp_image[x + y * width];
 		unsigned short center_alpha = temp_alpha[x + y * width];
-		double factor = blur * blur * sqrt(blur);
+		double factor = blur * blur * sqrt(blur)* M_PI/3.0;
 
 		for (int yy = y - size; yy <= y + size; yy++)
 		{
@@ -122,7 +122,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 					{
 						double opN = 1.0 - op;
 						sRGB16 old = image->GetPixelImage(xx, yy);
-						unsigned old_alpha = image->GetPixelAlpha(xx, yy);
+						unsigned short old_alpha = image->GetPixelAlpha(xx, yy);
 						sRGB16 pixel;
 						pixel.R = old.R * opN + center.R * op;
 						pixel.G = old.G * opN + center.G * op;
