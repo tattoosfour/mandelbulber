@@ -233,6 +233,7 @@ void SaveSettings(char *filename, sParamRender params, sParamSpecial *special)
 	fprintfDot(fileSettings, "power", params.doubles.power, &special->power);
 	fprintf(fileSettings, "N %d;\n", params.N);
 	fprintf(fileSettings, "minN %d;\n", params.minN);
+	fprintfDot(fileSettings, "fractal_constant_factor", params.doubles.fractalConstantFactor, &special->fractalConstantFactor);
 	fprintfDot(fileSettings, "quality", params.doubles.quality, &special->quality);
 	fprintf(fileSettings, "julia_mode %d;\n", params.juliaMode);
 	fprintfDot(fileSettings, "julia_a", params.doubles.julia.x, &special->juliaX);
@@ -588,6 +589,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "power")) params.doubles.power = atof2(str2, locale_dot, &special->power);
 				else if (!strcmp(str1, "N")) params.N = atoi(str2);
 				else if (!strcmp(str1, "minN")) params.minN = atoi(str2);
+				else if (!strcmp(str1, "fractal_constant_factor")) params.doubles.fractalConstantFactor = atof2(str2, locale_dot, &special->fractalConstantFactor);
 				else if (!strcmp(str1, "quality")) params.doubles.quality = atof2(str2, locale_dot, &special->quality);
 				else if (!strcmp(str1, "julia_mode")) params.juliaMode = atoi(str2);
 				else if (!strcmp(str1, "julia_a")) params.doubles.julia.x = atof2(str2, locale_dot, &special->juliaX);
@@ -821,9 +823,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 291)
+		if (lineCounter != 292)
 		{
-			printf("number of lines in settings file (should be 291): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 292): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -1055,6 +1057,8 @@ void DefaultValues(sParamRender *params)
 	params->interiorMode = false;
 	params->doubles.viewDistanceMin = 1e-15;
 	params->doubles.viewDistanceMax = 50;
+
+	params->doubles.fractalConstantFactor = 1.0;
 
 	params->quiet = false;
 

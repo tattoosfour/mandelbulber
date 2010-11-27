@@ -133,6 +133,8 @@ struct sFractal
 	double mandelboxFoldingSphericalFixed;
 
 	bool mandelboxRotationsEnabled;
+
+	double fractalConstantFactor;
 };
 
 struct sFractal_ret

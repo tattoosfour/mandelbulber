@@ -114,6 +114,7 @@ struct sParamRenderD
 	double mandelboxFoldingSphericalFixed;
 	double viewDistanceMin;
 	double viewDistanceMax;
+	double fractalConstantFactor;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -356,6 +357,7 @@ struct sParamSpecial
 	sAddData mandelboxFoldingSphericalFixed;
 	sAddData viewDistanceMin;
 	sAddData viewDistanceMax;
+	sAddData fractalConstantFactor;
 };
 
 #endif /* FRACTPARAMS_H_ */

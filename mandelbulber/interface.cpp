@@ -405,6 +405,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)), &special->viewDistanceMin);
 		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)), &special->viewDistanceMax);
 		params->interiorMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode));
+		params->doubles.fractalConstantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)), &special->fractalConstantFactor);
 
 		params->mandelboxRotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
 		params->doubles.mandelboxFoldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
@@ -775,6 +776,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->doubles.mandelboxScale, &special->mandelboxScale));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax, &special->viewDistanceMax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin, &special->viewDistanceMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->doubles.fractalConstantFactor, &special->fractalConstantFactor));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -1366,6 +1368,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxColorFactorZ = gtk_entry_new();
 	Interface.edit_viewMinDistance = gtk_entry_new();
 	Interface.edit_viewMaxDistance = gtk_entry_new();
+	Interface.edit_FractalConstantFactor = gtk_entry_new();
 
 	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Alfa), 5);
 	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotationX1Beta), 5);
@@ -1726,6 +1729,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "minimum iter:", 5, Interface.edit_minN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "resolution:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), CreateEdit("1,0", "Fractal constant factor:", 20, Interface.edit_FractalConstantFactor), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxFractalSwitches, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
