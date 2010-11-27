@@ -1,5 +1,15 @@
 Version history
 
+v0.97
+- Improved rendering of timeline thumbnails. Now thumbnails show what exactly will be rendered during animation rendering. The same was changed for loading settings by Next/Previous
+- Added refresh button in timeline window
+- Added rendering of interiors of fractals (Interior mode). When it's enabled the fractal is rendered as a thin crust.
+- Added edit fields for changing distance of minimum and maximum distance of view
+- Improved accuracy of raymarching
+- After image rendering there is visible "failed DE" value on progress bar. This value informs how many oversteppings were occurred during rendering.
+- Added "Fractal constant factor" which modifies constant value in all fractal formulas by multiplying by this factor.
+- fixed bug: program crashed when path for keyframe files was changed and Timeline window was opened
+
 v0.96
 - added 3 new mandelbulb-like formulas
 - fixed bug: spherical fording used wrong parameters
