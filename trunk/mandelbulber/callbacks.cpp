@@ -1295,7 +1295,7 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 		if (DOFEnabled)
 		{
 			double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / persp;
-			PostRendering_DOF(mainImage, DOFRadius, DOF_focus, persp);
+			PostRendering_DOF(mainImage, DOFRadius * mainImage->GetWidth() / 1000.0, DOF_focus, persp);
 		}
 		mainImage->ConvertTo8bit();
 		mainImage->UpdatePreview();
@@ -1408,6 +1408,8 @@ void CopyParams(sParamRender *src, sFractal *dest)
 	dest->mandelboxColorFactorSp2 = src->doubles.mandelboxColorFactorSp2;
 
 	dest->mandelboxRotationsEnabled  = src->mandelboxRotationsEnabled;
+
+	dest->fractalConstantFactor = src->doubles.fractalConstantFactor;
 
 	dest->interiorMode = src->interiorMode;
 }
@@ -1575,6 +1577,8 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 
 	timeline->RecordKeyframe(index,filename2, false);
 
+	gtk_widget_queue_draw(timelineInterface.table);
+
 	index++;
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
@@ -1630,6 +1634,8 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 		last_keyframe_position = fractParamToSave.doubles.vp;
 
 		timeline->RecordKeyframe(index,filename2, true);
+
+		gtk_widget_queue_draw(timelineInterface.table);
 
 		index++;
 		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));

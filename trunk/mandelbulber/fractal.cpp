@@ -63,7 +63,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	}
 	else
 	{
-		constant = par.point;
+		constant = par.point * par.fractalConstantFactor;
 	}
 
 	bool hybridEnabled = false;

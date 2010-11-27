@@ -390,6 +390,7 @@ struct sInterface
 	GtkWidget *edit_mandelboxColorFactorSp2;
 	GtkWidget *edit_viewMinDistance;
 	GtkWidget *edit_viewMaxDistance;
+	GtkWidget *edit_FractalConstantFactor;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
