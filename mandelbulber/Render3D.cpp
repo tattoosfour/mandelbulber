@@ -816,11 +816,13 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//refresh GUI
 		if (!noGUI && bo_refreshing)
 		{
-			while (gtk_events_pending())
-				gtk_main_iteration();
+			if (image->IsPreview())
+			{
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
 
 			//refreshing image and histograms during rendering
-
 			while (done < height / progressive - 1 && !programClosed)
 			{
 				g_usleep(100000);
@@ -897,8 +899,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
 				}
 				//refreshing GUI
-				while (gtk_events_pending())
-					gtk_main_iteration();
+				if (image->IsPreview())
+				{
+					while (gtk_events_pending())
+						gtk_main_iteration();
+				}
 			}
 		}
 		//when rendered all of image lines wait for finishing threads
@@ -967,8 +972,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}
-		while (gtk_events_pending())
-			gtk_main_iteration();
+		if(image->IsPreview())
+		{
+			while (gtk_events_pending())
+				gtk_main_iteration();
+		}
 	}
 	delete[] thread_done;
 }
@@ -1243,8 +1251,8 @@ bool LoadTextures(sParamRender *params)
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 		}
-		isRendering = false;
-		return false;
+		//isRendering = false;
+		//return false;
 	}
 
 	//loading texture for ambient occlusion light map
@@ -1266,8 +1274,8 @@ bool LoadTextures(sParamRender *params)
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 		}
-		isRendering = false;
-		return false;
+		//isRendering = false;
+		//return false;
 	}
 
 	//reading background texture
@@ -1289,8 +1297,8 @@ bool LoadTextures(sParamRender *params)
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 		}
-		isRendering = false;
-		return false;
+		//isRendering = false;
+		//return false;
 	}
 	return true;
 }
@@ -1810,7 +1818,7 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 
 		fractParamLoaded.image_width = miniImage->GetWidth();
 		fractParamLoaded.image_height = miniImage->GetHeight();
-		fractParamLoaded.doubles.resolution = 1.0 / fractParamLoaded.image_width;
+		fractParamLoaded.doubles.resolution = 0.5 / fractParamLoaded.image_width;
 		fractParamLoaded.doubles.max_y = 20.0 / fractParamLoaded.doubles.zoom;
 		if (fractParamLoaded.formula == trig_DE || fractParamLoaded.formula == menger_sponge || fractParamLoaded.formula == kaleidoscopic || fractParamLoaded.formula == tglad) fractParamLoaded.analitycDE
 				= true;
@@ -1830,6 +1838,8 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 
 		programClosed = false;
 		isPostRendering = false;
+
+		PlaceRandomLights(&fractParamLoaded);
 
 		Render(fractParamLoaded, miniImage, NULL);
 

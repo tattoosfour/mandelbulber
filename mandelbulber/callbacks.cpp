@@ -386,6 +386,15 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new("Load fractal settings", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN,
 			GTK_RESPONSE_ACCEPT, NULL);
 
+	GtkWidget *preview;
+	GtkWidget *checkBox = gtk_check_button_new_with_label("Render preview of settings file");
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget (GTK_FILE_CHOOSER(dialog), preview);
+	gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER(dialog), checkBox);
+
+	gtk_widget_set_size_request(preview, 128, 128);
+	g_signal_connect (dialog, "update-preview", G_CALLBACK (UpdatePreviewSettingsDialog), preview);
+
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), lastFilenameSettings);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -2103,4 +2112,40 @@ void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
 {
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	timeline->DeleteKeyframe(index,Interface_data.file_keyframes);
+}
+
+void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
+{
+	GtkWidget *preview;
+	preview = GTK_WIDGET(data);
+
+	GtkWidget *checkBox = gtk_file_chooser_get_extra_widget(file_chooser);
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkBox)))
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_preview_filename(file_chooser);
+
+		char string[12];
+
+		FILE *fileSettings = fopen(filename, "r");
+		if (fileSettings)
+		{
+			char *result = fgets(string, 12, fileSettings);
+			printf("%sX\n", string);
+			(void) result;
+			if (!strcmp(string, "locale_test"))
+			{
+				smart_ptr<cImage> thumbnail;
+				thumbnail.reset(new cImage(128, 128));
+				ThumbnailRender(filename, thumbnail.ptr(), 0);
+				thumbnail->CreatePreview(1.0);
+				thumbnail->ConvertTo8bit();
+				thumbnail->UpdatePreview();
+				thumbnail->RedrawInWidget(preview);
+
+				gtk_file_chooser_set_preview_widget_active(file_chooser, true);
+			}
+			fclose(fileSettings);
+		}
+	}
 }
