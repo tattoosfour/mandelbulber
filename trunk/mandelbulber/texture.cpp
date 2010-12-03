@@ -49,7 +49,11 @@ cTexture::cTexture(char *filename)
 	else
 	{
 		printf("Cant load texture: %s\n", filename);
+		width = 100;
+		height = 100;
 		loaded = false;
+		bitmap = new sRGB8[100 * 100];
+		memset(bitmap,255,sizeof(sRGB8)*100*100);
 	}
 }
 

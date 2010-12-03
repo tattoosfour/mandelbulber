@@ -74,7 +74,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		}
 	}
 
-	if (!noGUI)
+	if (!noGUI && image->IsPreview())
 	{
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Sorting zBuffer");
 		while (gtk_events_pending())
@@ -83,7 +83,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 	QuickSortZBuffer(temp_sort, 1, height * width - 1);
 
-	if (!noGUI)
+	if (!noGUI && image->IsPreview())
 	{
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Done 0%");
 		while (gtk_events_pending())
@@ -160,7 +160,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		if (!isPostRendering) break;
 	}
 
-	if (!noGUI)
+	if (!noGUI && image->IsPreview())
 	{
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Deptp Of Field effect. Done 100%");
 		while (gtk_events_pending())
@@ -329,7 +329,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, 
 
 	int height = image->GetHeight();
 
-	if (!noGUI)
+	if (!noGUI && image->IsPreview())
 	{
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Screen Space Ambient Occlusion");
 		while (gtk_events_pending())
@@ -387,15 +387,21 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, 
 				last_time = (double) clock() / CLOCKS_PER_SEC;
 				double percent_done = (double) total_done / height * 100.0;
 				sprintf(progressText, "Rendering Screen Space Ambient Occlusion. Done %.1f%%", percent_done);
-				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-				while (gtk_events_pending())
-					gtk_main_iteration();
+				if(image->IsPreview())
+				{
+					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+					while (gtk_events_pending())
+						gtk_main_iteration();
+				}
 			}
 		} while (total_done < height / progressive && isPostRendering);
 
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Screen Space Ambient Occlusion. Done 100%");
-		while (gtk_events_pending())
-			gtk_main_iteration();
+		if(image->IsPreview())
+		{
+			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Screen Space Ambient Occlusion. Done 100%");
+			while (gtk_events_pending())
+				gtk_main_iteration();
+		}
 	}
 	for (int i = 0; i < NR_THREADS; i++)
 	{

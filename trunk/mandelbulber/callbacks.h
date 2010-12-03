@@ -88,5 +88,7 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data);
 void PressedTimeline(GtkWidget *widget, gpointer data);
 void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer);
+void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data);
+
 
 #endif /* CALLBACKS_H_ */
