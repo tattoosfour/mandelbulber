@@ -6,20 +6,10 @@
  */
 
 
-
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
-#include <gtk-2.0/gtk/gtk.h>
-#include "texture.hpp"
 #include "cimage.hpp"
-
-//struct sRGB8
-//{
-//	unsigned char R;
-//	unsigned char G;
-//	unsigned char B;
-//};
 
 struct sSSAOparams
 {

@@ -26,7 +26,8 @@ cImage::cImage(int w, int h, bool low_mem)
 
 cImage::~cImage()
 {
-	if(!lowMem) delete[] complexImage;
+	if(!lowMem)
+		delete[] complexImage;
 	delete[] image16;
 	delete[] image8;
 	delete[] alpha;
@@ -34,14 +35,27 @@ cImage::~cImage()
 	delete[] colorIndexBuf16;
 	delete[] gammaTable;
 	delete[] palette;
-	if (previewAllocated) delete[] preview;
+	if (previewAllocated)
+		delete[] preview;
 }
+
+void cImage::SetLowMem(bool low_mem) {
+	if (lowMem != low_mem) {
+		if (lowMem)
+			delete[] complexImage;
+		else
+			complexImage = new sComplexImage[width * height];
+		lowMem = low_mem;
+	}
+}
+
 
 void cImage::AllocMem(void)
 {
 	if (width > 0 && height > 0)
 	{
-		if(!lowMem)complexImage = new sComplexImage[width * height];
+		if(!lowMem)
+			complexImage = new sComplexImage[width * height];
 		image16 = new sRGB16[width * height];
 		image8 = new sRGB8[width * height];
 		zBuffer = new float[width * height];
@@ -53,14 +67,18 @@ void cImage::AllocMem(void)
 	{
 		fprintf(stderr, "Error! Cannot allocate memory for image (wrong image size\n");
 	}
-	if (previewAllocated) delete[] preview;
+
+	if (previewAllocated)
+		delete[] preview;
 	previewAllocated = false;
+
 	preview = 0;
 }
 
 void cImage::ChangeSize(int w, int h)
 {
-	if(!lowMem) delete[] complexImage;
+	if(!lowMem)
+		delete[] complexImage;
 	delete[] image16;
 	delete[] image8;
 	delete[] alpha;
@@ -73,17 +91,16 @@ void cImage::ChangeSize(int w, int h)
 
 void cImage::ClearImage(void)
 {
-	memset(image16, 0, sizeof(sRGB16) * (width * height));
-	memset(image8, 0, sizeof(sRGB8) * (width * height));
-	memset(alpha, 0, sizeof(unsigned short) * (width * height));
-	memset(colorIndexBuf16, 0, sizeof(unsigned short) * (width * height));
+	memset(image16, 0, sizeof(sRGB16) * width * height);
+	memset(image8, 0, sizeof(sRGB8) * width * height);
+	memset(alpha, 0, sizeof(unsigned short) * width * height);
+	memset(colorIndexBuf16, 0, sizeof(unsigned short) * width * height);
 
-	if(!lowMem) memset(complexImage, 0, sizeof(sComplexImage) * (width * height));
+	if (!lowMem)
+		memset(complexImage, 0, sizeof(sComplexImage) * width * height);
 
-	for (int i = 0; i < width * height; i++)
-	{
+	for (int i = 0; i < width * height; ++i)
 		zBuffer[i] = 1e20;
-	}
 }
 
 sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront)

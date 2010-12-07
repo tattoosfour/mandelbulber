@@ -12,15 +12,12 @@
  *  Created on: 2010-01-23
  *      Author: krzysztof
  */
-#include <gtk-2.0/gtk/gtk.h>
+
+#include <string.h>
+
 #include "image.h"
-#include "cimage.hpp"
-#include "common_math.h"
-#include "math.h"
+#include "Render3D.h"
 #include "interface.h"
-#include "algebra.hpp"
-#include "shaders.h"
-#include "fractal.h"
 
 sRGB *buddhabrotImg;
 bool isBuddhabrot = false;
@@ -463,7 +460,7 @@ void DrawHistogram2(void)
 
 void DrawPalette(sRGB *palette)
 {
-	mainImage->SetPalette(palette);
+	mainImage.SetPalette(palette);
 
 	if (paletteViewCreated)
 	{
@@ -473,7 +470,7 @@ void DrawPalette(sRGB *palette)
 		for (int i = 0; i < 640; i++)
 		{
 			int number = (int) (i * 256.0 / colWidth + paletteOffset * 256.0);
-			sRGB color = mainImage->IndexToColour(number);
+			sRGB color = mainImage.IndexToColour(number);
 			GdkColor gdk_color = { 0, color.R * 256, color.G * 256, color.B * 256 };
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
 			gdk_draw_line(dareaPalette->window, GC, i, 0, i, 30);

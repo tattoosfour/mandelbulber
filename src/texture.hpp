@@ -8,7 +8,6 @@
 #ifndef TEXTURE_HPP_
 #define TEXTURE_HPP_
 
-#include "files.h"
 #include "cimage.hpp"
 
 class cTexture

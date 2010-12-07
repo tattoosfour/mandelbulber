@@ -13,21 +13,11 @@
  *      Author: krzysztof
  */
 
-#include <stdio.h>
+#include <cstdio>
+#include <string.h>
 #define PNG_DEBUG 3
-#include <png.h>
 //#include <jpeglib.h>
 #include "files.h"
-#include <setjmp.h>
-#include <string.h>
-#include "image.h"
-#include "cimage.hpp"
-#include "Render3D.h"
-
-extern "C"
-{
-#include <jpeglib.h>
-}
 
 char logfileName[1000];
 

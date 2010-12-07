@@ -83,6 +83,7 @@ public:
 	cImage(int w, int h, bool low_mem = false);
 	~cImage();
 	void ChangeSize(int w, int h);
+	void SetLowMem(bool low_mem);
 	void ClearImage(void);
 	inline void PutPixelImage(int x, int y, sRGB16 pixel)	{if (x >= 0 && x < width && y >= 0 && y < height) image16[x + y * width] = pixel;	}
 	inline void PutPixelZBuffer(int x, int y, float pixel) {if (x >= 0 && x < width && y >= 0 && y < height) zBuffer[x + y * width] = pixel;}

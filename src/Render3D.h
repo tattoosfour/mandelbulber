@@ -9,10 +9,7 @@
 #ifndef RENDER3D_H_
 #define RENDER3D_H_
 
-#include "fractal.h"
-#include <gtk-2.0/gtk/gtk.h>
 #include "image.h"
-#include "cimage.hpp"
 #include "texture.hpp"
 #include "fractparams.h"
 
@@ -40,7 +37,7 @@ extern bool isPostRendering;
 extern int NR_THREADS;
 extern bool noGUI;
 
-extern cImage *mainImage;
+extern cImage mainImage;
 
 double
 real_clock(void);

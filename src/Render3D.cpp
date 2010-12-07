@@ -13,32 +13,21 @@
 #define HAVE_BOOLEAN  /* prevent jmorecfg.h from redefining it */
 #endif
 
-#include <gtk-2.0/gtk/gtk.h>
-#include <math.h>
-#include <png.h>
-#include <jpeglib.h>
-#include <setjmp.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 
-#include "cimage.hpp"
-#include "fractparams.h"
 #include "Render3D.h"
-#include "algebra.hpp"
-#include "interface.h"
-#include "image.h"
-#include "common_math.h"
 #include "files.h"
-#include "settings.h"
-#include "texture.hpp"
-#include "callbacks.h"
 #include "shaders.h"
-#include "morph.hpp"
-#include "undo.hpp"
-#include "loadsound.hpp"
+#include "interface.h"
 #include "timeline.hpp"
+#include "morph.hpp"
+#include "settings.h"
+#include "loadsound.hpp"
+#include "undo.hpp"
+#include "callbacks.h"
 
 bool noGUI = false;
 
@@ -57,7 +46,7 @@ double start_time = 0.0;
 bool isRendering = false;
 bool isPostRendering = false;
 
-cImage *mainImage;
+cImage mainImage(800, 600);
 
 double real_clock(void)
 {
@@ -72,6 +61,7 @@ double real_clock(void)
 //main rendering thread
 void *MainThread(void *ptr)
 {
+
 	//getting parameters
 	sParam *parametry;
 	parametry = (sParam*) ptr;
@@ -93,8 +83,6 @@ void *MainThread(void *ptr)
 
 	//printf("Thread #%d started\n", z + 1);
 	sParamRender param = parametry->param;
-
-	int N = param.N;
 
 	double dist_thresh = param.doubles.dist_thresh;
 	double DE_factor = param.doubles.DE_factor;
@@ -205,11 +193,8 @@ void *MainThread(void *ptr)
 	double last_distance = 0;
 
 	//parameters for iteration functions
-	sFractal calcParam;
-
-	CopyParams(&param, &calcParam);
-
-	sFractal_ret calcRet;
+	sFractal calcParam = param.fractal;
+	bool max_iter;
 
 	double search_accuracy = 0.01;
 	double search_limit = 1.0 - search_accuracy;
@@ -320,6 +305,7 @@ void *MainThread(void *ptr)
 									point3D1.z = z2 * wsp_persp;
 									point3D2 = mRot.RotateVector(point3D1);
 								}
+
 								CVector3 point = point3D2 + vp;
 
 								if (counter == 1)
@@ -329,9 +315,8 @@ void *MainThread(void *ptr)
 
 								//calculate opacity
 
-								calcParam.point = point;
 								calcParam.DE_threshold = dist_thresh;
-								dist = CalculateDistance(calcParam, calcRet);
+								dist = CalculateDistance(point, calcParam, &max_iter);
 
 								//it is for situation when DE is calculated with very big error
 								if (dist > 1.0 / DE_factor)
@@ -340,15 +325,15 @@ void *MainThread(void *ptr)
 								}
 
 								//if maxiter then distance is zero
-								if (calcRet.max_iter)
+								if (max_iter)
 								{
 									dist = 0;
 								}
 
 								//iteration threshold mode
-								if (param.iterThresh)
+								if (param.fractal.iterThresh)
 								{
-									if (dist < dist_thresh && !calcRet.max_iter)
+									if (dist < dist_thresh && !max_iter)
 									{
 										dist = dist_thresh * 1.01;
 									}
@@ -432,7 +417,7 @@ void *MainThread(void *ptr)
 
 					//if fractal surface was found
 					if (found)
-					{
+			        {
 						//-------------------- SHADING ----------------------
 						double y = y_start;
 
@@ -499,10 +484,8 @@ void *MainThread(void *ptr)
 							//ambient occlusion based on orbit traps
 							if (fastGlobalIllumination)
 							{
-								calcParam.point = point;
-								calcParam.mode = fake_AO;
-								ComputeIterations(calcParam, calcRet);
-								double j = (calcRet.fake_ao - 0.65) * 1.0; //0.65
+								double min_radius = Compute<fake_AO>(point, calcParam);
+								double j = (min_radius - 0.65) * 1.0; //0.65
 								if (j > 1.0) j = 1.0;
 								if (j < 0) j = 0;
 								AO.R = j;
@@ -571,16 +554,11 @@ void *MainThread(void *ptr)
 						int colorIndex = 0;
 						if (fractColor)
 						{
-							{
-								calcParam.point = point;
-								calcParam.mode = colouring;
-								calcParam.N = N * 10;
-								ComputeIterations(calcParam, calcRet);
-								calcParam.N = N;
-								int nrKol = calcRet.colour;
-								nrKol = abs(nrKol) % 65536;
-								colorIndex = nrKol;
-							}
+							calcParam.N *= 10;
+							int nrKol = floor(Compute<colouring>(point, calcParam));
+							calcParam.N /= 10;
+							nrKol = abs(nrKol) % 65536;
+							colorIndex = nrKol;
 						}
 						image->PutPixelColor(x, z, colorIndex);
 
@@ -829,7 +807,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				if (progressive < progressiveStart)
 				{
 					refresh_index++;
-					//if (image->IsPreview()) mainImage->RedrawInWidget(darea);
 
 					if (refresh_index >= refresh_skip)
 					{
@@ -998,7 +975,7 @@ int get_cpu_count()
 	return ret;
 }
 
-//********************************** MAIN ******************************* 
+//********************************** MAIN *******************************
 int main(int argc, char *argv[])
 {
 	//read $home env variable
@@ -1042,23 +1019,19 @@ int main(int argc, char *argv[])
 		gtk_init(&argc, &argv);
 		WriteLog("GTK initialised");
 	}
+
+	mainImage.SetLowMem(noGUIdata.lowMemMode);
+
 	//detecting number of CPU cores
 	NR_THREADS = get_cpu_count();
 	printf("Detected %d CPUs\n", NR_THREADS);
 	WriteLogDouble("CPUs detected", NR_THREADS);
 
-	//lokckout for refreshing image during program startup
+	//lockout for refreshing image during program startup
 	Interface_data.disableInitRefresh = true;
 
-	int width = 800;
-	int height = 600;
-
-	bool lowMemMode = noGUIdata.lowMemMode;
-	mainImage = new cImage(width, height, lowMemMode);
-	WriteLog("complexImage allocated");
-
 	//allocating memory for image in window
-	mainImage->CreatePreview(1.0);
+	mainImage.CreatePreview(1.0);
 	WriteLog("Memory allocated for preview");
 
 	//allocating memory for lights
@@ -1083,13 +1056,11 @@ int main(int argc, char *argv[])
 	WriteLog("g_thread initialised");
 
 	sParamRender fractParamDefault;
-	ParamsAllocMem(&fractParamDefault);
 	WriteLog("allocated memory for default parameters");
 
 	bool noGUIsettingsLoaded = false;
 	if (noGUI)
 	{
-		ParamsAllocMem(&noGUIdata.fractparams);
 		if (LoadSettings(noGUIdata.settingsFile, noGUIdata.fractparams))
 		{
 			noGUIsettingsLoaded = true;
@@ -1156,7 +1127,6 @@ int main(int argc, char *argv[])
 			WriteLog("Rendering completely finished");
 		}
 
-		ParamsReleaseMem(&fractParamDefault);
 		WriteLog("Memory for parameters released");
 	}
 	else
@@ -1165,14 +1135,12 @@ int main(int argc, char *argv[])
 		WriteLog("Can't acces default data directory");
 		WriteLog(data_directory);
 	}
-	delete mainImage;
-	return (0);
+	return 0;
 }
 
 //Init parameters
 void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
 {
-	ParamsAllocMem(fractParam);
 	WriteLog("Memory allocated for fractal parameters");
 
 	//reading parameters from interface
@@ -1207,7 +1175,8 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 	WriteLog("complexImage allocated");
 	printf("Memory for image: %d MB\n", image->GetUsedMB());
 
-	if(!noGUI) image->CreatePreview(previewScale);
+	if(!noGUI)
+		image->CreatePreview(previewScale);
 
 	if (!noGUI)
 	{
@@ -1314,7 +1283,7 @@ void MainRender(void)
 
 	if (noGUI)
 	{
-		mainImage->SetPalette(noGUIdata.fractparams.palette);
+		mainImage.SetPalette(noGUIdata.fractparams.palette);
 	}
 
 	InitMainParameters(&fractParam, &fractSpecial);
@@ -1324,7 +1293,7 @@ void MainRender(void)
 	//image size
 	int width = fractParam.image_width;
 	int height = fractParam.image_height;
-	InitMainImage(mainImage, width, height, Interface_data.imageScale, darea);
+	InitMainImage(&mainImage, width, height, Interface_data.imageScale, darea);
 
 	if (!noGUI)
 	{
@@ -1397,9 +1366,8 @@ void MainRender(void)
 
 	//loading keyframes in keyframe animation mode
 	CMorph morph(maxKeyNumber, sizeof(sParamRenderD) / sizeof(double));
-	CMorph morphIFS(maxKeyNumber, 8 * IFS_number_of_vectors);
-	double *IFSdouble = new double[8 * IFS_number_of_vectors];
-	WriteLog("Memory for morphing allocated");
+	CMorph morphIFS(maxKeyNumber, 8 * IFS_VECTOR_COUNT);
+	double IFSdouble[8 * IFS_VECTOR_COUNT];
 
 	morph.SetFramesPerKey(fractParam.framesPerKeyframe);
 	morphIFS.SetFramesPerKey(fractParam.framesPerKeyframe);
@@ -1411,14 +1379,12 @@ void MainRender(void)
 			IndexFilename(filename2, fractParam.file_keyframes, (char*) "fract", keyNumber);
 
 			sParamRender fractParamLoaded;
-			ParamsAllocMem(&fractParamLoaded);
 			LoadSettings(filename2, fractParamLoaded, NULL, true);
 			WriteLogDouble("Keyframe loaded", keyNumber);
 			morph.AddData(keyNumber, (double*) &fractParamLoaded);
-			IFSToMorph(IFSdouble, &fractParamLoaded);
+			IFSToMorph(IFSdouble, fractParamLoaded.fractal);
 			morphIFS.AddData(keyNumber, IFSdouble);
 			WriteLogDouble("Keyframe data added to data structures", keyNumber);
-			ParamsReleaseMem(&fractParamLoaded);
 		}
 		printf("Keyframes loaded\n");
 	}
@@ -1473,7 +1439,7 @@ void MainRender(void)
 	{
 		autoSaveImage = true;
 		secondEyeImage = new cImage(width, height);
-		secondEyeImage->SetPalette(mainImage->GetPalettePtr());
+		secondEyeImage->SetPalette(mainImage.GetPalettePtr());
 		secondEyeImage->CreatePreview(Interface_data.imageScale);
 		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments, fractParam.effectColours, fractParam.imageSwitches);
 		stereoImage = new unsigned char[width * height * 3 * 2];
@@ -1500,8 +1466,8 @@ void MainRender(void)
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
 
-			delta_xm = x_mouse - width * mainImage->GetPreviewScale() / 2;
-			delta_ym = y_mouse - height * mainImage->GetPreviewScale() / 2;
+			delta_xm = x_mouse - width * mainImage.GetPreviewScale() / 2;
+			delta_ym = y_mouse - height * mainImage.GetPreviewScale() / 2;
 
 			if (fractParam.recordMode)
 			{
@@ -1510,11 +1476,7 @@ void MainRender(void)
 			}
 
 			//calculation of distance to fractal surface
-			sFractal calcParam;
-			sFractal_ret calcRet;
-			CopyParams(&fractParam, &calcParam);
-			calcParam.point = fractParam.doubles.vp;
-			distance = CalculateDistance(calcParam, calcRet);
+			distance = CalculateDistance(fractParam.doubles.vp, fractParam.fractal);
 			WriteLogDouble("Distance calculated", distance);
 
 			sprintf(label_text, "Estimated distance to fractal surface: %g", distance);
@@ -1575,12 +1537,12 @@ void MainRender(void)
 			morph.CatmullRom(index, (double*) &fractParam);
 			morphIFS.CatmullRom(index, IFSdouble);
 			WriteLog("Splines calculated");
-			MorphToIFS(IFSdouble, &fractParam);
+			MorphToIFS(IFSdouble, fractParam.fractal);
 			if (fractParam.doubles.zoom < 1e-15) fractParam.doubles.zoom = 1e-15;
 			fractParam.doubles.max_y = 20.0 / fractParam.doubles.zoom;
 			fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 			sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
-			mainImage->SetImageAdjustments(imageAdjustments);
+			mainImage.SetImageAdjustments(imageAdjustments);
 
 			sprintf(label_text, "Frame: %d, Keyframe %f", index, (double) index / fractParam.framesPerKeyframe);
 			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_keyframeInfo), label_text);
@@ -1605,17 +1567,17 @@ void MainRender(void)
 				fractParam.doubles.max_y = 20.0 / fractParam.doubles.zoom;
 				fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 				sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
-				mainImage->SetImageAdjustments(imageAdjustments);
+				mainImage.SetImageAdjustments(imageAdjustments);
 
 				addData++;
 				paramToAdd++;
 			}
 			WriteLog("Sound animation calculated");
 		}
-		RecalculateIFSParams(&fractParam);
+		RecalculateIFSParams(fractParam.fractal);
 		WriteLog("IFS params recalculated");
 
-		CreateFormulaSequence(&fractParam);
+		CreateFormulaSequence(fractParam.fractal);
 		WriteLog("Formula sequence created");
 
 		if (!noGUI)
@@ -1650,10 +1612,7 @@ void MainRender(void)
 
 			if (fractParam.animMode)
 			{
-				sFractal calcParam;
-				sFractal_ret calcRet;
-				CopyParams(&fractParam, &calcParam);
-				distance = CalculateDistance(calcParam, calcRet);
+				distance = CalculateDistance(fractParam.doubles.vp, fractParam.fractal);
 				printf("---------- index: %d -------------\n", index);
 				printf("Distance = %e\n", distance);
 				printf("alfa = %f, beta = %f\n", fractParam.doubles.alfa, fractParam.doubles.beta);
@@ -1702,9 +1661,9 @@ void MainRender(void)
 
 				if (eye == 0)
 				{
-					mainImage->ClearImage();
+					mainImage.ClearImage();
 					WriteLog("Image cleared");
-					Render(fractParam, mainImage, darea);
+					Render(fractParam, &mainImage, darea);
 					WriteLog("Image rendered");
 				}
 				else if (eye == 1)
@@ -1713,9 +1672,9 @@ void MainRender(void)
 					WriteLog("Image cleared");
 					Render(fractParam, secondEyeImage, darea);
 					WriteLog("Image rendered");
-					MakeStereoImage(mainImage, secondEyeImage, stereoImage);
+					MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image made");
-					if (!noGUI) StereoPreview(mainImage,stereoImage);
+					if (!noGUI) StereoPreview(&mainImage,stereoImage);
 					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
 					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
@@ -1724,14 +1683,14 @@ void MainRender(void)
 						char progressText[1000];
 						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2);
 						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-						StereoPreview(mainImage, stereoImage);
+						StereoPreview(&mainImage, stereoImage);
 					}
 				}
 
 				//save image
 				if ((autoSaveImage || fractParam.animMode) && !fractParam.stereoEnabled)
 				{
-					unsigned char *rgbbuf2 = mainImage->ConvertTo8bit();
+					unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
 					if (Interface_data.imageFormat == imgFormatJPG)
 					{
 						IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
@@ -1745,12 +1704,12 @@ void MainRender(void)
 					else if (Interface_data.imageFormat == imgFormatPNG16)
 					{
 						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
-						SavePNG16(filename2, 100, width, height, mainImage);
+						SavePNG16(filename2, 100, width, height, &mainImage);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
 					{
 						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
-						SavePNG16Alpha(filename2, 100, width, height, mainImage);
+						SavePNG16Alpha(filename2, 100, width, height, &mainImage);
 					}
 					printf("Image saved: %s\n", filename2);
 					WriteLog("Image saved");
@@ -1784,10 +1743,6 @@ void MainRender(void)
 	WriteLog("Released memory for envmap texture");
 	delete fractParam.lightmapTexture;
 	WriteLog("Released memory for lightmap texture");
-	delete[] IFSdouble;
-	WriteLog("Released memory for IFS params");
-	ParamsReleaseMem(&fractParam);
-	WriteLog("Released memory for fractal params");
 
 	if (fractParam.stereoEnabled)
 	{
@@ -1807,8 +1762,6 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 	if (FileIfExist(settingsFile))
 	{
 		sParamRender fractParamLoaded;
-
-		ParamsAllocMem(&fractParamLoaded);
 		LoadSettings(settingsFile, fractParamLoaded, NULL, true);
 
 		if (mode == 1)
@@ -1820,15 +1773,15 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 		fractParamLoaded.image_height = miniImage->GetHeight();
 		fractParamLoaded.doubles.resolution = 0.5 / fractParamLoaded.image_width;
 		fractParamLoaded.doubles.max_y = 20.0 / fractParamLoaded.doubles.zoom;
-		if (fractParamLoaded.formula == trig_DE || fractParamLoaded.formula == menger_sponge || fractParamLoaded.formula == kaleidoscopic || fractParamLoaded.formula == tglad) fractParamLoaded.analitycDE
-				= true;
-		else fractParamLoaded.analitycDE = false;
+		if (fractParamLoaded.fractal.formula == trig_DE || fractParamLoaded.fractal.formula == menger_sponge || fractParamLoaded.fractal.formula == kaleidoscopic || fractParamLoaded.fractal.formula == tglad)
+			fractParamLoaded.fractal.analitycDE = true;
+		else fractParamLoaded.fractal.analitycDE = false;
 		fractParamLoaded.recordMode = false;
 		fractParamLoaded.animMode = false;
 		fractParamLoaded.quiet = true;
 
-		RecalculateIFSParams(&fractParamLoaded);
-		CreateFormulaSequence(&fractParamLoaded);
+		RecalculateIFSParams(fractParamLoaded.fractal);
+		CreateFormulaSequence(fractParamLoaded.fractal);
 
 		miniImage->ClearImage();
 		miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.effectColours, fractParamLoaded.imageSwitches);
@@ -1842,12 +1795,5 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 		PlaceRandomLights(&fractParamLoaded);
 
 		Render(fractParamLoaded, miniImage, NULL);
-
-		ParamsReleaseMem(&fractParamLoaded);
-		delete fractParamLoaded.backgroundTexture;
-		delete fractParamLoaded.envmapTexture;
-		delete fractParamLoaded.lightmapTexture;
 	}
 }
-
-

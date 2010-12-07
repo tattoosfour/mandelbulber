@@ -13,24 +13,26 @@
  *      Author: krzysztof
  */
 
-#include "fractal.h"
-#include "math.h"
-#include "image.h"
 #include "Render3D.h"
-#include "algebra.hpp"
 #include "interface.h"
 
 sBuddhabrot buddhabrot[1000];
 
-//******************** COMPUTE ITERATIONS *********************
-int ComputeIterations(sFractal &par, sFractal_ret &retVal)
+/**
+ * Compute the fractal at the point, in one of the various modes
+ *
+ * Mode: normal: Returns distance
+ *		 fake_ao: Returns minimum radius
+ *		 colouring: Returns colour index
+ *		 delta_DE1, delta_DE2: Returns radius
+ */
+template<int Mode>
+double Compute(CVector3 z, const sFractal &par, int *iter_count)
 {
 	int L;
 	double distance = 0;
 
-	CVector3 z = par.point;
 	double w = 0;
-	double temp = 0;
 
 	CVector3 dz(1.0, 0.0, 0.0);
 	CVector3 one(1.0, 0.0, 0.0);
@@ -39,22 +41,22 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	double th_dz = 0;
 	double p = par.power; //mandelbulb power
 
-	CRotationMatrix rotM;
-
 	CVector3 constant;
 
-	double fixedRadius = par.mandelboxFoldingSphericalFixed;
+	double fixedRadius = par.mandelbox.foldingSphericalFixed;
 	double fR2 = fixedRadius * fixedRadius;
-	double minRadius = par.mandelboxFoldingSphericalMin;
+	double minRadius = par.mandelbox.foldingSphericalMin;
 	double mR2 = minRadius * minRadius;
 	double tglad_factor1 = fR2 / mR2;
 
-	double tgladDE = par.mandelboxScale;
+	double tgladDE = par.mandelbox.scale;
 
-	double scale = par.mandelboxScale;
+	double scale = par.mandelbox.scale;
 
 	enumFractalFormula actualFormula = par.formula;
-	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) tgladDE = 1.0;
+	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) 
+		tgladDE = 1.0;
+
 	double tgladColor = 1.0;
 
 	if (par.juliaMode)
@@ -63,7 +65,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	}
 	else
 	{
-		constant = par.point * par.fractalConstantFactor;
+		constant = z * par.constantFactor;
 	}
 
 	bool hybridEnabled = false;
@@ -80,34 +82,34 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 		if (hybridEnabled)
 		{
 			actualFormula = par.formulaSequence[L];
-			p = par.hybridPowerSequence[L];\
+			p = par.hybridPowerSequence[L];
 			scale = p;
 		}
 
-		if (par.IFSFoldingMode)
+		if (par.IFS.foldingMode)
 		{
-			if (par.IFSAbsX) z.x = fabs(z.x);
-			if (par.IFSAbsY) z.y = fabs(z.y);
-			if (par.IFSAbsZ) z.z = fabs(z.z);
+			if (par.IFS.absX) z.x = fabs(z.x);
+			if (par.IFS.absY) z.y = fabs(z.y);
+			if (par.IFS.absZ) z.z = fabs(z.z);
 
-			for (int i = 0; i < IFS_number_of_vectors; i++)
+			for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 			{
-				if (par.IFSEnabled[i])
+				if (par.IFS.enabled[i])
 				{
-					z = par.IFSRot[i].RotateVector(z);
-					double length = z.Dot(par.IFSDirection[i]);
+					z = par.IFS.rot[i].RotateVector(z);
+					double length = z.Dot(par.IFS.direction[i]);
 
-					if (length < par.IFSDistance[i])
+					if (length < par.IFS.distance[i])
 					{
-						z -= par.IFSDirection[i] * 2.0 * (length - par.IFSDistance[i]);
+						z -= par.IFS.direction[i] * 2.0 * (length - par.IFS.distance[i]);
 					}
 
 				}
 			}
 
-			z = par.IFSMainRot.RotateVector(z - par.IFSOffset) + par.IFSOffset;
-			z *= par.IFSScale;
-			z -= par.IFSOffset * (par.IFSScale - 1.0);
+			z = par.IFS.mainRot.RotateVector(z - par.IFS.offset) + par.IFS.offset;
+			z *= par.IFS.scale;
+			z -= par.IFS.offset * (par.IFS.scale - 1.0);
 
 			r = z.Length();
 		}
@@ -178,7 +180,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				double r2 = r1 * r;
 				double th = z.GetAlfa();
 				double ph = -z.GetBeta();
-				if (par.mode == 0)
+				if (Mode == 0)
 				{
 					double p_r1_rdz = p * r1 * r_dz;
 					double ph_phdz = (p - 1.0) * ph + ph_dz;
@@ -206,7 +208,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			}
 			case mandelbulb2:
 			{
-				double tempR;
+				double temp, tempR;
 				tempR = sqrt(z.x * z.x + z.y * z.y);
 				z *= (1.0 / tempR);
 				temp = z.x * z.x - z.y * z.y;
@@ -235,7 +237,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			}
 			case mandelbulb3:
 			{
-				double tempR;
+				double temp, tempR;
 
 				double sign = 1.0;
 				double sign2 = 1.0;
@@ -278,14 +280,13 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				r = z.Length();
 				break;
 			}
-
 			case xenodreambuie:
 			{
 				double rp = pow(r, p);
 				double th = atan2(z.y, z.x);
 				double ph = acos(z.z / r);
 				if (ph > 0.5 * M_PI)
-				{	
+				{
 					ph = M_PI - ph;
 				}
 				else if (ph < -0.5 * M_PI)
@@ -348,6 +349,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			}
 			case menger_sponge:
 			{
+				double temp;
 				z.x = fabs(z.x);
 				z.y = fabs(z.y);
 				z.z = fabs(z.z);
@@ -370,7 +372,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 					z.y = temp;
 				}
 
-				if (par.mode == colouring)
+				if (Mode == colouring)
 				{
 					double length2 = z.Length();
 					if (length2 < min) min = length2;
@@ -387,93 +389,93 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			}
 			case tglad:
 			{
-				if (par.mandelboxRotationsEnabled)
+				if (par.mandelbox.rotationsEnabled)
 				{
 					bool lockout = false;
-					z = par.mandelboxRot1X.RotateVector(z);
-					if (z.x > par.mandelboxFoldingLimit)
+					z = par.mandelbox.rot[0][0].RotateVector(z);
+					if (z.x > par.mandelbox.foldingLimit)
 					{
-						z.x = par.mandelboxFoldingValue - z.x;
-						tgladColor += par.mandelboxColorFactorX;
+						z.x = par.mandelbox.foldingValue - z.x;
+						tgladColor += par.mandelbox.colorFactorX;
 						lockout = true;
 					}
-					z = par.mandelboxRot1Xinv.RotateVector(z);
+					z = par.mandelbox.rotinv[0][0].RotateVector(z);
 
-					z = par.mandelboxRot2X.RotateVector(z);
-					if (!lockout && z.x < -par.mandelboxFoldingLimit)
+					z = par.mandelbox.rot[1][0].RotateVector(z);
+					if (!lockout && z.x < -par.mandelbox.foldingLimit)
 					{
-						z.x = -par.mandelboxFoldingValue - z.x;
-						tgladColor += par.mandelboxColorFactorX;
+						z.x = -par.mandelbox.foldingValue - z.x;
+						tgladColor += par.mandelbox.colorFactorX;
 					}
-					z = par.mandelboxRot2Xinv.RotateVector(z);
+					z = par.mandelbox.rotinv[1][0].RotateVector(z);
 
 					lockout = false;
-					z = par.mandelboxRot1Y.RotateVector(z);
-					if (z.y > par.mandelboxFoldingLimit)
+					z = par.mandelbox.rot[0][1].RotateVector(z);
+					if (z.y > par.mandelbox.foldingLimit)
 					{
-						z.y = par.mandelboxFoldingValue - z.y;
-						tgladColor += par.mandelboxColorFactorY;
+						z.y = par.mandelbox.foldingValue - z.y;
+						tgladColor += par.mandelbox.colorFactorY;
 						lockout = true;
 					}
-					z = par.mandelboxRot1Yinv.RotateVector(z);
+					z = par.mandelbox.rotinv[0][1].RotateVector(z);
 
-					z = par.mandelboxRot2Y.RotateVector(z);
-					if (!lockout && z.y < -par.mandelboxFoldingLimit)
+					z = par.mandelbox.rot[1][1].RotateVector(z);
+					if (!lockout && z.y < -par.mandelbox.foldingLimit)
 					{
-						z.y = -par.mandelboxFoldingValue - z.y;
-						tgladColor += par.mandelboxColorFactorY;
+						z.y = -par.mandelbox.foldingValue - z.y;
+						tgladColor += par.mandelbox.colorFactorY;
 					}
-					z = par.mandelboxRot2Yinv.RotateVector(z);
+					z = par.mandelbox.rotinv[1][1].RotateVector(z);
 
 					lockout = false;
-					z = par.mandelboxRot1Z.RotateVector(z);
-					if (z.z > par.mandelboxFoldingLimit)
+					z = par.mandelbox.rotinv[0][2].RotateVector(z);
+					if (z.z > par.mandelbox.foldingLimit)
 					{
-						z.z = par.mandelboxFoldingValue - z.z;
-						tgladColor += par.mandelboxColorFactorZ;
+						z.z = par.mandelbox.foldingValue - z.z;
+						tgladColor += par.mandelbox.colorFactorZ;
 						lockout = true;
 					}
-					z = par.mandelboxRot1Zinv.RotateVector(z);
+					z = par.mandelbox.rotinv[0][2].RotateVector(z);
 
-					z = par.mandelboxRot2Z.RotateVector(z);
-					if (!lockout && z.z < -par.mandelboxFoldingLimit)
+					z = par.mandelbox.rot[1][2].RotateVector(z);
+					if (!lockout && z.z < -par.mandelbox.foldingLimit)
 					{
-						z.z = -par.mandelboxFoldingValue - z.z;
-						tgladColor += par.mandelboxColorFactorZ;
+						z.z = -par.mandelbox.foldingValue - z.z;
+						tgladColor += par.mandelbox.colorFactorZ;
 					}
-					z = par.mandelboxRot2Zinv.RotateVector(z);
+					z = par.mandelbox.rotinv[1][2].RotateVector(z);
 				}
 				else
 				{
-					if (z.x > par.mandelboxFoldingLimit)
+					if (z.x > par.mandelbox.foldingLimit)
 					{
-						z.x = par.mandelboxFoldingValue - z.x;
-						tgladColor += par.mandelboxColorFactorX;
+						z.x = par.mandelbox.foldingValue - z.x;
+						tgladColor += par.mandelbox.colorFactorX;
 					}
-					else if (z.x < -par.mandelboxFoldingLimit)
+					else if (z.x < -par.mandelbox.foldingLimit)
 					{
-						z.x = -par.mandelboxFoldingValue - z.x;
-						tgladColor += par.mandelboxColorFactorX;
+						z.x = -par.mandelbox.foldingValue - z.x;
+						tgladColor += par.mandelbox.colorFactorX;
 					}
-					if (z.y > par.mandelboxFoldingLimit)
+					if (z.y > par.mandelbox.foldingLimit)
 					{
-						z.y = par.mandelboxFoldingValue - z.y;
-						tgladColor += par.mandelboxColorFactorY;
+						z.y = par.mandelbox.foldingValue - z.y;
+						tgladColor += par.mandelbox.colorFactorY;
 					}
-					else if (z.y < -par.mandelboxFoldingLimit)
+					else if (z.y < -par.mandelbox.foldingLimit)
 					{
-						z.y = -par.mandelboxFoldingValue - z.y;
-						tgladColor += par.mandelboxColorFactorY;
+						z.y = -par.mandelbox.foldingValue - z.y;
+						tgladColor += par.mandelbox.colorFactorY;
 					}
-					if (z.z > par.mandelboxFoldingLimit)
+					if (z.z > par.mandelbox.foldingLimit)
 					{
-						z.z = par.mandelboxFoldingValue - z.z;
-						tgladColor += par.mandelboxColorFactorZ;
+						z.z = par.mandelbox.foldingValue - z.z;
+						tgladColor += par.mandelbox.colorFactorZ;
 					}
-					else if (z.z < -par.mandelboxFoldingLimit)
+					else if (z.z < -par.mandelbox.foldingLimit)
 					{
-						z.z = -par.mandelboxFoldingValue - z.z;
-						tgladColor += par.mandelboxColorFactorZ;
+						z.z = -par.mandelbox.foldingValue - z.z;
+						tgladColor += par.mandelbox.colorFactorZ;
 					}
 				}
 
@@ -486,17 +488,17 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 				{
 					z *= tglad_factor1;
 					tgladDE *= tglad_factor1;
-					tgladColor += par.mandelboxColorFactorSp1;
+					tgladColor += par.mandelbox.colorFactorSp1;
 				}
 				else if (r2 < fR2)
 				{
 					double tglad_factor2 = fR2 / r2;
 					z *= tglad_factor2;
 					tgladDE *= tglad_factor2;
-					tgladColor += par.mandelboxColorFactorSp2;
+					tgladColor += par.mandelbox.colorFactorSp2;
 				}
 
-				z = par.mandelboxMainRot.RotateVector(z);
+				z = par.mandelbox.mainRot.RotateVector(z);
 
 				z = z * scale + constant;
 				tgladDE *= scale;
@@ -507,36 +509,36 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 			case kaleidoscopic:
 			{
 
-				if (par.IFSAbsX) z.x = fabs(z.x);
-				if (par.IFSAbsY) z.y = fabs(z.y);
-				if (par.IFSAbsZ) z.z = fabs(z.z);
+				if (par.IFS.absX) z.x = fabs(z.x);
+				if (par.IFS.absY) z.y = fabs(z.y);
+				if (par.IFS.absZ) z.z = fabs(z.z);
 
-				for (int i = 0; i < IFS_number_of_vectors; i++)
+				for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 				{
-					if (par.IFSEnabled[i])
+					if (par.IFS.enabled[i])
 					{
-						z = par.IFSRot[i].RotateVector(z);
-						double length = z.Dot(par.IFSDirection[i]);
+						z = par.IFS.rot[i].RotateVector(z);
+						double length = z.Dot(par.IFS.direction[i]);
 
-						if (length < par.IFSDistance[i])
+						if (length < par.IFS.distance[i])
 						{
-							z -= par.IFSDirection[i] * (2.0 * (length - par.IFSDistance[i]) * par.IFSIntensity[i]);
+							z -= par.IFS.direction[i] * (2.0 * (length - par.IFS.distance[i]) * par.IFS.intensity[i]);
 						}
 
 					}
 				}
-				z = par.IFSMainRot.RotateVector(z - par.IFSOffset) + par.IFSOffset;
+				z = par.IFS.mainRot.RotateVector(z - par.IFS.offset) + par.IFS.offset;
 
-				if (par.mode == colouring)
+				if (Mode == colouring)
 				{
 					double length2 = z.Length();
 					if (length2 < min) min = length2;
 				}
 
-				z *= par.IFSScale;
-				z -= par.IFSOffset * (par.IFSScale - 1.0);
+				z *= par.IFS.scale;
+				z -= par.IFS.offset * (par.IFS.scale - 1.0);
 
-				tgladDE *= par.IFSScale;
+				tgladDE *= par.IFS.scale;
 				r = z.Length();
 
 				break;
@@ -548,28 +550,22 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 		}
 
 		//************************** iteration terminate conditions *****************
-		if (par.mode == deltaDE1)
+		if (Mode == deltaDE1)
 		{
 			if (r > 1e10)
-			{
-				retVal.r1 = r;
 				break;
-			}
 		}
-		else if (par.mode == deltaDE2)
+		else if (Mode == deltaDE2)
 		{
-			if (L == par.required_N)
-			{
-				retVal.r1 = r;
+			if (L == *iter_count)
 				break;
-			}
 		}
 
-		if (actualFormula == menger_sponge)
+		if (actualFormula == menger_sponge || actualFormula == kaleidoscopic)
 		{
 			if (r > 1000)
 			{
-				retVal.distance = (r - 2.0) / tgladDE;
+				distance = (r - 2.0) / tgladDE;
 				break;
 			}
 		}
@@ -577,29 +573,21 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 		{
 			if (r > 1024)
 			{
-				retVal.distance = r / fabs(tgladDE);
-				break;
-			}
-		}
-		else if (actualFormula == kaleidoscopic)
-		{
-			if (r > 1000)
-			{
-				retVal.distance = (r - 2.0) / tgladDE;
+				distance = r / fabs(tgladDE);
 				break;
 			}
 		}
 		else
 		{
-			if (par.mode == normal) //condition for all other trigonometric and hypercomplex fractals
+			if (Mode == normal) //condition for all other trigonometric and hypercomplex fractals
 			{
 				if (r > 1e15)
 				{
-					retVal.distance = 0.5 * r * log(r) / r_dz;
+					distance = 0.5 * r * log(r) / r_dz;
 					break;
 				}
 			}
-			else if (par.mode == fake_AO) //mode 2
+			else if (Mode == fake_AO) //mode 2
 			{
 				if (r < min) min = r;
 				if (r > 1e15)
@@ -608,23 +596,7 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 					break;
 				}
 			}
-			else if (par.mode == deltaDE1)
-			{
-				if (r > 1e10)
-				{
-					retVal.r1 = r;
-					break;
-				}
-			}
-			else if (par.mode == deltaDE2)
-			{
-				if (L == par.required_N)
-				{
-					retVal.r1 = r;
-					break;
-				}
-			}
-			else if (par.mode == colouring) //mode 1
+			else if (Mode == colouring) //mode 1
 			{
 				distance = z.Length();
 				if (distance < min) min = distance;
@@ -642,70 +614,54 @@ int ComputeIterations(sFractal &par, sFractal_ret &retVal)
 	Loop_counter++;
 
 	if (L < 64)
-	{
 		histogram[L]++;
-	}
 	else
-	{
 		histogram[63]++;
-	}
 
-	int L2 = 0;
+	if (iter_count != NULL)
+		*iter_count = L;
 
-	if (par.mode == normal || par.mode == deltaDE1 || par.mode == deltaDE2)
+	if (Mode == normal)
 	{
 		if (L == par.N)
-		{
-			L2 = 256;
-			retVal.distance = 0;
-		}
+			distance = 0;
+		return distance;
 	}
 
-	if (par.mode == fake_AO)
-	{
-		retVal.fake_ao = distance;
-	}
+	if (Mode == deltaDE1 || Mode == deltaDE2)
+		return r;
 
-	if (par.mode == colouring)
-	{
-		if (actualFormula == tglad)
-		{
-			retVal.colour = tgladColor * 100.0 + z.Length()*par.mandelboxColorFactorR;
-		}
-		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
-		{
-			retVal.colour = min * 1000.0;
-		}
-		else
-		{
-			retVal.colour = distance * 5000.0;
-		}
+	if (Mode == fake_AO)
+		return distance;
 
+	if (Mode == colouring)
+	{
 		if (par.formula == hybrid)
 		{
-			if (min > 100) min = 100;
-			if (distance > 20) distance = 20;
-			if (tgladColor > 1000) tgladColor = 1000;
-			retVal.colour = distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
-		}
+			if (min > 100) 
+				min = 100;
+			if (distance > 20) 
+				distance = 20;
+			if (tgladColor > 1000) 
+				tgladColor = 1000;
+
+			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
+		} 
+		else if (actualFormula == tglad)
+			return tgladColor * 100.0 + z.Length()*par.mandelbox.colorFactorR;
+		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
+			return min * 1000.0;
+		else
+			return distance * 5000.0;
 	}
-
-	retVal.x_end = z.x;
-	retVal.y_end = z.y;
-	retVal.z_end = z.z;
-	retVal.r1 = r;
-	retVal.L = L;
-	return L2;
-
 }
 
 //******************* Calculate distance *******************8
 
-double CalculateDistance(sFractal &params, sFractal_ret &ret)
+double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 {
-	//limits
-
-
+	int L;
+	double distance;
 	if (params.limits_enabled)
 	{
 		bool limit = false;
@@ -713,137 +669,138 @@ double CalculateDistance(sFractal &params, sFractal_ret &ret)
 		double distance_b = 0;
 		double distance_c = 0;
 
-		if (params.point.x < params.amin)
+		if (point.x < params.amin)
 		{
-			distance_a = fabs(params.amin - params.point.x) + params.DE_threshold;
+			distance_a = fabs(params.amin - point.x) + params.DE_threshold;
 			limit = true;
 		}
-		if (params.point.x > params.amax)
+		if (point.x > params.amax)
 		{
-			distance_a = fabs(params.amax - params.point.x) + params.DE_threshold;
-			limit = true;
-		}
-
-		if (params.point.y < params.bmin)
-		{
-			distance_a = fabs(params.bmin - params.point.y) + params.DE_threshold;
-			limit = true;
-		}
-		if (params.point.y > params.bmax)
-		{
-			distance_b = fabs(params.bmax - params.point.y) + params.DE_threshold;
+			distance_a = fabs(params.amax - point.x) + params.DE_threshold;
 			limit = true;
 		}
 
-		if (params.point.z < params.cmin)
+		if (point.y < params.bmin)
 		{
-			distance_c = fabs(params.cmin - params.point.z) + params.DE_threshold;
+			distance_a = fabs(params.bmin - point.y) + params.DE_threshold;
 			limit = true;
 		}
-		if (params.point.z > params.cmax)
+		if (point.y > params.bmax)
 		{
-			distance_c = fabs(params.cmax - params.point.z) + params.DE_threshold;
+			distance_b = fabs(params.bmax - point.y) + params.DE_threshold;
+			limit = true;
+		}
+
+		if (point.z < params.cmin)
+		{
+			distance_c = fabs(params.cmin - point.z) + params.DE_threshold;
+			limit = true;
+		}
+		if (point.z > params.cmax)
+		{
+			distance_c = fabs(params.cmax - point.z) + params.DE_threshold;
 			limit = true;
 		}
 
 		if (limit)
 		{
-			ret.max_iter = false;
-			ret.distance = dMax(dMax(distance_a, distance_b), distance_c);
-			ret.L = 0;
-			return ret.distance;
+			if (max_iter != NULL)
+				*max_iter = false;
+			distance = dMax(distance_a, distance_b, distance_c);
+			return distance;
 		}
 	}
 
 	if (params.analitycDE)
 	{
-		params.mode = normal;
-		int retval = ComputeIterations(params, ret);
-		if (retval == 256) ret.max_iter = true;
-		else ret.max_iter = false;
-
-		if (ret.L < params.minN && ret.distance < params.DE_threshold)
+		distance = Compute<normal>(point, params, &L);
+		if (max_iter != NULL)
 		{
-			ret.distance = params.DE_threshold;
+			if (L == params.N)
+				*max_iter = true;
+			else
+				*max_iter = false;
 		}
 
+		if (L < params.minN && distance < params.DE_threshold)
+			distance = params.DE_threshold;
+		
 		if (params.interiorMode)
 		{
-			if (ret.distance < 0.5 * params.DE_threshold || retval == 256)
+			if (distance < 0.5 * params.DE_threshold || L == params.N)
 			{
-				ret.distance = params.DE_threshold;
-				ret.max_iter = false;
+				distance = params.DE_threshold;
+				if (max_iter != NULL)
+					*max_iter = false;
 			}
 		}
 
-		if (ret.distance < 0) ret.distance = 0;
+		if (distance < 0)
+			distance = 0;
 
-		return ret.distance;
-
+		return distance;
 	}
 	else
 	{
 		double deltaDE = 1e-10;
 
-		params.mode = deltaDE1;
-		int retval = ComputeIterations(params, ret);
-		double r = ret.r1;
+		double r = Compute<deltaDE1>(point, params, &L);
+		int retval = L;
 
-		params.point.x += deltaDE;
-		params.point.y += 0;
-		params.point.z += 0;
-		params.mode = deltaDE2;
-		params.required_N = ret.L;
-		ComputeIterations(params, ret);
-		double r2 = ret.r1;
+		point.x += deltaDE;
+		point.y += 0;
+		point.z += 0;
+		double r2 = Compute<deltaDE2>(point, params, &L);
 		double dr1 = fabs(r2 - r) / deltaDE;
 
-		params.point.x -= deltaDE;
-		params.point.y += deltaDE;
-		params.point.z += 0;
-		params.mode = deltaDE2;
-		params.required_N = ret.L;
-		ComputeIterations(params, ret);
-		r2 = ret.r1;
+		point.x -= deltaDE;
+		point.y += deltaDE;
+		point.z += 0;
+		r2 = Compute<deltaDE2>(point, params, &L);
 		double dr2 = fabs(r2 - r) / deltaDE;
 
-		params.point.x += 0;
-		params.point.y -= deltaDE;
-		params.point.z += deltaDE;
-		params.mode = deltaDE2;
-		params.required_N = ret.L;
-		ComputeIterations(params, ret);
-		r2 = ret.r1;
+		point.x += 0;
+		point.y -= deltaDE;
+		point.z += deltaDE;
+		r2 = Compute<deltaDE2>(point, params, &L);
 		double dr3 = fabs(r2 - r) / deltaDE;
 
 		double dr = sqrt(dr1 * dr1 + dr2 * dr2 + dr3 * dr3);
 
-		ret.distance = 0.5 * r * log(r) / dr;
+		distance = 0.5 * r * log(r) / dr;
 
-		if (retval == 256)
+		if (retval == params.N)
 		{
-			ret.max_iter = true;
-			ret.distance = 0;
+			if (max_iter != NULL)
+				*max_iter = true;
+			distance = 0;
 		}
-		else ret.max_iter = false;
+		else if (max_iter != NULL)
+			*max_iter = false;
 
-		if (ret.L < params.minN && ret.distance < params.DE_threshold)
-		{
-			ret.distance = params.DE_threshold;
-		}
+		if (L < params.minN && distance < params.DE_threshold)
+			distance = params.DE_threshold;
 
 		if (params.interiorMode)
 		{
-			if (ret.distance < 0.5 * params.DE_threshold || retval == 256)
+			if (distance < 0.5 * params.DE_threshold || retval == 256)
 			{
-				ret.distance = params.DE_threshold;
-				ret.max_iter = false;
+				distance = params.DE_threshold;
+				if (max_iter != NULL)
+					*max_iter = false;
 			}
 		}
 
-		//ret.distance = dMin(ret.distance,0.0-params.c);
-		if (ret.distance < 0) ret.distance = 0;
+		if (distance < 0) 
+			distance = 0;
 
-		return ret.distance;
+		return distance;
 	}
 }
+
+// force template instantiation
+template double Compute<normal>(CVector3, const sFractal&, int*);
+template double Compute<colouring>(CVector3, const sFractal&, int*);
+template double Compute<fake_AO>(CVector3, const sFractal&, int*);
+template double Compute<deltaDE1>(CVector3, const sFractal&, int*);
+template double Compute<deltaDE2>(CVector3, const sFractal&, int*);

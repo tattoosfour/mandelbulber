@@ -8,9 +8,7 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
-#include "Render3D.h"
-
-#define IFS_number_of_vectors 9
+#include "fractparams.h"
 
 enum enumImageFormat
 {
@@ -344,16 +342,8 @@ struct sInterface
 	GtkWidget *edit_sound4FreqMin;
 	GtkWidget *edit_sound4FreqMax;
 	GtkWidget *edit_soundFPS;
-	GtkWidget *edit_hybridIter1;
-	GtkWidget *edit_hybridIter2;
-	GtkWidget *edit_hybridIter3;
-	GtkWidget *edit_hybridIter4;
-	GtkWidget *edit_hybridIter5;
-	GtkWidget *edit_hybridPower1;
-	GtkWidget *edit_hybridPower2;
-	GtkWidget *edit_hybridPower3;
-	GtkWidget *edit_hybridPower4;
-	GtkWidget *edit_hybridPower5;
+	GtkWidget *edit_hybridIter[HYBRID_COUNT];
+	GtkWidget *edit_hybridPower[HYBRID_COUNT];
 	GtkWidget *edit_NavigatorAbsoluteDistance;
 	GtkWidget *edit_stereoDistance;
 	GtkWidget *edit_mandelboxScale;
@@ -361,27 +351,8 @@ struct sInterface
 	GtkWidget *edit_mandelboxFoldingValue;
 	GtkWidget *edit_mandelboxSpFoldingFixedRadius;
 	GtkWidget *edit_mandelboxSpFoldingMinRadius;
-	GtkWidget *edit_mandelboxRotationX1Alfa;
-	GtkWidget *edit_mandelboxRotationX1Beta;
-	GtkWidget *edit_mandelboxRotationX1Gamma;
-	GtkWidget *edit_mandelboxRotationX2Alfa;
-	GtkWidget *edit_mandelboxRotationX2Beta;
-	GtkWidget *edit_mandelboxRotationX2Gamma;
-	GtkWidget *edit_mandelboxRotationY1Alfa;
-	GtkWidget *edit_mandelboxRotationY1Beta;
-	GtkWidget *edit_mandelboxRotationY1Gamma;
-	GtkWidget *edit_mandelboxRotationY2Alfa;
-	GtkWidget *edit_mandelboxRotationY2Beta;
-	GtkWidget *edit_mandelboxRotationY2Gamma;
-	GtkWidget *edit_mandelboxRotationZ1Alfa;
-	GtkWidget *edit_mandelboxRotationZ1Beta;
-	GtkWidget *edit_mandelboxRotationZ1Gamma;
-	GtkWidget *edit_mandelboxRotationZ2Alfa;
-	GtkWidget *edit_mandelboxRotationZ2Beta;
-	GtkWidget *edit_mandelboxRotationZ2Gamma;
-	GtkWidget *edit_mandelboxRotationMainAlfa;
-	GtkWidget *edit_mandelboxRotationMainBeta;
-	GtkWidget *edit_mandelboxRotationMainGamma;
+	GtkWidget *edit_mandelboxRotation[MANDELBOX_FOLDS][3][3];
+	GtkWidget *edit_mandelboxRotationMain[3];
 	GtkWidget *edit_mandelboxColorFactorX;
 	GtkWidget *edit_mandelboxColorFactorY;
 	GtkWidget *edit_mandelboxColorFactorZ;
@@ -417,21 +388,13 @@ struct sInterface
 	GtkWidget *label_keyframeInfo;
 	GtkWidget *label_paletteOffset;
 	GtkWidget *label_soundEnvelope;
-	GtkWidget *label_HybridFormula1;
-	GtkWidget *label_HybridFormula2;
-	GtkWidget *label_HybridFormula3;
-	GtkWidget *label_HybridFormula4;
-	GtkWidget *label_HybridFormula5;
+	GtkWidget *label_HybridFormula[HYBRID_COUNT];
 	GtkWidget *label_NavigatorEstimatedDistance;
 
 	GtkWidget *comboFractType;
 	GtkWidget *combo_imageScale;
 	GtkWidget *comboImageFormat;
-	GtkWidget *comboHybridFormula1;
-	GtkWidget *comboHybridFormula2;
-	GtkWidget *comboHybridFormula3;
-	GtkWidget *comboHybridFormula4;
-	GtkWidget *comboHybridFormula5;
+	GtkWidget *comboHybridFormula[HYBRID_COUNT];
 	GtkWidget *comboHybridDEMethod;
 
 	GtkWidget *progressBar;
@@ -503,7 +466,7 @@ struct sInterface
 	GtkWidget *dareaSoundC;
 	GtkWidget *dareaSoundD;
 
-	sInterfaceIFS IFSParams[IFS_number_of_vectors];
+	sInterfaceIFS IFSParams[IFS_VECTOR_COUNT];
 };
 
 struct sDialogFiles
