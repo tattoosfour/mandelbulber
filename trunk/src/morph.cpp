@@ -6,28 +6,15 @@
  */
 
 #include "morph.hpp"
-#include <stdio.h>
 
 CMorph::CMorph(int size, int recordSize)
 {
 	count = size;
 	dataSize = recordSize;
-	dataSets = new double*[count];
+	dataSets.resize(count);
 	for (int i = 0; i < count; i++)
-	{
-		dataSets[i] = new double[dataSize];
-	}
-	output = new double[dataSize];
-}
-
-CMorph::~CMorph()
-{
-	for (int i = 0; i < count; i++)
-	{
-		delete[] dataSets[i];
-	}
-	delete[] dataSets;
-	delete[] output;
+		dataSets[i].resize(dataSize);
+	output.resize(dataSize);
 }
 
 void CMorph::AddData(int index, double *data)
@@ -74,11 +61,8 @@ void CMorph::CatmullRom(int frame, double *destData)
 		if (key < count - 2) v4 = dataSets[key + 2][i];
 		else v4 = dataSets[count - 1][i];
 
-		//printf("v1=%f, v2=%f, v3=%f, v4=%f\n",v1,v2,v3,v4);
-
 		double value = 0.5 * ((2 * v2) + (-v1 + v3) * factor + (2 * v1 - 5 * v2 + 4 * v3 - v4) * factor2 + (-v1 + 3 * v2 - 3 * v3 + v4) * factor3);
 		output[i]=value;
 		destData[i] = output[i];
 	}
 }
-

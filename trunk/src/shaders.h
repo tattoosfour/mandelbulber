@@ -9,10 +9,6 @@
 #define SHADERS_H_
 
 #include "Render3D.h"
-#include "fractal.h"
-#include "common_math.h"
-#include "texture.hpp"
-#include "math.h"
 
 struct sShaderOutput
 {

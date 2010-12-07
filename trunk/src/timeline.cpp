@@ -5,15 +5,13 @@
  *      Author: krzysztof
  */
 
-#include <gtk-2.0/gtk/gtk.h>
-#include <stdlib.h>
+#include <cstdlib>
+
 #include "timeline.hpp"
-#include "Render3D.h"
+#include "files.h"
 #include "interface.h"
 #include "settings.h"
-#include "cimage.hpp"
 #include "callbacks.h"
-#include "smartptr.h"
 
 smart_ptr<cTimeline> timeline;
 
@@ -392,12 +390,10 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		if (FileIfExist(filename2))
 		{
 			sParamRender fractParamLoaded;
-			ParamsAllocMem(&fractParamLoaded);
 			LoadSettings(filename2, fractParamLoaded, NULL, true);
 			KeepOtherSettings(&fractParamLoaded);
 			WriteInterface(&fractParamLoaded);
 			last_keyframe_position = fractParamLoaded.doubles.vp;
-			ParamsReleaseMem(&fractParamLoaded);
 
 			Interface_data.animMode = false;
 			Interface_data.playMode = false;

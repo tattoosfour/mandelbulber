@@ -8,8 +8,12 @@
 #ifndef FRACTAL_H_
 #define FRACTAL_H_
 
+#include <vector>
 #include "common_math.h"
-#include "algebra.hpp"
+
+const int IFS_VECTOR_COUNT = 9;
+const int HYBRID_COUNT = 5;
+const int MANDELBOX_FOLDS = 2;
 
 enum enumFractalFormula
 {
@@ -35,122 +39,96 @@ enum enumCalculationMode
 	normal = 0, colouring = 1, fake_AO = 2, deltaDE1 = 3, deltaDE2 = 4
 };
 
+struct sFractalIFS
+{
+	CVector3 offset;
+	double scale;
+	double rotationAlfa;
+	double rotationBeta;
+	double rotationGamma;
+	bool absX, absY, absZ;
+
+	bool foldingMode; // Kaleidoscopic IFS folding mode
+	int foldingCount;
+
+	CRotationMatrix mainRot;
+	bool enabled[IFS_VECTOR_COUNT];
+	CVector3 direction[IFS_VECTOR_COUNT];
+	CRotationMatrix rot[IFS_VECTOR_COUNT];
+
+	double distance[IFS_VECTOR_COUNT];
+	double alfa[IFS_VECTOR_COUNT];
+	double beta[IFS_VECTOR_COUNT];
+	double gamma[IFS_VECTOR_COUNT];
+	double intensity[IFS_VECTOR_COUNT];
+};
+
+struct sFractalMandelbox
+{
+	bool rotationsEnabled;
+	double rotationMain[3];
+	double rotation[MANDELBOX_FOLDS][3][3];
+
+	CRotationMatrix mainRot;
+	CRotationMatrix rot[MANDELBOX_FOLDS][3];
+	CRotationMatrix rotinv[MANDELBOX_FOLDS][3];
+
+	double colorFactorX;
+	double colorFactorY;
+	double colorFactorZ;
+	double colorFactorR;
+	double colorFactorSp1;
+	double colorFactorSp2;
+
+	double scale;
+	double foldingLimit;
+	double foldingValue;
+	double foldingSphericalMin;
+	double foldingSphericalFixed;
+};
+
 struct sFractal
 {
-	double amin;
+	int N;		  // maximum number of iterations
+	int minN;	  // minimum number of iterations
+
+	bool limits_enabled; // enable limits (intersections)
+	double amin;  //fractal limits
 	double amax;
 	double bmin;
 	double bmax;
 	double cmin;
 	double cmax;
-	bool limits_enabled;
-	int N;
-	int minN;
-	bool juliaMode;
-	CVector3 julia;
-	double foldingLimit;
+
+	bool juliaMode;				// Julia mode
+	bool tgladFoldingMode;		// Tglad's folding mode
+	bool sphericalFoldingMode;  // spherical folding mode
+	bool interiorMode;
+	bool hybridCyclic;
+
+	CVector3 julia; // Julia constant
+	double constantFactor;
+
+	double foldingLimit; //paramters of TGlad's folding
 	double foldingValue;
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
-	bool tgladFoldingMode;
-	bool sphericalFoldingMode;
-	bool IFSFoldingMode;
-	bool iterThresh;
+
+	bool iterThresh;	 //maxiter threshold mode
+	bool analitycDE;	 //analytic DE mode
 	double DE_threshold;
-	double power;
-	double ca;
-	double cb;
-	double cc;
-	int mode;
+	double power;		 //power of fractal formula
 	enumFractalFormula formula;
-	bool analitycDE;
-	int required_N;
-	CVector3 point;
-	CVector3 *IFSDirection;
-	double *IFSDistance;
-	bool *IFSEnabled;
-	double *IFSAlfa;
-	double *IFSBeta;
-	double *IFSGamma;
-	double *IFSIntensity;
-	double IFSRotationAlfa;
-	double IFSRotationBeta;
-	double IFSRotationGamma;
-	bool IFSAbsX;
-	bool IFSAbsY;
-	bool IFSAbsZ;
-	double IFSScale;
-	CVector3 IFSOffset;
-	int IFSfoldingCount;
-	CRotationMatrix *IFSRot;
-	CRotationMatrix IFSMainRot;
-	double hybridPower1;
-	double hybridPower2;
-	double hybridPower3;
-	double hybridPower4;
-	double hybridPower5;
-	int hybridIters1;
-	int hybridIters2;
-	int hybridIters3;
-	int hybridIters4;
-	int hybridIters5;
-	enumFractalFormula hybridFormula1;
-	enumFractalFormula hybridFormula2;
-	enumFractalFormula hybridFormula3;
-	enumFractalFormula hybridFormula4;
-	enumFractalFormula hybridFormula5;
-	enumFractalFormula *formulaSequence;
-	double *hybridPowerSequence;
-	bool hybridCyclic;
 
-	bool interiorMode;
+	double hybridPower[HYBRID_COUNT];
+	int hybridIters[HYBRID_COUNT];
+	enumFractalFormula hybridFormula[HYBRID_COUNT];
 
-	CRotationMatrix mandelboxMainRot;
-	CRotationMatrix mandelboxRot1X;
-	CRotationMatrix mandelboxRot2X;
-	CRotationMatrix mandelboxRot1Y;
-	CRotationMatrix mandelboxRot2Y;
-	CRotationMatrix mandelboxRot1Z;
-	CRotationMatrix mandelboxRot2Z;
-	CRotationMatrix mandelboxRot1Xinv;
-	CRotationMatrix mandelboxRot2Xinv;
-	CRotationMatrix mandelboxRot1Yinv;
-	CRotationMatrix mandelboxRot2Yinv;
-	CRotationMatrix mandelboxRot1Zinv;
-	CRotationMatrix mandelboxRot2Zinv;
+	std::vector<enumFractalFormula> formulaSequence;
+	std::vector<double> hybridPowerSequence;
 
-	double mandelboxColorFactorX;
-	double mandelboxColorFactorY;
-	double mandelboxColorFactorZ;
-	double mandelboxColorFactorR;
-	double mandelboxColorFactorSp1;
-	double mandelboxColorFactorSp2;
-
-	double mandelboxScale;
-	double mandelboxFoldingLimit;
-	double mandelboxFoldingValue;
-	double mandelboxFoldingSphericalMin;
-	double mandelboxFoldingSphericalFixed;
-
-	bool mandelboxRotationsEnabled;
-
-	double fractalConstantFactor;
-};
-
-struct sFractal_ret
-{
-	double distance;
-	int L;
-	double fake_ao;
-	double orbit;
-	bool max_iter;
-	double r1;
-	double r2;
-	double r3;
-	double x_end;
-	double y_end;
-	double z_end;
-	double colour;
+	sFractalIFS IFS;
+	sFractalMandelbox mandelbox;
 };
 
 struct sBuddhabrot
@@ -158,9 +136,11 @@ struct sBuddhabrot
 	CVector3 point;
 };
 
-extern sBuddhabrot buddhabrot[1000];
+template <int Mode>
+double Compute(CVector3 z, const sFractal &par, int *iter_count = NULL);
 
-int ComputeIterations(sFractal &par, sFractal_ret &retVal);
-double CalculateDistance(sFractal &params, sFractal_ret &ret);
+double CalculateDistance(CVector3 point, const sFractal &par, bool *max_iter = NULL);
+
+extern sBuddhabrot buddhabrot[1000];
 
 #endif /* FRACTAL_H_ */

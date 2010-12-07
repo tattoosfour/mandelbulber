@@ -47,7 +47,7 @@ CMatrix33& CMatrix33::operator=(const CMatrix33 &matrix)
 	return *this;
 }
 
-CMatrix33 CMatrix33::operator*(CMatrix33 &matrix)
+CMatrix33 CMatrix33::operator*(const CMatrix33 &matrix) const
 {
 	CMatrix33 result;
 	result.m11 = m11 * matrix.m11 + m12 * matrix.m21 + m13 * matrix.m31;
@@ -62,7 +62,7 @@ CMatrix33 CMatrix33::operator*(CMatrix33 &matrix)
 	return result;
 }
 
-CVector3 CMatrix33::operator*(CVector3 &vector)
+CVector3 CMatrix33::operator*(const CVector3 &vector) const
 {
 	CVector3 result;
 	result.x = m11 * vector.x + m12 * vector.y + m13 * vector.z;
@@ -137,7 +137,23 @@ void CRotationMatrix::RotateZ(double angle)
 	}
 }
 
-CVector3 CRotationMatrix::RotateVector(CVector3 vector)
+void CRotationMatrix::SetRotation(double angles[3])
+{
+	Null();
+	RotateZ(angles[2]);
+	RotateY(angles[1]);
+	RotateX(angles[0]);
+}
+
+void CRotationMatrix::SetRotation(double alfa, double beta, double gamma)
+{
+	Null();
+	RotateZ(alfa);
+	RotateY(beta);
+	RotateX(gamma);
+}
+
+CVector3 CRotationMatrix::RotateVector(const CVector3& vector) const
 {
 	if (!zero)
 	{
@@ -150,7 +166,7 @@ CVector3 CRotationMatrix::RotateVector(CVector3 vector)
 	}
 }
 
-void CRotationMatrix::Null(void)
+void CRotationMatrix::Null()
 {
 	//CRotationMatrix();
 	matrix.m11 = 1.0;
@@ -165,22 +181,22 @@ void CRotationMatrix::Null(void)
 	zero = true;
 }
 
-double CRotationMatrix::GetAlfa(void)
+double CRotationMatrix::GetAlfa() const
 {
 	return atan2(matrix.m12,matrix.m22);
 }
 
-double CRotationMatrix::GetBeta(void)
+double CRotationMatrix::GetBeta() const
 {
 	return asin(-matrix.m32);
 }
 
-double CRotationMatrix::GetGamma(void)
+double CRotationMatrix::GetGamma() const
 {
 	return atan2(matrix.m31,matrix.m33);
 }
 
-CRotationMatrix CRotationMatrix::Transpose(void)
+CRotationMatrix CRotationMatrix::Transpose() const
 {
 	CRotationMatrix m;
 	m.matrix.m11 = matrix.m11;

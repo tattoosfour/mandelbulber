@@ -39,15 +39,15 @@ public:
 		y = vector.y;
 		z = vector.z;
 	}
-	inline CVector3 operator+(const CVector3 &vector)
+	inline CVector3 operator+(const CVector3 &vector) const
 	{
 		return CVector3(x + vector.x, y + vector.y, z + vector.z);
 	}
-	inline CVector3 operator-(const CVector3 &vector)
+	inline CVector3 operator-(const CVector3 &vector) const
 	{
 		return CVector3(x - vector.x, y - vector.y, z - vector.z);
 	}
-	inline CVector3 operator*(const double &scalar)
+	inline CVector3 operator*(const double &scalar) const
 	{
 		return CVector3(x * scalar, y * scalar, z * scalar);
 	}
@@ -79,15 +79,15 @@ public:
 		z *= scalar;
 		return *this;
 	}
-	inline double Length(void)
+	inline double Length() const
 	{
 		return sqrt(x * x + y * y + z * z);
 	}
-	inline double Dot(CVector3 vector)
+	inline double Dot(const CVector3& vector) const
 	{
 		return x * vector.x + y * vector.y + z * vector.z;
 	}
-	inline double Normalize(void) //returns normalization factor
+	inline double Normalize() //returns normalization factor
 	{
 		double norm = 1.0 / Length();
 		x = x * norm;
@@ -95,11 +95,11 @@ public:
 		z = z * norm;
 		return norm;
 	}
-	inline double GetAlfa(void)
+	inline double GetAlfa() const
 	{
 		return atan2(y, x);
 	}
-	inline double GetBeta(void)
+	inline double GetBeta() const
 	{
 		return atan2(z, sqrt(x * x + y * y));
 	}
@@ -114,8 +114,8 @@ class CMatrix33
 public:
 	CMatrix33();
 	CMatrix33(const CMatrix33 &matrix);
-	CMatrix33 operator*(CMatrix33 &matrix);
-	CVector3 operator*(CVector3 &vector);
+	CMatrix33 operator*(const CMatrix33 &matrix) const;
+	CVector3 operator*(const CVector3 &vector) const;
 	CMatrix33& operator=(const CMatrix33&);
 	double m11;
 	double m12;
@@ -137,11 +137,13 @@ public:
 	void RotateY(double angle);
 	void RotateZ(double angle);
 	void Null();
-	CVector3 RotateVector(CVector3 vector);
-	double GetAlfa();
-	double GetBeta();
-	double GetGamma();
-	CRotationMatrix Transpose(void);
+	CVector3 RotateVector(const CVector3& vector) const;
+	double GetAlfa() const;
+	double GetBeta() const;
+	double GetGamma() const;
+	void SetRotation(double angles[3]);
+	void SetRotation(double alfa, double beta, double gamma);
+	CRotationMatrix Transpose(void) const;
 
 private:
 	CMatrix33 matrix;

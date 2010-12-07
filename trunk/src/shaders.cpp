@@ -5,15 +5,9 @@
  *      Author: krzysztof marczak
  */
 
+#include <cstdlib>
+
 #include "shaders.h"
-#include "algebra.hpp"
-#include "common_math.h"
-#include "fractal.h"
-#include "Render3D.h"
-#include <stdlib.h>
-#include "callbacks.h"
-#include "common_math.h"
-#include "interface.h"
 
 sLight *Lights;
 int lightsPlaced = 0;
@@ -25,28 +19,27 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 	//starting point
 	CVector3 point2;
 
+	bool max_iter;
 	double factor = 1.0 * param->doubles.zoom * wsp_persp;
 	double dist = dist_thresh;
 
 	double start = dist_thresh;
-	if(param->interiorMode) start = dist_thresh*param->doubles.DE_factor*0.5;
+	if(calcParam->interiorMode) 
+		start = dist_thresh*param->doubles.DE_factor*0.5;
 
 	for (double i = start; i < factor; i += dist * param->doubles.DE_factor)
 	{
 		point2 = point + lightVect * i;
 
-		calcParam->point = point2;
-
-		sFractal_ret calcRet;
-		dist = CalculateDistance(*calcParam, calcRet);
-		if (param->iterThresh)
+		dist = CalculateDistance(point2, *calcParam, &max_iter);
+		if (param->fractal.iterThresh)
 		{
-			if (dist < dist_thresh && !calcRet.max_iter)
+			if (dist < dist_thresh && !max_iter)
 			{
 				dist = dist_thresh * 1.01;
 			}
 		}
-		if (dist < dist_thresh || calcRet.max_iter)
+		if (dist < dist_thresh || max_iter)
 		{
 			double shadowing = i / factor;
 			shadow.R = shadowing;
@@ -66,6 +59,7 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 
 	double delta = param->doubles.resolution * param->doubles.zoom * wsp_persp;
 
+	bool max_iter;
 	double start_dist = dist_thresh;
 	double end_dist = param->doubles.zoom * wsp_persp;
 	double intense = 0;
@@ -84,18 +78,15 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 		{
 			CVector3 point2 = point + v.v * r;
 
-			calcParam->point = point2;
-
-			sFractal_ret calcRet;
-			dist = CalculateDistance(*calcParam, calcRet);
-			if (param->iterThresh)
+			dist = CalculateDistance(point2, *calcParam, &max_iter);
+			if (param->fractal.iterThresh)
 			{
-				if (dist < dist_thresh && !calcRet.max_iter)
+				if (dist < dist_thresh && !max_iter)
 				{
 					dist = dist_thresh * 1.01;
 				}
 			}
-			if (dist < dist_thresh || calcRet.max_iter)
+			if (dist < dist_thresh || max_iter)
 			{
 				not_shade = false;
 				intense = r / end_dist;
@@ -131,33 +122,28 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
 		double delta = dist_thresh;
-		if(param->interiorMode) delta = dist_thresh * 0.1;
+		if(calcParam->interiorMode) delta = dist_thresh * 0.1;
 
 		double s1, s2, s3, s4;
-		calcParam->N = param->N * 2;
+		calcParam->N = param->fractal.N * 2;
 		calcParam->minN = 0;
-		sFractal_ret calcRet;
 
-		calcParam->point = point;
-		s1 = CalculateDistance(*calcParam, calcRet);
+		s1 = CalculateDistance(point, *calcParam);
 
 		CVector3 deltax(delta, 0.0, 0.0);
-		calcParam->point = point + deltax;
-		s2 = CalculateDistance(*calcParam, calcRet);
+		s2 = CalculateDistance(point + deltax, *calcParam);
 
 		CVector3 deltay(0.0, delta, 0.0);
-		calcParam->point = point + deltay;
-		s3 = CalculateDistance(*calcParam, calcRet);
+		s3 = CalculateDistance(point + deltay, *calcParam);
 
 		CVector3 deltaz(0.0, 0.0, delta);
-		calcParam->point = point + deltaz;
-		s4 = CalculateDistance(*calcParam, calcRet);
+		s4 = CalculateDistance(point + deltaz, *calcParam);
 
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		calcParam->N = param->N;
-		calcParam->minN = param->minN;
+		calcParam->N = param->fractal.N;
+		calcParam->minN = param->fractal.minN;
 		//calcParam->DE_threshold = DEthreshold_temp;
 	}
 
@@ -165,6 +151,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 	else
 	{
 		double result2;
+		bool max_iter;
 
 		CVector3 point2;
 		CVector3 point3;
@@ -175,19 +162,17 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 				for (point2.z = -1.0; point2.z <= 1.0; point2.z += 0.2)
 				{
 					point3 = point + point2 * dist_thresh;
-					calcParam->point = point3;
 
-					sFractal_ret calcRet;
-					double dist = CalculateDistance(*calcParam, calcRet);
+					double dist = CalculateDistance(point3, *calcParam, &max_iter);
 
-					if (param->iterThresh)
+					if (param->fractal.iterThresh)
 					{
-						if (dist < dist_thresh && !calcRet.max_iter)
+						if (dist < dist_thresh && !max_iter)
 						{
 							dist = dist_thresh * 1.01;
 						}
 					}
-					if (dist < dist_thresh || calcRet.max_iter) result2 = 0.0;
+					if (dist < dist_thresh || max_iter) result2 = 0.0;
 					else result2 = 1.0;
 
 					normal += (point2 * result2);
@@ -293,18 +278,16 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 		{
 			CVector3 point2 = point + lightVector * i;
 
-			calcParam->point = point2;
-
-			sFractal_ret calcRet;
-			dist = CalculateDistance(*calcParam, calcRet);
-			if (fractParams->iterThresh)
+			bool max_iter;
+			dist = CalculateDistance(point2, *calcParam, &max_iter);
+			if (fractParams->fractal.iterThresh)
 			{
-				if (dist < dist_thresh && !calcRet.max_iter)
+				if (dist < dist_thresh && !max_iter)
 				{
 					dist = dist_thresh * 1.01;
 				}
 			}
-			if (dist < 0.5 * dist_thresh || calcRet.max_iter)
+			if (dist < 0.5 * dist_thresh || max_iter)
 			{
 				shade = 0;
 				shade2 = 0;
@@ -337,10 +320,9 @@ void PlaceRandomLights(sParamRender *fractParams)
 	delete[] Lights;
 	Lights = new sLight[fractParams->auxLightNumber + 4];
 
-	sFractal calcParam;
-	sFractal_ret calcRet;
+	sFractal calcParam = fractParams->fractal;
+	bool max_iter;
 
-	CopyParams(fractParams, &calcParam);
 	int trial_number = 0;
 	double radius_multiplier = 1.0;
 
@@ -357,9 +339,7 @@ void PlaceRandomLights(sParamRender *fractParams)
 
 		CVector3 position = fractParams->doubles.vp + random * fractParams->doubles.auxLightDistributionRadius * fractParams->doubles.zoom;
 
-		calcParam.point = position;
-
-		double distance = CalculateDistance(calcParam, calcRet);
+		double distance = CalculateDistance(position, calcParam, &max_iter);
 
 		if (trial_number > 1000)
 		{
@@ -367,14 +347,14 @@ void PlaceRandomLights(sParamRender *fractParams)
 			trial_number = 0;
 		}
 
-		if (distance > 0 && !calcRet.max_iter && distance < fractParams->doubles.auxLightMaxDist * radius_multiplier)
+		if (distance > 0 && !max_iter && distance < fractParams->doubles.auxLightMaxDist * radius_multiplier)
 		{
 			radius_multiplier = 1.0;
 
 			Lights[i].position = position;
 
 			sRGB colour = { 20000 + Random(80000), 20000 + Random(80000), 20000 + Random(80000) };
-			double maxColour = dMax(dMax(colour.R, colour.G), colour.B);
+			double maxColour = dMax(colour.R, colour.G, colour.B);
 			colour.R = colour.R * 65536.0 / maxColour;
 			colour.G = colour.G * 65536.0 / maxColour;
 			colour.B = colour.B * 65536.0 / maxColour;

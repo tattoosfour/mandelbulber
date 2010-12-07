@@ -12,14 +12,12 @@
 
 void fprintfDot(FILE *file, const char *string, double value, sAddData *addData = 0);
 double atof2(char *str, bool locale_dot, sAddData *addData = 0);
-void SaveSettings(char *filename, sParamRender params, sParamSpecial *special = 0);
+void SaveSettings(char *filename, const sParamRender &params, sParamSpecial *special = 0);
 bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special = 0, bool disableMessages = false);
-void DefaultValues(sParamRender *params);
-void ParamsAllocMem(sParamRender *fractParam);
-void ParamsReleaseMem(sParamRender *fractParam);
-void IFSToMorph(double *IFSdouble, sParamRender *params);
-void MorphToIFS(double *IFSdouble, sParamRender *params);
-void MakePaletteString(sRGB *palette, char *paletteString);
+void DefaultValues(sParamRender &params);
+void IFSToMorph(double *IFSdouble, const sFractal &fractal);
+void MorphToIFS(double *IFSdouble, sFractal &fractal);
+void MakePaletteString(const sRGB *palette, char *paletteString);
 void GetPaletteFromString(sRGB *palette, char *paletteString);
 void KeepOtherSettings(sParamRender *params);
 #endif /* SETTINGS_H_ */

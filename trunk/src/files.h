@@ -8,14 +8,13 @@
 #ifndef FILES_H_
 #define FILES_H_
 
-#include <png.h>
-//#include <jpeglib.h>
-#include <setjmp.h>
-
 extern "C"
 {
+#include <png.h>
+#include <setjmp.h>
 #include <jpeglib.h>
 }
+
 #include "cimage.hpp"
 
 struct my_error_mgr
