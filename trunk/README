@@ -16,34 +16,26 @@ LICENCE: GNU GPL v3.0
 - very fast CPU (recomended 2GHz, 4 cores)
 - 500MB RAM
 
-2. INSTALATION
+2. COMPILING
 
-Please type:
-./install
+CMake, libgtk2.0, libjpeg8, and libsndfile1 are required to compile Mandelbulber.
 
-Program will be automaticaly copied to /usr/bin directory and additinal data to ~/.mandelbulber directory
+On Ubuntu:
+sudo apt-get install build-essentials cmake libgtk2.0-dev libjpeg8-dev libsndfile1-dev
 
-Program was compiled for x86 CPUs with SSE
+Then:
 
+mkdir build
+cd build
+cmake ../src
+make
 
-3. COMPILATION
+3. INSTALLATION
 
-Program is prepared for compilation using gcc. Before compilation you need to install libgtk2.0-dev, libjpeg8-dev and libsndfile1-dev package
+(After compiling)
+cd build
+make install
 
-sudo apt-get install libgtk2.0-dev
-sudo apt-get install libjpeg8-dev
-sudo apt-get install libsndfile1-dev
-
-next go to src/Release directory and type:
-make clean
-make all
-
-program was compiled for your native CPU. If you have x64 CPU now will be able to render very high resolution images.
-
-go back to mandelbulber directory and type:
-./install
-
-Source files was created in Enclipse SDK CDT
 
 4. TESTED ON:
 
@@ -73,4 +65,3 @@ options:
 [settings_file] - file with fractal settings (program also tries
 to find file in ./mandelbulber/settings directory)
 When settings_file is put as command argument then program will start in noGUI mode
-
