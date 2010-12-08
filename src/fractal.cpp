@@ -428,7 +428,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					z = par.mandelbox.rotinv[1][1].RotateVector(z);
 
 					lockout = false;
-					z = par.mandelbox.rotinv[0][2].RotateVector(z);
+					z = par.mandelbox.rot[0][2].RotateVector(z);
 					if (z.z > par.mandelbox.foldingLimit)
 					{
 						z.z = par.mandelbox.foldingValue - z.z;
