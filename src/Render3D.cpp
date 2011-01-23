@@ -315,7 +315,7 @@ void *MainThread(void *ptr)
 
 								//calculate opacity
 
-								calcParam.DE_threshold = dist_thresh;
+								calcParam.doubles.DE_threshold = dist_thresh;
 								dist = CalculateDistance(point, calcParam, &max_iter);
 
 								//it is for situation when DE is calculated with very big error

@@ -72,9 +72,9 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 		int height = mainImage.GetHeight();
 
 		double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
-		if(event->button == 3)
+		if (event->button == 3)
 		{
-			closeUpRatio = 1.0/closeUpRatio;
+			closeUpRatio = 1.0 / closeUpRatio;
 		}
 
 		sParamRender params;
@@ -366,11 +366,11 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 	GtkWidget *preview;
 	GtkWidget *checkBox = gtk_check_button_new_with_label("Render preview of settings file");
 	preview = gtk_drawing_area_new();
-	gtk_file_chooser_set_preview_widget (GTK_FILE_CHOOSER(dialog), preview);
-	gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER(dialog), checkBox);
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), checkBox);
 
 	gtk_widget_set_size_request(preview, 128, 128);
-	g_signal_connect (dialog, "update-preview", G_CALLBACK (UpdatePreviewSettingsDialog), preview);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewSettingsDialog), preview);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), lastFilenameSettings);
 
@@ -597,14 +597,11 @@ static void Move(int x, int y, int z)
 	}
 	else
 	{
-		if (z < 0)
-			distance = last_navigator_step;
-		else
-			distance = CalculateDistance(params.doubles.vp, params.fractal) * speed;
+		if (z < 0) distance = last_navigator_step;
+		else distance = CalculateDistance(params.doubles.vp, params.fractal) * speed;
 	}
 
-	if (z > 0)
-		last_navigator_step = distance;
+	if (z > 0) last_navigator_step = distance;
 
 	CVector3 vDelta;
 	CRotationMatrix mRot;
@@ -614,10 +611,8 @@ static void Move(int x, int y, int z)
 	CVector3 directionVector(x * distance, abs(z) * distance, y * distance);
 	vDelta = mRot.RotateVector(directionVector);
 
-	if (z >= 0)
-		params.doubles.vp += vDelta;
-	else
-		params.doubles.vp -= vDelta;
+	if (z >= 0) params.doubles.vp += vDelta;
+	else params.doubles.vp -= vDelta;
 
 	char distanceString[1000];
 	distance = CalculateDistance(params.doubles.vp, params.fractal);
@@ -966,23 +961,20 @@ void PressedDistributeLights(GtkWidget *widget, gpointer data)
 
 void RecalculateIFSParams(sFractal &fractal)
 {
-	fractal.IFS.mainRot.SetRotation(fractal.IFS.rotationAlfa,
-									fractal.IFS.rotationBeta,
-									fractal.IFS.rotationGamma);
+	fractal.IFS.mainRot.SetRotation(fractal.IFS.doubles.rotationAlfa, fractal.IFS.doubles.rotationBeta, fractal.IFS.doubles.rotationGamma);
 
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		fractal.IFS.rot[i].SetRotation(fractal.IFS.alfa[i],
-									   fractal.IFS.beta[i],
-									   fractal.IFS.gamma[i]);
-		fractal.IFS.direction[i].Normalize();
+		fractal.IFS.rot[i].SetRotation(fractal.IFS.doubles.alfa[i], fractal.IFS.doubles.beta[i], fractal.IFS.doubles.gamma[i]);
+		fractal.IFS.doubles.direction[i].Normalize();
 	}
 
-	fractal.mandelbox.mainRot.SetRotation(fractal.mandelbox.rotationMain);
+	fractal.mandelbox.mainRot.SetRotation(fractal.mandelbox.doubles.rotationMain);
 
 	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
-		for (int axis = 0; axis < 3; ++axis) {
-			fractal.mandelbox.rot[fold][axis].SetRotation(fractal.mandelbox.rotation[fold][axis]);
+		for (int axis = 0; axis < 3; ++axis)
+		{
+			fractal.mandelbox.rot[fold][axis].SetRotation(fractal.mandelbox.doubles.rotation[fold][axis]);
 			fractal.mandelbox.rotinv[fold][axis] = fractal.mandelbox.rot[fold][axis].Transpose();
 		}
 }
@@ -995,35 +987,32 @@ void CreateFormulaSequence(sFractal &fractal)
 	int number = 0;
 	while (number < fractal.N)
 	{
-		for (int hybrid_n = 0; hybrid_n < HYBRID_COUNT - 1; ++hybrid_n) 
+		for (int hybrid_n = 0; hybrid_n < HYBRID_COUNT - 1; ++hybrid_n)
 		{
-			if (fractal.hybridFormula[hybrid_n] == none)
-			    continue;
-			for (int i = 0; i < fractal.hybridIters[hybrid_n]; ++i) 
+			if (fractal.hybridFormula[hybrid_n] == none) continue;
+			for (int i = 0; i < fractal.hybridIters[hybrid_n]; ++i)
 			{
 				if (number < fractal.N)
 				{
 					fractal.formulaSequence[number] = fractal.hybridFormula[hybrid_n];
-					fractal.hybridPowerSequence[number] = fractal.hybridPower[hybrid_n];
+					fractal.hybridPowerSequence[number] = fractal.doubles.hybridPower[hybrid_n];
 				}
 				number++;
 			}
 		}
 
 		int temp_end = fractal.N;
-		if (fractal.hybridCyclic)
-			temp_end = fractal.hybridIters[HYBRID_COUNT - 1];
+		if (fractal.hybridCyclic) temp_end = fractal.hybridIters[HYBRID_COUNT - 1];
 
-		if (fractal.hybridFormula[HYBRID_COUNT - 1] != none)
-			for (int i = 0; i < temp_end; i++)
+		if (fractal.hybridFormula[HYBRID_COUNT - 1] != none) for (int i = 0; i < temp_end; i++)
+		{
+			if (number < fractal.N)
 			{
-			    if (number < fractal.N)
-			    {
-			        fractal.formulaSequence[number] = fractal.hybridFormula[HYBRID_COUNT - 1];
-			        fractal.hybridPowerSequence[number] = fractal.hybridPower[HYBRID_COUNT - 1];
-			    }
-			    number++;
+				fractal.formulaSequence[number] = fractal.hybridFormula[HYBRID_COUNT - 1];
+				fractal.hybridPowerSequence[number] = fractal.doubles.hybridPower[HYBRID_COUNT - 1];
 			}
+			number++;
+		}
 
 		if (!fractal.hybridCyclic) break;
 	}
@@ -1034,7 +1023,7 @@ void PressedIFSNormalizeOffset(GtkWidget *widget, gpointer data)
 	sParamRender params;
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
-	params.fractal.IFS.offset.Normalize();
+	params.fractal.IFS.doubles.offset.Normalize();
 	WriteInterface(&params);
 }
 
@@ -1045,7 +1034,7 @@ void PressedIFSNormalizeVectors(GtkWidget *widget, gpointer data)
 	undoBuffer.SaveUndo(&params);
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		params.fractal.IFS.direction[i].Normalize();
+		params.fractal.IFS.doubles.direction[i].Normalize();
 	}
 
 	WriteInterface(&params);
@@ -1062,7 +1051,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	SaveSettings(filename2, fractParamToSave);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
-	timeline->RecordKeyframe(index,filename2, false);
+	timeline->RecordKeyframe(index, filename2, false);
 
 	gtk_widget_queue_draw(timelineInterface.table);
 
@@ -1096,52 +1085,52 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 	char filename1[1000];
 	char filename2[1000];
 
-		int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)))+1;
-		int maxIndex = timeline->CheckNumberOfKeyframes(Interface_data.file_keyframes)-1;
-		printf("Maxindex = %d\n",maxIndex);
+	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber))) + 1;
+	int maxIndex = timeline->CheckNumberOfKeyframes(Interface_data.file_keyframes) - 1;
+	printf("Maxindex = %d\n", maxIndex);
 
-		if(index > maxIndex) index = maxIndex+1;
+	if (index > maxIndex) index = maxIndex + 1;
 
-		for(int i=maxIndex; i>=index; i--)
-		{
-			IndexFilename(filename1, Interface_data.file_keyframes, (char*) "fract", i);
-			IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", i+1);
-			rename(filename1,filename2);
-		}
+	for (int i = maxIndex; i >= index; i--)
+	{
+		IndexFilename(filename1, Interface_data.file_keyframes, (char*) "fract", i);
+		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", i + 1);
+		rename(filename1, filename2);
+	}
 
-		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
 
-		sParamRender fractParamToSave;
-		ReadInterface(&fractParamToSave);
-		SaveSettings(filename2, fractParamToSave);
-		last_keyframe_position = fractParamToSave.doubles.vp;
+	sParamRender fractParamToSave;
+	ReadInterface(&fractParamToSave);
+	SaveSettings(filename2, fractParamToSave);
+	last_keyframe_position = fractParamToSave.doubles.vp;
 
-		timeline->RecordKeyframe(index,filename2, true);
+	timeline->RecordKeyframe(index, filename2, true);
 
-		gtk_widget_queue_draw(timelineInterface.table);
+	gtk_widget_queue_draw(timelineInterface.table);
 
-		index++;
-		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
+	index++;
+	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
-		//loading next keyframe if exists
-		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
-		if (FileIfExist(filename2))
-		{
-			sParamRender fractParamLoaded;
-			LoadSettings(filename2, fractParamLoaded, NULL, true);
-			KeepOtherSettings(&fractParamLoaded);
-			WriteInterface(&fractParamLoaded);
+	//loading next keyframe if exists
+	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	if (FileIfExist(filename2))
+	{
+		sParamRender fractParamLoaded;
+		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		KeepOtherSettings(&fractParamLoaded);
+		WriteInterface(&fractParamLoaded);
 
-			Interface_data.animMode = false;
-			Interface_data.playMode = false;
-			Interface_data.recordMode = false;
-			Interface_data.continueRecord = false;
-			Interface_data.keyframeMode = false;
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
 
-			programClosed = true;
-			isPostRendering = false;
-			renderRequest = true;
-		}
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
+	}
 
 }
 
@@ -1563,14 +1552,14 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 
 void DeleteTimelineWindow(GtkWidget *widget, gpointer widget_pointer)
 {
-	gtk_widget_destroyed(widget, (GtkWidget**)widget_pointer);
+	gtk_widget_destroyed(widget, (GtkWidget**) widget_pointer);
 	timeline->isOpened = false;
 }
 
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
 {
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
-	timeline->DeleteKeyframe(index,Interface_data.file_keyframes);
+	timeline->DeleteKeyframe(index, Interface_data.file_keyframes);
 }
 
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)

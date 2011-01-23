@@ -16,8 +16,6 @@
 #include "Render3D.h"
 #include "interface.h"
 
-sBuddhabrot buddhabrot[1000];
-
 /**
  * Compute the fractal at the point, in one of the various modes
  *
@@ -32,6 +30,11 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	int L;
 	double distance = 0;
 
+	double x1=0;
+	double x2 = 0;
+	double y1=0;
+	double y2 = 0;
+
 	double w = 0;
 
 	CVector3 dz(1.0, 0.0, 0.0);
@@ -39,19 +42,19 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double r_dz = 1;
 	double ph_dz = 0;
 	double th_dz = 0;
-	double p = par.power; //mandelbulb power
+	double p = par.doubles.power; //mandelbulb power
 
 	CVector3 constant;
 
-	double fixedRadius = par.mandelbox.foldingSphericalFixed;
+	double fixedRadius = par.mandelbox.doubles.foldingSphericalFixed;
 	double fR2 = fixedRadius * fixedRadius;
-	double minRadius = par.mandelbox.foldingSphericalMin;
+	double minRadius = par.mandelbox.doubles.foldingSphericalMin;
 	double mR2 = minRadius * minRadius;
 	double tglad_factor1 = fR2 / mR2;
 
-	double tgladDE = par.mandelbox.scale;
+	double tgladDE = par.mandelbox.doubles.scale;
 
-	double scale = par.mandelbox.scale;
+	double scale = par.mandelbox.doubles.scale;
 
 	enumFractalFormula actualFormula = par.formula;
 	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) 
@@ -61,11 +64,11 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 	if (par.juliaMode)
 	{
-		constant = par.julia;
+		constant = par.doubles.julia;
 	}
 	else
 	{
-		constant = z * par.constantFactor;
+		constant = z * par.doubles.constantFactor;
 	}
 
 	bool hybridEnabled = false;
@@ -77,7 +80,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	for (L = 0; L < par.N; L++)
 	{
 		//buddhabrot[L].point = z;
-
 
 		if (hybridEnabled)
 		{
@@ -97,53 +99,53 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				if (par.IFS.enabled[i])
 				{
 					z = par.IFS.rot[i].RotateVector(z);
-					double length = z.Dot(par.IFS.direction[i]);
+					double length = z.Dot(par.IFS.doubles.direction[i]);
 
-					if (length < par.IFS.distance[i])
+					if (length < par.IFS.doubles.distance[i])
 					{
-						z -= par.IFS.direction[i] * 2.0 * (length - par.IFS.distance[i]);
+						z -= par.IFS.doubles.direction[i] * 2.0 * (length - par.IFS.doubles.distance[i]);
 					}
 
 				}
 			}
 
-			z = par.IFS.mainRot.RotateVector(z - par.IFS.offset) + par.IFS.offset;
-			z *= par.IFS.scale;
-			z -= par.IFS.offset * (par.IFS.scale - 1.0);
+			z = par.IFS.mainRot.RotateVector(z - par.IFS.doubles.offset) + par.IFS.doubles.offset;
+			z *= par.IFS.doubles.scale;
+			z -= par.IFS.doubles.offset * (par.IFS.doubles.scale - 1.0);
 
 			r = z.Length();
 		}
 
 		if (par.tgladFoldingMode)
 		{
-			if (z.x > par.foldingLimit)
+			if (z.x > par.doubles.foldingLimit)
 			{
-				z.x = par.foldingValue - z.x;
+				z.x = par.doubles.foldingValue - z.x;
 				tgladColor *= 0.9;
 			}
-			else if (z.x < -par.foldingLimit)
+			else if (z.x < -par.doubles.foldingLimit)
 			{
-				z.x = -par.foldingValue - z.x;
+				z.x = -par.doubles.foldingValue - z.x;
 				tgladColor *= 0.9;
 			}
-			if (z.y > par.foldingLimit)
+			if (z.y > par.doubles.foldingLimit)
 			{
-				z.y = par.foldingValue - z.y;
+				z.y = par.doubles.foldingValue - z.y;
 				tgladColor *= 0.9;
 			}
-			else if (z.y < -par.foldingLimit)
+			else if (z.y < -par.doubles.foldingLimit)
 			{
-				z.y = -par.foldingValue - z.y;
+				z.y = -par.doubles.foldingValue - z.y;
 				tgladColor *= 0.9;
 			}
-			if (z.z > par.foldingLimit)
+			if (z.z > par.doubles.foldingLimit)
 			{
-				z.z = par.foldingValue - z.z;
+				z.z = par.doubles.foldingValue - z.z;
 				tgladColor *= 0.9;
 			}
-			else if (z.z < -par.foldingLimit)
+			else if (z.z < -par.doubles.foldingLimit)
 			{
-				z.z = -par.foldingValue - z.z;
+				z.z = -par.doubles.foldingValue - z.z;
 				tgladColor *= 0.9;
 			}
 			r = z.Length();
@@ -151,8 +153,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 		if (par.sphericalFoldingMode)
 		{
-			double fR2_2 = par.foldingSphericalFixed * par.foldingSphericalFixed;
-			double mR2_2 = par.foldingSphericalMin * par.foldingSphericalMin;
+			double fR2_2 = par.doubles.foldingSphericalFixed * par.doubles.foldingSphericalFixed;
+			double mR2_2 = par.doubles.foldingSphericalMin * par.doubles.foldingSphericalMin;
 			double r2_2 = r * r;
 			double tglad_factor1_2 = fR2_2 / mR2_2;
 
@@ -282,6 +284,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case xenodreambuie:
 			{
+				/*
+
 				double rp = pow(r, p);
 				double th = atan2(z.y, z.x);
 				double ph = acos(z.z / r);
@@ -297,6 +301,28 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z.y = rp * sin(th * p) * sin(ph * p);
 				z.z = rp * cos(ph * p);
 				z = z + constant;
+
+				*/
+
+
+
+				double cx1 = constant.z;
+				double cy1 = constant.x;
+				double cx2 = constant.z;
+				double cy2 = constant.y;
+
+				double temp1 = x1*x1 - y1*y1 + cx1;
+				y1 = 2.0*x1*y1 + cy1;
+				x1 = temp1;
+
+				double temp2 = x2*x2 - y2*y2 + cx2;
+				y2 = 2.0*x2*y2 + cy2;
+				x2 = temp2;
+
+				z.x = x1*x2 - y1*y2;
+				z.y = x1*y2 + x2*y1;
+				z.z = 0;
+
 				r = z.Length();
 				break;
 			}
@@ -393,89 +419,89 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				{
 					bool lockout = false;
 					z = par.mandelbox.rot[0][0].RotateVector(z);
-					if (z.x > par.mandelbox.foldingLimit)
+					if (z.x > par.mandelbox.doubles.foldingLimit)
 					{
-						z.x = par.mandelbox.foldingValue - z.x;
-						tgladColor += par.mandelbox.colorFactorX;
+						z.x = par.mandelbox.doubles.foldingValue - z.x;
+						tgladColor += par.mandelbox.doubles.colorFactorX;
 						lockout = true;
 					}
 					z = par.mandelbox.rotinv[0][0].RotateVector(z);
 
 					z = par.mandelbox.rot[1][0].RotateVector(z);
-					if (!lockout && z.x < -par.mandelbox.foldingLimit)
+					if (!lockout && z.x < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.x = -par.mandelbox.foldingValue - z.x;
-						tgladColor += par.mandelbox.colorFactorX;
+						z.x = -par.mandelbox.doubles.foldingValue - z.x;
+						tgladColor += par.mandelbox.doubles.colorFactorX;
 					}
 					z = par.mandelbox.rotinv[1][0].RotateVector(z);
 
 					lockout = false;
 					z = par.mandelbox.rot[0][1].RotateVector(z);
-					if (z.y > par.mandelbox.foldingLimit)
+					if (z.y > par.mandelbox.doubles.foldingLimit)
 					{
-						z.y = par.mandelbox.foldingValue - z.y;
-						tgladColor += par.mandelbox.colorFactorY;
+						z.y = par.mandelbox.doubles.foldingValue - z.y;
+						tgladColor += par.mandelbox.doubles.colorFactorY;
 						lockout = true;
 					}
 					z = par.mandelbox.rotinv[0][1].RotateVector(z);
 
 					z = par.mandelbox.rot[1][1].RotateVector(z);
-					if (!lockout && z.y < -par.mandelbox.foldingLimit)
+					if (!lockout && z.y < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.y = -par.mandelbox.foldingValue - z.y;
-						tgladColor += par.mandelbox.colorFactorY;
+						z.y = -par.mandelbox.doubles.foldingValue - z.y;
+						tgladColor += par.mandelbox.doubles.colorFactorY;
 					}
 					z = par.mandelbox.rotinv[1][1].RotateVector(z);
 
 					lockout = false;
 					z = par.mandelbox.rot[0][2].RotateVector(z);
-					if (z.z > par.mandelbox.foldingLimit)
+					if (z.z > par.mandelbox.doubles.foldingLimit)
 					{
-						z.z = par.mandelbox.foldingValue - z.z;
-						tgladColor += par.mandelbox.colorFactorZ;
+						z.z = par.mandelbox.doubles.foldingValue - z.z;
+						tgladColor += par.mandelbox.doubles.colorFactorZ;
 						lockout = true;
 					}
 					z = par.mandelbox.rotinv[0][2].RotateVector(z);
 
 					z = par.mandelbox.rot[1][2].RotateVector(z);
-					if (!lockout && z.z < -par.mandelbox.foldingLimit)
+					if (!lockout && z.z < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.z = -par.mandelbox.foldingValue - z.z;
-						tgladColor += par.mandelbox.colorFactorZ;
+						z.z = -par.mandelbox.doubles.foldingValue - z.z;
+						tgladColor += par.mandelbox.doubles.colorFactorZ;
 					}
 					z = par.mandelbox.rotinv[1][2].RotateVector(z);
 				}
 				else
 				{
-					if (z.x > par.mandelbox.foldingLimit)
+					if (z.x > par.mandelbox.doubles.foldingLimit)
 					{
-						z.x = par.mandelbox.foldingValue - z.x;
-						tgladColor += par.mandelbox.colorFactorX;
+						z.x = par.mandelbox.doubles.foldingValue - z.x;
+						tgladColor += par.mandelbox.doubles.colorFactorX;
 					}
-					else if (z.x < -par.mandelbox.foldingLimit)
+					else if (z.x < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.x = -par.mandelbox.foldingValue - z.x;
-						tgladColor += par.mandelbox.colorFactorX;
+						z.x = -par.mandelbox.doubles.foldingValue - z.x;
+						tgladColor += par.mandelbox.doubles.colorFactorX;
 					}
-					if (z.y > par.mandelbox.foldingLimit)
+					if (z.y > par.mandelbox.doubles.foldingLimit)
 					{
-						z.y = par.mandelbox.foldingValue - z.y;
-						tgladColor += par.mandelbox.colorFactorY;
+						z.y = par.mandelbox.doubles.foldingValue - z.y;
+						tgladColor += par.mandelbox.doubles.colorFactorY;
 					}
-					else if (z.y < -par.mandelbox.foldingLimit)
+					else if (z.y < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.y = -par.mandelbox.foldingValue - z.y;
-						tgladColor += par.mandelbox.colorFactorY;
+						z.y = -par.mandelbox.doubles.foldingValue - z.y;
+						tgladColor += par.mandelbox.doubles.colorFactorY;
 					}
-					if (z.z > par.mandelbox.foldingLimit)
+					if (z.z > par.mandelbox.doubles.foldingLimit)
 					{
-						z.z = par.mandelbox.foldingValue - z.z;
-						tgladColor += par.mandelbox.colorFactorZ;
+						z.z = par.mandelbox.doubles.foldingValue - z.z;
+						tgladColor += par.mandelbox.doubles.colorFactorZ;
 					}
-					else if (z.z < -par.mandelbox.foldingLimit)
+					else if (z.z < -par.mandelbox.doubles.foldingLimit)
 					{
-						z.z = -par.mandelbox.foldingValue - z.z;
-						tgladColor += par.mandelbox.colorFactorZ;
+						z.z = -par.mandelbox.doubles.foldingValue - z.z;
+						tgladColor += par.mandelbox.doubles.colorFactorZ;
 					}
 				}
 
@@ -488,14 +514,14 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				{
 					z *= tglad_factor1;
 					tgladDE *= tglad_factor1;
-					tgladColor += par.mandelbox.colorFactorSp1;
+					tgladColor += par.mandelbox.doubles.colorFactorSp1;
 				}
 				else if (r2 < fR2)
 				{
 					double tglad_factor2 = fR2 / r2;
 					z *= tglad_factor2;
 					tgladDE *= tglad_factor2;
-					tgladColor += par.mandelbox.colorFactorSp2;
+					tgladColor += par.mandelbox.doubles.colorFactorSp2;
 				}
 
 				z = par.mandelbox.mainRot.RotateVector(z);
@@ -518,16 +544,16 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					if (par.IFS.enabled[i])
 					{
 						z = par.IFS.rot[i].RotateVector(z);
-						double length = z.Dot(par.IFS.direction[i]);
+						double length = z.Dot(par.IFS.doubles.direction[i]);
 
-						if (length < par.IFS.distance[i])
+						if (length < par.IFS.doubles.distance[i])
 						{
-							z -= par.IFS.direction[i] * (2.0 * (length - par.IFS.distance[i]) * par.IFS.intensity[i]);
+							z -= par.IFS.doubles.direction[i] * (2.0 * (length - par.IFS.doubles.distance[i]) * par.IFS.doubles.intensity[i]);
 						}
 
 					}
 				}
-				z = par.IFS.mainRot.RotateVector(z - par.IFS.offset) + par.IFS.offset;
+				z = par.IFS.mainRot.RotateVector(z - par.IFS.doubles.offset) + par.IFS.doubles.offset;
 
 				if (Mode == colouring)
 				{
@@ -535,10 +561,10 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					if (length2 < min) min = length2;
 				}
 
-				z *= par.IFS.scale;
-				z -= par.IFS.offset * (par.IFS.scale - 1.0);
+				z *= par.IFS.doubles.scale;
+				z -= par.IFS.doubles.offset * (par.IFS.doubles.scale - 1.0);
 
-				tgladDE *= par.IFS.scale;
+				tgladDE *= par.IFS.doubles.scale;
 				r = z.Length();
 
 				break;
@@ -648,7 +674,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
 		} 
 		else if (actualFormula == tglad)
-			return tgladColor * 100.0 + z.Length()*par.mandelbox.colorFactorR;
+			return tgladColor * 100.0 + z.Length()*par.mandelbox.doubles.colorFactorR;
 		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 			return min * 1000.0;
 		else
@@ -669,36 +695,36 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 		double distance_b = 0;
 		double distance_c = 0;
 
-		if (point.x < params.amin)
+		if (point.x < params.doubles.amin)
 		{
-			distance_a = fabs(params.amin - point.x) + params.DE_threshold;
+			distance_a = fabs(params.doubles.amin - point.x) + params.doubles.DE_threshold;
 			limit = true;
 		}
-		if (point.x > params.amax)
+		if (point.x > params.doubles.amax)
 		{
-			distance_a = fabs(params.amax - point.x) + params.DE_threshold;
-			limit = true;
-		}
-
-		if (point.y < params.bmin)
-		{
-			distance_a = fabs(params.bmin - point.y) + params.DE_threshold;
-			limit = true;
-		}
-		if (point.y > params.bmax)
-		{
-			distance_b = fabs(params.bmax - point.y) + params.DE_threshold;
+			distance_a = fabs(params.doubles.amax - point.x) + params.doubles.DE_threshold;
 			limit = true;
 		}
 
-		if (point.z < params.cmin)
+		if (point.y < params.doubles.bmin)
 		{
-			distance_c = fabs(params.cmin - point.z) + params.DE_threshold;
+			distance_a = fabs(params.doubles.bmin - point.y) + params.doubles.DE_threshold;
 			limit = true;
 		}
-		if (point.z > params.cmax)
+		if (point.y > params.doubles.bmax)
 		{
-			distance_c = fabs(params.cmax - point.z) + params.DE_threshold;
+			distance_b = fabs(params.doubles.bmax - point.y) + params.doubles.DE_threshold;
+			limit = true;
+		}
+
+		if (point.z < params.doubles.cmin)
+		{
+			distance_c = fabs(params.doubles.cmin - point.z) + params.doubles.DE_threshold;
+			limit = true;
+		}
+		if (point.z > params.doubles.cmax)
+		{
+			distance_c = fabs(params.doubles.cmax - point.z) + params.doubles.DE_threshold;
 			limit = true;
 		}
 
@@ -722,14 +748,14 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 				*max_iter = false;
 		}
 
-		if (L < params.minN && distance < params.DE_threshold)
-			distance = params.DE_threshold;
+		if (L < params.minN && distance < params.doubles.DE_threshold)
+			distance = params.doubles.DE_threshold;
 		
 		if (params.interiorMode)
 		{
-			if (distance < 0.5 * params.DE_threshold || L == params.N)
+			if (distance < 0.5 * params.doubles.DE_threshold || L == params.N)
 			{
-				distance = params.DE_threshold;
+				distance = params.doubles.DE_threshold;
 				if (max_iter != NULL)
 					*max_iter = false;
 			}
@@ -778,14 +804,14 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 		else if (max_iter != NULL)
 			*max_iter = false;
 
-		if (L < params.minN && distance < params.DE_threshold)
-			distance = params.DE_threshold;
+		if (L < params.minN && distance < params.doubles.DE_threshold)
+			distance = params.doubles.DE_threshold;
 
 		if (params.interiorMode)
 		{
-			if (distance < 0.5 * params.DE_threshold || retval == 256)
+			if (distance < 0.5 * params.doubles.DE_threshold || retval == 256)
 			{
-				distance = params.DE_threshold;
+				distance = params.doubles.DE_threshold;
 				if (max_iter != NULL)
 					*max_iter = false;
 			}
