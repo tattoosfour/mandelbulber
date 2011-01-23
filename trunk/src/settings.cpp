@@ -168,12 +168,12 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintfDot(fileSettings, "locale_test", 0.5);
 	fprintf(fileSettings, "image_width %d;\n", params.image_width);
 	fprintf(fileSettings, "image_height %d;\n", params.image_height);
-	fprintfDot(fileSettings, "x_min", params.fractal.amin, &special->amin);
-	fprintfDot(fileSettings, "x_max", params.fractal.amax, &special->amax);
-	fprintfDot(fileSettings, "y_min", params.fractal.bmin, &special->bmin);
-	fprintfDot(fileSettings, "y_max", params.fractal.bmax, &special->bmax);
-	fprintfDot(fileSettings, "z_min", params.fractal.cmin, &special->cmin);
-	fprintfDot(fileSettings, "z_max", params.fractal.cmax, &special->cmax);
+	fprintfDot(fileSettings, "x_min", params.fractal.doubles.amin, &special->amin);
+	fprintfDot(fileSettings, "x_max", params.fractal.doubles.amax, &special->amax);
+	fprintfDot(fileSettings, "y_min", params.fractal.doubles.bmin, &special->bmin);
+	fprintfDot(fileSettings, "y_max", params.fractal.doubles.bmax, &special->bmax);
+	fprintfDot(fileSettings, "z_min", params.fractal.doubles.cmin, &special->cmin);
+	fprintfDot(fileSettings, "z_max", params.fractal.doubles.cmax, &special->cmax);
 	fprintfDot(fileSettings, "view_point_x", params.doubles.vp.x, &special->vpX);
 	fprintfDot(fileSettings, "view_point_y", params.doubles.vp.y, &special->vpY);
 	fprintfDot(fileSettings, "view_point_z", params.doubles.vp.z, &special->vpZ);
@@ -183,21 +183,21 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintfDot(fileSettings, "zoom", params.doubles.zoom, &special->zoom);
 	fprintfDot(fileSettings, "perspective", params.doubles.persp, &special->persp);
 	fprintf(fileSettings, "formula %d;\n", params.fractal.formula);
-	fprintfDot(fileSettings, "power", params.fractal.power, &special->power);
+	fprintfDot(fileSettings, "power", params.fractal.doubles.power, &special->power);
 	fprintf(fileSettings, "N %d;\n", params.fractal.N);
 	fprintf(fileSettings, "minN %d;\n", params.fractal.minN);
-	fprintfDot(fileSettings, "fractal_constant_factor", params.fractal.constantFactor, &special->fractalConstantFactor);
+	fprintfDot(fileSettings, "fractal_constant_factor", params.fractal.doubles.constantFactor, &special->fractalConstantFactor);
 	fprintfDot(fileSettings, "quality", params.doubles.quality, &special->quality);
 	fprintf(fileSettings, "julia_mode %d;\n", params.fractal.juliaMode);
-	fprintfDot(fileSettings, "julia_a", params.fractal.julia.x, &special->juliaX);
-	fprintfDot(fileSettings, "julia_b", params.fractal.julia.y, &special->juliaY);
-	fprintfDot(fileSettings, "julia_c", params.fractal.julia.z, &special->juliaZ);
+	fprintfDot(fileSettings, "julia_a", params.fractal.doubles.julia.x, &special->juliaX);
+	fprintfDot(fileSettings, "julia_b", params.fractal.doubles.julia.y, &special->juliaY);
+	fprintfDot(fileSettings, "julia_c", params.fractal.doubles.julia.z, &special->juliaZ);
 	fprintf(fileSettings, "tglad_folding_mode %d;\n", params.fractal.tgladFoldingMode);
-	fprintfDot(fileSettings, "folding_limit", params.fractal.foldingLimit, &special->foldingLimit);
-	fprintfDot(fileSettings, "folding_value", params.fractal.foldingValue, &special->foldingValue);
+	fprintfDot(fileSettings, "folding_limit", params.fractal.doubles.foldingLimit, &special->foldingLimit);
+	fprintfDot(fileSettings, "folding_value", params.fractal.doubles.foldingValue, &special->foldingValue);
 	fprintf(fileSettings, "spherical_folding_mode %d;\n", params.fractal.sphericalFoldingMode);
-	fprintfDot(fileSettings, "spherical_folding_fixed", params.fractal.foldingSphericalFixed, &special->foldingSphericalFixed);
-	fprintfDot(fileSettings, "spherical_folding_min", params.fractal.foldingSphericalMin, &special->foldingSphericalMin);
+	fprintfDot(fileSettings, "spherical_folding_fixed", params.fractal.doubles.foldingSphericalFixed, &special->foldingSphericalFixed);
+	fprintfDot(fileSettings, "spherical_folding_min", params.fractal.doubles.foldingSphericalMin, &special->foldingSphericalMin);
 	fprintf(fileSettings, "IFS_folding_mode %d;\n", params.fractal.IFS.foldingMode);
 	fprintf(fileSettings, "iteration_threshold_mode %d;\n", params.fractal.iterThresh);
 	fprintf(fileSettings, "analityc_DE_mode %d;\n", params.fractal.analitycDE);
@@ -289,13 +289,13 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintf(fileSettings, "aux_light_predefined_4_colour_G %d;\n", params.auxLightPre4Colour.G);
 	fprintf(fileSettings, "aux_light_predefined_4_colour_B %d;\n", params.auxLightPre4Colour.B);
 	fprintfDot(fileSettings, "aux_light_visibility", params.doubles.auxLightVisibility, &special->auxLightVisibility);
-	fprintfDot(fileSettings, "IFS_scale", params.fractal.IFS.scale, &special->IFSScale);
-	fprintfDot(fileSettings, "IFS_rot_alfa", params.fractal.IFS.rotationAlfa, &special->IFSRotationAlfa);
-	fprintfDot(fileSettings, "IFS_rot_beta", params.fractal.IFS.rotationBeta, &special->IFSRotationBeta);
-	fprintfDot(fileSettings, "IFS_rot_gamma", params.fractal.IFS.rotationGamma, &special->IFSRotationGamma);
-	fprintfDot(fileSettings, "IFS_offsetX", params.fractal.IFS.offset.x, &special->IFSOffsetX);
-	fprintfDot(fileSettings, "IFS_offsetY", params.fractal.IFS.offset.y, &special->IFSOffsetY);
-	fprintfDot(fileSettings, "IFS_offsetZ", params.fractal.IFS.offset.z, &special->IFSOffsetZ);
+	fprintfDot(fileSettings, "IFS_scale", params.fractal.IFS.doubles.scale, &special->IFSScale);
+	fprintfDot(fileSettings, "IFS_rot_alfa", params.fractal.IFS.doubles.rotationAlfa, &special->IFSRotationAlfa);
+	fprintfDot(fileSettings, "IFS_rot_beta", params.fractal.IFS.doubles.rotationBeta, &special->IFSRotationBeta);
+	fprintfDot(fileSettings, "IFS_rot_gamma", params.fractal.IFS.doubles.rotationGamma, &special->IFSRotationGamma);
+	fprintfDot(fileSettings, "IFS_offsetX", params.fractal.IFS.doubles.offset.x, &special->IFSOffsetX);
+	fprintfDot(fileSettings, "IFS_offsetY", params.fractal.IFS.doubles.offset.y, &special->IFSOffsetY);
+	fprintfDot(fileSettings, "IFS_offsetZ", params.fractal.IFS.doubles.offset.z, &special->IFSOffsetZ);
 	fprintf(fileSettings, "IFS_absX %d;\n", params.fractal.IFS.absX);
 	fprintf(fileSettings, "IFS_absY %d;\n", params.fractal.IFS.absY);
 	fprintf(fileSettings, "IFS_absZ %d;\n", params.fractal.IFS.absZ);
@@ -303,21 +303,21 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_x", params.fractal.IFS.direction[i].x);
+		fprintfDot(fileSettings, "_x", params.fractal.IFS.doubles.direction[i].x);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_y", params.fractal.IFS.direction[i].y);
+		fprintfDot(fileSettings, "_y", params.fractal.IFS.doubles.direction[i].y);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_z", params.fractal.IFS.direction[i].z);
+		fprintfDot(fileSettings, "_z", params.fractal.IFS.doubles.direction[i].z);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_alfa", params.fractal.IFS.alfa[i]);
+		fprintfDot(fileSettings, "_alfa", params.fractal.IFS.doubles.alfa[i]);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_beta", params.fractal.IFS.beta[i]);
+		fprintfDot(fileSettings, "_beta", params.fractal.IFS.doubles.beta[i]);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_gamma", params.fractal.IFS.gamma[i]);
+		fprintfDot(fileSettings, "_gamma", params.fractal.IFS.doubles.gamma[i]);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_distance", params.fractal.IFS.distance[i]);
+		fprintfDot(fileSettings, "_distance", params.fractal.IFS.doubles.distance[i]);
 		fprintf(fileSettings, "IFS_%d", i);
-		fprintfDot(fileSettings, "_intensity", params.fractal.IFS.intensity[i]);
+		fprintfDot(fileSettings, "_intensity", params.fractal.IFS.doubles.intensity[i]);
 		fprintf(fileSettings, "IFS_%d", i);
 		fprintf(fileSettings, "_enabled %d;\n", params.fractal.IFS.enabled[i]);
 	}
@@ -344,7 +344,7 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i) {
 		fprintf(fileSettings, "hybrid_power_%d", i);
-		fprintfDot(fileSettings, "", params.fractal.hybridPower[i-1], &special->hybridPower[i-1]);
+		fprintfDot(fileSettings, "", params.fractal.doubles.hybridPower[i-1], &special->hybridPower[i-1]);
 	}
 
 	fprintf(fileSettings, "hybrid_cyclic %d;\n", params.fractal.hybridCyclic);
@@ -352,30 +352,30 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintfDot(fileSettings, "stereo_eye_distance", params.doubles.stereoEyeDistance, &special->stereoEyeDistance);
 	fprintf(fileSettings, "stereo_enabled %d;\n", params.stereoEnabled);
 
-	fprintfDot(fileSettings, "mandelbox_scale", params.fractal.mandelbox.scale, &special->mandelboxScale);
-	fprintfDot(fileSettings, "mandelbox_folding_limit", params.fractal.mandelbox.foldingLimit, &special->mandelboxFoldingLimit);
-	fprintfDot(fileSettings, "mandelbox_folding_value", params.fractal.mandelbox.foldingValue, &special->mandelboxFoldingValue);
-	fprintfDot(fileSettings, "mandelbox_folding_min_radius", params.fractal.mandelbox.foldingSphericalMin, &special->mandelboxFoldingSphericalMin);
-	fprintfDot(fileSettings, "mandelbox_folding_fixed_radius", params.fractal.mandelbox.foldingSphericalFixed, &special->mandelboxFoldingSphericalFixed);
+	fprintfDot(fileSettings, "mandelbox_scale", params.fractal.mandelbox.doubles.scale, &special->mandelboxScale);
+	fprintfDot(fileSettings, "mandelbox_folding_limit", params.fractal.mandelbox.doubles.foldingLimit, &special->mandelboxFoldingLimit);
+	fprintfDot(fileSettings, "mandelbox_folding_value", params.fractal.mandelbox.doubles.foldingValue, &special->mandelboxFoldingValue);
+	fprintfDot(fileSettings, "mandelbox_folding_min_radius", params.fractal.mandelbox.doubles.foldingSphericalMin, &special->mandelboxFoldingSphericalMin);
+	fprintfDot(fileSettings, "mandelbox_folding_fixed_radius", params.fractal.mandelbox.doubles.foldingSphericalFixed, &special->mandelboxFoldingSphericalFixed);
 
 	for (int component = 0; component < 3; ++component) {
 		fprintf(fileSettings, "mandelbox_rotation_main_%s", component_names[component]);
-		fprintfDot(fileSettings, "", params.fractal.mandelbox.rotationMain[component] * 180.0 / M_PI, &special->mandelboxRotationMain[component]);
+		fprintfDot(fileSettings, "", params.fractal.mandelbox.doubles.rotationMain[component] * 180.0 / M_PI, &special->mandelboxRotationMain[component]);
 	}
 
 	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 		for (int axis = 0; axis < 3; ++axis)
 			for (int component = 0; component < 3; ++component) {
 				fprintf(fileSettings, "mandelbox_rotation_%s%d_%s", axis_names[axis], fold, component_names[component]);
-				fprintfDot(fileSettings, "", params.fractal.mandelbox.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]);
+				fprintfDot(fileSettings, "", params.fractal.mandelbox.doubles.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]);
 			}
 
-	fprintfDot(fileSettings, "mandelbox_color_R", params.fractal.mandelbox.colorFactorR, &special->mandelboxColorFactorR);
-	fprintfDot(fileSettings, "mandelbox_color_X", params.fractal.mandelbox.colorFactorX, &special->mandelboxColorFactorX);
-	fprintfDot(fileSettings, "mandelbox_color_Y", params.fractal.mandelbox.colorFactorY, &special->mandelboxColorFactorY);
-	fprintfDot(fileSettings, "mandelbox_color_Z", params.fractal.mandelbox.colorFactorZ, &special->mandelboxColorFactorZ);
-	fprintfDot(fileSettings, "mandelbox_color_Sp1", params.fractal.mandelbox.colorFactorSp1, &special->mandelboxColorFactorSp1);
-	fprintfDot(fileSettings, "mandelbox_color_Sp2", params.fractal.mandelbox.colorFactorSp2, &special->mandelboxColorFactorSp2);
+	fprintfDot(fileSettings, "mandelbox_color_R", params.fractal.mandelbox.doubles.colorFactorR, &special->mandelboxColorFactorR);
+	fprintfDot(fileSettings, "mandelbox_color_X", params.fractal.mandelbox.doubles.colorFactorX, &special->mandelboxColorFactorX);
+	fprintfDot(fileSettings, "mandelbox_color_Y", params.fractal.mandelbox.doubles.colorFactorY, &special->mandelboxColorFactorY);
+	fprintfDot(fileSettings, "mandelbox_color_Z", params.fractal.mandelbox.doubles.colorFactorZ, &special->mandelboxColorFactorZ);
+	fprintfDot(fileSettings, "mandelbox_color_Sp1", params.fractal.mandelbox.doubles.colorFactorSp1, &special->mandelboxColorFactorSp1);
+	fprintfDot(fileSettings, "mandelbox_color_Sp2", params.fractal.mandelbox.doubles.colorFactorSp2, &special->mandelboxColorFactorSp2);
 	fprintf(fileSettings, "mandelbox_rotation_enabled %d;\n", params.fractal.mandelbox.rotationsEnabled);
 
 	fprintfDot(fileSettings, "view_distance_max", params.doubles.viewDistanceMax, &special->viewDistanceMax);
@@ -441,56 +441,56 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 					c = sprintf(str3, "IFS_%d_x", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.direction[i].x = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.direction[i].x = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_y", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.direction[i].y = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.direction[i].y = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_z", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.direction[i].z = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.direction[i].z = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_alfa", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.alfa[i] = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.alfa[i] = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_beta", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.beta[i] = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.beta[i] = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_gamma", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.gamma[i] = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.gamma[i] = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_distance", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.distance[i] = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.distance[i] = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
 					c = sprintf(str3, "IFS_%d_intensity", i);
 					if (!strcmp(str1, str3))
 					{
-						params.fractal.IFS.intensity[i] = atof2(str2, locale_dot);
+						params.fractal.IFS.doubles.intensity[i] = atof2(str2, locale_dot);
 						IFSresult = true;
 						break;
 					}
@@ -512,12 +512,12 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (IFSresult) IFSresult = false;
 				else if (!strcmp(str1, "image_width")) params.image_width = atoi(str2);
 				else if (!strcmp(str1, "image_height")) params.image_height = atoi(str2);
-				else if (!strcmp(str1, "x_min")) params.fractal.amin = atof2(str2, locale_dot, &special->amin);
-				else if (!strcmp(str1, "x_max")) params.fractal.amax = atof2(str2, locale_dot, &special->amax);
-				else if (!strcmp(str1, "y_min")) params.fractal.bmin = atof2(str2, locale_dot, &special->bmin);
-				else if (!strcmp(str1, "y_max")) params.fractal.bmax = atof2(str2, locale_dot, &special->bmax);
-				else if (!strcmp(str1, "z_min")) params.fractal.cmin = atof2(str2, locale_dot, &special->cmin);
-				else if (!strcmp(str1, "z_max")) params.fractal.cmax = atof2(str2, locale_dot, &special->cmax);
+				else if (!strcmp(str1, "x_min")) params.fractal.doubles.amin = atof2(str2, locale_dot, &special->amin);
+				else if (!strcmp(str1, "x_max")) params.fractal.doubles.amax = atof2(str2, locale_dot, &special->amax);
+				else if (!strcmp(str1, "y_min")) params.fractal.doubles.bmin = atof2(str2, locale_dot, &special->bmin);
+				else if (!strcmp(str1, "y_max")) params.fractal.doubles.bmax = atof2(str2, locale_dot, &special->bmax);
+				else if (!strcmp(str1, "z_min")) params.fractal.doubles.cmin = atof2(str2, locale_dot, &special->cmin);
+				else if (!strcmp(str1, "z_max")) params.fractal.doubles.cmax = atof2(str2, locale_dot, &special->cmax);
 				else if (!strcmp(str1, "view_point_x")) params.doubles.vp.x = atof2(str2, locale_dot, &special->vpX);
 				else if (!strcmp(str1, "view_point_y")) params.doubles.vp.y = atof2(str2, locale_dot, &special->vpY);
 				else if (!strcmp(str1, "view_point_z")) params.doubles.vp.z = atof2(str2, locale_dot, &special->vpZ);
@@ -527,21 +527,21 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "zoom")) params.doubles.zoom = atof2(str2, locale_dot, &special->zoom);
 				else if (!strcmp(str1, "perspective")) params.doubles.persp = atof2(str2, locale_dot, &special->persp);
 				else if (!strcmp(str1, "formula")) params.fractal.formula = (enumFractalFormula) atoi(str2);
-				else if (!strcmp(str1, "power")) params.fractal.power = atof2(str2, locale_dot, &special->power);
+				else if (!strcmp(str1, "power")) params.fractal.doubles.power = atof2(str2, locale_dot, &special->power);
 				else if (!strcmp(str1, "N")) params.fractal.N = atoi(str2);
 				else if (!strcmp(str1, "minN")) params.fractal.minN = atoi(str2);
-				else if (!strcmp(str1, "fractal_constant_factor")) params.fractal.constantFactor = atof2(str2, locale_dot, &special->fractalConstantFactor);
+				else if (!strcmp(str1, "fractal_constant_factor")) params.fractal.doubles.constantFactor = atof2(str2, locale_dot, &special->fractalConstantFactor);
 				else if (!strcmp(str1, "quality")) params.doubles.quality = atof2(str2, locale_dot, &special->quality);
 				else if (!strcmp(str1, "julia_mode")) params.fractal.juliaMode = atoi(str2);
-				else if (!strcmp(str1, "julia_a")) params.fractal.julia.x = atof2(str2, locale_dot, &special->juliaX);
-				else if (!strcmp(str1, "julia_b")) params.fractal.julia.y = atof2(str2, locale_dot, &special->juliaY);
-				else if (!strcmp(str1, "julia_c")) params.fractal.julia.z = atof2(str2, locale_dot, &special->juliaZ);
+				else if (!strcmp(str1, "julia_a")) params.fractal.doubles.julia.x = atof2(str2, locale_dot, &special->juliaX);
+				else if (!strcmp(str1, "julia_b")) params.fractal.doubles.julia.y = atof2(str2, locale_dot, &special->juliaY);
+				else if (!strcmp(str1, "julia_c")) params.fractal.doubles.julia.z = atof2(str2, locale_dot, &special->juliaZ);
 				else if (!strcmp(str1, "tglad_folding_mode")) params.fractal.tgladFoldingMode = atoi(str2);
-				else if (!strcmp(str1, "folding_limit")) params.fractal.foldingLimit = atof2(str2, locale_dot, &special->foldingLimit);
-				else if (!strcmp(str1, "folding_value")) params.fractal.foldingValue = atof2(str2, locale_dot, &special->foldingValue);
+				else if (!strcmp(str1, "folding_limit")) params.fractal.doubles.foldingLimit = atof2(str2, locale_dot, &special->foldingLimit);
+				else if (!strcmp(str1, "folding_value")) params.fractal.doubles.foldingValue = atof2(str2, locale_dot, &special->foldingValue);
 				else if (!strcmp(str1, "spherical_folding_mode")) params.fractal.sphericalFoldingMode = atoi(str2);
-				else if (!strcmp(str1, "spherical_folding_fixed")) params.fractal.foldingSphericalFixed = atof2(str2, locale_dot, &special->foldingSphericalFixed);
-				else if (!strcmp(str1, "spherical_folding_min")) params.fractal.foldingSphericalMin = atof2(str2, locale_dot, &special->foldingSphericalMin);
+				else if (!strcmp(str1, "spherical_folding_fixed")) params.fractal.doubles.foldingSphericalFixed = atof2(str2, locale_dot, &special->foldingSphericalFixed);
+				else if (!strcmp(str1, "spherical_folding_min")) params.fractal.doubles.foldingSphericalMin = atof2(str2, locale_dot, &special->foldingSphericalMin);
 				else if (!strcmp(str1, "IFS_folding_mode")) params.fractal.IFS.foldingMode = atoi(str2);
 				else if (!strcmp(str1, "iteration_threshold_mode")) params.fractal.iterThresh = atoi(str2);
 				else if (!strcmp(str1, "analityc_DE_mode")) params.fractal.analitycDE = atoi(str2);
@@ -634,13 +634,13 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "aux_light_predefined_4_colour_B")) params.auxLightPre4Colour.B = atoi(str2);
 				else if (!strcmp(str1, "aux_light_visibility")) params.doubles.auxLightVisibility = atof2(str2, locale_dot, &special->auxLightVisibility);
 
-				else if (!strcmp(str1, "IFS_scale")) params.fractal.IFS.scale = atof2(str2, locale_dot, &special->IFSScale);
-				else if (!strcmp(str1, "IFS_rot_alfa")) params.fractal.IFS.rotationAlfa = atof2(str2, locale_dot, &special->IFSRotationAlfa);
-				else if (!strcmp(str1, "IFS_rot_beta")) params.fractal.IFS.rotationBeta = atof2(str2, locale_dot, &special->IFSRotationBeta);
-				else if (!strcmp(str1, "IFS_rot_gamma")) params.fractal.IFS.rotationGamma = atof2(str2, locale_dot, &special->IFSRotationGamma);
-				else if (!strcmp(str1, "IFS_offsetX")) params.fractal.IFS.offset.x = atof2(str2, locale_dot, &special->IFSOffsetX);
-				else if (!strcmp(str1, "IFS_offsetY")) params.fractal.IFS.offset.y = atof2(str2, locale_dot, &special->IFSOffsetY);
-				else if (!strcmp(str1, "IFS_offsetZ")) params.fractal.IFS.offset.z = atof2(str2, locale_dot, &special->IFSOffsetZ);
+				else if (!strcmp(str1, "IFS_scale")) params.fractal.IFS.doubles.scale = atof2(str2, locale_dot, &special->IFSScale);
+				else if (!strcmp(str1, "IFS_rot_alfa")) params.fractal.IFS.doubles.rotationAlfa = atof2(str2, locale_dot, &special->IFSRotationAlfa);
+				else if (!strcmp(str1, "IFS_rot_beta")) params.fractal.IFS.doubles.rotationBeta = atof2(str2, locale_dot, &special->IFSRotationBeta);
+				else if (!strcmp(str1, "IFS_rot_gamma")) params.fractal.IFS.doubles.rotationGamma = atof2(str2, locale_dot, &special->IFSRotationGamma);
+				else if (!strcmp(str1, "IFS_offsetX")) params.fractal.IFS.doubles.offset.x = atof2(str2, locale_dot, &special->IFSOffsetX);
+				else if (!strcmp(str1, "IFS_offsetY")) params.fractal.IFS.doubles.offset.y = atof2(str2, locale_dot, &special->IFSOffsetY);
+				else if (!strcmp(str1, "IFS_offsetZ")) params.fractal.IFS.doubles.offset.z = atof2(str2, locale_dot, &special->IFSOffsetZ);
 				else if (!strcmp(str1, "IFS_absX")) params.fractal.IFS.absX = atof(str2);
 				else if (!strcmp(str1, "IFS_absY")) params.fractal.IFS.absY = atof(str2);
 				else if (!strcmp(str1, "IFS_absZ")) params.fractal.IFS.absZ = atof(str2);
@@ -667,17 +667,17 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "stereo_enabled")) params.stereoEnabled = atoi(str2);
 				else if (!strcmp(str1, "stereo_eye_distance")) params.doubles.stereoEyeDistance = atof2(str2, locale_dot, &special->stereoEyeDistance);
 
-				else if (!strcmp(str1, "mandelbox_scale")) {params.fractal.mandelbox.scale = atof2(str2, locale_dot, &special->mandelboxScale); newMandelboxParametersLoaded = true;}
-				else if (!strcmp(str1, "mandelbox_folding_limit")) params.fractal.mandelbox.foldingLimit = atof2(str2, locale_dot, &special->mandelboxFoldingLimit);
-				else if (!strcmp(str1, "mandelbox_folding_value")) params.fractal.mandelbox.foldingValue = atof2(str2, locale_dot, &special->mandelboxFoldingValue);
-				else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.fractal.mandelbox.foldingSphericalMin = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalMin);
-				else if (!strcmp(str1, "mandelbox_folding_fixed_radius")) params.fractal.mandelbox.foldingSphericalFixed = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalFixed);
-				else if (!strcmp(str1, "mandelbox_color_R")) params.fractal.mandelbox.colorFactorR = atof2(str2, locale_dot, &special->mandelboxColorFactorR);
-				else if (!strcmp(str1, "mandelbox_color_X")) params.fractal.mandelbox.colorFactorX = atof2(str2, locale_dot, &special->mandelboxColorFactorX);
-				else if (!strcmp(str1, "mandelbox_color_Y")) params.fractal.mandelbox.colorFactorY = atof2(str2, locale_dot, &special->mandelboxColorFactorY);
-				else if (!strcmp(str1, "mandelbox_color_Z")) params.fractal.mandelbox.colorFactorZ = atof2(str2, locale_dot, &special->mandelboxColorFactorZ);
-				else if (!strcmp(str1, "mandelbox_color_Sp1")) params.fractal.mandelbox.colorFactorSp1 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp1);
-				else if (!strcmp(str1, "mandelbox_color_Sp2")) params.fractal.mandelbox.colorFactorSp2 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp2);
+				else if (!strcmp(str1, "mandelbox_scale")) {params.fractal.mandelbox.doubles.scale = atof2(str2, locale_dot, &special->mandelboxScale); newMandelboxParametersLoaded = true;}
+				else if (!strcmp(str1, "mandelbox_folding_limit")) params.fractal.mandelbox.doubles.foldingLimit = atof2(str2, locale_dot, &special->mandelboxFoldingLimit);
+				else if (!strcmp(str1, "mandelbox_folding_value")) params.fractal.mandelbox.doubles.foldingValue = atof2(str2, locale_dot, &special->mandelboxFoldingValue);
+				else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.fractal.mandelbox.doubles.foldingSphericalMin = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalMin);
+				else if (!strcmp(str1, "mandelbox_folding_fixed_radius")) params.fractal.mandelbox.doubles.foldingSphericalFixed = atof2(str2, locale_dot, &special->mandelboxFoldingSphericalFixed);
+				else if (!strcmp(str1, "mandelbox_color_R")) params.fractal.mandelbox.doubles.colorFactorR = atof2(str2, locale_dot, &special->mandelboxColorFactorR);
+				else if (!strcmp(str1, "mandelbox_color_X")) params.fractal.mandelbox.doubles.colorFactorX = atof2(str2, locale_dot, &special->mandelboxColorFactorX);
+				else if (!strcmp(str1, "mandelbox_color_Y")) params.fractal.mandelbox.doubles.colorFactorY = atof2(str2, locale_dot, &special->mandelboxColorFactorY);
+				else if (!strcmp(str1, "mandelbox_color_Z")) params.fractal.mandelbox.doubles.colorFactorZ = atof2(str2, locale_dot, &special->mandelboxColorFactorZ);
+				else if (!strcmp(str1, "mandelbox_color_Sp1")) params.fractal.mandelbox.doubles.colorFactorSp1 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp1);
+				else if (!strcmp(str1, "mandelbox_color_Sp2")) params.fractal.mandelbox.doubles.colorFactorSp2 = atof2(str2, locale_dot, &special->mandelboxColorFactorSp2);
 				else if (!strcmp(str1, "mandelbox_rotation_enabled")) params.fractal.mandelbox.rotationsEnabled = atoi(str2);
 
 				else if (!strcmp(str1, "view_distance_max")) params.doubles.viewDistanceMax = atof2(str2, locale_dot, &special->viewDistanceMax);
@@ -711,7 +711,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 						}
 						sprintf(buf, "hybrid_power_%d", i);
 						if (!strcmp(str1, buf)) {
-							params.fractal.hybridPower[i-1] = atof2(str2, locale_dot, &special->hybridPower[i-1]);
+							params.fractal.doubles.hybridPower[i-1] = atof2(str2, locale_dot, &special->hybridPower[i-1]);
 							matched = true;
 							break;
 						}
@@ -720,7 +720,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 					for (int component = 0; component < 3; ++component) {
 						sprintf(buf, "mandelbox_rotation_main_%s", component_names[component]);
 						if (!strcmp(str1, buf)) {
-							params.fractal.mandelbox.rotationMain[component] = atof2(str2, locale_dot,
+							params.fractal.mandelbox.doubles.rotationMain[component] = atof2(str2, locale_dot,
 									&special->mandelboxRotationMain[component])/ 180.0 * M_PI;
 							matched = true;
 							break;
@@ -732,7 +732,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 							for (int component = 0; component < 3; ++component) {
 								sprintf(buf, "mandelbox_rotation_%s%d_%s", axis_names[axis], fold + 1, component_names[component]);
 								if (!strcmp(str1, buf)) {
-									params.fractal.mandelbox.rotation[fold][axis][component] = atof2(str2, locale_dot,
+									params.fractal.mandelbox.doubles.rotation[fold][axis][component] = atof2(str2, locale_dot,
 											&special->mandelboxRotation[fold][axis][component])/ 180.0 * M_PI;
 									matched = true;
 									break;
@@ -769,11 +769,11 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		if(!newMandelboxParametersLoaded)
 		{
-			params.fractal.mandelbox.scale = params.fractal.power;
-			params.fractal.mandelbox.foldingLimit = params.fractal.foldingLimit;
-			params.fractal.mandelbox.foldingValue = params.fractal.foldingValue;
-			params.fractal.mandelbox.foldingSphericalFixed = params.fractal.foldingSphericalFixed;
-			params.fractal.mandelbox.foldingSphericalMin = params.fractal.foldingSphericalMin;
+			params.fractal.mandelbox.doubles.scale = params.fractal.doubles.power;
+			params.fractal.mandelbox.doubles.foldingLimit = params.fractal.doubles.foldingLimit;
+			params.fractal.mandelbox.doubles.foldingValue = params.fractal.doubles.foldingValue;
+			params.fractal.mandelbox.doubles.foldingSphericalFixed = params.fractal.doubles.foldingSphericalFixed;
+			params.fractal.mandelbox.doubles.foldingSphericalMin = params.fractal.doubles.foldingSphericalMin;
 			if(params.fractal.formula == tglad) params.fractal.tgladFoldingMode = false;
 		}
 
@@ -804,12 +804,12 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 void DefaultValues(sParamRender &params)
 {
-	params.fractal.amin = -10; //fractal limits
-	params.fractal.amax = 10;
-	params.fractal.bmin = -10;
-	params.fractal.bmax = 10;
-	params.fractal.cmin = -10;
-	params.fractal.cmax = 10;
+	params.fractal.doubles.amin = -10; //fractal limits
+	params.fractal.doubles.amax = 10;
+	params.fractal.doubles.bmin = -10;
+	params.fractal.doubles.bmax = 10;
+	params.fractal.doubles.cmin = -10;
+	params.fractal.doubles.cmax = 10;
 	params.doubles.vp.x = 0; // viewpoint
 	params.doubles.vp.y = 0;
 	params.doubles.vp.z = 0;
@@ -819,20 +819,20 @@ void DefaultValues(sParamRender &params)
 	params.fractal.N = 255; //maximum number of iterations
 	params.fractal.minN = 0; //minimum number of iterations
 	params.fractal.iterThresh = false; //maxiter threshord mode
-	params.fractal.power = 8; //power of fractal formula
+	params.fractal.doubles.power = 8; //power of fractal formula
 	params.fractal.formula = trig_DE; //type of fractal formula
 	params.fractal.analitycDE = true; //analytic DE mode
 	params.fractal.juliaMode = false; //Julia mode
 	params.fractal.tgladFoldingMode = false; //Tglad's folding mode
 	params.fractal.sphericalFoldingMode = false; //spherical folding mode
 	params.fractal.IFS.foldingMode = false;
-	params.fractal.julia.x = 0; //Julia constant
-	params.fractal.julia.y = 0;
-	params.fractal.julia.z = 0;
-	params.fractal.foldingLimit = 1; //parameters of Tg;ad's folding
-	params.fractal.foldingValue = 2;
-	params.fractal.foldingSphericalMin = 0.5; //parameters of spherical folding
-	params.fractal.foldingSphericalFixed = 1;
+	params.fractal.doubles.julia.x = 0; //Julia constant
+	params.fractal.doubles.julia.y = 0;
+	params.fractal.doubles.julia.z = 0;
+	params.fractal.doubles.foldingLimit = 1; //parameters of Tg;ad's folding
+	params.fractal.doubles.foldingValue = 2;
+	params.fractal.doubles.foldingSphericalMin = 0.5; //parameters of spherical folding
+	params.fractal.doubles.foldingSphericalFixed = 1;
 	params.doubles.DE_factor = 1.0; //factor for distance estimation steps
 	params.image_width = 800; //image width
 	params.image_height = 600; //image height
@@ -945,13 +945,13 @@ void DefaultValues(sParamRender &params)
 	params.soundBand4Min = 8000;
 	params.soundBand4Max = 10000;
 
-	params.fractal.IFS.offset.x = 1;
-	params.fractal.IFS.offset.y = 0;
-	params.fractal.IFS.offset.z = 0;
-	params.fractal.IFS.scale = 2;
-	params.fractal.IFS.rotationAlfa = 0;
-	params.fractal.IFS.rotationBeta = 0;
-	params.fractal.IFS.rotationGamma = 0;
+	params.fractal.IFS.doubles.offset.x = 1;
+	params.fractal.IFS.doubles.offset.y = 0;
+	params.fractal.IFS.doubles.offset.z = 0;
+	params.fractal.IFS.doubles.scale = 2;
+	params.fractal.IFS.doubles.rotationAlfa = 0;
+	params.fractal.IFS.doubles.rotationBeta = 0;
+	params.fractal.IFS.doubles.rotationGamma = 0;
 	params.fractal.IFS.absX = false;
 	params.fractal.IFS.absY = false;
 	params.fractal.IFS.absZ = false;
@@ -959,31 +959,31 @@ void DefaultValues(sParamRender &params)
 	for (int i = 0; i < HYBRID_COUNT; ++i)  {
 		params.fractal.hybridFormula[i] = none;
 		params.fractal.hybridIters[i] = 1;
-		params.fractal.hybridPower[i] = 2;
+		params.fractal.doubles.hybridPower[i] = 2;
 	}
 	params.fractal.hybridFormula[HYBRID_COUNT - 1] = trig;
 	params.fractal.hybridCyclic = false;
 
-	params.fractal.mandelbox.colorFactorX = 0.03;
-	params.fractal.mandelbox.colorFactorY = 0.05;
-	params.fractal.mandelbox.colorFactorZ = 0.07;
-	params.fractal.mandelbox.colorFactorR = 0;
-	params.fractal.mandelbox.colorFactorSp1 = 0.2;
-	params.fractal.mandelbox.colorFactorSp2 = 0.2;
+	params.fractal.mandelbox.doubles.colorFactorX = 0.03;
+	params.fractal.mandelbox.doubles.colorFactorY = 0.05;
+	params.fractal.mandelbox.doubles.colorFactorZ = 0.07;
+	params.fractal.mandelbox.doubles.colorFactorR = 0;
+	params.fractal.mandelbox.doubles.colorFactorSp1 = 0.2;
+	params.fractal.mandelbox.doubles.colorFactorSp2 = 0.2;
 
 	for (int component = 0; component < 3; ++component)
-		params.fractal.mandelbox.rotationMain[component] = 0;
+		params.fractal.mandelbox.doubles.rotationMain[component] = 0;
 
 	for (int rot = 0; rot < MANDELBOX_FOLDS; ++rot)
 		for (int axis = 0; axis < 3; ++axis)
 			for (int component = 0; component < 3; ++component)
-				params.fractal.mandelbox.rotation[rot][axis][component] = 0;
+				params.fractal.mandelbox.doubles.rotation[rot][axis][component] = 0;
 
-	params.fractal.mandelbox.foldingLimit = 1;
-	params.fractal.mandelbox.foldingValue = 2;
-	params.fractal.mandelbox.foldingSphericalMin = 0.5;
-	params.fractal.mandelbox.foldingSphericalFixed = 1.0;
-	params.fractal.mandelbox.scale = 2.0;
+	params.fractal.mandelbox.doubles.foldingLimit = 1;
+	params.fractal.mandelbox.doubles.foldingValue = 2;
+	params.fractal.mandelbox.doubles.foldingSphericalMin = 0.5;
+	params.fractal.mandelbox.doubles.foldingSphericalFixed = 1.0;
+	params.fractal.mandelbox.doubles.scale = 2.0;
 	params.fractal.mandelbox.rotationsEnabled = false;
 
 	params.doubles.stereoEyeDistance = 0.1;
@@ -993,7 +993,7 @@ void DefaultValues(sParamRender &params)
 	params.doubles.viewDistanceMin = 1e-15;
 	params.doubles.viewDistanceMax = 50;
 
-	params.fractal.constantFactor = 1.0;
+	params.fractal.doubles.constantFactor = 1.0;
 
 	params.quiet = false;
 
@@ -1007,14 +1007,14 @@ void DefaultValues(sParamRender &params)
 
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		params.fractal.IFS.direction[i].x = 1;
-		params.fractal.IFS.direction[i].y = 0;
-		params.fractal.IFS.direction[i].z = 0;
-		params.fractal.IFS.alfa[i] = 0;
-		params.fractal.IFS.beta[i] = 0;
-		params.fractal.IFS.gamma[i] = 0;
-		params.fractal.IFS.distance[i] = 0;
-		params.fractal.IFS.intensity[i] = 1.0;
+		params.fractal.IFS.doubles.direction[i].x = 1;
+		params.fractal.IFS.doubles.direction[i].y = 0;
+		params.fractal.IFS.doubles.direction[i].z = 0;
+		params.fractal.IFS.doubles.alfa[i] = 0;
+		params.fractal.IFS.doubles.beta[i] = 0;
+		params.fractal.IFS.doubles.gamma[i] = 0;
+		params.fractal.IFS.doubles.distance[i] = 0;
+		params.fractal.IFS.doubles.intensity[i] = 1.0;
 		params.fractal.IFS.enabled[i] = false;
 	}
 }
@@ -1023,14 +1023,14 @@ void IFSToMorph(double *IFSdouble, const sFractal &fractal)
 {
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		IFSdouble[i * 8 + 0] = fractal.IFS.direction[i].x;
-		IFSdouble[i * 8 + 1] = fractal.IFS.direction[i].y;
-		IFSdouble[i * 8 + 2] = fractal.IFS.direction[i].z;
-		IFSdouble[i * 8 + 3] = fractal.IFS.alfa[i];
-		IFSdouble[i * 8 + 4] = fractal.IFS.beta[i];
-		IFSdouble[i * 8 + 5] = fractal.IFS.gamma[i];
-		IFSdouble[i * 8 + 6] = fractal.IFS.distance[i];
-		IFSdouble[i * 8 + 7] = fractal.IFS.intensity[i];
+		IFSdouble[i * 8 + 0] = fractal.IFS.doubles.direction[i].x;
+		IFSdouble[i * 8 + 1] = fractal.IFS.doubles.direction[i].y;
+		IFSdouble[i * 8 + 2] = fractal.IFS.doubles.direction[i].z;
+		IFSdouble[i * 8 + 3] = fractal.IFS.doubles.alfa[i];
+		IFSdouble[i * 8 + 4] = fractal.IFS.doubles.beta[i];
+		IFSdouble[i * 8 + 5] = fractal.IFS.doubles.gamma[i];
+		IFSdouble[i * 8 + 6] = fractal.IFS.doubles.distance[i];
+		IFSdouble[i * 8 + 7] = fractal.IFS.doubles.intensity[i];
 	}
 }
 
@@ -1038,14 +1038,14 @@ void MorphToIFS(double *IFSdouble, sFractal &fractal)
 {
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		fractal.IFS.direction[i].x = IFSdouble[i * 8 + 0];
-		fractal.IFS.direction[i].y = IFSdouble[i * 8 + 1];
-		fractal.IFS.direction[i].z = IFSdouble[i * 8 + 2];
-		fractal.IFS.alfa[i] = IFSdouble[i * 8 + 3];
-		fractal.IFS.beta[i] = IFSdouble[i * 8 + 4];
-		fractal.IFS.gamma[i] = IFSdouble[i * 8 + 5];
-		fractal.IFS.distance[i] = IFSdouble[i * 8 + 6];
-		fractal.IFS.intensity[i] = IFSdouble[i * 8 + 7];
+		fractal.IFS.doubles.direction[i].x = IFSdouble[i * 8 + 0];
+		fractal.IFS.doubles.direction[i].y = IFSdouble[i * 8 + 1];
+		fractal.IFS.doubles.direction[i].z = IFSdouble[i * 8 + 2];
+		fractal.IFS.doubles.alfa[i] = IFSdouble[i * 8 + 3];
+		fractal.IFS.doubles.beta[i] = IFSdouble[i * 8 + 4];
+		fractal.IFS.doubles.gamma[i] = IFSdouble[i * 8 + 5];
+		fractal.IFS.doubles.distance[i] = IFSdouble[i * 8 + 6];
+		fractal.IFS.doubles.intensity[i] = IFSdouble[i * 8 + 7];
 	}
 }
 
@@ -1054,12 +1054,12 @@ void KeepOtherSettings(sParamRender *params)
 	sParamRender paramsTemp;
 	for(int i=0; i< IFS_VECTOR_COUNT; i++)
 	{
-		paramsTemp.fractal.IFS.alfa[i] = params->fractal.IFS.alfa[i];
-		paramsTemp.fractal.IFS.beta[i] = params->fractal.IFS.beta[i];
-		paramsTemp.fractal.IFS.gamma[i] = params->fractal.IFS.gamma[i];
-		paramsTemp.fractal.IFS.distance[i] = params->fractal.IFS.distance[i];
-		paramsTemp.fractal.IFS.intensity[i] = params->fractal.IFS.intensity[i];
-		paramsTemp.fractal.IFS.direction[i] = params->fractal.IFS.direction[i];
+		paramsTemp.fractal.IFS.doubles.alfa[i] = params->fractal.IFS.doubles.alfa[i];
+		paramsTemp.fractal.IFS.doubles.beta[i] = params->fractal.IFS.doubles.beta[i];
+		paramsTemp.fractal.IFS.doubles.gamma[i] = params->fractal.IFS.doubles.gamma[i];
+		paramsTemp.fractal.IFS.doubles.distance[i] = params->fractal.IFS.doubles.distance[i];
+		paramsTemp.fractal.IFS.doubles.intensity[i] = params->fractal.IFS.doubles.intensity[i];
+		paramsTemp.fractal.IFS.doubles.direction[i] = params->fractal.IFS.doubles.direction[i];
 	}
 
 	int sizeOfDoubles = sizeof(sParamRenderD);
@@ -1071,11 +1071,11 @@ void KeepOtherSettings(sParamRender *params)
 
 	for(int i=0; i < IFS_VECTOR_COUNT; i++)
 	{
-		params->fractal.IFS.alfa[i] = paramsTemp.fractal.IFS.alfa[i];
-		params->fractal.IFS.beta[i] = paramsTemp.fractal.IFS.beta[i];
-		params->fractal.IFS.gamma[i] = paramsTemp.fractal.IFS.gamma[i];
-		params->fractal.IFS.distance[i] = paramsTemp.fractal.IFS.distance[i];
-		params->fractal.IFS.intensity[i] = paramsTemp.fractal.IFS.intensity[i];
-		params->fractal.IFS.direction[i] = paramsTemp.fractal.IFS.direction[i];
+		params->fractal.IFS.doubles.alfa[i] = paramsTemp.fractal.IFS.doubles.alfa[i];
+		params->fractal.IFS.doubles.beta[i] = paramsTemp.fractal.IFS.doubles.beta[i];
+		params->fractal.IFS.doubles.gamma[i] = paramsTemp.fractal.IFS.doubles.gamma[i];
+		params->fractal.IFS.doubles.distance[i] = paramsTemp.fractal.IFS.doubles.distance[i];
+		params->fractal.IFS.doubles.intensity[i] = paramsTemp.fractal.IFS.doubles.intensity[i];
+		params->fractal.IFS.doubles.direction[i] = paramsTemp.fractal.IFS.doubles.direction[i];
 	}
 }

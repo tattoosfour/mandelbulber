@@ -67,7 +67,6 @@ struct sParamRender
 	sParamRenderD doubles;
 
 	sFractal fractal;
-
 	int image_width; //image width
 	int image_height; //image height
 	int globalIlumQuality; //ambient occlusion quality

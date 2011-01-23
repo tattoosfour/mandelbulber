@@ -286,7 +286,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.quality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_thresh)), &special->quality);
 		params->fractal.N = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_maxN)));
 		params->fractal.minN = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_minN)));
-		params->fractal.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)), &special->power);
+		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)), &special->power);
 		params->image_width = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth)));
 		params->image_height = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight)));
 		params->doubles.imageAdjustments.brightness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)), &special->brightness);
@@ -306,15 +306,15 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->fractal.juliaMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkJulia));
 		params->slowShading = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading));
 		params->textured_background = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground));
-		params->fractal.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)), &special->juliaX);
-		params->fractal.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)), &special->juliaY);
-		params->fractal.julia.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_c)), &special->juliaZ);
-		params->fractal.amin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amin)), &special->amin);
-		params->fractal.amax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amax)), &special->amax);
-		params->fractal.bmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmin)), &special->bmin);
-		params->fractal.bmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmax)), &special->bmax);
-		params->fractal.cmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmin)), &special->cmin);
-		params->fractal.cmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmax)), &special->cmax);
+		params->fractal.doubles.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)), &special->juliaX);
+		params->fractal.doubles.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)), &special->juliaY);
+		params->fractal.doubles.julia.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_c)), &special->juliaZ);
+		params->fractal.doubles.amin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amin)), &special->amin);
+		params->fractal.doubles.amax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amax)), &special->amax);
+		params->fractal.doubles.bmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmin)), &special->bmin);
+		params->fractal.doubles.bmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmax)), &special->bmax);
+		params->fractal.doubles.cmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmin)), &special->cmin);
+		params->fractal.doubles.cmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmax)), &special->cmax);
 		params->fractal.limits_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkLimits));
 		params->imageSwitches.coloringEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkColoring));
 		params->coloring_seed = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_seed)));
@@ -322,10 +322,10 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->fractal.tgladFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode));
 		params->fractal.sphericalFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSphericalFoldingMode));
 		params->fractal.IFS.foldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode));
-		params->fractal.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_1)), &special->foldingLimit);
-		params->fractal.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_2)), &special->foldingValue);
-		params->fractal.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_1)), &special->foldingSphericalFixed);
-		params->fractal.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_2)), &special->foldingSphericalMin);
+		params->fractal.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_1)), &special->foldingLimit);
+		params->fractal.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_2)), &special->foldingValue);
+		params->fractal.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_1)), &special->foldingSphericalFixed);
+		params->fractal.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_2)), &special->foldingSphericalMin);
 		params->imageSwitches.fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
 		params->doubles.imageAdjustments.fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
 		params->doubles.imageAdjustments.fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
@@ -363,13 +363,13 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.auxLightVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightVisibility)), &special->auxLightVisibility);
 		params->doubles.mainLightAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa)), &special->mainLightAlfa) / 180.0 * M_PI;
 		params->doubles.mainLightBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightBeta)), &special->mainLightBeta) / 180.0 * M_PI;
-		params->fractal.IFS.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)), &special->IFSScale);
-		params->fractal.IFS.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa)), &special->IFSRotationAlfa) / 180.0 * M_PI;
-		params->fractal.IFS.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta)), &special->IFSRotationBeta) / 180.0 * M_PI;
-		params->fractal.IFS.rotationGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSGamma)), &special->IFSRotationGamma) / 180.0 * M_PI;
-		params->fractal.IFS.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetX)), &special->IFSOffsetX);
-		params->fractal.IFS.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetY)), &special->IFSOffsetY);
-		params->fractal.IFS.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetZ)), &special->IFSOffsetZ);
+		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)), &special->IFSScale);
+		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa)), &special->IFSRotationAlfa) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta)), &special->IFSRotationBeta) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.rotationGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSGamma)), &special->IFSRotationGamma) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetX)), &special->IFSOffsetX);
+		params->fractal.IFS.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetY)), &special->IFSOffsetY);
+		params->fractal.IFS.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetZ)), &special->IFSOffsetZ);
 		params->fractal.IFS.absX = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsX));
 		params->fractal.IFS.absY = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsY));
 		params->fractal.IFS.absZ = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ));
@@ -389,7 +389,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.soundFPS = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_soundFPS)));
 		for (int i = 0; i < HYBRID_COUNT; ++i) {
 			params->fractal.hybridIters[i] = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridIter[i])));
-			params->fractal.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])), &special->hybridPower[i]);
+			params->fractal.doubles.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])), &special->hybridPower[i]);
 		}
 		params->fractal.hybridCyclic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic));
 		params->fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
@@ -398,32 +398,32 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)), &special->viewDistanceMin);
 		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)), &special->viewDistanceMax);
 		params->fractal.interiorMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode));
-		params->fractal.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)), &special->fractalConstantFactor);
+		params->fractal.doubles.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)), &special->fractalConstantFactor);
 
 		params->fractal.mandelbox.rotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
-		params->fractal.mandelbox.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
-		params->fractal.mandelbox.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingValue);
-		params->fractal.mandelbox.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)), &special->mandelboxFoldingSphericalFixed);
-		params->fractal.mandelbox.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)), &special->mandelboxFoldingSphericalMin);
+		params->fractal.mandelbox.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
+		params->fractal.mandelbox.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingValue);
+		params->fractal.mandelbox.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)), &special->mandelboxFoldingSphericalFixed);
+		params->fractal.mandelbox.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)), &special->mandelboxFoldingSphericalMin);
 
 		for (int component = 0; component < 3; ++component)
-			params->fractal.mandelbox.rotationMain[component] = atofData(gtk_entry_get_text(GTK_ENTRY(
+			params->fractal.mandelbox.doubles.rotationMain[component] = atofData(gtk_entry_get_text(GTK_ENTRY(
 							Interface.edit_mandelboxRotationMain[component])), &special->mandelboxRotationMain[component]) / 180.0 * M_PI;
 
 		for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 			for (int axis = 0; axis < 3; ++axis)
 				for (int component = 0; component < 3; ++component)
-					params->fractal.mandelbox.rotation[fold][axis][component] = atofData(
+					params->fractal.mandelbox.doubles.rotation[fold][axis][component] = atofData(
 						gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component])),
 						&special->mandelboxRotation[fold][axis][component]) / 180.0 * M_PI;
 
-		params->fractal.mandelbox.colorFactorR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR)), &special->mandelboxColorFactorR);
-		params->fractal.mandelbox.colorFactorX = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX)), &special->mandelboxColorFactorX);
-		params->fractal.mandelbox.colorFactorY = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY)), &special->mandelboxColorFactorY);
-		params->fractal.mandelbox.colorFactorZ = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ)), &special->mandelboxColorFactorZ);
-		params->fractal.mandelbox.colorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)), &special->mandelboxColorFactorSp1);
-		params->fractal.mandelbox.colorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)), &special->mandelboxColorFactorSp2);
-		params->fractal.mandelbox.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)), &special->mandelboxScale);
+		params->fractal.mandelbox.doubles.colorFactorR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR)), &special->mandelboxColorFactorR);
+		params->fractal.mandelbox.doubles.colorFactorX = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX)), &special->mandelboxColorFactorX);
+		params->fractal.mandelbox.doubles.colorFactorY = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY)), &special->mandelboxColorFactorY);
+		params->fractal.mandelbox.doubles.colorFactorZ = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ)), &special->mandelboxColorFactorZ);
+		params->fractal.mandelbox.doubles.colorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)), &special->mandelboxColorFactorSp1);
+		params->fractal.mandelbox.doubles.colorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)), &special->mandelboxColorFactorSp2);
+		params->fractal.mandelbox.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)), &special->mandelboxScale);
 
 		params->image_width = (params->image_width/8)*8;
 		params->image_height = (params->image_height/8)*8;
@@ -436,14 +436,14 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 
 		for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 		{
-			params->fractal.IFS.direction[i].x = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSx)));
-			params->fractal.IFS.direction[i].y = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSy)));
-			params->fractal.IFS.direction[i].z = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSz)));
-			params->fractal.IFS.alfa[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSalfa))) / 180.0 * M_PI;
-			params->fractal.IFS.beta[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSbeta))) / 180.0 * M_PI;
-			params->fractal.IFS.gamma[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSgamma))) / 180.0 * M_PI;
-			params->fractal.IFS.distance[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSdistance)));
-			params->fractal.IFS.intensity[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity)));
+			params->fractal.IFS.doubles.direction[i].x = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSx)));
+			params->fractal.IFS.doubles.direction[i].y = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSy)));
+			params->fractal.IFS.doubles.direction[i].z = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSz)));
+			params->fractal.IFS.doubles.alfa[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSalfa))) / 180.0 * M_PI;
+			params->fractal.IFS.doubles.beta[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSbeta))) / 180.0 * M_PI;
+			params->fractal.IFS.doubles.gamma[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSgamma))) / 180.0 * M_PI;
+			params->fractal.IFS.doubles.distance[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSdistance)));
+			params->fractal.IFS.doubles.intensity[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity)));
 			params->fractal.IFS.enabled[i] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled));
 		}
 
@@ -642,7 +642,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), DoubleToString(params->doubles.quality, &special->quality));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_maxN), IntToString(params->fractal.N));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_minN), IntToString(params->fractal.minN));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.power, &special->power));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power, &special->power));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(params->image_width));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageHeight), IntToString(params->image_height));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_brightness), DoubleToString(params->doubles.imageAdjustments.brightness, &special->brightness));
@@ -655,21 +655,21 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shadows), DoubleToString(params->doubles.imageAdjustments.directLight, &special->directLight));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_specular), DoubleToString(params->doubles.imageAdjustments.specular, &special->specular));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_AmbientOcclusionQuality), IntToString(params->globalIlumQuality));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_a), DoubleToString(params->fractal.julia.x, &special->juliaX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_b), DoubleToString(params->fractal.julia.y, &special->juliaY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_c), DoubleToString(params->fractal.julia.z, &special->juliaZ));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amin), DoubleToString(params->fractal.amin, &special->amin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amax), DoubleToString(params->fractal.amax, &special->amax));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmin), DoubleToString(params->fractal.bmin, &special->bmin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmax), DoubleToString(params->fractal.bmax, &special->bmax));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmin), DoubleToString(params->fractal.cmin, &special->cmin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmax), DoubleToString(params->fractal.cmax, &special->cmax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_a), DoubleToString(params->fractal.doubles.julia.x, &special->juliaX));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_b), DoubleToString(params->fractal.doubles.julia.y, &special->juliaY));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_c), DoubleToString(params->fractal.doubles.julia.z, &special->juliaZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amin), DoubleToString(params->fractal.doubles.amin, &special->amin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amax), DoubleToString(params->fractal.doubles.amax, &special->amax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmin), DoubleToString(params->fractal.doubles.bmin, &special->bmin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmax), DoubleToString(params->fractal.doubles.bmax, &special->bmax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmin), DoubleToString(params->fractal.doubles.cmin, &special->cmin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmax), DoubleToString(params->fractal.doubles.cmax, &special->cmax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(params->coloring_seed));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_speed), DoubleToString(params->doubles.imageAdjustments.coloring_speed, &special->coloring_speed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_1), DoubleToString(params->fractal.foldingLimit, &special->foldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_2), DoubleToString(params->fractal.foldingValue, &special->foldingValue));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_1), DoubleToString(params->fractal.foldingSphericalFixed, &special->foldingSphericalFixed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_2), DoubleToString(params->fractal.foldingSphericalMin, &special->foldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_1), DoubleToString(params->fractal.doubles.foldingLimit, &special->foldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_2), DoubleToString(params->fractal.doubles.foldingValue, &special->foldingValue));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_1), DoubleToString(params->fractal.doubles.foldingSphericalFixed, &special->foldingSphericalFixed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_2), DoubleToString(params->fractal.doubles.foldingSphericalMin, &special->foldingSphericalMin));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightIntensity), DoubleToString(params->doubles.imageAdjustments.mainLightIntensity, &special->mainLightIntensity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightIntensity), DoubleToString(params->doubles.auxLightIntensity, &special->auxLightIntensity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomSeed), IntToString(params->auxLightRandomSeed));
@@ -695,13 +695,13 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlfa * 180.0 / M_PI, &special->mainLightAlfa));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightBeta), DoubleToString(params->doubles.mainLightBeta * 180.0 / M_PI, &special->mainLightBeta));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightVisibility), DoubleToString(params->doubles.auxLightVisibility, &special->auxLightVisibility));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSScale), DoubleToString(params->fractal.IFS.scale, &special->IFSScale));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSAlfa), DoubleToString(params->fractal.IFS.rotationAlfa * 180.0 / M_PI, &special->IFSRotationAlfa));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSBeta), DoubleToString(params->fractal.IFS.rotationBeta * 180.0 / M_PI, &special->IFSRotationBeta));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSGamma), DoubleToString(params->fractal.IFS.rotationGamma * 180.0 / M_PI, &special->IFSRotationGamma));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetX), DoubleToString(params->fractal.IFS.offset.x, &special->IFSOffsetX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetY), DoubleToString(params->fractal.IFS.offset.y, &special->IFSOffsetY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetZ), DoubleToString(params->fractal.IFS.offset.z, &special->IFSOffsetZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSScale), DoubleToString(params->fractal.IFS.doubles.scale, &special->IFSScale));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSAlfa), DoubleToString(params->fractal.IFS.doubles.rotationAlfa * 180.0 / M_PI, &special->IFSRotationAlfa));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSBeta), DoubleToString(params->fractal.IFS.doubles.rotationBeta * 180.0 / M_PI, &special->IFSRotationBeta));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSGamma), DoubleToString(params->fractal.IFS.doubles.rotationGamma * 180.0 / M_PI, &special->IFSRotationGamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetX), DoubleToString(params->fractal.IFS.doubles.offset.x, &special->IFSOffsetX));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetY), DoubleToString(params->fractal.IFS.doubles.offset.y, &special->IFSOffsetY));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetZ), DoubleToString(params->fractal.IFS.doubles.offset.z, &special->IFSOffsetZ));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationStartFrame), IntToString(params->startFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationEndFrame), IntToString(params->endFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationFramesPerKey), IntToString(params->framesPerKeyframe));
@@ -716,34 +716,34 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound4FreqMax), IntToString(params->soundBand4Max));
 	for (int i = 0; i < HYBRID_COUNT; ++i) {
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridIter[i]), IntToString(params->fractal.hybridIters[i]));
-		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridPower[i]), DoubleToString(params->fractal.hybridPower[i], &special->hybridPower[i]));
+		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridPower[i]), DoubleToString(params->fractal.doubles.hybridPower[i], &special->hybridPower[i]));
 	}
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_stereoDistance), DoubleToString(params->doubles.stereoEyeDistance, &special->stereoEyeDistance));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR), DoubleToString(params->fractal.mandelbox.colorFactorR, &special->mandelboxColorFactorR));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX), DoubleToString(params->fractal.mandelbox.colorFactorX, &special->mandelboxColorFactorX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY), DoubleToString(params->fractal.mandelbox.colorFactorY, &special->mandelboxColorFactorY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ), DoubleToString(params->fractal.mandelbox.colorFactorZ, &special->mandelboxColorFactorZ));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1), DoubleToString(params->fractal.mandelbox.colorFactorSp1, &special->mandelboxColorFactorSp1));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2), DoubleToString(params->fractal.mandelbox.colorFactorSp2, &special->mandelboxColorFactorSp2));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit), DoubleToString(params->fractal.mandelbox.foldingLimit, &special->mandelboxFoldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->fractal.mandelbox.foldingValue, &special->mandelboxFoldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.foldingSphericalFixed, &special->mandelboxFoldingSphericalFixed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.foldingSphericalMin, &special->mandelboxFoldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR), DoubleToString(params->fractal.mandelbox.doubles.colorFactorR, &special->mandelboxColorFactorR));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX), DoubleToString(params->fractal.mandelbox.doubles.colorFactorX, &special->mandelboxColorFactorX));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY), DoubleToString(params->fractal.mandelbox.doubles.colorFactorY, &special->mandelboxColorFactorY));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ), DoubleToString(params->fractal.mandelbox.doubles.colorFactorZ, &special->mandelboxColorFactorZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp1, &special->mandelboxColorFactorSp1));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp2, &special->mandelboxColorFactorSp2));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit), DoubleToString(params->fractal.mandelbox.doubles.foldingLimit, &special->mandelboxFoldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->fractal.mandelbox.doubles.foldingValue, &special->mandelboxFoldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalFixed, &special->mandelboxFoldingSphericalFixed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalMin, &special->mandelboxFoldingSphericalMin));
 
 	for (int component = 0; component < 3; ++component)
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMain[component]), DoubleToString(
-					params->fractal.mandelbox.rotationMain[component] * 180.0 / M_PI, &special->mandelboxRotationMain[component]));
+					params->fractal.mandelbox.doubles.rotationMain[component] * 180.0 / M_PI, &special->mandelboxRotationMain[component]));
 
 	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 		for (int axis = 0; axis < 3; ++axis)
 			for (int component = 0; component < 3; ++component)
 				gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component]),
-						DoubleToString(params->fractal.mandelbox.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]));
+						DoubleToString(params->fractal.mandelbox.doubles.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]));
 
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->fractal.mandelbox.scale, &special->mandelboxScale));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->fractal.mandelbox.doubles.scale, &special->mandelboxScale));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax, &special->viewDistanceMax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin, &special->viewDistanceMin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->fractal.constantFactor, &special->fractalConstantFactor));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->fractal.doubles.constantFactor, &special->fractalConstantFactor));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -783,14 +783,14 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSx), DoubleToString(params->fractal.IFS.direction[i].x));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSy), DoubleToString(params->fractal.IFS.direction[i].y));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSz), DoubleToString(params->fractal.IFS.direction[i].z));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSalfa), DoubleToString(params->fractal.IFS.alfa[i] * 180.0 / M_PI));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSbeta), DoubleToString(params->fractal.IFS.beta[i] * 180.0 / M_PI));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSgamma), DoubleToString(params->fractal.IFS.gamma[i] * 180.0 / M_PI));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSdistance), DoubleToString(params->fractal.IFS.distance[i]));
-		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity), DoubleToString(params->fractal.IFS.intensity[i]));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSx), DoubleToString(params->fractal.IFS.doubles.direction[i].x));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSy), DoubleToString(params->fractal.IFS.doubles.direction[i].y));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSz), DoubleToString(params->fractal.IFS.doubles.direction[i].z));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSalfa), DoubleToString(params->fractal.IFS.doubles.alfa[i] * 180.0 / M_PI));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSbeta), DoubleToString(params->fractal.IFS.doubles.beta[i] * 180.0 / M_PI));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSgamma), DoubleToString(params->fractal.IFS.doubles.gamma[i] * 180.0 / M_PI));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSdistance), DoubleToString(params->fractal.IFS.doubles.distance[i]));
+		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity), DoubleToString(params->fractal.IFS.doubles.intensity[i]));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled), params->fractal.IFS.enabled[i]);
 	}
 
