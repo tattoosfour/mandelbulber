@@ -80,6 +80,18 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 	QuickSortZBuffer(temp_sort, 1, height * width - 1);
 
+	//Randomize Z-buffer
+	int size = height*width;
+	for(int i=0; i<size; i++)
+	{
+		sSortZ temp;
+		temp = temp_sort[i];
+		int ii=i + Random(size*0.05);
+		if(ii>=size-1) ii = size-1;
+		temp_sort[i] = temp_sort[ii];
+		temp_sort[ii] = temp;
+	}
+
 	if (!noGUI && image->IsPreview())
 	{
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Done 0%");
