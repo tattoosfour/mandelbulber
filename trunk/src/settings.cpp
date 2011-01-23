@@ -1019,63 +1019,23 @@ void DefaultValues(sParamRender &params)
 	}
 }
 
-void IFSToMorph(double *IFSdouble, const sFractal &fractal)
-{
-	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
-	{
-		IFSdouble[i * 8 + 0] = fractal.IFS.doubles.direction[i].x;
-		IFSdouble[i * 8 + 1] = fractal.IFS.doubles.direction[i].y;
-		IFSdouble[i * 8 + 2] = fractal.IFS.doubles.direction[i].z;
-		IFSdouble[i * 8 + 3] = fractal.IFS.doubles.alfa[i];
-		IFSdouble[i * 8 + 4] = fractal.IFS.doubles.beta[i];
-		IFSdouble[i * 8 + 5] = fractal.IFS.doubles.gamma[i];
-		IFSdouble[i * 8 + 6] = fractal.IFS.doubles.distance[i];
-		IFSdouble[i * 8 + 7] = fractal.IFS.doubles.intensity[i];
-	}
-}
-
-void MorphToIFS(double *IFSdouble, sFractal &fractal)
-{
-	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
-	{
-		fractal.IFS.doubles.direction[i].x = IFSdouble[i * 8 + 0];
-		fractal.IFS.doubles.direction[i].y = IFSdouble[i * 8 + 1];
-		fractal.IFS.doubles.direction[i].z = IFSdouble[i * 8 + 2];
-		fractal.IFS.doubles.alfa[i] = IFSdouble[i * 8 + 3];
-		fractal.IFS.doubles.beta[i] = IFSdouble[i * 8 + 4];
-		fractal.IFS.doubles.gamma[i] = IFSdouble[i * 8 + 5];
-		fractal.IFS.doubles.distance[i] = IFSdouble[i * 8 + 6];
-		fractal.IFS.doubles.intensity[i] = IFSdouble[i * 8 + 7];
-	}
-}
-
 void KeepOtherSettings(sParamRender *params)
 {
-	sParamRender paramsTemp;
-	for(int i=0; i< IFS_VECTOR_COUNT; i++)
-	{
-		paramsTemp.fractal.IFS.doubles.alfa[i] = params->fractal.IFS.doubles.alfa[i];
-		paramsTemp.fractal.IFS.doubles.beta[i] = params->fractal.IFS.doubles.beta[i];
-		paramsTemp.fractal.IFS.doubles.gamma[i] = params->fractal.IFS.doubles.gamma[i];
-		paramsTemp.fractal.IFS.doubles.distance[i] = params->fractal.IFS.doubles.distance[i];
-		paramsTemp.fractal.IFS.doubles.intensity[i] = params->fractal.IFS.doubles.intensity[i];
-		paramsTemp.fractal.IFS.doubles.direction[i] = params->fractal.IFS.doubles.direction[i];
-	}
+	smart_ptr<double> doublesParamRender(new double[sizeof(sParamRenderD)]);
+	smart_ptr<double> doublesFractal(new double[sizeof(sFractalD)]);
+	smart_ptr<double> doublesMandelbox(new double[sizeof(sFractalMandelboxD)]);
+	smart_ptr<double> doublesIFS(new double[sizeof(sFractalIFSD)]);
 
-	int sizeOfDoubles = sizeof(sParamRenderD);
-	smart_ptr<double> doubles(new double[sizeOfDoubles]);
-	memcpy(doubles.ptr(),&params->doubles,sizeOfDoubles);
+	memcpy(doublesParamRender.ptr(),&params->doubles,sizeof(sParamRenderD));
+	memcpy(doublesFractal.ptr(),&params->fractal.doubles,sizeof(sFractalD));
+	memcpy(doublesMandelbox.ptr(),&params->fractal.mandelbox.doubles,sizeof(sFractalMandelboxD));
+	memcpy(doublesIFS.ptr(),&params->fractal.IFS.doubles,sizeof(sFractalIFSD));
 
 	ReadInterface(params);
-	memcpy(&params->doubles,doubles.ptr(),sizeOfDoubles);
 
-	for(int i=0; i < IFS_VECTOR_COUNT; i++)
-	{
-		params->fractal.IFS.doubles.alfa[i] = paramsTemp.fractal.IFS.doubles.alfa[i];
-		params->fractal.IFS.doubles.beta[i] = paramsTemp.fractal.IFS.doubles.beta[i];
-		params->fractal.IFS.doubles.gamma[i] = paramsTemp.fractal.IFS.doubles.gamma[i];
-		params->fractal.IFS.doubles.distance[i] = paramsTemp.fractal.IFS.doubles.distance[i];
-		params->fractal.IFS.doubles.intensity[i] = paramsTemp.fractal.IFS.doubles.intensity[i];
-		params->fractal.IFS.doubles.direction[i] = paramsTemp.fractal.IFS.doubles.direction[i];
-	}
+	memcpy(&params->doubles,doublesParamRender.ptr(),sizeof(sParamRenderD));
+	memcpy(&params->fractal.doubles,doublesFractal.ptr(),sizeof(sFractalD));
+	memcpy(&params->fractal.mandelbox.doubles,doublesMandelbox.ptr(),sizeof(sFractalMandelboxD));
+	memcpy(&params->fractal.IFS.doubles,doublesIFS.ptr(),sizeof(sFractalIFSD));
+
 }

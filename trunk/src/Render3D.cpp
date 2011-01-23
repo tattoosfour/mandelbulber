@@ -1365,12 +1365,16 @@ void MainRender(void)
 	if (Interface_data.keyframeMode) printf("Found %d keyframes\n", maxKeyNumber);
 
 	//loading keyframes in keyframe animation mode
-	CMorph morph(maxKeyNumber, sizeof(sParamRenderD) / sizeof(double));
-	CMorph morphIFS(maxKeyNumber, 8 * IFS_VECTOR_COUNT);
-	double IFSdouble[8 * IFS_VECTOR_COUNT];
 
-	morph.SetFramesPerKey(fractParam.framesPerKeyframe);
+	CMorph morphParamRender(maxKeyNumber, sizeof(sParamRenderD) / sizeof(double));
+	CMorph morphIFS(maxKeyNumber, sizeof(sFractalIFSD) / sizeof(double));
+	CMorph morphMandelbox(maxKeyNumber, sizeof(sFractalMandelboxD) / sizeof(double));
+	CMorph morphFractal(maxKeyNumber, sizeof(sFractalD) / sizeof(double));
+
+	morphParamRender.SetFramesPerKey(fractParam.framesPerKeyframe);
 	morphIFS.SetFramesPerKey(fractParam.framesPerKeyframe);
+	morphMandelbox.SetFramesPerKey(fractParam.framesPerKeyframe);
+	morphFractal.SetFramesPerKey(fractParam.framesPerKeyframe);
 
 	if (Interface_data.keyframeMode)
 	{
@@ -1381,9 +1385,12 @@ void MainRender(void)
 			sParamRender fractParamLoaded;
 			LoadSettings(filename2, fractParamLoaded, NULL, true);
 			WriteLogDouble("Keyframe loaded", keyNumber);
-			morph.AddData(keyNumber, (double*) &fractParamLoaded);
-			IFSToMorph(IFSdouble, fractParamLoaded.fractal);
-			morphIFS.AddData(keyNumber, IFSdouble);
+
+			morphParamRender.AddData(keyNumber, (double*) &fractParamLoaded.doubles);
+			morphIFS.AddData(keyNumber, (double*) &fractParamLoaded.fractal.IFS.doubles);
+			morphMandelbox.AddData(keyNumber, (double*) &fractParamLoaded.fractal.mandelbox.doubles);
+			morphFractal.AddData(keyNumber, (double*) &fractParamLoaded.fractal.doubles);
+
 			WriteLogDouble("Keyframe data added to data structures", keyNumber);
 		}
 		printf("Keyframes loaded\n");
@@ -1534,10 +1541,13 @@ void MainRender(void)
 		//Catmull-Rom interpolation in keyframe animation mode
 		if (fractParam.animMode && Interface_data.keyframeMode)
 		{
-			morph.CatmullRom(index, (double*) &fractParam);
-			morphIFS.CatmullRom(index, IFSdouble);
+			morphParamRender.CatmullRom(index, (double*) &fractParam.doubles);
+			morphIFS.CatmullRom(index, (double*) &fractParam.fractal.IFS.doubles);
+			morphMandelbox.CatmullRom(index, (double*) &fractParam.fractal.mandelbox.doubles);
+			morphFractal.CatmullRom(index, (double*) &fractParam.fractal.doubles);
+
 			WriteLog("Splines calculated");
-			MorphToIFS(IFSdouble, fractParam.fractal);
+
 			if (fractParam.doubles.zoom < 1e-15) fractParam.doubles.zoom = 1e-15;
 			fractParam.doubles.max_y = 20.0 / fractParam.doubles.zoom;
 			fractParam.doubles.resolution = 1.0 / fractParam.image_width;
