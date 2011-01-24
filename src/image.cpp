@@ -80,14 +80,63 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 	QuickSortZBuffer(temp_sort, 1, height * width - 1);
 
+	if (!noGUI && image->IsPreview())
+	{
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Randomizing zBuffer");
+		while (gtk_events_pending())
+			gtk_main_iteration();
+	}
+
+	double min = -1.0 / persp;
+
 	//Randomize Z-buffer
-	int size = height*width;
-	for(int i=0; i<size; i++)
+	int imgSize = height*width;
+	for(int i=imgSize-1; i>=0; i--)
 	{
 		sSortZ temp;
 		temp = temp_sort[i];
-		int ii=i + Random(size*0.05);
-		if(ii>=size-1) ii = size-1;
+		double z1 = temp.z;
+		double size1 = (z1 - neutral) / (z1 - min) * deep;
+
+		int randomStep = i;
+
+		bool done = false;
+		int ii;
+		do
+		{
+			ii = i - Random(randomStep);
+			if (ii <= 0) ii = 0;
+			sSortZ temp2 = temp_sort[ii];
+			double z2 = temp2.z;
+			double size2 = (z2 - neutral) / (z2 - min) * deep;
+			if (size1 * size2 > 0)
+			{
+				double sizeCompare;
+				if (size1 > 0)
+				{
+					sizeCompare = size2 / size1;
+				}
+				else
+				{
+					sizeCompare = size1 / size2;
+				}
+
+				if (sizeCompare > 0.7)
+				{
+					done = true;
+				}
+				else
+				{
+					done = false;
+				}
+			}
+			else
+			{
+				done = false;
+			}
+			randomStep = randomStep * 0.7 - 1;
+		}
+		while(!done);
 		temp_sort[i] = temp_sort[ii];
 		temp_sort[ii] = temp;
 	}
@@ -100,7 +149,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 	}
 
 	double last_time = clock() / CLOCKS_PER_SEC;
-	double min = -1.0 / persp;
+
 
 	for (int i = 0; i < height * width; i++)
 	{
