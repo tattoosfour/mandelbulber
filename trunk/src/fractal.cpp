@@ -30,11 +30,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	int L;
 	double distance = 0;
 
-	double x1=0;
-	double x2 = 0;
-	double y1=0;
-	double y2 = 0;
-
 	double w = 0;
 
 	CVector3 dz(1.0, 0.0, 0.0);
@@ -284,8 +279,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case xenodreambuie:
 			{
-				/*
-
 				double rp = pow(r, p);
 				double th = atan2(z.y, z.x);
 				double ph = acos(z.z / r);
@@ -301,27 +294,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z.y = rp * sin(th * p) * sin(ph * p);
 				z.z = rp * cos(ph * p);
 				z = z + constant;
-
-				*/
-
-
-
-				double cx1 = constant.z;
-				double cy1 = constant.x;
-				double cx2 = constant.z;
-				double cy2 = constant.y;
-
-				double temp1 = x1*x1 - y1*y1 + cx1;
-				y1 = 2.0*x1*y1 + cy1;
-				x1 = temp1;
-
-				double temp2 = x2*x2 - y2*y2 + cx2;
-				y2 = 2.0*x2*y2 + cy2;
-				x2 = temp2;
-
-				z.x = x1*x2 - y1*y2;
-				z.y = x1*y2 + x2*y1;
-				z.z = 0;
 
 				r = z.Length();
 				break;
@@ -506,8 +478,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				}
 
 				r = z.Length();
-
-
 				double r2 = r * r;
 
 				if (r2 < mR2)
@@ -529,6 +499,49 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z = z * scale + constant;
 				tgladDE *= scale;
 
+				r = z.Length();
+				break;
+			}
+			case foldingIntPow2:
+			{
+				if (z.x > par.doubles.FoldingIntPowFoldFactor) z.x = par.doubles.FoldingIntPowFoldFactor * 2.0 - z.x;
+				else if (z.x < -par.doubles.FoldingIntPowFoldFactor) z.x = -par.doubles.FoldingIntPowFoldFactor * 2.0 - z.x;
+
+				if (z.y > par.doubles.FoldingIntPowFoldFactor) z.y = par.doubles.FoldingIntPowFoldFactor * 2.0 - z.y;
+				else if (z.y < -par.doubles.FoldingIntPowFoldFactor) z.y = -par.doubles.FoldingIntPowFoldFactor * 2.0 - z.y;
+
+				if (z.z > par.doubles.FoldingIntPowFoldFactor) z.z = par.doubles.FoldingIntPowFoldFactor * 2.0 - z.z;
+				else if (z.z < -par.doubles.FoldingIntPowFoldFactor) z.z = -par.doubles.FoldingIntPowFoldFactor * 2.0 - z.z;
+
+				r = z.Length();
+
+				double fR2_2 = 1.0;
+				double mR2_2 = 0.25;
+				double r2_2 = r * r;
+				double tglad_factor1_2 = fR2_2 / mR2_2;
+
+				if (r2_2 < mR2_2)
+				{
+					z = z * tglad_factor1_2;
+				}
+				else if (r2_2 < fR2_2)
+				{
+					double tglad_factor2_2 = fR2_2 / r2_2;
+					z = z * tglad_factor2_2;
+				}
+
+				z = z * 2.0;
+				double x2 = z.x * z.x;
+				double y2 = z.y * z.y;
+				double z2 = z.z * z.z;
+				double temp = 1.0 - z2 / (x2 + y2);
+				double newx = (x2 - y2) * temp;
+				double newy = 2.0 * z.x * z.y * temp;
+				double newz = -2.0 * z.z * sqrt(x2 + y2);
+				z.x = newx + constant.x;
+				z.y = newy + constant.y;
+				z.z = newz + constant.z;
+				z.z *= par.doubles.FoldingIntPowZfactor;
 				r = z.Length();
 				break;
 			}
@@ -697,34 +710,34 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 
 		if (point.x < params.doubles.amin)
 		{
-			distance_a = fabs(params.doubles.amin - point.x) + params.doubles.DE_threshold;
+			distance_a = fabs(params.doubles.amin - point.x) + params.doubles.detailSize;
 			limit = true;
 		}
 		if (point.x > params.doubles.amax)
 		{
-			distance_a = fabs(params.doubles.amax - point.x) + params.doubles.DE_threshold;
+			distance_a = fabs(params.doubles.amax - point.x) + params.doubles.detailSize;
 			limit = true;
 		}
 
 		if (point.y < params.doubles.bmin)
 		{
-			distance_a = fabs(params.doubles.bmin - point.y) + params.doubles.DE_threshold;
+			distance_a = fabs(params.doubles.bmin - point.y) + params.doubles.detailSize;
 			limit = true;
 		}
 		if (point.y > params.doubles.bmax)
 		{
-			distance_b = fabs(params.doubles.bmax - point.y) + params.doubles.DE_threshold;
+			distance_b = fabs(params.doubles.bmax - point.y) + params.doubles.detailSize;
 			limit = true;
 		}
 
 		if (point.z < params.doubles.cmin)
 		{
-			distance_c = fabs(params.doubles.cmin - point.z) + params.doubles.DE_threshold;
+			distance_c = fabs(params.doubles.cmin - point.z) + params.doubles.detailSize;
 			limit = true;
 		}
 		if (point.z > params.doubles.cmax)
 		{
-			distance_c = fabs(params.doubles.cmax - point.z) + params.doubles.DE_threshold;
+			distance_c = fabs(params.doubles.cmax - point.z) + params.doubles.detailSize;
 			limit = true;
 		}
 
@@ -748,14 +761,14 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 				*max_iter = false;
 		}
 
-		if (L < params.minN && distance < params.doubles.DE_threshold)
-			distance = params.doubles.DE_threshold;
+		if (L < params.minN && distance < params.doubles.detailSize)
+			distance = params.doubles.detailSize;
 		
 		if (params.interiorMode)
 		{
-			if (distance < 0.5 * params.doubles.DE_threshold || L == params.N)
+			if (distance < 0.5 * params.doubles.detailSize || L == params.N)
 			{
-				distance = params.doubles.DE_threshold;
+				distance = params.doubles.detailSize;
 				if (max_iter != NULL)
 					*max_iter = false;
 			}
@@ -793,7 +806,14 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 
 		double dr = sqrt(dr1 * dr1 + dr2 * dr2 + dr3 * dr3);
 
-		distance = 0.5 * r * log(r) / dr;
+		if(params.linearDEmode)
+		{
+			distance = 0.5 * r / dr;
+		}
+		else
+		{
+			distance = 0.5 * r * log(r) / dr;
+		}
 
 		if (retval == params.N)
 		{
@@ -804,14 +824,14 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 		else if (max_iter != NULL)
 			*max_iter = false;
 
-		if (L < params.minN && distance < params.doubles.DE_threshold)
-			distance = params.doubles.DE_threshold;
+		if (L < params.minN && distance < params.doubles.detailSize)
+			distance = params.doubles.detailSize;
 
 		if (params.interiorMode)
 		{
-			if (distance < 0.5 * params.doubles.DE_threshold || retval == 256)
+			if (distance < 0.5 * params.doubles.detailSize || retval == 256)
 			{
-				distance = params.doubles.DE_threshold;
+				distance = params.doubles.detailSize;
 				if (max_iter != NULL)
 					*max_iter = false;
 			}

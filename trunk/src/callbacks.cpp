@@ -776,7 +776,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.edit_power, false);
 	}
 
-	if ((formula == 13))
+	if ((formula == 14)) //hybrid
 	{
 		gtk_widget_set_sensitive(Interface.tab_box_hybrid, true);
 		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
