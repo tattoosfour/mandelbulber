@@ -31,7 +31,8 @@ enum enumFractalFormula
 	hybrid = 12,
 	mandelbulb2 = 13,
 	mandelbulb3 = 14,
-	mandelbulb4 = 15
+	mandelbulb4 = 15,
+	foldingIntPow2 = 16
 };
 
 enum enumCalculationMode
@@ -101,11 +102,13 @@ struct sFractalD
 	double cmin;
 	double cmax;
 	double constantFactor;
+	double FoldingIntPowZfactor;
+	double FoldingIntPowFoldFactor;
 	double foldingLimit; //paramters of TGlad's folding
 	double foldingValue;
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
-	double DE_threshold;
+	double detailSize;
 	double power;		 //power of fractal formula
 	double hybridPower[HYBRID_COUNT];
 	CVector3 julia; // Julia constant
@@ -126,6 +129,8 @@ struct sFractal
 	bool sphericalFoldingMode;  // spherical folding mode
 	bool interiorMode;
 	bool hybridCyclic;
+	bool dynamicDEcorrection;
+	bool linearDEmode;
 
 	enumFractalFormula formula;
 

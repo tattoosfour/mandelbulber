@@ -121,7 +121,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 	{
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
-		double delta = dist_thresh;
+		double delta = dist_thresh * 0.01;
 		if(calcParam->interiorMode) delta = dist_thresh * 0.1;
 
 		double s1, s2, s3, s4;

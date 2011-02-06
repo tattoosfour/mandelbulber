@@ -240,6 +240,7 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 10) formula2 = mandelbulb2;
 	if (formula == 11) formula2 = mandelbulb3;
 	if (formula == 12) formula2 = mandelbulb4;
+	if (formula == 13) formula2 = foldingIntPow2;
 	return formula2;
 }
 
@@ -259,6 +260,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == mandelbulb2) formula2 = 10;
 	if (formula == mandelbulb3) formula2 = 11;
 	if (formula == mandelbulb4) formula2 = 12;
+	if (formula == foldingIntPow2) formula2 = 13;
 	return formula2;
 }
 
@@ -399,6 +401,8 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)), &special->viewDistanceMax);
 		params->fractal.interiorMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode));
 		params->fractal.doubles.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)), &special->fractalConstantFactor);
+		params->fractal.dynamicDEcorrection = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode));
+		params->fractal.linearDEmode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode));
 
 		params->fractal.mandelbox.rotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
 		params->fractal.mandelbox.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
@@ -446,6 +450,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 			params->fractal.IFS.doubles.intensity[i] = atof(gtk_entry_get_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity)));
 			params->fractal.IFS.enabled[i] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled));
 		}
+
+		params->fractal.doubles.FoldingIntPowFoldFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FoldingIntPowFoldingFactor)));
+		params->fractal.doubles.FoldingIntPowZfactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FoldingIntPowZFactor)));
 
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
@@ -512,7 +519,8 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		if (formula == 10) params->fractal.formula = mandelbulb2;
 		if (formula == 11) params->fractal.formula = mandelbulb3;
 		if (formula == 12) params->fractal.formula = mandelbulb4;
-		if (formula == 13) params->fractal.formula = hybrid;
+		if (formula == 13) params->fractal.formula = foldingIntPow2;
+		if (formula == 14) params->fractal.formula = hybrid;
 
 		for (int i = 0; i < HYBRID_COUNT; ++i)
 			params->fractal.hybridFormula[i] = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
@@ -565,10 +573,12 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		}
 
 	}
+
 	if (params->fractal.formula == trig_DE || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic || params->fractal.formula == tglad)
 		params->fractal.analitycDE = true;
 	else
 		params->fractal.analitycDE = false;
+
 	params->doubles.max_y = 20.0 / params->doubles.zoom;
 	params->doubles.resolution = 1.0 / params->image_width;
 
@@ -808,7 +818,8 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	if (params->fractal.formula == mandelbulb2) formula = 10;
 	if (params->fractal.formula == mandelbulb3) formula = 11;
 	if (params->fractal.formula == mandelbulb4) formula = 12;
-	if (params->fractal.formula == hybrid) formula = 13;
+	if (params->fractal.formula == foldingIntPow2) formula = 13;
+	if (params->fractal.formula == hybrid) formula = 14;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -886,6 +897,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 1");
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 2");
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 3");
+	gtk_combo_box_append_text(combo, "FoldingIntPow2");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1012,6 +1024,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxArrows2 = gtk_vbox_new(FALSE, 1);
 	Interface.boxArrows3 = gtk_vbox_new(FALSE, 1);
 	Interface.boxFractal = gtk_vbox_new(FALSE, 1);
+	Interface.boxFractalFormula = gtk_vbox_new(FALSE, 1);
+	Interface.boxFractalPower = gtk_hbox_new(FALSE, 1);
+	Interface.boxFractalFoldingIntPow = gtk_hbox_new(FALSE, 1);
+	Interface.boxFractalFolding = gtk_vbox_new(FALSE, 1);
+	Interface.boxFractalRayMarching = gtk_vbox_new(FALSE, 1);
+	Interface.boxFractalSwitches = gtk_hbox_new(FALSE, 1);
 	Interface.boxLimits = gtk_hbox_new(FALSE, 1);
 	Interface.boxJulia = gtk_hbox_new(FALSE, 1);
 	Interface.boxQuality = gtk_hbox_new(FALSE, 1);
@@ -1089,8 +1107,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxMandelboxColor1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor3 = gtk_hbox_new(FALSE, 1);
-	Interface.boxFractalSwitches = gtk_hbox_new(FALSE, 1);
 	Interface.boxViewDistance = gtk_hbox_new(FALSE, 1);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
 	Interface.tableLimits = gtk_table_new(2, 3, false);
@@ -1104,6 +1122,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frCoordinates = gtk_frame_new("Viewpoint coordinates");
 	Interface.fr3Dnavigator = gtk_frame_new("3D Navigator");
 	Interface.frFractal = gtk_frame_new("Fractal Parameters");
+	Interface.frFractalFormula = gtk_frame_new("Formula");
+	Interface.frFractalFoldingIntPow = gtk_frame_new("Folding Int Pow 2 formula");
+	Interface.frFractalFolding = gtk_frame_new("Folding");
+	Interface.frFractalRayMarching = gtk_frame_new("Ray-tracing parameters");
 	Interface.frLimits = gtk_frame_new("Limits");
 	Interface.frImage = gtk_frame_new("Image parameters");
 	Interface.frEffects = gtk_frame_new("Shading effects");
@@ -1130,6 +1152,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMandelboxMainParams = gtk_frame_new("Main Mandelbox parameters");
 	Interface.frMandelboxRotations = gtk_frame_new("Rotation of Mandelbox folding planes");
 	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
+
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1218,6 +1241,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_maxN = gtk_entry_new();
 	Interface.edit_minN = gtk_entry_new();
 	Interface.edit_power = gtk_entry_new();
+	Interface.edit_FoldingIntPowFoldingFactor = gtk_entry_new();
+	Interface.edit_FoldingIntPowZFactor = gtk_entry_new();
 	Interface.edit_DE_thresh = gtk_entry_new();
 	Interface.edit_DE_stepFactor = gtk_entry_new();
 	Interface.edit_imageWidth = gtk_entry_new();
@@ -1336,6 +1361,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 1");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 	//		image scale
@@ -1407,6 +1433,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkStereoEnabled = gtk_check_button_new_with_label("Enable stereoscopic rendering");
 	Interface.checkMandelboxRotationsEnable = gtk_check_button_new_with_label("Enable rotation of each folding plane");
 	Interface.checkInteriorMode = gtk_check_button_new_with_label("Interior mode");
+	Interface.checkDECorrectionMode = gtk_check_button_new_with_label("Dynamic DE correction");
+	Interface.checkDELinearMode = gtk_check_button_new_with_label("Linear DE mode");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1628,40 +1656,58 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractal, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frFractal), Interface.boxFractal);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), CreateWidgetWithLabel("Fractal formula type:", Interface.comboFractType), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.checkJulia, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.frFractalFormula, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFormula), Interface.boxFractalFormula);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxJulia, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), CreateWidgetWithLabel("Fractal formula type:", Interface.comboFractType), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxJulia, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia x:", 20, Interface.edit_julia_a), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia y:", 20, Interface.edit_julia_b), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia z:", 20, Interface.edit_julia_c), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), Interface.checkJulia, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxTgladFolding, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxFractalPower, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("8,0", "power:", 5, Interface.edit_power), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("1,0", "Fractal constant factor:", 5, Interface.edit_FractalConstantFactor), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.frFractalFoldingIntPow, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFoldingIntPow), Interface.boxFractalFoldingIntPow);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("2,0", "Cubic folding factor:", 5, Interface.edit_FoldingIntPowFoldingFactor), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("10,0", "Z factor:", 5, Interface.edit_FoldingIntPowZFactor), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.frFractalFolding, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFolding), Interface.boxFractalFolding);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxTgladFolding, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), Interface.checkTgladMode, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("1,0", "Folding limit:", 5, Interface.edit_tglad_folding_1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("2,0", "Folding value:", 5, Interface.edit_tglad_folding_2), false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxSphericalFolding, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxSphericalFolding, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), Interface.checkSphericalFoldingMode, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("1,0", "Fixed radius:", 5, Interface.edit_spherical_folding_1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("0,5", "Min. radius:", 5, Interface.edit_spherical_folding_2), false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.checkIFSFoldingMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.checkIFSFoldingMode, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxQuality, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("8,0", "power:", 5, Interface.edit_power), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "maximum iter:", 5, Interface.edit_maxN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "minimum iter:", 5, Interface.edit_minN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "resolution:", 5, Interface.edit_DE_thresh), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalRayMarching, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalRayMarching), Interface.boxFractalRayMarching);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxQuality, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Maximum iterations:", 5, Interface.edit_maxN), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Minimum iterations:", 5, Interface.edit_minN), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail size:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), CreateEdit("1,0", "Fractal constant factor:", 20, Interface.edit_FractalConstantFactor), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxFractalSwitches, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkInteriorMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDECorrectionMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDELinearMode, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.boxViewDistance, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxViewDistance, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, Interface.edit_viewMinDistance), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("20", "Maximum render distance:", 10, Interface.edit_viewMaxDistance), false, false, 1);
 
@@ -2112,7 +2158,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_sound, Interface.tab_label_sound);
+	//gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_sound, Interface.tab_label_sound);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 
 	//main window pack

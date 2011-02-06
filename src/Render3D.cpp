@@ -40,8 +40,11 @@ JSAMPLE *lightMap;
 guint64 N_counter = 0;
 guint64 Loop_counter = 0;
 guint64 DE_counter = 0;
+guint64 DE_counterForDEerror;
 guint64 Pixel_counter = 0;
 int Missed_DE_counter = 0;
+double DEerror = 0;
+
 double start_time = 0.0;
 bool isRendering = false;
 bool isPostRendering = false;
@@ -262,6 +265,13 @@ void *MainThread(void *ptr)
 						max_y = 100;
 					}
 
+					double correction = 0.1;
+					double lastCorrection = 0.1;
+
+					double lastStepY = 0;
+					bool firstLoop = true;
+					double lastDist = 0;
+
 					//main loop for y values (depth)
 					for (double y = min_y; y < max_y; y += stepYpersp)
 					{
@@ -315,13 +325,13 @@ void *MainThread(void *ptr)
 
 								//calculate opacity
 
-								calcParam.doubles.DE_threshold = dist_thresh;
+								calcParam.doubles.detailSize = dist_thresh;
 								dist = CalculateDistance(point, calcParam, &max_iter);
 
 								//it is for situation when DE is calculated with very big error
-								if (dist > 1.0 / DE_factor)
+								if (dist > 5.0 / DE_factor)
 								{
-									dist = 1.0 / DE_factor;
+									dist = 5.0 / DE_factor;
 								}
 
 								//if maxiter then distance is zero
@@ -373,7 +383,7 @@ void *MainThread(void *ptr)
 								if (!binary)
 								{
 									if (sphericalPersp) stepYpersp = dist * DE_factor;
-									else stepYpersp = (dist-0.5*dist_thresh) / zoom * DE_factor;
+									else stepYpersp = (dist-0.5*dist_thresh) / zoom * DE_factor * correction;
 								}
 
 								//step in binary searching mode
@@ -404,7 +414,63 @@ void *MainThread(void *ptr)
 								}
 							}
 						}
+
+						//DE fractor - dynamic correction
+						if (!firstLoop)
+						{
+							double deltaDist = lastDist - dist;
+							if (deltaDist <= 0 && param.fractal.dynamicDEcorrection)
+							{
+								if(correction > 1.0) correction= 1.0;
+							}
+							else
+							{
+								double deltaY = (lastStepY) * zoom / DE_factor / correction + 0.5 * dist_thresh;
+								DE_counterForDEerror++;
+								DEerror += fabs(deltaDist - deltaY) / deltaY;
+
+								if (param.fractal.dynamicDEcorrection)
+								{
+									double newCorrection = deltaY / deltaDist;
+									if (newCorrection > 3.0) newCorrection = 3.0;
+
+									if (newCorrection < lastCorrection) correction = newCorrection * (newCorrection*newCorrection) / (correction*correction) * 0.5;
+									else correction = correction + (newCorrection - lastCorrection) * lastCorrection * 0.1;
+
+									if (correction > 3.0) correction = 3.0;
+									if (correction < 0.001) correction = 0.001;
+								}
+								else
+								{
+									correction = 1.0;
+								}
+							}
+							//printf("%f ",correction);
+						}
+						else
+						{
+							if (param.fractal.dynamicDEcorrection)
+							{
+								correction = 0.1;
+							}
+							else
+							{
+								correction = 1.0;
+							}
+						}
+
+						if (lastDist - dist > 0)
+						{
+							firstLoop = false;
+						}
+
+						lastDist = dist;
+						lastStepY = stepYpersp;
+						lastCorrection = correction;
 					} //next y
+
+					//printf("\n");
+
 					DE_counter += counter;
 					Pixel_counter++;
 					//counters for drawing histogram
@@ -740,6 +806,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	DE_counter = 0;
 	Pixel_counter = 0;
 	Missed_DE_counter = 0;
+	DEerror = 0;
+	DE_counterForDEerror = 0;
 	start_time = real_clock();
 
 	//initialising threads
@@ -870,8 +938,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					int time_min = (int) (time / 60) % 60;
 					int time_h = time / 3600;
 					double iterations_per_sec = N_counter / time;
-					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
-							iterations_per_sec);
+					double avgDEerror = DEerror / DE_counterForDEerror*100.0;
+					double avgMissedDE = (double)Missed_DE_counter / Pixel_counter;
+					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, DE error %.1f%%, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
+							iterations_per_sec, avgDEerror, avgMissedDE);
 					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 					gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
 				}
@@ -945,7 +1015,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			double iterations_per_sec = N_counter / time;
 			double avg_N = (double) N_counter / Loop_counter;
 			double avg_DE = (double) DE_counter / Pixel_counter;
-			sprintf(progressText, "Rendering done, elapsed %dh%dm%ds, iters/s %.0f, average N %.1f, avg. DE steps %.1f, failed DE %d", time_h, time_min, time_s, iterations_per_sec, avg_N, avg_DE, Missed_DE_counter);
+			double avgDEerror = DEerror / DE_counterForDEerror*100.0;
+			double avgMissedDE = (double)Missed_DE_counter / Pixel_counter;
+			sprintf(progressText, "Render time %dh%dm%ds, iters/s %.0f, avg. N %.1f, avg. DEsteps %.1f, DEerror %.1f%%, MissedDE %.3f%%", time_h, time_min, time_s,
+					iterations_per_sec, avg_N, avg_DE, avgDEerror, avgMissedDE);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}
@@ -1024,6 +1097,9 @@ int main(int argc, char *argv[])
 
 	//detecting number of CPU cores
 	NR_THREADS = get_cpu_count();
+
+	//NR_THREADS = 1;
+
 	printf("Detected %d CPUs\n", NR_THREADS);
 	WriteLogDouble("CPUs detected", NR_THREADS);
 

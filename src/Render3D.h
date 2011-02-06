@@ -31,6 +31,9 @@ extern guint64 Loop_counter;
 extern guint64 DE_counter;
 extern guint64 Pixel_counter;
 extern int Missed_DE_counter;
+extern double DEerror;
+extern guint64 DE_counterForDEerror;
+
 extern double start_time;
 extern bool isRendering;
 extern bool isPostRendering;

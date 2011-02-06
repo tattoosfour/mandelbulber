@@ -73,6 +73,12 @@ struct sInterface
 	GtkWidget *boxNavigationButtons;
 	GtkWidget *boxNavigationZooming;
 	GtkWidget *boxFractal;
+	GtkWidget *boxFractalFormula;
+	GtkWidget *boxFractalFolding;
+	GtkWidget *boxFractalRayMarching;
+	GtkWidget *boxFractalFoldingIntPow;
+	GtkWidget *boxFractalPower;
+	GtkWidget *boxFractalSwitches;
 	GtkWidget *boxLimits;
 	GtkWidget *boxJulia;
 	GtkWidget *boxQuality;
@@ -151,7 +157,6 @@ struct sInterface
 	GtkWidget *boxMandelboxColor1;
 	GtkWidget *boxMandelboxColor2;
 	GtkWidget *boxMandelboxColor3;
-	GtkWidget *boxFractalSwitches;
 	GtkWidget *boxViewDistance;
 
 	GtkWidget *tableLimits;
@@ -191,6 +196,10 @@ struct sInterface
 	GtkWidget *frMandelboxMainParams;
 	GtkWidget *frMandelboxRotations;
 	GtkWidget *frMandelboxColoring;
+	GtkWidget *frFractalFormula;
+	GtkWidget *frFractalFolding;
+	GtkWidget *frFractalRayMarching;
+	GtkWidget *frFractalFoldingIntPow;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -362,6 +371,8 @@ struct sInterface
 	GtkWidget *edit_viewMinDistance;
 	GtkWidget *edit_viewMaxDistance;
 	GtkWidget *edit_FractalConstantFactor;
+	GtkWidget *edit_FoldingIntPowZFactor;
+	GtkWidget *edit_FoldingIntPowFoldingFactor;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -433,6 +444,8 @@ struct sInterface
 	GtkWidget *checkStereoEnabled;
 	GtkWidget *checkMandelboxRotationsEnable;
 	GtkWidget *checkInteriorMode;
+	GtkWidget *checkDECorrectionMode;
+	GtkWidget *checkDELinearMode;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
