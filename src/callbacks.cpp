@@ -61,111 +61,148 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable)) && !Interface_data.animMode)
+	int clickMode = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode));
+
+	if (Interface_data.animMode && Interface_data.recordMode)
 	{
-		int x = event->x;
-		int z = event->y;
-		x = x / mainImage.GetPreviewScale();
-		z = z / mainImage.GetPreviewScale();
 
-		int width = mainImage.GetWidth();
-		int height = mainImage.GetHeight();
-
-		double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
-		if (event->button == 3)
+		double DESpeed = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationDESpeed)));
+		if (event-> button == 1)
 		{
-			closeUpRatio = 1.0 / closeUpRatio;
+			DESpeed *= 1.1;
 		}
-
-		sParamRender params;
-		ReadInterface(&params);
-		undoBuffer.SaveUndo(&params);
-
-		double x2, z2;
-		double aspectRatio = (double) width / height;
-
-		bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
-		if (fishEye)
+		if (event-> button == 3)
 		{
-			x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
-			z2 = M_PI * ((double) z / height - 0.5);
+			DESpeed *= 0.9;
 		}
-		else
-		{
-			x2 = ((double) x / width - 0.5) * params.doubles.zoom * aspectRatio;
-			z2 = ((double) z / height - 0.5) * params.doubles.zoom;
-		}
-		//rotation matrix
-		CRotationMatrix mRot;
-		mRot.RotateZ(params.doubles.alfa);
-		mRot.RotateX(params.doubles.beta);
-		mRot.RotateY(params.doubles.gamma);
-		double y = mainImage.GetPixelZBuffer(x, z);
-		if (y < 1e19)
-		{
-			double persp_factor = 1.0 + y * params.doubles.persp;
-			CVector3 vector, vector2;
-			if (fishEye)
-			{
-				double y2 = y * (1.0 - 1.0 / closeUpRatio);
-				vector.x = sin(params.doubles.persp * x2) * y2;
-				vector.z = sin(params.doubles.persp * z2) * y2;
-				vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
-			}
-			else
-			{
-				double delta_y;
-				if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
-				{
-					delta_y = 0;
-				}
-				else
-				{
-					delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
-				}
-				double y2 = ((y - delta_y) * params.doubles.zoom);
-				vector.x = x2 * persp_factor;
-				vector.y = y2;
-				vector.z = z2 * persp_factor;
-			}
-			vector2 = mRot.RotateVector(vector);
-			params.doubles.vp = vector2 + params.doubles.vp;
-
-			params.doubles.zoom /= closeUpRatio;
-
-			char distanceString[1000];
-			double distance = CalculateDistance(params.doubles.vp, params.fractal);
-			sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
-			gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
-
-			WriteInterface(&params);
-			Interface_data.animMode = false;
-			Interface_data.playMode = false;
-			Interface_data.recordMode = false;
-			Interface_data.continueRecord = false;
-
-			programClosed = true;
-			isPostRendering = false;
-			renderRequest = true;
-
-			printf("Event finished\n");
-		}
+		gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationDESpeed), DoubleToString(DESpeed));
 	}
 	else
 	{
-		if (Interface_data.animMode && Interface_data.recordMode)
+		if (clickMode == 0) //none
 		{
+			//nothing
+		}
+		else
+		{
+			int x = event->x;
+			int z = event->y;
+			x = x / mainImage.GetPreviewScale();
+			z = z / mainImage.GetPreviewScale();
+			double y = mainImage.GetPixelZBuffer(x, z);
 
-			double DESpeed = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationDESpeed)));
-			if (event-> button == 1)
+			if(clickMode ==1) //camera move
 			{
-				DESpeed *= 1.1;
+				int width = mainImage.GetWidth();
+				int height = mainImage.GetHeight();
+
+				double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
+				if (event->button == 3)
+				{
+					closeUpRatio = 1.0 / closeUpRatio;
+				}
+
+				sParamRender params;
+				ReadInterface(&params);
+				undoBuffer.SaveUndo(&params);
+
+				double x2, z2;
+				double aspectRatio = (double) width / height;
+
+				bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
+				if (fishEye)
+				{
+					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
+					z2 = M_PI * ((double) z / height - 0.5);
+				}
+				else
+				{
+					x2 = ((double) x / width - 0.5) * params.doubles.zoom * aspectRatio;
+					z2 = ((double) z / height - 0.5) * params.doubles.zoom;
+				}
+				//rotation matrix
+				CRotationMatrix mRot;
+				mRot.RotateZ(params.doubles.alfa);
+				mRot.RotateX(params.doubles.beta);
+				mRot.RotateY(params.doubles.gamma);
+
+				if (y < 1e19)
+				{
+					double persp_factor = 1.0 + y * params.doubles.persp;
+					CVector3 vector, vector2;
+					if (fishEye)
+					{
+						double y2 = y * (1.0 - 1.0 / closeUpRatio);
+						vector.x = sin(params.doubles.persp * x2) * y2;
+						vector.z = sin(params.doubles.persp * z2) * y2;
+						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
+					}
+					else
+					{
+						double delta_y;
+						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
+						{
+							delta_y = 0;
+						}
+						else
+						{
+							delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
+						}
+						double y2 = ((y - delta_y) * params.doubles.zoom);
+						vector.x = x2 * persp_factor;
+						vector.y = y2;
+						vector.z = z2 * persp_factor;
+					}
+					vector2 = mRot.RotateVector(vector);
+					params.doubles.vp = vector2 + params.doubles.vp;
+
+					params.doubles.zoom /= closeUpRatio;
+
+					char distanceString[1000];
+					double distance = CalculateDistance(params.doubles.vp, params.fractal);
+					sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
+					gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+
+					WriteInterface(&params);
+					Interface_data.animMode = false;
+					Interface_data.playMode = false;
+					Interface_data.recordMode = false;
+					Interface_data.continueRecord = false;
+
+					programClosed = true;
+					isPostRendering = false;
+					renderRequest = true;
+				}
 			}
-			if (event-> button == 3)
+			else if(clickMode == 2) //fog distance front
 			{
-				DESpeed *= 0.9;
+				double fog = (log10(y + 10.0) + 2.0)*10.0;
+				gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront),fog);
 			}
-			gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationDESpeed), DoubleToString(DESpeed));
+			else if(clickMode == 3) //fog visibility distance
+			{
+				double fogFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
+				double fogFront2 = pow(10, fogFront / 10 - 2.0) - 10.0;
+
+				if(y > fogFront2)
+				{
+					double fog = (log10(y - fogFront2) + 2.0) * 10.0;
+					gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), fog);
+				}
+				else
+				{
+					gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), 0.1);
+				}
+			}
+			else if(clickMode == 4) //DOF point
+			{
+				double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+
+				//double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / persp;
+
+				double dof = (log10(y + 1.0/persp) + 2.0) * 10;
+				gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus),dof);
+			}
 		}
 	}
 	return true;
@@ -186,9 +223,9 @@ gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data)
 	int width = event->configure.width;
 	int height = event->configure.height;
 
-	if (width != lastWindowWidth || height != lastWindowHeight)
+	if (width != renderWindow.lastWindowWidth || height != renderWindow.lastWindowHeight)
 	{
-		ChangedComboScale(Interface.combo_imageScale, NULL);
+		ChangedComboScale(renderWindow.comboImageScale, NULL);
 	}
 	return false;
 }
@@ -197,7 +234,7 @@ gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user
 {
 	if (mainImage.IsPreview())
 	{
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		return TRUE;
 	}
 	else return false;
@@ -351,7 +388,7 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
@@ -714,22 +751,22 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 	if (scale == 10) imageScale = 8.0;
 	if (scale == 11)
 	{
-		int winWidth;
-		int winHeight;
-		gtk_window_get_size(GTK_WINDOW(window2), &winWidth, &winHeight);
-		winWidth -= scrollbarSize;
-		winHeight -= scrollbarSize;
+		int winWidth = renderWindow.scrolled_window->allocation.width;
+		int winHeight = renderWindow.scrolled_window->allocation.height;;
+		//gtk_window_get_size(GTK_WINDOW(renderWindow.scrolled_window), &winWidth, &winHeight);
+		winWidth -= renderWindow.scrollbarSize;
+		winHeight -= renderWindow.scrollbarSize;
 		imageScale = (double) winWidth / mainImage.GetWidth();
 		if (mainImage.GetHeight() * imageScale > winHeight) imageScale = (double) winHeight / mainImage.GetHeight();
 	}
 	Interface_data.imageScale = imageScale;
 
 	mainImage.CreatePreview(imageScale);
-	gtk_widget_set_size_request(darea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
+	gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
 
 	mainImage.ConvertTo8bit();
 	mainImage.UpdatePreview();
-	mainImage.RedrawInWidget(darea);
+	mainImage.RedrawInWidget(renderWindow.drawingArea);
 
 	while (gtk_events_pending())
 		gtk_main_iteration();
@@ -900,7 +937,7 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
@@ -922,7 +959,7 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
@@ -945,7 +982,7 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 		}
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
@@ -1439,7 +1476,7 @@ void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
@@ -1460,7 +1497,7 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(darea);
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}

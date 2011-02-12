@@ -18,6 +18,26 @@ enum enumImageFormat
 	imgFormatPNG16Alpha = 3
 };
 
+struct sMainWindow
+{
+	GtkWidget *window;
+	GtkWidget *mainBox;
+	GtkWidget *drawingArea;
+	GtkWidget *scrolled_window;
+	GtkWidget *comboImageScale;
+	GtkWidget *comboMouseClickMode;
+	GtkWidget *boxButtons;
+	GtkWidget *labelImageScale;
+	GtkWidget *labelMouseClickMode;
+
+	GtkObject *hadjustment;
+	GtkObject *vadjustment;
+
+	int scrollbarSize;
+	int lastWindowWidth;
+	int lastWindowHeight;
+};
+
 struct sInterfaceIFS
 {
 	GtkWidget *editIFSx;
@@ -403,7 +423,6 @@ struct sInterface
 	GtkWidget *label_NavigatorEstimatedDistance;
 
 	GtkWidget *comboFractType;
-	GtkWidget *combo_imageScale;
 	GtkWidget *comboImageFormat;
 	GtkWidget *comboHybridFormula[HYBRID_COUNT];
 	GtkWidget *comboHybridDEMethod;
@@ -583,21 +602,19 @@ struct sNoGUIdata
 };
 //Global variables
 
+extern sMainWindow renderWindow;
 extern sInterface Interface;
 extern sTimelineInterface timelineInterface;
 extern sInterface_data Interface_data;
 extern sNoGUIdata noGUIdata;
-extern GtkWidget *window2, *window_histogram, *window_interface;
-extern GtkWidget *darea, *darea2, *darea3;
+extern GtkWidget *window_histogram, *window_interface;
+extern GtkWidget *darea2, *darea3;
 extern GtkWidget *dareaPalette;
 extern int x_mouse;
 extern int y_mouse;
 extern bool programClosed;
 extern bool interfaceCreated;
 extern bool paletteViewCreated;
-extern int scrollbarSize;
-extern int lastWindowWidth;
-extern int lastWindowHeight;
 
 extern char lastFilenameImage[1000];
 extern char lastFilenameSettings[1000];

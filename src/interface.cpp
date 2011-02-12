@@ -21,15 +21,14 @@
 #define CONNECT_SIGNAL(object, callback, event) g_signal_connect(G_OBJECT(object), event, G_CALLBACK(callback), NULL)
 #define CONNECT_SIGNAL_CLICKED(x, y) CONNECT_SIGNAL(x, y, "clicked")
 
+sMainWindow renderWindow;
 sInterface Interface;
 sInterface_data Interface_data;
 sNoGUIdata noGUIdata;
-GtkWidget *window2, *window_histogram, *window_interface;
-GtkWidget *darea, *darea2, *darea3;
+GtkWidget *window_histogram, *window_interface;
+GtkWidget *darea2, *darea3;
 GtkWidget *dareaPalette;
-int scrollbarSize;
-int lastWindowWidth;
-int lastWindowHeight;
+
 
 sTimelineInterface timelineInterface;
 GtkWidget *timeLineWindow = 0;
@@ -526,7 +525,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 			params->fractal.hybridFormula[i] = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
 
 		double imageScale;
-		int scale = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.combo_imageScale));
+		int scale = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboImageScale));
 		if (scale == 0) imageScale = 1.0/10.0;
 		if (scale == 1) imageScale = 1.0/8.0;
 		if (scale == 2) imageScale = 1.0/6.0;
@@ -542,9 +541,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		{
 			int winWidth;
 			int winHeight;
-			gtk_window_get_size(GTK_WINDOW(window2),&winWidth,&winHeight);
-			winWidth-=scrollbarSize;
-			winHeight-=scrollbarSize;
+			gtk_window_get_size(GTK_WINDOW(renderWindow.window),&winWidth,&winHeight);
+			winWidth-=renderWindow.scrollbarSize;
+			winHeight-=renderWindow.scrollbarSize;
 			imageScale = (double)winWidth / params->image_width;
 			if(params->image_height*imageScale > winHeight) imageScale = (double)winHeight / params->image_height;
 		}
@@ -754,6 +753,8 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax, &special->viewDistanceMax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin, &special->viewDistanceMin));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->fractal.doubles.constantFactor, &special->fractalConstantFactor));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowFoldingFactor), DoubleToString(params->fractal.doubles.FoldingIntPowFoldFactor));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowZFactor), DoubleToString(params->fractal.doubles.FoldingIntPowZfactor));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -783,6 +784,8 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable), params->fractal.mandelbox.rotationsEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode), params->fractal.interiorMode);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode), params->fractal.dynamicDEcorrection);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode), params->fractal.linearDEmode);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -903,46 +906,82 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 void CreateInterface(sParamRender *default_settings)
 {
 	//------------- glowne okno renderowania
-	window2 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window2), "Mandelbulb Render Window");
-	CONNECT_SIGNAL(window2, StopRenderingAndQuit, "delete_event");
-	gtk_widget_add_events(GTK_WIDGET(window2), GDK_CONFIGURE);
-  CONNECT_SIGNAL(window2, WindowReconfigured, "configure-event");
+	renderWindow.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(renderWindow.window), "Mandelbulb Render Window");
+	CONNECT_SIGNAL(renderWindow.window, StopRenderingAndQuit, "delete_event");
+	gtk_widget_add_events(GTK_WIDGET(renderWindow.window), GDK_CONFIGURE);
+  CONNECT_SIGNAL(renderWindow.window, WindowReconfigured, "configure-event");
 
 	//glowny box w oknie
-	GtkWidget *box1 = gtk_vbox_new(FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(box1), 0);
+	renderWindow.mainBox = gtk_vbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(renderWindow.mainBox), 0);
 
 	//obszar rysowania
-	darea = gtk_drawing_area_new();
+	renderWindow.drawingArea = gtk_drawing_area_new();
 
-	gtk_widget_set_size_request(darea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
-	gtk_window_set_default_size(GTK_WINDOW(window2), mainImage.GetPreviewWidth() + 16, mainImage.GetPreviewHeight() + 16);
-	lastWindowWidth = mainImage.GetPreviewWidth()+16;
-	lastWindowHeight = mainImage.GetPreviewHeight()+16;
+	gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight()+50);
+	gtk_window_set_default_size(GTK_WINDOW(renderWindow.window), mainImage.GetPreviewWidth() + 16, mainImage.GetPreviewHeight() + 50);
+	renderWindow.lastWindowWidth = mainImage.GetPreviewWidth()+16;
+	renderWindow.lastWindowHeight = mainImage.GetPreviewHeight()+50;
 
-	gtk_signal_connect(GTK_OBJECT(darea), "expose-event", GTK_SIGNAL_FUNC(on_darea_expose), NULL);
-	gtk_signal_connect(GTK_OBJECT(darea), "motion_notify_event", (GtkSignalFunc) motion_notify_event, NULL);
-	gtk_signal_connect(GTK_OBJECT(darea), "button_press_event", GTK_SIGNAL_FUNC(pressed_button_on_image), NULL);
-	gtk_widget_set_events(darea, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK);
+	gtk_signal_connect(GTK_OBJECT(renderWindow.drawingArea), "expose-event", GTK_SIGNAL_FUNC(on_darea_expose), NULL);
+	gtk_signal_connect(GTK_OBJECT(renderWindow.drawingArea), "motion_notify_event", (GtkSignalFunc) motion_notify_event, NULL);
+	gtk_signal_connect(GTK_OBJECT(renderWindow.drawingArea), "button_press_event", GTK_SIGNAL_FUNC(pressed_button_on_image), NULL);
+	gtk_widget_set_events(renderWindow.drawingArea, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK);
 
-	GtkObject *hadjustment = gtk_adjustment_new(0, 0, 1000, 1, 1, 100);
-	GtkObject *vadjustment = gtk_adjustment_new(0, 0, 1000, 1, 1, 100);
+	renderWindow.hadjustment = gtk_adjustment_new(0, 0, 1000, 1, 1, 100);
+	renderWindow.vadjustment = gtk_adjustment_new(0, 0, 1000, 1, 1, 100);
 
-	GtkWidget *scrolled_window = gtk_scrolled_window_new(GTK_ADJUSTMENT(hadjustment), GTK_ADJUSTMENT(vadjustment));
+	renderWindow.scrolled_window = gtk_scrolled_window_new(GTK_ADJUSTMENT(renderWindow.hadjustment), GTK_ADJUSTMENT(renderWindow.vadjustment));
 
-	//wstawienie darea do box
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), darea);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(renderWindow.scrolled_window), renderWindow.drawingArea);
 
-	//wstawienie box do window
-	gtk_container_add(GTK_CONTAINER(window2), scrolled_window);
+	gtk_box_pack_start(GTK_BOX(renderWindow.mainBox), renderWindow.scrolled_window, true, true, 1);
+
+	//----- buttons
+	renderWindow.boxButtons = gtk_hbox_new(FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(renderWindow.mainBox), renderWindow.boxButtons, false, false, 1);
+
+	//image scale combo
+	renderWindow.labelImageScale = gtk_label_new("Image scale:");
+	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.labelImageScale, false, false, 1);
+	renderWindow.comboImageScale = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/10");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/8");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/6");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/4");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1/2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "4");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "6");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "8");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboImageScale), "Fit to window");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboImageScale), 11);
+	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.comboImageScale, false, false, 10);
+
+	//image scale combo
+	renderWindow.labelMouseClickMode = gtk_label_new("Mouse click function:");
+	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.labelMouseClickMode, false, false, 1);
+	renderWindow.comboMouseClickMode = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "None");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Move the camera");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set fog front distance");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set fog visibility distance");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set Depth of Field focus point");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 1);
+	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.comboMouseClickMode, false, false, 1);
+
+	//mainBox into window
+	gtk_container_add(GTK_CONTAINER(renderWindow.window), renderWindow.mainBox);
 
 	//wyswietlenie wszystkich widgetow
-	gtk_widget_show_all(window2);
+	gtk_widget_show_all(renderWindow.window);
 
 	//get scrollbar size
-	GtkWidget *hscrollbar = gtk_scrolled_window_get_hscrollbar(GTK_SCROLLED_WINDOW(scrolled_window));
-	scrollbarSize = hscrollbar->allocation.height;
+	GtkWidget *hscrollbar = gtk_scrolled_window_get_hscrollbar(GTK_SCROLLED_WINDOW(renderWindow.scrolled_window));
+	renderWindow.scrollbarSize = hscrollbar->allocation.height;
 
 	//------------------- okno histogramu iteracji ------------
 
@@ -1364,21 +1403,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
-	//		image scale
-	Interface.combo_imageScale = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/10");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/8");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/6");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/4");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/3");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1/2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "4");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "6");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "8");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.combo_imageScale), "Fit to window");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.combo_imageScale), 11);
+
 	//image format
 	Interface.comboImageFormat = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "JPEG");
@@ -1559,7 +1584,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buGetPaletteFromImage, PressedGetPaletteFromImage);
 	CONNECT_SIGNAL_CLICKED(Interface.buTimeline, PressedTimeline);
 
-	CONNECT_SIGNAL(Interface.combo_imageScale, ChangedComboScale, "changed");
+	CONNECT_SIGNAL(renderWindow.comboImageScale, ChangedComboScale, "changed");
 	CONNECT_SIGNAL(Interface.comboFractType, ChangedComboFormula, "changed");
 	CONNECT_SIGNAL_CLICKED(Interface.checkTgladMode, ChangedTgladFoldingMode);
 	CONNECT_SIGNAL_CLICKED(Interface.checkJulia, ChangedJulia);
@@ -1698,7 +1723,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Maximum iterations:", 5, Interface.edit_maxN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Minimum iterations:", 5, Interface.edit_minN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail size:", 5, Interface.edit_DE_thresh), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail level:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
@@ -1729,7 +1754,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxImage), Interface.boxImageRes, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "image width:", 5, Interface.edit_imageWidth), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "image height:", 5, Interface.edit_imageHeight), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateWidgetWithLabel("Scale in window:", Interface.combo_imageScale), false, false, 1);
 
 	//frame Stereoscopic
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frStereo, false, false, 1);
@@ -2215,7 +2239,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.edit_step_rotation, "Rotation step in degrees");
 	gtk_widget_set_tooltip_text(Interface.edit_imageWidth, "Final image width");
 	gtk_widget_set_tooltip_text(Interface.edit_imageHeight, "Final image height");
-	gtk_widget_set_tooltip_text(Interface.combo_imageScale, "Image scale in render window\nSmaller value <-> smaller render window");
+	gtk_widget_set_tooltip_text(renderWindow.comboImageScale, "Image scale in render window\nSmaller value <-> smaller render window");
 	gtk_widget_set_tooltip_text(Interface.edit_brightness, "Image brightness");
 	gtk_widget_set_tooltip_text(Interface.edit_gamma, "Image gamma");
 	gtk_widget_set_tooltip_text(Interface.buApplyBrighness, "Applying all shaders changes during rendering and after rendering");
