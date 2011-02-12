@@ -1369,7 +1369,7 @@ void MainRender(void)
 	//image size
 	int width = fractParam.image_width;
 	int height = fractParam.image_height;
-	InitMainImage(&mainImage, width, height, Interface_data.imageScale, darea);
+	InitMainImage(&mainImage, width, height, Interface_data.imageScale, renderWindow.drawingArea);
 
 	if (!noGUI)
 	{
@@ -1749,14 +1749,14 @@ void MainRender(void)
 				{
 					mainImage.ClearImage();
 					WriteLog("Image cleared");
-					Render(fractParam, &mainImage, darea);
+					Render(fractParam, &mainImage, renderWindow.drawingArea);
 					WriteLog("Image rendered");
 				}
 				else if (eye == 1)
 				{
 					secondEyeImage->ClearImage();
 					WriteLog("Image cleared");
-					Render(fractParam, secondEyeImage, darea);
+					Render(fractParam, secondEyeImage, renderWindow.drawingArea);
 					WriteLog("Image rendered");
 					MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image made");

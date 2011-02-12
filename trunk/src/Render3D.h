@@ -42,8 +42,7 @@ extern bool noGUI;
 
 extern cImage mainImage;
 
-double
-real_clock(void);
+double real_clock(void);
 void MainRender(void);
 void *MainThread(void *ptr);
 void Render(sParamRender param, cImage *image, GtkWidget *outputDarea);

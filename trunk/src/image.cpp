@@ -203,7 +203,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 			image->ConvertTo8bit();
 			image->UpdatePreview();
-			image->RedrawInWidget(darea);
+			image->RedrawInWidget(renderWindow.drawingArea);
 
 			while (gtk_events_pending())
 				gtk_main_iteration();
@@ -597,6 +597,6 @@ void StereoPreview(cImage *temporaryImage, guchar *stereoImage)
 		}
 	}
 	temporaryImage->UpdatePreview();
-	temporaryImage->RedrawInWidget(darea);
+	temporaryImage->RedrawInWidget(renderWindow.drawingArea);
 }
 

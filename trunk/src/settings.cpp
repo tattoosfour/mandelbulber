@@ -366,7 +366,7 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 		for (int axis = 0; axis < 3; ++axis)
 			for (int component = 0; component < 3; ++component) {
-				fprintf(fileSettings, "mandelbox_rotation_%s%d_%s", axis_names[axis], fold, component_names[component]);
+				fprintf(fileSettings, "mandelbox_rotation_%s%d_%s", axis_names[axis], fold + 1, component_names[component]);
 				fprintfDot(fileSettings, "", params.fractal.mandelbox.doubles.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]);
 			}
 
@@ -381,6 +381,10 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintfDot(fileSettings, "view_distance_max", params.doubles.viewDistanceMax, &special->viewDistanceMax);
 	fprintfDot(fileSettings, "view_distance_min", params.doubles.viewDistanceMin, &special->viewDistanceMin);
 	fprintf(fileSettings, "interior_mode %d;\n", params.fractal.interiorMode);
+	fprintfDot(fileSettings, "FoldingIntPow_folding_factor", params.fractal.doubles.FoldingIntPowFoldFactor);
+	fprintfDot(fileSettings, "FoldingIntPow_z_factor", params.fractal.doubles.FoldingIntPowZfactor);
+	fprintf(fileSettings, "dynamic_DE_correction %d;\n", params.fractal.dynamicDEcorrection);
+	fprintf(fileSettings, "linear_DE_mode %d;\n", params.fractal.linearDEmode);
 
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
@@ -683,6 +687,11 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "view_distance_max")) params.doubles.viewDistanceMax = atof2(str2, locale_dot, &special->viewDistanceMax);
 				else if (!strcmp(str1, "view_distance_min")) params.doubles.viewDistanceMin = atof2(str2, locale_dot, &special->viewDistanceMin);
 				else if (!strcmp(str1, "interior_mode")) params.fractal.interiorMode = atoi(str2);
+				else if (!strcmp(str1, "dynamic_DE_correction")) params.fractal.dynamicDEcorrection = atoi(str2);
+				else if (!strcmp(str1, "linear_DE_mode")) params.fractal.linearDEmode = atoi(str2);
+
+				else if (!strcmp(str1, "FoldingIntPow_folding_factor")) params.fractal.doubles.FoldingIntPowFoldFactor = atof2(str2, locale_dot);
+				else if (!strcmp(str1, "FoldingIntPow_z_factor")) params.fractal.doubles.FoldingIntPowZfactor = atof2(str2, locale_dot);
 
 				else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 				else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
@@ -779,9 +788,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 292)
+		if (lineCounter != 296)
 		{
-			printf("number of lines in settings file (should be 292): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 296): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -833,6 +842,10 @@ void DefaultValues(sParamRender &params)
 	params.fractal.doubles.foldingValue = 2;
 	params.fractal.doubles.foldingSphericalMin = 0.5; //parameters of spherical folding
 	params.fractal.doubles.foldingSphericalFixed = 1;
+	params.fractal.doubles.FoldingIntPowFoldFactor = 2.0;
+	params.fractal.doubles.FoldingIntPowZfactor = 5.0;
+	params.fractal.dynamicDEcorrection = false;
+	params.fractal.linearDEmode = false;
 	params.doubles.DE_factor = 1.0; //factor for distance estimation steps
 	params.image_width = 800; //image width
 	params.image_height = 600; //image height
