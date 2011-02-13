@@ -1,7 +1,7 @@
-MANDELBULBER 0.97
+MANDELBULBER 0.98
 
 project leader: Krzysztof Marczak
-project members: knighty, makemeunsee, Marius Schilder
+project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman
 
 contact: buddhi1980@gmail.com
 www: http://sites.google.com/site/mandelbulber/
@@ -12,30 +12,27 @@ LICENCE: GNU GPL v3.0
 
 1. REQUIREMENTS
 
-- Linux OS with installed GTK+2.0 libraries (version >2.20), libjpeg, libsndfile1
+- Linux OS with installed GTK+2.0 libraries (version >2.20), libjpeg
 - very fast CPU (recomended 2GHz, 4 cores)
 - 500MB RAM
 
 2. COMPILING
 
-CMake, libgtk2.0, libjpeg8, and libsndfile1 are required to compile Mandelbulber.
+libgtk2.0, libjpeg8 are required to compile Mandelbulber.
 
 On Ubuntu:
-sudo apt-get install build-essentials cmake libgtk2.0-dev libjpeg8-dev libsndfile1-dev
+sudo apt-get install libgtk2.0-dev libjpeg8-dev
 
 Then:
 
-mkdir build
-cd build
-cmake ../src
-make
+cd makefiles
+make all
+cd ..
 
 3. INSTALLATION
 
-(After compiling)
-cd build
-make install
-
+please type:
+./install
 
 4. TESTED ON:
 

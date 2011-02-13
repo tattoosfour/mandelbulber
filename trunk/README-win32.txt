@@ -1,7 +1,7 @@
-MANDELBULBER 0.97 - win32
+MANDELBULBER 0.98 - win32
 
 project leader: Krzysztof Marczak
-project members: knighty, makemeunsee, Marius Schilder
+project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman
 
 contact: buddhi1980@gmail.com
 www: http://sites.google.com/site/mandelbulber/
@@ -9,7 +9,7 @@ download site: http://sourceforge.net/projects/mandelbulber/
 SVN: http://code.google.com/p/mandelbulber/
 
 
-Licence: GLU GPL v3.0
+Licence: GNU GPL v3.0
 
 
 1. REQUIREMENTS

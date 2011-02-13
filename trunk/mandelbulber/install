@@ -1,6 +1,24 @@
 #!/bin/bash
 
-sudo install src/Release/mandelbulber /usr/bin
+if [ -f makefiles/mandelbulber ] ; then
+  sudo install makefiles/mandelbulber /usr/bin
+elif [ -f bin/mandelbulber ] ; then
+  sudo install bin/mandelbulber /usr/bin
+else
+  echo Binary file not found. Program not compilled.
+  echo Do you want to compile program now? [y/n]
+  read answer
+  if [ "$answer" = "y" ] ; then
+    cd makefiles/
+	make all
+	rm src/*.o
+	rm src/*.d
+	cd ..
+	mv makefiles/mandelbulber bin/mandelbulber
+	sudo install bin/mandelbulber /usr/bin
+  fi
+fi
+
 cp .mandelbulber $HOME/ -a
 
 echo mandelbulber installed successfully

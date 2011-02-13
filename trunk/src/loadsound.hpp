@@ -8,6 +8,7 @@
 #ifndef LOADSOUND_H_
 #define LOADSOUND_H_
 
+/*
 class CSound
 {
 public:
@@ -43,6 +44,7 @@ private:
 
 extern CSound sound;
 
-#endif /* LOADSOUND_H_ */
-
 void fft(double* data, unsigned long nn);
+*/
+
+#endif /* LOADSOUND_H_ */

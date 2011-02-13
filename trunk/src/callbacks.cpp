@@ -249,6 +249,7 @@ gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpoint
 	return TRUE;
 }
 
+/*
 gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 	char *userdata = (char*) user_data;
@@ -290,6 +291,7 @@ gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer
 	}
 	return true;
 }
+*/
 
 void StartRendering(GtkWidget *widget, gpointer data)
 {
@@ -1503,6 +1505,7 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 	}
 }
 
+/*
 void PressedLoadSound(GtkWidget *widget, gpointer data)
 {
 	sParamRender params;
@@ -1522,6 +1525,7 @@ void PressedLoadSound(GtkWidget *widget, gpointer data)
 	gtk_widget_queue_draw(Interface.dareaSoundD);
 
 }
+*/
 
 void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 {

@@ -1503,7 +1503,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.97\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.98\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");
@@ -1580,7 +1580,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buBuddhabrot, PressedBuddhabrot);
 	CONNECT_SIGNAL(Interface.adjustmentPaletteOffset, ChangedSliderPaletteOffset, "value-changed");
 	CONNECT_SIGNAL_CLICKED(Interface.buRandomPalette, PressedRandomPalette);
-	CONNECT_SIGNAL_CLICKED(Interface.buLoadSound, PressedLoadSound);
+	//CONNECT_SIGNAL_CLICKED(Interface.buLoadSound, PressedLoadSound);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetPaletteFromImage, PressedGetPaletteFromImage);
 	CONNECT_SIGNAL_CLICKED(Interface.buTimeline, PressedTimeline);
 
@@ -1594,11 +1594,11 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkMandelboxRotationsEnable, ChangedMandelboxRotations);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
-	gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
-	gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundA), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "A");
-	gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundB), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "B");
-	gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundC), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "C");
-	gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundD), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "D");
+	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
+	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundA), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "A");
+	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundB), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "B");
+	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundC), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "C");
+	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundD), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "D");
 
 	//----------------------- main box -----------------------
 
