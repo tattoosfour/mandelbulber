@@ -1,5 +1,14 @@
 Version history
 
+v0.98
+- added preview for settings files in Load Settings dialog window
+- improved quality of Depth of Field effect
+- added FoldingIntPow2 formula
+- improved calculation of raytracing steps. Added dynamic correction of estimated distance. Added possibility to switch between logaritmic and linear fuction for distance estimation.
+- moved Image Scale combo into main Render Window
+- added possibility to adjust fog visibility and focus point for Depth of Field effect using mouse pointer (added combo box for change function of mouse click)
+- source code: cleaned up, refractioned, optimised (thanks to Ryan Hitchman)
+
 v0.97
 - Improved rendering of timeline thumbnails. Now thumbnails show what exactly will be rendered during animation rendering. The same was changed for loading settings by Next/Previous
 - Added refresh button in timeline window

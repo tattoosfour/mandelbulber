@@ -1385,6 +1385,7 @@ void MainRender(void)
 	printf("Lights placed\n");
 
 	//loading sound
+	/*
 	if (fractParam.soundEnabled)
 	{
 		sound.Load((char*) fractParam.file_sound);
@@ -1397,6 +1398,7 @@ void MainRender(void)
 		sound.DoFFT(bandMin, bandMax);
 		WriteLog("Sound FFT calculated");
 	}
+	*/
 
 	FILE *pFile_coordinates = NULL;
 	//erasing file with animation path in path record mode
@@ -1636,6 +1638,7 @@ void MainRender(void)
 		}
 
 		//animation by sound
+		/*
 		if (fractParam.soundEnabled)
 		{
 			sAddData *addData;
@@ -1660,6 +1663,7 @@ void MainRender(void)
 			}
 			WriteLog("Sound animation calculated");
 		}
+		*/
 		RecalculateIFSParams(fractParam.fractal);
 		WriteLog("IFS params recalculated");
 

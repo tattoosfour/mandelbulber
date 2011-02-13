@@ -5,6 +5,7 @@
  *      Author: krzysztof
  */
 
+/*
 #include "loadsound.hpp"
 #include "sndfile.h"
 #include "math.h"
@@ -313,3 +314,5 @@ void fft(double* data, unsigned long nn)
 		mmax = istep;
 	}
 }
+
+*/
