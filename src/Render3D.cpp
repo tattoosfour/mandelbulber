@@ -303,9 +303,16 @@ void *MainThread(void *ptr)
 								CVector3 point3D1, point3D2;
 								if (sphericalPersp)
 								{
+									point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
+									point3D1.z = sin(fov * z2) * y;
+									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+
+									/*
 									point3D1.x = sin(fov * x2) * y;
 									point3D1.z = sin(fov * z2) * y;
 									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+									*/
+
 									point3D2 = mRot.RotateVector(point3D1);
 								}
 								else
@@ -493,9 +500,16 @@ void *MainThread(void *ptr)
 						CVector3 point3D1, point3D2;
 						if (sphericalPersp)
 						{
+							point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
+							point3D1.z = sin(fov * z2) * y;
+							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+
+							/*
 							point3D1.x = sin(fov * x2) * y;
 							point3D1.z = sin(fov * z2) * y;
 							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+							*/
+
 							point3D2 = mRot.RotateVector(point3D1);
 						}
 						else
