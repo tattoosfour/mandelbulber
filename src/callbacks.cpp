@@ -109,8 +109,8 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				double x2, z2;
 				double aspectRatio = (double) width / height;
 
-				bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
-				if (fishEye)
+				enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+				if (perspectiveType == fishEye || perspectiveType == equirectangular)
 				{
 					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 					z2 = M_PI * ((double) z / height - 0.5);
@@ -130,10 +130,17 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				{
 					double persp_factor = 1.0 + y * params.doubles.persp;
 					CVector3 vector, vector2;
-					if (fishEye)
+					if (perspectiveType == fishEye)
 					{
 						double y2 = y * (1.0 - 1.0 / closeUpRatio);
 						vector.x = sin(params.doubles.persp * x2) * y2;
+						vector.z = sin(params.doubles.persp * z2) * y2;
+						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
+					}
+					else if(perspectiveType == equirectangular)
+					{
+						double y2 = y * (1.0 - 1.0 / closeUpRatio);
+						vector.x = sin(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
 						vector.z = sin(params.doubles.persp * z2) * y2;
 						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
 					}
@@ -951,12 +958,12 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 	double SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
 	bool SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
 	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
-	bool fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
+	enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
 	if (!isRendering)
 	{
 		if (SSAOEnabled)
 		{
-			PostRendering_SSAO(&mainImage, persp, SSAOQuality, fishEye, false);
+			PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
 		}
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
