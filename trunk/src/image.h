@@ -10,6 +10,7 @@
 #define IMAGE_H_
 
 #include "cimage.hpp"
+#include "fractparams.h"
 
 struct sSSAOparams
 {
@@ -18,7 +19,7 @@ struct sSSAOparams
 	double persp;
 	int quality;
 	int done;
-	bool fishEye;
+	enumPerspectiveType perspectiveType;
 	int progressive;
 	bool quiet;
 };
@@ -34,7 +35,7 @@ extern unsigned int histogram2[1000];
 void NowaPaleta(sRGB *p, double nasycenie);
 void DrawHistogram(void);
 void DrawHistogram2(void);
-void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, bool quiet);
+void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet);
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp);
 void DrawPalette(sRGB *palette);
 void StoreImage8(sComplexImage *image, sRGB8 *image8);

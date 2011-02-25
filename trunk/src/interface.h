@@ -426,6 +426,7 @@ struct sInterface
 	GtkWidget *comboImageFormat;
 	GtkWidget *comboHybridFormula[HYBRID_COUNT];
 	GtkWidget *comboHybridDEMethod;
+	GtkWidget *comboPerspectiveType;
 
 	GtkWidget *progressBar;
 
@@ -458,7 +459,6 @@ struct sInterface
 	GtkWidget *checkHybridCyclic;
 	GtkWidget *checkNavigatorAbsoluteDistance;
 	GtkWidget *checkNavigatorGoToSurface;
-	GtkWidget *checkFishEye;
 	GtkWidget *checkStraightRotation;
 	GtkWidget *checkStereoEnabled;
 	GtkWidget *checkMandelboxRotationsEnable;

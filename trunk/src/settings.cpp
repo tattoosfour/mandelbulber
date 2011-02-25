@@ -348,7 +348,7 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	}
 
 	fprintf(fileSettings, "hybrid_cyclic %d;\n", params.fractal.hybridCyclic);
-	fprintf(fileSettings, "fish_eye %d;\n", params.fishEye);
+	fprintf(fileSettings, "fish_eye %d;\n", params.perspectiveType);
 	fprintfDot(fileSettings, "stereo_eye_distance", params.doubles.stereoEyeDistance, &special->stereoEyeDistance);
 	fprintf(fileSettings, "stereo_enabled %d;\n", params.stereoEnabled);
 
@@ -666,7 +666,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 			    else if (!strcmp(str1, "hybrid_cyclic")) params.fractal.hybridCyclic = atoi(str2);
 
-				else if (!strcmp(str1, "fish_eye")) params.fishEye = atoi(str2);
+				else if (!strcmp(str1, "fish_eye")) params.perspectiveType = (enumPerspectiveType)atoi(str2);
 
 				else if (!strcmp(str1, "stereo_enabled")) params.stereoEnabled = atoi(str2);
 				else if (!strcmp(str1, "stereo_eye_distance")) params.doubles.stereoEyeDistance = atof2(str2, locale_dot, &special->stereoEyeDistance);

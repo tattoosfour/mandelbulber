@@ -393,7 +393,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 			params->fractal.doubles.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])), &special->hybridPower[i]);
 		}
 		params->fractal.hybridCyclic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic));
-		params->fishEye = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye));
+		params->perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
 		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)), &special->viewDistanceMin);
@@ -780,7 +780,6 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ), params->fractal.IFS.absZ);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSoundEnabled), params->soundEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic), params->fractal.hybridCyclic);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFishEye), params->fishEye);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable), params->fractal.mandelbox.rotationsEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode), params->fractal.interiorMode);
@@ -806,6 +805,8 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 		gtk_entry_set_text(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity), DoubleToString(params->fractal.IFS.doubles.intensity[i]));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled), params->fractal.IFS.enabled[i]);
 	}
+
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), params->perspectiveType);
 
 	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
 	if (params->fractal.formula == trig) formula = 0;
@@ -907,7 +908,7 @@ void CreateInterface(sParamRender *default_settings)
 {
 	//------------- glowne okno renderowania
 	renderWindow.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(renderWindow.window), "Mandelbulb Render Window");
+	gtk_window_set_title(GTK_WINDOW(renderWindow.window), "Mandelbulber Render Window");
 	CONNECT_SIGNAL(renderWindow.window, StopRenderingAndQuit, "delete_event");
 	gtk_widget_add_events(GTK_WIDGET(renderWindow.window), GDK_CONFIGURE);
   CONNECT_SIGNAL(renderWindow.window, WindowReconfigured, "configure-event");
@@ -1417,9 +1418,11 @@ void CreateInterface(sParamRender *default_settings)
 		AddComboTextsFractalFormula(GTK_COMBO_BOX(Interface.comboHybridFormula[i]));
 	}
 
-	Interface.comboHybridDEMethod = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboHybridDEMethod), "Delta DE");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboHybridDEMethod), "Analytic for Mandelboxes and IFS");
+	Interface.comboPerspectiveType = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Three-point perspective");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Fish eye");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Equirectangular projection");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), 0);
 
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
@@ -1453,7 +1456,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkHybridCyclic = gtk_check_button_new_with_label("Cyclic loop");
 	Interface.checkNavigatorAbsoluteDistance = gtk_check_button_new_with_label("Absolute distance mode");
 	Interface.checkNavigatorGoToSurface = gtk_check_button_new_with_label("Go close to indicated surface");
-	Interface.checkFishEye = gtk_check_button_new_with_label("Fish eye");
 	Interface.checkStraightRotation = gtk_check_button_new_with_label("Rotation without\nusing gamma\nangle");
 	Interface.checkStereoEnabled = gtk_check_button_new_with_label("Enable stereoscopic rendering");
 	Interface.checkMandelboxRotationsEnable = gtk_check_button_new_with_label("Enable rotation of each folding plane");
@@ -1627,7 +1629,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxZoom, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("2,5", "Close up (zoom):", 20, Interface.edit_zoom), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("0,5", "perspective (FOV):", 5, Interface.edit_persp), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), Interface.checkFishEye, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateWidgetWithLabel("Perspective projection:", Interface.comboPerspectiveType), false, false, 1);
 
 	//buttons arrows
 	gtk_container_add(GTK_CONTAINER(Interface.buUp), Interface.pixmap_up);

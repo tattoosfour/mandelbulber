@@ -204,7 +204,7 @@ void *MainThread(void *ptr)
 
 	WriteLogDouble("All vectors and matrices prepared", thread_number);
 
-	bool sphericalPersp = param.fishEye;
+	enumPerspectiveType perspectiveType = param.perspectiveType;
 	double fov = param.doubles.persp;
 
 	//2-pass loop (for multi-threading)
@@ -240,14 +240,19 @@ void *MainThread(void *ptr)
 					//calculating starting point
 					double y_start = max_y;
 					if (y_scan_start > min_y) min_y = y_scan_start;
-					double x2 = ((double) x / width - 0.5) * zoom * aspectRatio;
-					double z2 = ((double) z / height - 0.5) * zoom;
 
-					if (sphericalPersp)
+					double x2,z2;
+					if (perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
 						x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 						z2 = M_PI * ((double) z / height - 0.5);
 					}
+					else
+					{
+						x2 = ((double) x / width - 0.5) * zoom * aspectRatio;
+						z2 = ((double) z / height - 0.5) * zoom;
+					}
+
 					//preparing variables
 					bool found = false;
 					double dist = delta;
@@ -259,7 +264,7 @@ void *MainThread(void *ptr)
 					CVector3 viewVectorStart(0, 0, 0);
 					CVector3 viewVectorEnd(0, 0, 0);
 
-					if (sphericalPersp)
+					if (perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
 						min_y = 1e-15;
 						max_y = 100;
@@ -285,7 +290,7 @@ void *MainThread(void *ptr)
 							double wsp_persp = 1.0 + y * persp;
 
 							//recalculating dynamic DE threshold
-							if (sphericalPersp)
+							if (perspectiveType == fishEye || perspectiveType == equirectangular)
 							{
 								dist_thresh = 2.0 * y * resolution / quality * fov;
 							}
@@ -299,30 +304,29 @@ void *MainThread(void *ptr)
 								//DE steps counter
 								counter++;
 
-								//rotate coordinate system from screen to fractal coordinates
+								//rotate coordinate system from screen to fractal coordinates and perspective projection
 								CVector3 point3D1, point3D2;
-								if (sphericalPersp)
+								if (perspectiveType == fishEye)
+								{
+									point3D1.x = sin(fov * x2) * y;
+									point3D1.z = sin(fov * z2) * y;
+									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+
+								}
+								else if(perspectiveType == equirectangular)
 								{
 									point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
 									point3D1.z = sin(fov * z2) * y;
 									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-
-									/*
-									point3D1.x = sin(fov * x2) * y;
-									point3D1.z = sin(fov * z2) * y;
-									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-									*/
-
-									point3D2 = mRot.RotateVector(point3D1);
 								}
-								else
+								else //tree-point perspective
 								{
 									point3D1.x = x2 * wsp_persp;
 									point3D1.y = y2;
 									point3D1.z = z2 * wsp_persp;
-									point3D2 = mRot.RotateVector(point3D1);
 								}
 
+							  point3D2 = mRot.RotateVector(point3D1);
 								CVector3 point = point3D2 + vp;
 
 								if (counter == 1)
@@ -389,7 +393,7 @@ void *MainThread(void *ptr)
 								//step in DE mode
 								if (!binary)
 								{
-									if (sphericalPersp) stepYpersp = dist * DE_factor;
+									if (perspectiveType == fishEye || perspectiveType == equirectangular) stepYpersp = dist * DE_factor;
 									else stepYpersp = (dist-0.5*dist_thresh) / zoom * DE_factor * correction;
 								}
 
@@ -498,27 +502,28 @@ void *MainThread(void *ptr)
 						double y2 = y * zoom;
 						double wsp_persp = 1.0 + y * persp;
 						CVector3 point3D1, point3D2;
-						if (sphericalPersp)
+
+						if (perspectiveType == fishEye)
+						{
+							point3D1.x = sin(fov * x2) * y;
+							point3D1.z = sin(fov * z2) * y;
+							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+
+						}
+						else if(perspectiveType == equirectangular)
 						{
 							point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
 							point3D1.z = sin(fov * z2) * y;
 							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-
-							/*
-							point3D1.x = sin(fov * x2) * y;
-							point3D1.z = sin(fov * z2) * y;
-							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-							*/
-
-							point3D2 = mRot.RotateVector(point3D1);
 						}
-						else
+						else //tree-point perspective
 						{
 							point3D1.x = x2 * wsp_persp;
 							point3D1.y = y2;
 							point3D1.z = z2 * wsp_persp;
-							point3D2 = mRot.RotateVector(point3D1);
 						}
+
+					  point3D2 = mRot.RotateVector(point3D1);
 						CVector3 point = point3D2 + vp;
 
 						viewVectorEnd = point;
@@ -533,7 +538,7 @@ void *MainThread(void *ptr)
 						CVector3 vn = CalculateNormals(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance);
 
 						//delta for all shading algorithms depended on depth and resolution (dynamic shaders resolution)
-						if (sphericalPersp)
+						if (perspectiveType == fishEye || perspectiveType == equirectangular)
 						{
 							delta = resolution * y * fov;
 							wsp_persp = 2.0 * y;
@@ -675,20 +680,28 @@ void *MainThread(void *ptr)
 							double wsp_persp = 1.0 + y * persp;
 							CVector3 point3D1, point3D2;
 
-							if (sphericalPersp)
+							if (perspectiveType == fishEye)
 							{
 								point3D1.x = sin(fov * x2) * y;
 								point3D1.z = sin(fov * z2) * y;
 								point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-								point3D2 = mRot.RotateVector(point3D1);
+
 							}
-							else
+							else if(perspectiveType == equirectangular)
+							{
+								point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
+								point3D1.z = sin(fov * z2) * y;
+								point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
+							}
+							else //tree-point perspective
 							{
 								point3D1.x = x2 * wsp_persp;
 								point3D1.y = y2;
 								point3D1.z = z2 * wsp_persp;
-								point3D2 = mRot.RotateVector(point3D1);
 							}
+
+						  point3D2 = mRot.RotateVector(point3D1);
+
 							CVector3 point = point3D2 + vp;
 
 							//calculate texture coordinates
@@ -900,7 +913,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							if (param.SSAOEnabled && !image->IsLowMemMode())
 							{
 								param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
-								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.fishEye, param.quiet);
+								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
 								WriteLog("SSAO rendered");
 							}
 							image->CompileImage();
@@ -984,7 +997,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 	if (param.SSAOEnabled && !programClosed)
 	{
-		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.fishEye, param.quiet);
+		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
 		WriteLog("SSAO rendered");
 	}
 	image->CompileImage();

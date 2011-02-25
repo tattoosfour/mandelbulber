@@ -16,6 +16,11 @@ enum dataMode
 	soundNone = 0, soundEnvelope = 1, soundA = 2, soundB = 3, soundC = 4, soundD = 5
 };
 
+enum enumPerspectiveType
+{
+	threePoint = 0, fishEye = 1, equirectangular = 2
+};
+
 struct sAddData
 {
 	dataMode mode;
@@ -86,6 +91,7 @@ struct sParamRender
 	int soundBand3Max;
 	int soundBand4Min;
 	int soundBand4Max;
+	enumPerspectiveType perspectiveType;
 
 	bool shadow; //enable shadows
 	bool global_ilumination; //enable global ilumination
@@ -103,7 +109,6 @@ struct sParamRender
 	bool auxLightPre3Enabled;
 	bool auxLightPre4Enabled;
 	bool soundEnabled;
-	bool fishEye;
 	bool stereoEnabled;
 	bool quiet;
 	sImageSwitches imageSwitches;

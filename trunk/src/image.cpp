@@ -257,7 +257,7 @@ void ThreadSSAO(void *ptr)
 	double scale_factor = (double) width / (quality * quality) / 2.0;
 	double aspectRatio = (double) width / height;
 
-	bool sphericalPersp = param->fishEye;
+	enumPerspectiveType perspectiveType = param->perspectiveType;
 	double fov = param->persp;
 
 	for (int y = threadNo * progressive; y < height; y += NR_THREADS * progressive)
@@ -272,11 +272,18 @@ void ThreadSSAO(void *ptr)
 			{
 				//printf("SSAO point on object\n");
 				double x2, y2;
-				if (sphericalPersp)
+				if (perspectiveType == fishEye)
 				{
 					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 					y2 = M_PI * ((double) y / height - 0.5);
 					x2 = sin(fov * x2) * z;
+					y2 = sin(fov * y2) * z;
+				}
+				else if(perspectiveType == equirectangular)
+				{
+					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
+					y2 = M_PI * ((double) y / height - 0.5);
+					x2 = sin(fov * x2) * cos(fov * y2) * z;
 					y2 = sin(fov * y2) * z;
 				}
 				else
@@ -307,11 +314,18 @@ void ThreadSSAO(void *ptr)
 						double z2 = image->GetPixelZBuffer(xx, yy);
 
 						double xx2, yy2;
-						if (sphericalPersp)
+						if (perspectiveType == fishEye)
 						{
 							xx2 = M_PI * (xx / width - 0.5) * aspectRatio;
 							yy2 = M_PI * (yy / height - 0.5);
 							xx2 = sin(fov * xx2) * z2;
+							yy2 = sin(fov * yy2) * z2;
+						}
+						else if (perspectiveType == equirectangular)
+						{
+							xx2 = M_PI * (xx / width - 0.5) * aspectRatio;
+							yy2 = M_PI * (yy / height - 0.5);
+							xx2 = sin(fov * xx2) * cos(fov * yy2) * z2;
 							yy2 = sin(fov * yy2) * z2;
 						}
 						else
@@ -381,7 +395,7 @@ void ThreadSSAO(void *ptr)
 
 }
 
-void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, bool quiet)
+void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet)
 {
 	isPostRendering = true;
 
@@ -413,7 +427,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, bool fishEye, 
 		thread_param[i].threadNo = i;
 		thread_param[i].image = image;
 		thread_param[i].persp = persp;
-		thread_param[i].fishEye = fishEye;
+		thread_param[i].perspectiveType = perspectiveType;
 		thread_param[i].quality = quality * sqrt(1.0 / progressive);
 		thread_param[i].done = 0;
 		thread_param[i].progressive = progressive;
