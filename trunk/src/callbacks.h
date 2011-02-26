@@ -89,5 +89,7 @@ void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer);
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data);
 
+double ScanFractal(sParamRender *params, CVector3 direction);
+double ScanSizeOfFractal(sParamRender *params);
 
 #endif /* CALLBACKS_H_ */
