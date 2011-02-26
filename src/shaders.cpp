@@ -337,7 +337,7 @@ void PlaceRandomLights(sParamRender *fractParams)
 		random.y = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
 		random.z = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
 
-		CVector3 position = fractParams->doubles.vp + random * fractParams->doubles.auxLightDistributionRadius * fractParams->doubles.zoom;
+		CVector3 position = fractParams->doubles.auxLightRandomCenter + random * fractParams->doubles.auxLightDistributionRadius * radius_multiplier;
 
 		double distance = CalculateDistance(position, calcParam, &max_iter);
 

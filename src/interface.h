@@ -143,6 +143,7 @@ struct sInterface
 	GtkWidget *boxLightPre2;
 	GtkWidget *boxLightPre3;
 	GtkWidget *boxLightPre4;
+	GtkWidget *boxLightCommon;
 	GtkWidget *boxMainLight;
 	GtkWidget *boxMainLightPosition;
 	GtkWidget *boxIFSMain;
@@ -178,6 +179,7 @@ struct sInterface
 	GtkWidget *boxMandelboxColor2;
 	GtkWidget *boxMandelboxColor3;
 	GtkWidget *boxViewDistance;
+	GtkWidget *boxIFSDefaults;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -202,10 +204,12 @@ struct sInterface
 	GtkWidget *frPostDOF;
 	GtkWidget *frLightBallance;
 	GtkWidget *frLightsParameters;
+	GtkWidget *frLightsCommon;
 	GtkWidget *frPredefinedLights;
 	GtkWidget *frMainLight;
 	GtkWidget *frIFSMain;
 	GtkWidget *frIFSParams;
+	GtkWidget *frIFSDefaults;
 	GtkWidget *frKeyframeAnimation;
 	GtkWidget *frKeyframeAnimation2;
 	GtkWidget *frPalette;
@@ -276,6 +280,9 @@ struct sInterface
 	GtkWidget *buLoadSound;
 	GtkWidget *buGetPaletteFromImage;
 	GtkWidget *buTimeline;
+	GtkWidget *buIFSDefaultDodeca;
+	GtkWidget *buIFSDefaultIcosa;
+	GtkWidget *buIFSDefaultOcta;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -350,6 +357,10 @@ struct sInterface
 	GtkWidget *edit_auxLightPre4z;
 	GtkWidget *edit_auxLightPre4intensity;
 	GtkWidget *edit_auxLightVisibility;
+	GtkWidget *edit_auxLightPlacementDistance;
+	GtkWidget *edit_auxLightRandomCentreX;
+	GtkWidget *edit_auxLightRandomCentreY;
+	GtkWidget *edit_auxLightRandomCentreZ;
 	GtkWidget *edit_mainLightAlfa;
 	GtkWidget *edit_mainLightBeta;
 	GtkWidget *edit_IFSAlfa;
