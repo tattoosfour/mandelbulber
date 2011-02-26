@@ -289,6 +289,9 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintf(fileSettings, "aux_light_predefined_4_colour_G %d;\n", params.auxLightPre4Colour.G);
 	fprintf(fileSettings, "aux_light_predefined_4_colour_B %d;\n", params.auxLightPre4Colour.B);
 	fprintfDot(fileSettings, "aux_light_visibility", params.doubles.auxLightVisibility, &special->auxLightVisibility);
+	fprintfDot(fileSettings, "aux_light_random_center_X", params.doubles.auxLightRandomCenter.x);
+	fprintfDot(fileSettings, "aux_light_random_center_Y", params.doubles.auxLightRandomCenter.y);
+	fprintfDot(fileSettings, "aux_light_random_center_Z", params.doubles.auxLightRandomCenter.z);
 	fprintfDot(fileSettings, "IFS_scale", params.fractal.IFS.doubles.scale, &special->IFSScale);
 	fprintfDot(fileSettings, "IFS_rot_alfa", params.fractal.IFS.doubles.rotationAlfa, &special->IFSRotationAlfa);
 	fprintfDot(fileSettings, "IFS_rot_beta", params.fractal.IFS.doubles.rotationBeta, &special->IFSRotationBeta);
@@ -637,6 +640,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "aux_light_predefined_4_colour_G")) params.auxLightPre4Colour.G = atoi(str2);
 				else if (!strcmp(str1, "aux_light_predefined_4_colour_B")) params.auxLightPre4Colour.B = atoi(str2);
 				else if (!strcmp(str1, "aux_light_visibility")) params.doubles.auxLightVisibility = atof2(str2, locale_dot, &special->auxLightVisibility);
+				else if (!strcmp(str1, "aux_light_random_center_X")) params.doubles.auxLightRandomCenter.x = atof2(str2, locale_dot);
+				else if (!strcmp(str1, "aux_light_random_center_Y")) params.doubles.auxLightRandomCenter.y = atof2(str2, locale_dot);
+				else if (!strcmp(str1, "aux_light_random_center_Z")) params.doubles.auxLightRandomCenter.z = atof2(str2, locale_dot);
 
 				else if (!strcmp(str1, "IFS_scale")) params.fractal.IFS.doubles.scale = atof2(str2, locale_dot, &special->IFSScale);
 				else if (!strcmp(str1, "IFS_rot_alfa")) params.fractal.IFS.doubles.rotationAlfa = atof2(str2, locale_dot, &special->IFSRotationAlfa);
@@ -788,9 +794,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 296)
+		if (lineCounter != 299)
 		{
-			printf("number of lines in settings file (should be 296): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 299): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -943,6 +949,9 @@ void DefaultValues(sParamRender &params)
 	params.auxLightPre4Colour.R = 52704;
 	params.auxLightPre4Colour.G = 62492;
 	params.auxLightPre4Colour.B = 45654;
+	params.doubles.auxLightRandomCenter.x = 0;
+	params.doubles.auxLightRandomCenter.y = 0;
+	params.doubles.auxLightRandomCenter.z = 0;
 	params.startFrame = 0;
 	params.endFrame = 1000;
 	params.framesPerKeyframe = 100;

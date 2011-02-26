@@ -91,13 +91,16 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			z = z / mainImage.GetPreviewScale();
 			double y = mainImage.GetPixelZBuffer(x, z);
 
-			if(clickMode ==1) //camera move
+			if(clickMode ==1 || clickMode >= 5) //camera move or light position setup
 			{
 				int width = mainImage.GetWidth();
 				int height = mainImage.GetHeight();
 
 				double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
-				if (event->button == 3)
+				double lightPlacementDistance = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPlacementDistance)));
+				if(clickMode == 9) lightPlacementDistance = 0; //random light center
+
+				if (event->button == 3) //right mouse button
 				{
 					closeUpRatio = 1.0 / closeUpRatio;
 				}
@@ -130,16 +133,19 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				{
 					double persp_factor = 1.0 + y * params.doubles.persp;
 					CVector3 vector, vector2;
+					double y2 = y;
 					if (perspectiveType == fishEye)
 					{
-						double y2 = y * (1.0 - 1.0 / closeUpRatio);
+						if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
+						else if(clickMode >= 5) y2 = y - lightPlacementDistance;
 						vector.x = sin(params.doubles.persp * x2) * y2;
 						vector.z = sin(params.doubles.persp * z2) * y2;
 						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
 					}
 					else if(perspectiveType == equirectangular)
 					{
-						double y2 = y * (1.0 - 1.0 / closeUpRatio);
+						if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
+						else if(clickMode >= 5) y2 = y - lightPlacementDistance;
 						vector.x = sin(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
 						vector.z = sin(params.doubles.persp * z2) * y2;
 						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
@@ -147,38 +153,67 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 					else
 					{
 						double delta_y;
-						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface)))
-						{
-							delta_y = 0;
-						}
-						else
-						{
-							delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
-						}
-						double y2 = ((y - delta_y) * params.doubles.zoom);
+						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface))) delta_y = 0;
+						else delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
+
+						if(clickMode == 1) y2 = ((y - delta_y) * params.doubles.zoom);
+						else if(clickMode >= 5) y2 = y * params.doubles.zoom - lightPlacementDistance;
 						vector.x = x2 * persp_factor;
 						vector.y = y2;
 						vector.z = z2 * persp_factor;
 					}
 					vector2 = mRot.RotateVector(vector);
-					params.doubles.vp = vector2 + params.doubles.vp;
 
-					params.doubles.zoom /= closeUpRatio;
+					if(clickMode == 1)
+					{
+					  params.doubles.vp = vector2 + params.doubles.vp;
+						params.doubles.zoom /= closeUpRatio;
 
-					char distanceString[1000];
-					double distance = CalculateDistance(params.doubles.vp, params.fractal);
-					sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
-					gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+						char distanceString[1000];
+						double distance = CalculateDistance(params.doubles.vp, params.fractal);
+						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
+						gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
-					WriteInterface(&params);
-					Interface_data.animMode = false;
-					Interface_data.playMode = false;
-					Interface_data.recordMode = false;
-					Interface_data.continueRecord = false;
+						WriteInterface(&params);
+						Interface_data.animMode = false;
+						Interface_data.playMode = false;
+						Interface_data.recordMode = false;
+						Interface_data.continueRecord = false;
 
-					programClosed = true;
-					isPostRendering = false;
-					renderRequest = true;
+						programClosed = true;
+						isPostRendering = false;
+						renderRequest = true;
+					}
+					if(clickMode >= 5)
+					{
+						double distance = CalculateDistance(vector2 + params.doubles.vp, params.fractal);
+						if (clickMode == 5)
+						{
+							params.doubles.auxLightPre1 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre1intensity = distance * distance;
+						}
+						if (clickMode == 6)
+						{
+							params.doubles.auxLightPre2 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre2intensity = distance * distance;
+						}
+						if (clickMode == 7)
+						{
+							params.doubles.auxLightPre3 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre3intensity = distance * distance;
+						}
+						if (clickMode == 8)
+						{
+							params.doubles.auxLightPre4 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre4intensity = distance * distance;
+						}
+						if (clickMode == 9)
+						{
+							params.doubles.auxLightRandomCenter = vector2 + params.doubles.vp;
+						}
+						WriteInterface(&params);
+						PlaceRandomLights(&params);
+					}
 				}
 			}
 			else if(clickMode == 2) //fog distance front
@@ -1648,6 +1683,108 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 			fclose(fileSettings);
 		}
 	}
+}
+
+void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	double phi = (1 + sqrt(5))/2.0;
+	params.fractal.IFS.doubles.direction[0].x = phi*phi;
+	params.fractal.IFS.doubles.direction[0].y = 1.0;
+	params.fractal.IFS.doubles.direction[0].z = -phi;
+
+	params.fractal.IFS.doubles.direction[1].x = -phi;
+	params.fractal.IFS.doubles.direction[1].y = phi*phi;
+	params.fractal.IFS.doubles.direction[1].z = 1.0;
+
+	params.fractal.IFS.doubles.direction[2].x = 1.0;
+	params.fractal.IFS.doubles.direction[2].y = -phi;
+	params.fractal.IFS.doubles.direction[2].z = phi*phi;
+
+	params.fractal.IFS.enabled[0] = true;
+	params.fractal.IFS.enabled[1] = true;
+	params.fractal.IFS.enabled[2] = true;
+
+	params.fractal.IFS.doubles.offset.x = 1.0;
+	params.fractal.IFS.doubles.offset.y = 1.0;
+	params.fractal.IFS.doubles.offset.z = 1.0;
+
+	params.fractal.IFS.absX = true;
+	params.fractal.IFS.absY = true;
+	params.fractal.IFS.absZ = true;
+
+	params.fractal.IFS.doubles.scale = phi*phi;
+
+	WriteInterface(&params);
+}
+
+void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	double phi = (1 + sqrt(5))/2.0;
+	params.fractal.IFS.doubles.direction[3].x = -phi*phi;
+	params.fractal.IFS.doubles.direction[3].y = 1.0;
+	params.fractal.IFS.doubles.direction[3].z = phi;
+
+	params.fractal.IFS.doubles.direction[4].x = phi;
+	params.fractal.IFS.doubles.direction[4].y = -phi*phi;
+	params.fractal.IFS.doubles.direction[4].z = 1.0;
+
+	params.fractal.IFS.enabled[3] = true;
+	params.fractal.IFS.enabled[4] = true;
+
+	params.fractal.IFS.doubles.offset.x = 1.0;
+	params.fractal.IFS.doubles.offset.y = 0;
+	params.fractal.IFS.doubles.offset.z = phi;
+
+	params.fractal.IFS.absX = true;
+	params.fractal.IFS.absY = true;
+	params.fractal.IFS.absZ = true;
+
+	params.fractal.IFS.doubles.scale = 2.0;
+
+	WriteInterface(&params);
+}
+
+void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	params.fractal.IFS.doubles.direction[5].x = 1.0;
+	params.fractal.IFS.doubles.direction[5].y = -1.0;
+	params.fractal.IFS.doubles.direction[5].z = 0;
+
+	params.fractal.IFS.doubles.direction[6].x = 1.0;
+	params.fractal.IFS.doubles.direction[6].y = 0;
+	params.fractal.IFS.doubles.direction[6].z = -1.0;
+
+	params.fractal.IFS.doubles.direction[7].x = 0;
+	params.fractal.IFS.doubles.direction[7].y = 1.0;
+	params.fractal.IFS.doubles.direction[7].z = -1.0;
+
+	params.fractal.IFS.enabled[5] = true;
+	params.fractal.IFS.enabled[6] = true;
+	params.fractal.IFS.enabled[7] = true;
+
+	params.fractal.IFS.doubles.offset.x = 1.0;
+	params.fractal.IFS.doubles.offset.y = 0.0;
+	params.fractal.IFS.doubles.offset.z = 0.0;
+
+	params.fractal.IFS.absX = true;
+	params.fractal.IFS.absY = true;
+	params.fractal.IFS.absZ = true;
+
+	params.fractal.IFS.doubles.scale = 2.0;
+
+	WriteInterface(&params);
 }
 
 double ScanFractal(sParamRender *params, CVector3 direction)

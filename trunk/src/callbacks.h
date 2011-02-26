@@ -55,7 +55,6 @@ void ChangedSphericalFoldingMode(GtkWidget *widget, gpointer data);
 void ChangedLimits(GtkWidget *widget, gpointer data);
 void ChangedMandelboxRotations(GtkWidget *widget, gpointer data);
 void ChangedIFSFoldingMode(GtkWidget *widget, gpointer data);
-
 void ChangedSliderFog(GtkWidget *widget, gpointer data);
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data);
 void PressedDOFUpdate(GtkWidget *widget, gpointer data);
@@ -88,6 +87,9 @@ void PressedTimeline(GtkWidget *widget, gpointer data);
 void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer);
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data);
+void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer);
+void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer);
+void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

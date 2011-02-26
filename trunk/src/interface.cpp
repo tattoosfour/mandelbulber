@@ -364,6 +364,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.auxLightVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightVisibility)), &special->auxLightVisibility);
 		params->doubles.mainLightAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa)), &special->mainLightAlfa) / 180.0 * M_PI;
 		params->doubles.mainLightBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightBeta)), &special->mainLightBeta) / 180.0 * M_PI;
+		params->doubles.auxLightRandomCenter.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX)));
+		params->doubles.auxLightRandomCenter.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY)));
+		params->doubles.auxLightRandomCenter.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreZ)));
 		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)), &special->IFSScale);
 		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa)), &special->IFSRotationAlfa) / 180.0 * M_PI;
 		params->fractal.IFS.doubles.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta)), &special->IFSRotationBeta) / 180.0 * M_PI;
@@ -539,9 +542,9 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		if (scale == 10) imageScale = 8.0;
 		if (scale == 11)
 		{
-			int winWidth;
-			int winHeight;
-			gtk_window_get_size(GTK_WINDOW(renderWindow.window),&winWidth,&winHeight);
+			int winWidth = renderWindow.scrolled_window->allocation.width;
+			int winHeight = renderWindow.scrolled_window->allocation.height;;
+			//gtk_window_get_size(GTK_WINDOW(renderWindow.window),&winWidth,&winHeight);
 			winWidth-=renderWindow.scrollbarSize;
 			winHeight-=renderWindow.scrollbarSize;
 			imageScale = (double)winWidth / params->image_width;
@@ -704,6 +707,9 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlfa * 180.0 / M_PI, &special->mainLightAlfa));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightBeta), DoubleToString(params->doubles.mainLightBeta * 180.0 / M_PI, &special->mainLightBeta));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightVisibility), DoubleToString(params->doubles.auxLightVisibility, &special->auxLightVisibility));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX), DoubleToString(params->doubles.auxLightRandomCenter.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY), DoubleToString(params->doubles.auxLightRandomCenter.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreZ), DoubleToString(params->doubles.auxLightRandomCenter.z));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSScale), DoubleToString(params->fractal.IFS.doubles.scale, &special->IFSScale));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSAlfa), DoubleToString(params->fractal.IFS.doubles.rotationAlfa * 180.0 / M_PI, &special->IFSRotationAlfa));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSBeta), DoubleToString(params->fractal.IFS.doubles.rotationBeta * 180.0 / M_PI, &special->IFSRotationBeta));
@@ -971,6 +977,11 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set fog front distance");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set fog visibility distance");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set Depth of Field focus point");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #4");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of centre for random lights");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 1);
 	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.comboMouseClickMode, false, false, 1);
 
@@ -1113,6 +1124,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxLightPre2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxLightPre3 = gtk_hbox_new(FALSE, 1);
 	Interface.boxLightPre4 = gtk_hbox_new(FALSE, 1);
+	Interface.boxLightCommon= gtk_hbox_new(FALSE, 1);
 	Interface.boxMainLight = gtk_vbox_new(FALSE, 1);
 	Interface.boxMainLightPosition = gtk_hbox_new(FALSE, 1);
 	Interface.boxIFSMain = gtk_vbox_new(FALSE, 1);
@@ -1120,6 +1132,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxIFSMainEdit2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxIFSParams = gtk_vbox_new(FALSE, 1);
 	Interface.boxIFSButtons = gtk_hbox_new(FALSE, 1);
+	Interface.boxIFSDefaults = gtk_hbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimation = gtk_vbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimationButtons = gtk_hbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimationButtons2 = gtk_hbox_new(FALSE, 1);
@@ -1178,10 +1191,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frPostDOF = gtk_frame_new("Depth of field");
 	Interface.frLightBallance = gtk_frame_new("Light brightness ballance");
 	Interface.frLightsParameters = gtk_frame_new("Random lights parameters");
+	Interface.frLightsCommon = gtk_frame_new("Common parameters");
 	Interface.frPredefinedLights = gtk_frame_new("Predefined Lights");
 	Interface.frMainLight = gtk_frame_new("Main light source (connected with camera)");
 	Interface.frIFSMain = gtk_frame_new("General IFS parameters");
 	Interface.frIFSParams = gtk_frame_new("Symmetry vectors");
+	Interface.frIFSDefaults = gtk_frame_new("Vector presets");
 	Interface.frKeyframeAnimation = gtk_frame_new("Keyframe animation");
 	Interface.frKeyframeAnimation2 = gtk_frame_new("Key-frames");
 	Interface.frPalette = gtk_frame_new("Colour palette");
@@ -1259,6 +1274,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buLoadSound = gtk_button_new_with_label("Load sound");
 	Interface.buGetPaletteFromImage = gtk_button_new_with_label("Get palette from image");
 	Interface.buTimeline = gtk_button_new_with_label("Timeline");
+	Interface.buIFSDefaultDodeca = gtk_button_new_with_label("Dodecahedron");
+	Interface.buIFSDefaultIcosa = gtk_button_new_with_label("Icosahedron");
+	Interface.buIFSDefaultOcta = gtk_button_new_with_label("Octahedron");
+
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1332,6 +1351,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mainLightAlfa = gtk_entry_new();
 	Interface.edit_mainLightBeta = gtk_entry_new();
 	Interface.edit_auxLightVisibility = gtk_entry_new();
+	Interface.edit_auxLightPlacementDistance = gtk_entry_new();
+	Interface.edit_auxLightRandomCentreX = gtk_entry_new();
+	Interface.edit_auxLightRandomCentreY = gtk_entry_new();
+	Interface.edit_auxLightRandomCentreZ = gtk_entry_new();
 	Interface.edit_IFSScale = gtk_entry_new();
 	Interface.edit_IFSAlfa = gtk_entry_new();
 	Interface.edit_IFSBeta = gtk_entry_new();
@@ -1585,6 +1608,9 @@ void CreateInterface(sParamRender *default_settings)
 	//CONNECT_SIGNAL_CLICKED(Interface.buLoadSound, PressedLoadSound);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetPaletteFromImage, PressedGetPaletteFromImage);
 	CONNECT_SIGNAL_CLICKED(Interface.buTimeline, PressedTimeline);
+	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultDodeca, PressedIFSDefaultDodeca);
+	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultIcosa, PressedIFSDefaultIcosa);
+	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultOcta, PressedIFSDefaultOcta);
 
 	CONNECT_SIGNAL(renderWindow.comboImageScale, ChangedComboScale, "changed");
 	CONNECT_SIGNAL(Interface.comboFractType, ChangedComboFormula, "changed");
@@ -1918,6 +1944,12 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("45", "Vertical angle relative to camera:", 6, Interface.edit_mainLightBeta), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateWidgetWithLabel("Colour:", Interface.buColorMainLight), false, false, 1);
 
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsCommon, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLightsCommon), Interface.boxLightCommon);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), Interface.buDistributeLights, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit("0", "Number of aux. lights:", 6, Interface.edit_auxLightNumber), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit(DoubleToString(0.01), "Manual placement distance:", 6, Interface.edit_auxLightPlacementDistance), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightBallance, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLightBallance), Interface.boxLightBallance);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightBallance), Interface.boxLightBrightness, false, false, 1);
@@ -1928,12 +1960,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsParameters, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLightsParameters), Interface.boxLightsParameters);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("0", "Number of aux. lights:", 6, Interface.edit_auxLightNumber), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("1234", "Random seed:", 6, Interface.edit_auxLightRandomSeed), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("0,1", "Maximum distance from fractal", 12, Interface.edit_auxLightMaxDist), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("3.0", "Distribution radius of lights:", 6, Interface.edit_auxLightDistributionRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), Interface.buDistributeLights, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Centre of distribution X:", 12, Interface.edit_auxLightRandomCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Y:", 12, Interface.edit_auxLightRandomCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Z:", 12, Interface.edit_auxLightRandomCentreZ), false, false, 1);
 
 	//frame: predefined lights
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frPredefinedLights, false, false, 1);
@@ -2041,6 +2074,12 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.boxIFSButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeOffset, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeVectors, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSDefaults, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frIFSDefaults), Interface.boxIFSDefaults);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultDodeca, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultIcosa, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultOcta, false, false, 1);
 
 	//tab hybrid formula
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_hybrid), Interface.frHybrid, false, false, 1);

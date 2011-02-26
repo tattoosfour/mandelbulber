@@ -35,6 +35,7 @@ struct sParamRenderD
 	CVector3 auxLightPre2;
 	CVector3 auxLightPre3;
 	CVector3 auxLightPre4;
+	CVector3 auxLightRandomCenter;
 
 	double zoom; //zoom
 	double min_y; //range of depth;
