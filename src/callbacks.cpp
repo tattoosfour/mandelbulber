@@ -715,14 +715,18 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
 
+	double objectSize = ScanSizeOfFractal(&params);
+	double initCameraDistance = objectSize + objectSize / params.doubles.persp * 1.2 * params.image_width/params.image_height;
+
+	CVector3 initVector(0,-initCameraDistance,0);
+	CRotationMatrix mRot;
+	mRot.RotateZ(params.doubles.alfa);
+	mRot.RotateX(params.doubles.beta);
+	initVector = mRot.RotateVector(initVector);
+
 	params.doubles.zoom = 1e-7;
-	params.doubles.vp.x = 10;
-	params.doubles.vp.y = -10;
-	params.doubles.vp.z = -10;
-	params.doubles.alfa = 45 * 2 * M_PI / 360.0;
-	params.doubles.beta = 38 * 2 * M_PI / 360.0;
-	params.doubles.persp = 1.2;
-	params.doubles.max_y = 10.0 / params.doubles.zoom;
+	params.doubles.vp = initVector;
+	params.doubles.viewDistanceMax = initCameraDistance + objectSize;
 
 	char distanceString[1000];
 	double distance = CalculateDistance(params.doubles.vp, params.fractal);
@@ -1644,4 +1648,40 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 			fclose(fileSettings);
 		}
 	}
+}
+
+double ScanFractal(sParamRender *params, CVector3 direction)
+{
+
+	double result = 0;
+	double distStep;
+	sFractal calcParams = params->fractal;
+	for (double scan = 100.0; scan > 0; scan -= distStep)
+	{
+		CVector3 point = direction * scan;
+		double dist = CalculateDistance(point, calcParams);
+		if (dist < params->doubles.resolution / params->doubles.quality)
+		{
+			result = scan;
+			return result;
+		}
+		distStep = dist * 0.1;
+		if(distStep>1) distStep = 1.0;
+	}
+	return 0.0;
+}
+
+double ScanSizeOfFractal(sParamRender *params)
+{
+	double maxDist = 0.0;
+	double dist;
+
+	for(int i=0; i<100; i++)
+	{
+		CVector3 direction(Random(1000)/500.0-1.0, Random(1000)/500.0-1.0, Random(1000)/500.0-1.0);
+		direction.Normalize();
+		dist = ScanFractal(params, direction);
+		maxDist = (dist > maxDist) ? dist : maxDist;
+	}
+	return maxDist;
 }

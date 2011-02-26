@@ -1227,7 +1227,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buMoveRight = gtk_button_new();
 	Interface.buForward = gtk_button_new_with_label("Forward");
 	Interface.buBackward = gtk_button_new_with_label("backward");
-	Interface.buInitNavigator = gtk_button_new_with_label("Init 3D Navigator");
+	Interface.buInitNavigator = gtk_button_new_with_label("Reset view");
 	Interface.buAnimationRecordTrack = gtk_button_new_with_label("Record path");
 	Interface.buAnimationContinueRecord = gtk_button_new_with_label("Continue recording");
 	Interface.buAnimationRenderTrack = gtk_button_new_with_label("Render animation");
