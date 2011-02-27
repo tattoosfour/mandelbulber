@@ -1,1 +1,2 @@
-xcopy .mandelbulber "%USERPROFILE%\.mandelbulber\" /e
+ren "%USERPROFILE%\.mandelbulber" mandelbulber
+xcopy mandelbulber "%USERPROFILE%\mandelbulber\" /e

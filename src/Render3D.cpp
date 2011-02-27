@@ -1171,7 +1171,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+#ifdef WIN32 /* WINDOWS */
+	sprintf(data_directory, "%s/mandelbulber", homedir);
+#else
 	sprintf(data_directory, "%s/.mandelbulber", homedir);
+#endif
 	printf("Default data directory: %s\n", data_directory);
 
 	strcpy(lastFilenameSettings, "settings/default.fract");

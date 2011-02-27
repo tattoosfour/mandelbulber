@@ -39,7 +39,6 @@
 <option id="gnu.cpp.link.option.libs.919575554" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="jpeg"/>
 <listOptionValue builtIn="false" value="png"/>
-<listOptionValue builtIn="false" value="sndfile"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1456504419" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
