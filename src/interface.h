@@ -524,7 +524,7 @@ struct sDialogFiles
 	GtkWidget *boxFileEnvMap;
 	GtkWidget *boxFileAmbient;
 	GtkWidget *boxFileKeyframes;
-	GtkWidget *boxFileSound;
+	//GtkWidget *boxFileSound;
 
 	GtkWidget *table_edits;
 	GtkWidget *label_destination;
@@ -533,7 +533,7 @@ struct sDialogFiles
 	GtkWidget *label_background;
 	GtkWidget *label_path;
 	GtkWidget *label_keyframes;
-	GtkWidget *label_fileSound;
+	//GtkWidget *label_fileSound;
 
 	GtkWidget *edit_destination;
 	GtkWidget *edit_envmap;
@@ -550,7 +550,7 @@ struct sDialogFiles
 	GtkWidget *bu_select_background;
 	GtkWidget *bu_select_path;
 	GtkWidget *bu_select_keyframes;
-	GtkWidget *bu_select_sound;
+	//GtkWidget *bu_select_sound;
 };
 
 struct sTimelineInterface

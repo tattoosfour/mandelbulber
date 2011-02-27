@@ -1406,7 +1406,7 @@ void MainRender(void)
 	//placing random Lights
 	if (lightsPlaced == 0)
 	{
-		PlaceRandomLights(&fractParam);
+		PlaceRandomLights(&fractParam, false);
 		WriteLog("Lights placed");
 	}
 	printf("Lights placed\n");
@@ -1697,6 +1697,8 @@ void MainRender(void)
 		CreateFormulaSequence(fractParam.fractal);
 		WriteLog("Formula sequence created");
 
+		PlaceRandomLights(&fractParam, true);
+
 		if (!noGUI)
 		{
 			if (fractParam.animMode) WriteInterface(&fractParam);
@@ -1909,7 +1911,7 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 		programClosed = false;
 		isPostRendering = false;
 
-		PlaceRandomLights(&fractParamLoaded);
+		PlaceRandomLights(&fractParamLoaded, false);
 
 		Render(fractParamLoaded, miniImage, NULL);
 	}
