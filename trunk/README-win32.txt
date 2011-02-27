@@ -1,4 +1,4 @@
-MANDELBULBER 0.98 - win32
+MANDELBULBER 0.99 - win32
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman

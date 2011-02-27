@@ -1,5 +1,13 @@
 Version history
 
+v0.99
+- added equirectangular projection for making 360 degree panoramic views
+- much improved function "Init 3D navigator". It checks real size of fractal and moves the camera according to actual rotation angle and FOV, so there will be visible whole fractal. The function was renamed to "Reset view"
+- position of auxiliary lights can be set using mouse pointer
+- added possibility of rendering flying light sources in keyframe animation mode
+- fixed bug: possible to change visibility of lightsources after rendering. Lights didn't disappear after pressing "Apply changes" button
+- fixed bug: in Windows version default folder was renamed from ".mandelbulber" to "mandelbulber". There was problem with dot in file name on Win7
+
 v0.98
 - added preview for settings files in Load Settings dialog window
 - improved quality of Depth of Field effect
