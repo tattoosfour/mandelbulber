@@ -37,7 +37,7 @@ sShaderOutput MainSpecular(CVector3 normal, CVector3 lightVector, CVector3 viewV
 sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture);
 sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, sLight light, double wsp_persp, double dist_thresh,
 		int number, sShaderOutput *outSpecular, bool accurate);
-void PlaceRandomLights(sParamRender *fractParams);
+void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
 void PostRenderingLights(cImage *image, sParamRender *fractParam);
 void RenderBuddhabrot(sParamRender *fractParam);
 #endif /* SHADERS_H_ */

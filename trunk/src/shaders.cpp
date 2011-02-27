@@ -313,60 +313,64 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	return shading;
 }
 
-void PlaceRandomLights(sParamRender *fractParams)
+void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined)
 {
 	srand(fractParams->auxLightRandomSeed);
 
-	delete[] Lights;
-	Lights = new sLight[fractParams->auxLightNumber + 4];
-
+	if(!onlyPredefined)
+	{
+		delete[] Lights;
+		Lights = new sLight[fractParams->auxLightNumber + 4];
+	}
 	sFractal calcParam = fractParams->fractal;
 	bool max_iter;
 
 	int trial_number = 0;
 	double radius_multiplier = 1.0;
 
-	printf("3: Number of lights = %d\n", fractParams->auxLightNumber);
 
-	for (int i = 0; i < fractParams->auxLightNumber; i++)
+	if(!onlyPredefined)
 	{
-		trial_number++;
-
-		CVector3 random;
-		random.x = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
-		random.y = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
-		random.z = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
-
-		CVector3 position = fractParams->doubles.auxLightRandomCenter + random * fractParams->doubles.auxLightDistributionRadius * radius_multiplier;
-
-		double distance = CalculateDistance(position, calcParam, &max_iter);
-
-		if (trial_number > 1000)
+	for (int i = 0; i < fractParams->auxLightNumber; i++)
 		{
-			radius_multiplier *= 1.1;
-			trial_number = 0;
-		}
+			trial_number++;
 
-		if (distance > 0 && !max_iter && distance < fractParams->doubles.auxLightMaxDist * radius_multiplier)
-		{
-			radius_multiplier = 1.0;
+			CVector3 random;
+			random.x = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
+			random.y = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
+			random.z = (Random(2000000) / 1000000.0 - 1.0) + (Random(1000000) / 1.0e12);
 
-			Lights[i].position = position;
+			CVector3 position = fractParams->doubles.auxLightRandomCenter + random * fractParams->doubles.auxLightDistributionRadius * radius_multiplier;
 
-			sRGB colour = { 20000 + Random(80000), 20000 + Random(80000), 20000 + Random(80000) };
-			double maxColour = dMax(colour.R, colour.G, colour.B);
-			colour.R = colour.R * 65536.0 / maxColour;
-			colour.G = colour.G * 65536.0 / maxColour;
-			colour.B = colour.B * 65536.0 / maxColour;
-			Lights[i].colour = colour;
+			double distance = CalculateDistance(position, calcParam, &max_iter);
 
-			Lights[i].intensity = distance * distance / fractParams->doubles.auxLightMaxDist;
-			Lights[i].enabled = true;
-			printf("Light no. %d: x=%f, y=%f, z=%f, distance=%f\n", i, position.x, position.y, position.z, distance);
-		}
-		else
-		{
-			i--;
+			if (trial_number > 1000)
+			{
+				radius_multiplier *= 1.1;
+				trial_number = 0;
+			}
+
+			if (distance > 0 && !max_iter && distance < fractParams->doubles.auxLightMaxDist * radius_multiplier)
+			{
+				radius_multiplier = 1.0;
+
+				Lights[i].position = position;
+
+				sRGB colour = { 20000 + Random(80000), 20000 + Random(80000), 20000 + Random(80000) };
+				double maxColour = dMax(colour.R, colour.G, colour.B);
+				colour.R = colour.R * 65536.0 / maxColour;
+				colour.G = colour.G * 65536.0 / maxColour;
+				colour.B = colour.B * 65536.0 / maxColour;
+				Lights[i].colour = colour;
+
+				Lights[i].intensity = distance * distance / fractParams->doubles.auxLightMaxDist;
+				Lights[i].enabled = true;
+				printf("Light no. %d: x=%f, y=%f, z=%f, distance=%f\n", i, position.x, position.y, position.z, distance);
+			}
+			else
+			{
+				i--;
+			}
 		}
 	}
 

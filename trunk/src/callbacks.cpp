@@ -212,7 +212,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 							params.doubles.auxLightRandomCenter = vector2 + params.doubles.vp;
 						}
 						WriteInterface(&params);
-						PlaceRandomLights(&params);
+						PlaceRandomLights(&params, false);
 					}
 				}
 			}
@@ -430,6 +430,7 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 	if (!isRendering)
 	{
 		mainImage.CompileImage();
+		PostRenderingLights(&mainImage, &params);
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
@@ -590,7 +591,7 @@ void PressedOkDialogFiles(GtkWidget *widget, gpointer data)
 	strcpy(Interface_data.file_lightmap, gtk_entry_get_text(GTK_ENTRY(dialog->edit_lightmap)));
 	strcpy(Interface_data.file_path, gtk_entry_get_text(GTK_ENTRY(dialog->edit_path)));
 	strcpy(Interface_data.file_keyframes, gtk_entry_get_text(GTK_ENTRY(dialog->edit_keyframes)));
-	strcpy(Interface_data.file_sound, gtk_entry_get_text(GTK_ENTRY(dialog->edit_sound)));
+	//strcpy(Interface_data.file_sound, gtk_entry_get_text(GTK_ENTRY(dialog->edit_sound)));
 
 	gtk_widget_destroy(dialog->window_files);
 	delete dialog;
@@ -1041,7 +1042,7 @@ void PressedDistributeLights(GtkWidget *widget, gpointer data)
 	sParamRender fractParams;
 	ReadInterface(&fractParams);
 	undoBuffer.SaveUndo(&fractParams);
-	PlaceRandomLights(&fractParams);
+	PlaceRandomLights(&fractParams, false);
 }
 
 void RecalculateIFSParams(sFractal &fractal)

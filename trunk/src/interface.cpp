@@ -78,11 +78,11 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 
 	dialog->label_destination = gtk_label_new("Destination image sequnce");
 	dialog->label_background = gtk_label_new("Background");
-	dialog->label_envmap = gtk_label_new("Environment map (512x512)");
-	dialog->label_lightmap = gtk_label_new("Ambient occlusion color map (512x512)");
+	dialog->label_envmap = gtk_label_new("Environment map");
+	dialog->label_lightmap = gtk_label_new("Ambient occlusion color map");
 	dialog->label_path = gtk_label_new("Animation path");
 	dialog->label_keyframes = gtk_label_new("Keyframe sequence");
-	dialog->label_fileSound = gtk_label_new("Sound file (*.wav)");
+	//dialog->label_fileSound = gtk_label_new("Sound file (*.wav)");
 
 	dialog->edit_destination = gtk_entry_new();
 	dialog->edit_background = gtk_entry_new();
@@ -90,7 +90,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	dialog->edit_lightmap = gtk_entry_new();
 	dialog->edit_path = gtk_entry_new();
 	dialog->edit_keyframes = gtk_entry_new();
-	dialog->edit_sound = gtk_entry_new();
+	//dialog->edit_sound = gtk_entry_new();
 
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_destination), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_background), 100);
@@ -98,7 +98,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_lightmap), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_path), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_keyframes), 100);
-	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_sound), 100);
+	//gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_sound), 100);
 
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_destination), Interface_data.file_destination);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_background), Interface_data.file_background);
@@ -106,7 +106,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_lightmap), Interface_data.file_lightmap);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_path), Interface_data.file_path);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_keyframes), Interface_data.file_keyframes);
-	gtk_entry_set_text(GTK_ENTRY(dialog->edit_sound), Interface_data.file_sound);
+	//gtk_entry_set_text(GTK_ENTRY(dialog->edit_sound), Interface_data.file_sound);
 
 	dialog->bu_cancel = gtk_button_new_with_label("Cancel");
 	dialog->bu_ok = gtk_button_new_with_label("OK");
@@ -116,7 +116,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	dialog->bu_select_lightmap = gtk_button_new_with_label("Select");
 	dialog->bu_select_path = gtk_button_new_with_label("Select");
 	dialog->bu_select_keyframes = gtk_button_new_with_label("Select");
-	dialog->bu_select_sound = gtk_button_new_with_label("Select");
+	//dialog->bu_select_sound = gtk_button_new_with_label("Select");
 
 	g_signal_connect(G_OBJECT(dialog->bu_ok), "clicked", G_CALLBACK(PressedOkDialogFiles), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_cancel), "clicked", G_CALLBACK(PressedCancelDialogFiles), dialog);
@@ -126,7 +126,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	g_signal_connect(G_OBJECT(dialog->bu_select_lightmap), "clicked", G_CALLBACK(PressedSelectLightmap), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_select_path), "clicked", G_CALLBACK(PressedSelectFlightPath), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_select_keyframes), "clicked", G_CALLBACK(PressedSelectKeyframes), dialog);
-	g_signal_connect(G_OBJECT(dialog->bu_select_sound), "clicked", G_CALLBACK(PressedSelectSound), dialog);
+	//g_signal_connect(G_OBJECT(dialog->bu_select_sound), "clicked", G_CALLBACK(PressedSelectSound), dialog);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_destination, 0, 1, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_background, 0, 1, 1, 2);
@@ -134,7 +134,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_lightmap, 0, 1, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_path, 0, 1, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_keyframes, 0, 1, 5, 6);
-	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_fileSound, 0, 1, 6, 7);
+	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_fileSound, 0, 1, 6, 7);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_destination, 1, 2, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_background, 1, 2, 1, 2);
@@ -142,7 +142,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_lightmap, 1, 2, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_path, 1, 2, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_keyframes, 1, 2, 5, 6);
-	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_sound, 1, 2, 6, 7);
+	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_sound, 1, 2, 6, 7);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_destination, 2, 3, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_background, 2, 3, 1, 2);
@@ -150,7 +150,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_lightmap, 2, 3, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_path, 2, 3, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_keyframes, 2, 3, 5, 6);
-	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_sound, 2, 3, 6, 7);
+	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_sound, 2, 3, 6, 7);
 
 	gtk_box_pack_start(GTK_BOX(dialog->box_main), dialog->table_edits, false, false, 1);
 
@@ -1528,7 +1528,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.98\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.99\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");
