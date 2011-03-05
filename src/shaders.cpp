@@ -121,8 +121,8 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 	{
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
-		double delta = dist_thresh * 0.01;
-		if(calcParam->interiorMode) delta = dist_thresh * 0.1;
+		double delta = dist_thresh * param->doubles.smoothness;
+		if(calcParam->interiorMode) delta = dist_thresh * 0.2;
 
 		double s1, s2, s3, s4;
 		calcParam->N = param->fractal.N * 2;
@@ -161,7 +161,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 			{
 				for (point2.z = -1.0; point2.z <= 1.0; point2.z += 0.2)
 				{
-					point3 = point + point2 * dist_thresh;
+					point3 = point + point2 * dist_thresh * param->doubles.smoothness;
 
 					double dist = CalculateDistance(point3, *calcParam, &max_iter);
 

@@ -45,6 +45,7 @@ struct sParamRenderD
 	double resolution; //resolution of image in fractal coordinates
 	double persp; //perspective factor
 	double quality; //DE threshold factor
+	double smoothness;
 	double alfa; //rotation of fractal
 	double beta; //
 	double gamma;

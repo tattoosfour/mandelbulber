@@ -1,5 +1,8 @@
 Version history
 
+v0.991
+- fixed problem with decreased quality of images. Added "smoothness" parameter.
+
 v0.99
 - added equirectangular projection for making 360 degree panoramic views
 - much improved function "Init 3D navigator". It checks real size of fractal and moves the camera according to actual rotation angle and FOV, so there will be visible whole fractal. The function was renamed to "Reset view"

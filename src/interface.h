@@ -404,6 +404,7 @@ struct sInterface
 	GtkWidget *edit_FractalConstantFactor;
 	GtkWidget *edit_FoldingIntPowZFactor;
 	GtkWidget *edit_FoldingIntPowFoldingFactor;
+	GtkWidget *edit_roughness;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
