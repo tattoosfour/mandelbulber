@@ -188,6 +188,7 @@ void SaveSettings(char *filename, const sParamRender& params, sParamSpecial *spe
 	fprintf(fileSettings, "minN %d;\n", params.fractal.minN);
 	fprintfDot(fileSettings, "fractal_constant_factor", params.fractal.doubles.constantFactor, &special->fractalConstantFactor);
 	fprintfDot(fileSettings, "quality", params.doubles.quality, &special->quality);
+	fprintfDot(fileSettings, "smoothness", params.doubles.smoothness);
 	fprintf(fileSettings, "julia_mode %d;\n", params.fractal.juliaMode);
 	fprintfDot(fileSettings, "julia_a", params.fractal.doubles.julia.x, &special->juliaX);
 	fprintfDot(fileSettings, "julia_b", params.fractal.doubles.julia.y, &special->juliaY);
@@ -539,6 +540,7 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 				else if (!strcmp(str1, "minN")) params.fractal.minN = atoi(str2);
 				else if (!strcmp(str1, "fractal_constant_factor")) params.fractal.doubles.constantFactor = atof2(str2, locale_dot, &special->fractalConstantFactor);
 				else if (!strcmp(str1, "quality")) params.doubles.quality = atof2(str2, locale_dot, &special->quality);
+				else if (!strcmp(str1, "smoothness")) params.doubles.smoothness = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "julia_mode")) params.fractal.juliaMode = atoi(str2);
 				else if (!strcmp(str1, "julia_a")) params.fractal.doubles.julia.x = atof2(str2, locale_dot, &special->juliaX);
 				else if (!strcmp(str1, "julia_b")) params.fractal.doubles.julia.y = atof2(str2, locale_dot, &special->juliaY);
@@ -794,9 +796,9 @@ bool LoadSettings(char *filename, sParamRender &params, sParamSpecial *special, 
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 299)
+		if (lineCounter != 300)
 		{
-			printf("number of lines in settings file (should be 299): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 300): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -881,6 +883,7 @@ void DefaultValues(sParamRender &params)
 	params.background_color2.B = 59901;
 	params.doubles.persp = 0.5; //perspective factor
 	params.doubles.quality = 1.0; //DE threshold factor
+	params.doubles.smoothness = 1.0;
 	params.doubles.alfa = -20 * M_PI / 180.0; //rotation of fractal
 	params.doubles.beta = 30 * M_PI / 180.0;
 	params.doubles.gamma = 0 * M_PI / 180.0;

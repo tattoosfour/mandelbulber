@@ -285,6 +285,7 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)), &special->persp);
 		params->doubles.DE_factor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_stepFactor)), &special->DE_factor);
 		params->doubles.quality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_thresh)), &special->quality);
+		params->doubles.smoothness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_roughness)));
 		params->fractal.N = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_maxN)));
 		params->fractal.minN = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_minN)));
 		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)), &special->power);
@@ -652,6 +653,7 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_persp), DoubleToString(params->doubles.persp, &special->persp));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_stepFactor), DoubleToString(params->doubles.DE_factor, &special->DE_factor));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), DoubleToString(params->doubles.quality, &special->quality));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_roughness), DoubleToString(params->doubles.smoothness));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_maxN), IntToString(params->fractal.N));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_minN), IntToString(params->fractal.minN));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power, &special->power));
@@ -1304,6 +1306,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_FoldingIntPowZFactor = gtk_entry_new();
 	Interface.edit_DE_thresh = gtk_entry_new();
 	Interface.edit_DE_stepFactor = gtk_entry_new();
+	Interface.edit_roughness = gtk_entry_new();
 	Interface.edit_imageWidth = gtk_entry_new();
 	Interface.edit_imageHeight = gtk_entry_new();
 	Interface.edit_ambient = gtk_entry_new();
@@ -1528,7 +1531,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 0.99\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 0.991\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL\n"
 		"www: http://sourceforge.net/projects/mandelbulber/");
@@ -1749,10 +1752,11 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxQuality, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Maximum iterations:", 5, Interface.edit_maxN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Minimum iterations:", 5, Interface.edit_minN), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Max. iterations:", 5, Interface.edit_maxN), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Min. iterations:", 5, Interface.edit_minN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail level:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Smoothness:", 5, Interface.edit_roughness), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
