@@ -1918,5 +1918,12 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 		PlaceRandomLights(&fractParamLoaded, false);
 
 		Render(fractParamLoaded, miniImage, NULL);
+
+		delete fractParamLoaded.backgroundTexture;
+		WriteLog("Released memory for background texture");
+		delete fractParamLoaded.envmapTexture;
+		WriteLog("Released memory for envmap texture");
+		delete fractParamLoaded.lightmapTexture;
+		WriteLog("Released memory for lightmap texture");
 	}
 }
