@@ -5,6 +5,8 @@
  *      Author: krzysztof
  */
 
+#include <math.h>
+#include <stdio.h>
 #include "morph.hpp"
 
 CMorph::CMorph(int size, int recordSize)
@@ -61,7 +63,38 @@ void CMorph::CatmullRom(int frame, double *destData)
 		if (key < count - 2) v4 = dataSets[key + 2][i];
 		else v4 = dataSets[count - 1][i];
 
+		bool logaritmic = false;
+		bool negative = false;
+		if ((v1 > 0 && v2 > 0 && v3 > 0 && v4 > 0) || (v1 < 0 && v2 < 0 && v3 < 0 && v4 < 0))
+		{
+			if(v1<0) negative = true;
+			//double totalVariation = (fabs(v2 - v1) + fabs(v3 - v2) + fabs(v4 - v3)) / 3.0;
+			double average = (v1 + v2 + v3 + v4)/4.0;
+			if (average > 0)
+			{
+				//double var1 = fabs(v2 - v1) / totalVariation;
+				//double var2 = fabs(v3 - v2) / totalVariation;
+				//double var3 = fabs(v4 - v3) / totalVariation;
+				double deviation = (fabs(v2 - v1) + fabs(v3 - v2) + fabs(v4 - v3))/average;
+				//if (var1 < 0.2 || var2 < 0.2 || var3 < 0.2)
+				if(deviation>0.1)
+				{
+					printf("v1 = %g, v2 = %g, v3 = %g, v4 = %g, ",v1,v2,v3,v4);
+					v1 = log(fabs(v1));
+					v2 = log(fabs(v2));
+					v3 = log(fabs(v3));
+					v4 = log(fabs(v4));
+					logaritmic = true;
+				}
+			}
+		}
 		double value = 0.5 * ((2 * v2) + (-v1 + v3) * factor + (2 * v1 - 5 * v2 + 4 * v3 - v4) * factor2 + (-v1 + 3 * v2 - 3 * v3 + v4) * factor3);
+		if(logaritmic)
+		{
+			if(negative) value = -exp(value);
+			else value = exp(value);
+			printf("val = %g\n",value);
+		}
 		output[i]=value;
 		destData[i] = output[i];
 	}
