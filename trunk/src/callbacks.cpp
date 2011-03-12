@@ -131,8 +131,8 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 
 				if (y < 1e19)
 				{
-					double persp_factor = 1.0 + y * params.doubles.persp;
 					CVector3 vector, vector2;
+					double persp_factor = 1.0 + y * params.doubles.persp;
 					double y2 = y;
 					if (perspectiveType == fishEye)
 					{
@@ -156,8 +156,12 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface))) delta_y = 0;
 						else delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
 
-						if(clickMode == 1) y2 = ((y - delta_y) * params.doubles.zoom);
-						else if(clickMode >= 5) y2 = y * params.doubles.zoom - lightPlacementDistance;
+						if (clickMode == 1) y2 = ((y - delta_y) * params.doubles.zoom);
+						else if (clickMode >= 5)
+						{
+							y2 = y * params.doubles.zoom - lightPlacementDistance;
+							persp_factor = 1.0 + y2 * params.doubles.persp / params.doubles.zoom;
+						}
 						vector.x = x2 * persp_factor;
 						vector.y = y2;
 						vector.z = z2 * persp_factor;
