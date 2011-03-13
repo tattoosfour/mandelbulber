@@ -525,6 +525,8 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		if (formula == 13) params->fractal.formula = foldingIntPow2;
 		if (formula == 14) params->fractal.formula = hybrid;
 
+		CheckPrameters(params);
+
 		for (int i = 0; i < HYBRID_COUNT; ++i)
 			params->fractal.hybridFormula[i] = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
 
@@ -2512,3 +2514,14 @@ void InterfaceData2Params(sParamRender *dest)
 	strcpy(dest->file_sound, Interface_data.file_sound);
 }
 
+void CheckPrameters(sParamRender *params)
+{
+	if(params->doubles.zoom <= 1e-15) params->doubles.zoom = 1e-15;
+	if(params->doubles.DE_factor <= 0.0001) params->doubles.DE_factor = 0.0001;
+	if(params->doubles.smoothness <= 0.00001) params->doubles.smoothness = 0.00001;
+	if(params->doubles.persp <= 0.001) params->doubles.persp = 0.001;
+	if(params->globalIlumQuality >=30) params->globalIlumQuality = 30;
+	if(params->globalIlumQuality <=1) params->globalIlumQuality = 1;
+	if(params->image_width < 32) params->image_width = 32;
+	if(params->image_height < 32) params->image_height = 32;
+}
