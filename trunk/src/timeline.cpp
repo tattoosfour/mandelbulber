@@ -230,6 +230,7 @@ void cTimeline::RebulidTimelineWindow(void)
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "expose-event", GTK_SIGNAL_FUNC(thumbnail_expose), NULL);
 		gtk_signal_connect(GTK_OBJECT(timelineInterface.darea[i]), "button_press_event", GTK_SIGNAL_FUNC(PressedKeyframeThumbnail), NULL);
 		gtk_widget_add_events(timelineInterface.darea[i], GDK_BUTTON_PRESS_MASK);
+		gtk_widget_queue_draw(timelineInterface.table);
 	}
 }
 
