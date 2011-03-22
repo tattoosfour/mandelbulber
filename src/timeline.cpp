@@ -77,8 +77,8 @@ int cTimeline::Initialize(char *keyframesPath)
 			keyframeCount = numberOfKeyframes;
 			return numberOfKeyframes;
 		}
+		gtk_widget_queue_draw(timelineInterface.table);
 	}
-	gtk_widget_queue_draw(timelineInterface.table);
 
 	gtk_widget_set_sensitive(timelineInterface.buAnimationDeleteKeyframe, true);
 	gtk_widget_set_sensitive(timelineInterface.buAnimationInsertKeyframe, true);
@@ -173,7 +173,7 @@ void cTimeline::CreateInterface(int numberOfKeyframes)
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), timelineInterface.buRefresh, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(timelineInterface.boxButtons), CreateEdit("0", "Key no.:", 5, timelineInterface.editAnimationKeyNumber), true, true, 1);
 
-	gtk_box_pack_start(GTK_BOX(timelineInterface.boxMain), timelineInterface.boxButtons, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(timelineInterface.boxMain), timelineInterface.boxButtons, false, false, 1);
 
 	timelineInterface.scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	timelineInterface.windowHadjustment = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(timelineInterface.scrolledWindow));
@@ -264,6 +264,7 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 		keyframeCount++;
 	}
 	DisplayInDrawingArea(index, timelineInterface.darea[index]);
+	gtk_widget_queue_draw(timelineInterface.table);
 }
 
 void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
@@ -286,6 +287,7 @@ void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
 		database->DeleteRecord(index);
 		Resize(keyframeCount - 1);
 		keyframeCount--;
+		gtk_widget_queue_draw(timelineInterface.table);
 	}
 }
 
