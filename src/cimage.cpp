@@ -119,7 +119,10 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float
 		int color_number = (int) (colorIndex * adj.coloring_speed + 256 * adj.paletteOffset) % 65536;
 		color = IndexToColour(color_number);
 	}
-	double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
+	//double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
+	double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * (pixel.shadowsBuf16 / 4096.0 * adj.directLight) * (1.0 - adj.ambient) + adj.ambient;
+	if (zBuf > 1e19) jasSuma1 = 0;
+
 	double jasSuma2 = (adj.specular * pixel.specularBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
 
 	jasSuma1 *= adj.mainLightIntensity;
