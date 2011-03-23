@@ -345,6 +345,11 @@ void StartRendering(GtkWidget *widget, gpointer data)
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
 
+	char distanceString[1000];
+	double distance = CalculateDistance(params.doubles.vp, params.fractal);
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\n", distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+
 	Interface_data.animMode = false;
 	Interface_data.playMode = false;
 	Interface_data.recordMode = false;
@@ -683,8 +688,7 @@ static void Move(int x, int y, int z)
 	}
 	else
 	{
-		if (z < 0) distance = last_navigator_step;
-		else distance = CalculateDistance(params.doubles.vp, params.fractal) * speed;
+		distance = CalculateDistance(params.doubles.vp, params.fractal) * speed;
 	}
 
 	if (z > 0) last_navigator_step = distance;
