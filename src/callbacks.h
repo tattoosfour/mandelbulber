@@ -87,6 +87,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data);
 void DeleteTimelineWindow(GtkWidget *widget, gpointer data);
 void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer);
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data);
+void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data);
 void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer);

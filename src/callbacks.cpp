@@ -1404,6 +1404,12 @@ void PressedSelectBackground(GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new("Select background image...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
+	GtkWidget *preview;
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_widget_set_size_request(preview, 256, 256);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewImageDialog), preview);
+
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), Interface_data.file_background);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -1423,6 +1429,12 @@ void PressedSelectEnvmap(GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new("Select environment map image...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
+	GtkWidget *preview;
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_widget_set_size_request(preview, 256, 256);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewImageDialog), preview);
+
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), Interface_data.file_envmap);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -1441,6 +1453,12 @@ void PressedSelectLightmap(GtkWidget *widget, gpointer data)
 	GtkWidget *dialog;
 	dialog = gtk_file_chooser_dialog_new("Select image with light map for ambient occlusion...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL,
 			GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	GtkWidget *preview;
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_widget_set_size_request(preview, 256, 256);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewImageDialog), preview);
 
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), Interface_data.file_lightmap);
 
@@ -1589,6 +1607,12 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new("Please select image to grab colour palette...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL,
 			GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
+	GtkWidget *preview;
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_widget_set_size_request(preview, 256, 256);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewImageDialog), preview);
+
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), lastFilenamePalette);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -1691,6 +1715,54 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 				gtk_file_chooser_set_preview_widget_active(file_chooser, true);
 			}
 			fclose(fileSettings);
+		}
+	}
+}
+
+void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data)
+{
+	GtkWidget *preview;
+	preview = GTK_WIDGET(data);
+
+	int size = 256;
+
+	char *filename;
+	filename = gtk_file_chooser_get_preview_filename(file_chooser);
+
+	if (FileIfExist(filename))
+	{
+		cTexture *image = new cTexture(filename);
+
+		if (image->IsLoaded())
+		{
+			int iw = image->Width();
+			int ih = image->Height();
+			double scale;
+			if (iw > ih)
+			{
+				scale = (double)iw / size;
+			}
+			else
+			{
+				scale = (double)ih / size;
+			}
+
+			sRGB8 *smallImage = new sRGB8[size * size];
+			memset(smallImage, 0, sizeof(sRGB8) * size * size);
+
+			for (int y = 0; y < size; y++)
+			{
+				for (int x = 0; x < size; x++)
+				{
+					double x2 = (x - size / 2) * scale + iw / 2.0;
+					double y2 = (y - size / 2) * scale + ih / 2.0;
+					sRGB8 pixel = image->Pixel(x2, y2);
+					smallImage[x + y * size] = pixel;
+				}
+			}
+			gdk_draw_rgb_image(preview->window, preview->style->fg_gc[GTK_STATE_NORMAL], 0, 0, size, size, GDK_RGB_DITHER_MAX, (guchar*) smallImage, size * 3);
+			delete image;
+			delete[] smallImage;
 		}
 	}
 }
