@@ -175,7 +175,8 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 
 						char distanceString[1000];
 						double distance = CalculateDistance(params.doubles.vp, params.fractal);
-						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
+						double key_distance = (params.doubles.vp - last_keyframe_position).Length();
+						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", distance, key_distance);
 						gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 						WriteInterface(&params);
