@@ -79,7 +79,6 @@ void CMorph::CatmullRom(int frame, double *destData)
 				//if (var1 < 0.2 || var2 < 0.2 || var3 < 0.2)
 				if(deviation>0.1)
 				{
-					printf("v1 = %g, v2 = %g, v3 = %g, v4 = %g, ",v1,v2,v3,v4);
 					v1 = log(fabs(v1));
 					v2 = log(fabs(v2));
 					v3 = log(fabs(v3));
@@ -93,7 +92,6 @@ void CMorph::CatmullRom(int frame, double *destData)
 		{
 			if(negative) value = -exp(value);
 			else value = exp(value);
-			printf("val = %g\n",value);
 		}
 		output[i]=value;
 		destData[i] = output[i];
