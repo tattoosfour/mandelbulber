@@ -20,7 +20,7 @@ enum enumFractalFormula
 {
 	none = 0,
 	trig_DE = 1,
-	trig = 2,
+	trig_optim = 2,
 	fast_trig = 3,
 	hypercomplex = 4,
 	quaternion = 5,
