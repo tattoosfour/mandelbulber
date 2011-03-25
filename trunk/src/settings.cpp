@@ -915,7 +915,7 @@ void DefaultValues(sParamRender &params)
 		params.fractal.hybridIters[i] = 1;
 		params.fractal.doubles.hybridPower[i] = 2;
 	}
-	params.fractal.hybridFormula[HYBRID_COUNT - 1] = trig;
+	params.fractal.hybridFormula[HYBRID_COUNT - 1] = trig_optim;
 	params.fractal.hybridCyclic = false;
 
 	params.fractal.mandelbox.doubles.colorFactorX = 0.03;

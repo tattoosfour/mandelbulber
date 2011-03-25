@@ -171,9 +171,9 @@ double atofData(const gchar *text)
 
 enumFractalFormula FormulaNumberGUI2Data(int formula)
 {
-	enumFractalFormula formula2 = trig;
+	enumFractalFormula formula2 = trig_optim;
 	if (formula == 0) formula2 = none;
-	if (formula == 1) formula2 = trig;
+	if (formula == 1) formula2 = trig_optim;
 	if (formula == 2) formula2 = fast_trig;
 	if (formula == 3) formula2 = minus_fast_trig;
 	if (formula == 4) formula2 = xenodreambuie;
@@ -193,7 +193,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 {
 	int formula2 = 0;
 	if (formula == none) formula2 = 0;
-	if (formula == trig) formula2 = 1;
+	if (formula == trig_optim) formula2 = 1;
 	if (formula == fast_trig) formula2 = 2;
 	if (formula == minus_fast_trig) formula2 = 3;
 	if (formula == xenodreambuie) formula2 = 4;
@@ -441,7 +441,7 @@ void ReadInterface(sParamRender *params)
 		params->effectColours.mainLightColour.B = color.blue;
 
 		int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
-		if (formula == 0) params->fractal.formula = trig;
+		if (formula == 0) params->fractal.formula = trig_optim;
 		if (formula == 1) params->fractal.formula = trig_DE;
 		if (formula == 2) params->fractal.formula = fast_trig;
 		if (formula == 3) params->fractal.formula = minus_fast_trig;
@@ -511,7 +511,7 @@ void ReadInterface(sParamRender *params)
 
 	}
 
-	if (params->fractal.formula == trig_DE || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic || params->fractal.formula == tglad)
+	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic || params->fractal.formula == tglad)
 		params->fractal.analitycDE = true;
 	else
 		params->fractal.analitycDE = false;
@@ -731,7 +731,7 @@ void WriteInterface(sParamRender *params)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), params->perspectiveType);
 
 	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
-	if (params->fractal.formula == trig) formula = 0;
+	if (params->fractal.formula == trig_optim) formula = 0;
 	if (params->fractal.formula == trig_DE) formula = 1;
 	if (params->fractal.formula == fast_trig) formula = 2;
 	if (params->fractal.formula == minus_fast_trig) formula = 3;
@@ -809,7 +809,7 @@ void WriteInterface(sParamRender *params)
 void AddComboTextsFractalFormula(GtkComboBox *combo)
 {
 	gtk_combo_box_append_text(combo, "None");
-	gtk_combo_box_append_text(combo, "Trigonometric");
+	gtk_combo_box_append_text(combo, "Mandelbulb");
 	gtk_combo_box_append_text(combo, "Polynomic power 2");
 	gtk_combo_box_append_text(combo, "Polynomic power 2 - minus z");
 	gtk_combo_box_append_text(combo, "Xenodreambuie's formula");
@@ -1326,8 +1326,8 @@ void CreateInterface(sParamRender *default_settings)
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Trigonometric");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Trigonometric with calculation of analytic DE");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbulb");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbulb - Daniel White's");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Polynomic power 2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Polynomic power 2 - minus z");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Xenodreambuie's formula");

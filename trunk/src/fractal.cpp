@@ -193,13 +193,18 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case trig:
+			case trig_optim:
 			{
-				double rp = pow(r, p);
-				double th = z.GetAlfa();
-				double ph = -z.GetBeta();
-				CVector3 rot(p * th, p * ph);
-				z = rot * rp + constant;
+				//optimisation based on: http://www.fractalforums.com/mandelbulb-implementation/realtime-renderingoptimisations/
+				double th0 = asin(z.z / r);
+				double ph0 = atan2(z.y, z.x);
+				double rp = pow(r, p - 1.0);
+				double th = th0 * p;
+				double ph = ph0 * p;
+				double cth = cos(th);
+				r_dz = rp * r_dz * p + 1.0;
+				rp *= r;
+				z = CVector3(cth * cos(ph), cth * sin(ph), sin(th)) * rp + constant;
 				r = z.Length();
 				break;
 			}
@@ -620,7 +625,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 		{
 			if (Mode == normal) //condition for all other trigonometric and hypercomplex fractals
 			{
-				if (r > 1e15)
+				if (r > 1e4)
 				{
 					distance = 0.5 * r * log(r) / r_dz;
 					break;
