@@ -471,10 +471,9 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		sParamRender fractParamLoaded;
-		sParamSpecial fractParamSpecial;
-		LoadSettings(filename, fractParamLoaded, &fractParamSpecial);
+		LoadSettings(filename, fractParamLoaded);
 		Params2InterfaceData(&fractParamLoaded);
-		WriteInterface(&fractParamLoaded, &fractParamSpecial);
+		WriteInterface(&fractParamLoaded);
 
 		strcpy(lastFilenameSettings, filename);
 		char windowTitle[1000];
@@ -501,9 +500,8 @@ void PressedSaveSettings(GtkWidget *widget, gpointer data)
 		char *filename;
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		sParamRender fractParamToSave;
-		sParamSpecial fractParamSpecial;
-		ReadInterface(&fractParamToSave, &fractParamSpecial);
-		SaveSettings(filename, fractParamToSave, &fractParamSpecial);
+		ReadInterface(&fractParamToSave);
+		SaveSettings(filename, fractParamToSave);
 
 		strcpy(lastFilenameSettings, filename);
 		char windowTitle[1000];
@@ -1158,7 +1156,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		LoadSettings(filename2, fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
@@ -1212,7 +1210,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		LoadSettings(filename2, fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
@@ -1254,7 +1252,7 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		LoadSettings(filename2, fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
@@ -1293,7 +1291,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, NULL, true);
+		LoadSettings(filename2, fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		WriteInterface(&fractParamLoaded);

@@ -635,17 +635,17 @@ extern char lastFilenamePalette[1000];
 extern GtkWidget *timeLineWindow;
 
 //functions
-char* DoubleToString(double value, sAddData *addData = 0);
+char* DoubleToString(double value);
 char* IntToString(int value);
 GtkWidget* CreateEdit(const gchar *text, const gchar *txt_label, int size, GtkWidget *edit);
 GtkWidget* CreateWidgetWithLabel(const gchar *txt_label, GtkWidget *widget);
 void CreateInterface(sParamRender *default_settings);
-void ReadInterface(sParamRender *params, sParamSpecial *special = 0);
-void WriteInterface(sParamRender *params, sParamSpecial *special = 0);
+void ReadInterface(sParamRender *params);
+void WriteInterface(sParamRender *params);
 void CreateFilesDialog(GtkWidget *widget, gpointer data);
 void CreateTooltips(void);
 bool ReadComandlineParams(int argc, char *argv[]);
-double atofData(const gchar* text, sAddData *addData = 0);
+double atofData(const gchar* text);
 void AddComboTextsFractalFormula(GtkComboBox *combo);
 enumFractalFormula FormulaNumberGUI2Data(int formula);
 int FormulaNumberData2GUI(enumFractalFormula formula);

@@ -46,7 +46,7 @@ double real_clock(void);
 void MainRender(void);
 void *MainThread(void *ptr);
 void Render(sParamRender param, cImage *image, GtkWidget *outputDarea);
-void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial);
+void InitMainParameters(sParamRender *fractParam);
 void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
 bool LoadTextures(sParamRender *params);
 void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode);
