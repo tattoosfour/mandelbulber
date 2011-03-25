@@ -163,63 +163,9 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_widget_show_all(dialog->window_files);
 }
 
-double atofData(const gchar *text, sAddData *addData)
+double atofData(const gchar *text)
 {
 	double retval = atof(text);
-
-	if (addData != 0)
-	{
-		char text2[1000];
-		strcpy(text2, text);
-
-		char testmode[1000];
-		strcpy(testmode, "null");
-		double testamp;
-		sscanf(text2, "%s %lg", testmode, &testamp);
-		if (!strcmp(testmode, "null"))
-		{
-			addData->mode = soundNone;
-			addData->amp = 0;
-			addData->active = true;
-		}
-		else if (!strcmp(testmode, "s0"))
-		{
-			addData->mode = soundEnvelope;
-			addData->amp = testamp;
-			addData->active = true;
-		}
-		else if (!strcmp(testmode, "sa"))
-		{
-			addData->mode = soundA;
-			addData->amp = testamp;
-			addData->active = true;
-		}
-		else if (!strcmp(testmode, "sb"))
-		{
-			addData->mode = soundB;
-			addData->amp = testamp;
-			addData->active = true;
-		}
-		else if (!strcmp(testmode, "sc"))
-		{
-			addData->mode = soundC;
-			addData->amp = testamp;
-			addData->active = true;
-		}
-		else if (!strcmp(testmode, "sd"))
-		{
-			addData->mode = soundD;
-			addData->amp = testamp;
-			addData->active = true;
-		}
-		else
-		{
-			addData->mode = soundNone;
-			addData->amp = 0;
-			addData->active = false;
-			retval = atof(text);
-		}
-	}
 	return retval;
 }
 
@@ -264,42 +210,35 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 }
 
 //read data from interface
-void ReadInterface(sParamRender *params, sParamSpecial *special)
+void ReadInterface(sParamRender *params)
 {
-	bool freeSpecial = false;
-	if (special == 0)
-	{
-		special = new sParamSpecial;
-			freeSpecial = true;
-	}
-
 	if (!noGUI)
 	{
-		params->doubles.vp.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_va)), &special->vpX);
-		params->doubles.vp.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vb)), &special->vpY);
-		params->doubles.vp.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vc)), &special->vpZ);
-		params->doubles.alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_alfa)), &special->alfa) / 180.0 * M_PI;
-		params->doubles.beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_beta)), &special->beta) / 180.0 * M_PI;
-		params->doubles.gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gammaAngle)), &special->gamma) / 180.0 * M_PI;
-		params->doubles.zoom = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_zoom)), &special->zoom);
-		params->doubles.persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)), &special->persp);
-		params->doubles.DE_factor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_stepFactor)), &special->DE_factor);
-		params->doubles.quality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_thresh)), &special->quality);
+		params->doubles.vp.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_va)));
+		params->doubles.vp.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vb)));
+		params->doubles.vp.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vc)));
+		params->doubles.alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_alfa))) / 180.0 * M_PI;
+		params->doubles.beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_beta))) / 180.0 * M_PI;
+		params->doubles.gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gammaAngle))) / 180.0 * M_PI;
+		params->doubles.zoom = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_zoom)));
+		params->doubles.persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+		params->doubles.DE_factor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_stepFactor)));
+		params->doubles.quality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_thresh)));
 		params->doubles.smoothness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_roughness)));
 		params->fractal.N = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_maxN)));
 		params->fractal.minN = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_minN)));
-		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)), &special->power);
+		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)));
 		params->image_width = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth)));
 		params->image_height = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight)));
-		params->doubles.imageAdjustments.brightness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)), &special->brightness);
-		params->doubles.imageAdjustments.imageGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gamma)), &special->imageGamma);
-		params->doubles.imageAdjustments.ambient = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient)), &special->ambient);
-		params->doubles.imageAdjustments.globalIlum = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient_occlusion)), &special->globalIlum);
-		params->doubles.imageAdjustments.glow_intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_glow)), &special->glow_intensity);
-		params->doubles.imageAdjustments.reflect = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_reflect)), &special->reflect);
-		params->doubles.imageAdjustments.shading = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shading)), &special->shading);
-		params->doubles.imageAdjustments.directLight = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shadows)), &special->directLight);
-		params->doubles.imageAdjustments.specular = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_specular)), &special->specular);
+		params->doubles.imageAdjustments.brightness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)));
+		params->doubles.imageAdjustments.imageGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gamma)));
+		params->doubles.imageAdjustments.ambient = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient)));
+		params->doubles.imageAdjustments.globalIlum = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient_occlusion)));
+		params->doubles.imageAdjustments.glow_intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_glow)));
+		params->doubles.imageAdjustments.reflect = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_reflect)));
+		params->doubles.imageAdjustments.shading = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shading)));
+		params->doubles.imageAdjustments.directLight = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shadows)));
+		params->doubles.imageAdjustments.specular = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_specular)));
 		params->global_ilumination = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion));
 		params->fastGlobalIllumination = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion));
 		params->globalIlumQuality = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_AmbientOcclusionQuality)));
@@ -308,26 +247,26 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->fractal.juliaMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkJulia));
 		params->slowShading = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading));
 		params->textured_background = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground));
-		params->fractal.doubles.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)), &special->juliaX);
-		params->fractal.doubles.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)), &special->juliaY);
-		params->fractal.doubles.julia.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_c)), &special->juliaZ);
-		params->fractal.doubles.amin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amin)), &special->amin);
-		params->fractal.doubles.amax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amax)), &special->amax);
-		params->fractal.doubles.bmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmin)), &special->bmin);
-		params->fractal.doubles.bmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmax)), &special->bmax);
-		params->fractal.doubles.cmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmin)), &special->cmin);
-		params->fractal.doubles.cmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmax)), &special->cmax);
+		params->fractal.doubles.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)));
+		params->fractal.doubles.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)));
+		params->fractal.doubles.julia.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_c)));
+		params->fractal.doubles.amin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amin)));
+		params->fractal.doubles.amax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_amax)));
+		params->fractal.doubles.bmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmin)));
+		params->fractal.doubles.bmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_bmax)));
+		params->fractal.doubles.cmin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmin)));
+		params->fractal.doubles.cmax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cmax)));
 		params->fractal.limits_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkLimits));
 		params->imageSwitches.coloringEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkColoring));
 		params->coloring_seed = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_seed)));
-		params->doubles.imageAdjustments.coloring_speed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_speed)), &special->coloring_speed);
+		params->doubles.imageAdjustments.coloring_speed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_speed)));
 		params->fractal.tgladFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode));
 		params->fractal.sphericalFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSphericalFoldingMode));
 		params->fractal.IFS.foldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode));
-		params->fractal.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_1)), &special->foldingLimit);
-		params->fractal.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_2)), &special->foldingValue);
-		params->fractal.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_1)), &special->foldingSphericalFixed);
-		params->fractal.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_2)), &special->foldingSphericalMin);
+		params->fractal.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_1)));
+		params->fractal.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tglad_folding_2)));
+		params->fractal.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_1)));
+		params->fractal.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_2)));
 		params->imageSwitches.fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
 		params->doubles.imageAdjustments.fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
 		params->doubles.imageAdjustments.fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
@@ -336,45 +275,45 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
 		params->doubles.DOFFocus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
 		params->doubles.DOFRadius = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius));
-		params->doubles.imageAdjustments.mainLightIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightIntensity)), &special->mainLightIntensity);
-		params->doubles.auxLightIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightIntensity)), &special->auxLightIntensity);
+		params->doubles.imageAdjustments.mainLightIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightIntensity)));
+		params->doubles.auxLightIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightIntensity)));
 		params->auxLightRandomSeed = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomSeed)));
 		params->auxLightNumber = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightNumber)));
-		params->doubles.auxLightMaxDist = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightMaxDist)), &special->auxLightMaxDist);
-		params->doubles.auxLightDistributionRadius = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightDistributionRadius)), &special->auxLightDistributionRadius);
-		params->doubles.auxLightPre1.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1x)), &special->auxLightPre1X);
-		params->doubles.auxLightPre1.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1y)), &special->auxLightPre1Y);
-		params->doubles.auxLightPre1.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1z)), &special->auxLightPre1Z);
-		params->doubles.auxLightPre1intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1intensity)), &special->auxLightPre1intensity);
-		params->doubles.auxLightPre2.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2x)), &special->auxLightPre2X);
-		params->doubles.auxLightPre2.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2y)), &special->auxLightPre2Y);
-		params->doubles.auxLightPre2.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2z)), &special->auxLightPre2Z);
-		params->doubles.auxLightPre2intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2intensity)), &special->auxLightPre2intensity);
-		params->doubles.auxLightPre3.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3x)), &special->auxLightPre3X);
-		params->doubles.auxLightPre3.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3y)), &special->auxLightPre3Y);
-		params->doubles.auxLightPre3.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3z)), &special->auxLightPre3Z);
-		params->doubles.auxLightPre3intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3intensity)), &special->auxLightPre3intensity);
-		params->doubles.auxLightPre4.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4x)), &special->auxLightPre4X);
-		params->doubles.auxLightPre4.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4y)), &special->auxLightPre4Y);
-		params->doubles.auxLightPre4.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4z)), &special->auxLightPre4Z);
-		params->doubles.auxLightPre4intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4intensity)), &special->auxLightPre4intensity);
+		params->doubles.auxLightMaxDist = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightMaxDist)));
+		params->doubles.auxLightDistributionRadius = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightDistributionRadius)));
+		params->doubles.auxLightPre1.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1x)));
+		params->doubles.auxLightPre1.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1y)));
+		params->doubles.auxLightPre1.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1z)));
+		params->doubles.auxLightPre1intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre1intensity)));
+		params->doubles.auxLightPre2.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2x)));
+		params->doubles.auxLightPre2.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2y)));
+		params->doubles.auxLightPre2.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2z)));
+		params->doubles.auxLightPre2intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre2intensity)));
+		params->doubles.auxLightPre3.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3x)));
+		params->doubles.auxLightPre3.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3y)));
+		params->doubles.auxLightPre3.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3z)));
+		params->doubles.auxLightPre3intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre3intensity)));
+		params->doubles.auxLightPre4.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4x)));
+		params->doubles.auxLightPre4.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4y)));
+		params->doubles.auxLightPre4.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4z)));
+		params->doubles.auxLightPre4intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPre4intensity)));
 		params->auxLightPre1Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre1Enabled));
 		params->auxLightPre2Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre2Enabled));
 		params->auxLightPre3Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre3Enabled));
 		params->auxLightPre4Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre4Enabled));
-		params->doubles.auxLightVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightVisibility)), &special->auxLightVisibility);
-		params->doubles.mainLightAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa)), &special->mainLightAlfa) / 180.0 * M_PI;
-		params->doubles.mainLightBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightBeta)), &special->mainLightBeta) / 180.0 * M_PI;
+		params->doubles.auxLightVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightVisibility)));
+		params->doubles.mainLightAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa))) / 180.0 * M_PI;
+		params->doubles.mainLightBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightBeta))) / 180.0 * M_PI;
 		params->doubles.auxLightRandomCenter.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX)));
 		params->doubles.auxLightRandomCenter.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY)));
 		params->doubles.auxLightRandomCenter.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreZ)));
-		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)), &special->IFSScale);
-		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa)), &special->IFSRotationAlfa) / 180.0 * M_PI;
-		params->fractal.IFS.doubles.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta)), &special->IFSRotationBeta) / 180.0 * M_PI;
-		params->fractal.IFS.doubles.rotationGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSGamma)), &special->IFSRotationGamma) / 180.0 * M_PI;
-		params->fractal.IFS.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetX)), &special->IFSOffsetX);
-		params->fractal.IFS.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetY)), &special->IFSOffsetY);
-		params->fractal.IFS.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetZ)), &special->IFSOffsetZ);
+		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)));
+		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa))) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta))) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.rotationGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSGamma))) / 180.0 * M_PI;
+		params->fractal.IFS.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetX)));
+		params->fractal.IFS.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetY)));
+		params->fractal.IFS.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetZ)));
 		params->fractal.IFS.absX = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsX));
 		params->fractal.IFS.absY = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsY));
 		params->fractal.IFS.absZ = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ));
@@ -394,52 +333,45 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 		params->doubles.soundFPS = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_soundFPS)));
 		for (int i = 0; i < HYBRID_COUNT; ++i) {
 			params->fractal.hybridIters[i] = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridIter[i])));
-			params->fractal.doubles.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])), &special->hybridPower[i]);
+			params->fractal.doubles.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])));
 		}
 		params->fractal.hybridCyclic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic));
 		params->perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
-		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)), &special->stereoEyeDistance);
+		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)));
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
-		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)), &special->viewDistanceMin);
-		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)), &special->viewDistanceMax);
+		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)));
+		params->doubles.viewDistanceMax = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMaxDistance)));
 		params->fractal.interiorMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode));
-		params->fractal.doubles.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)), &special->fractalConstantFactor);
+		params->fractal.doubles.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)));
 		params->fractal.dynamicDEcorrection = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode));
 		params->fractal.linearDEmode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode));
 
 		params->fractal.mandelbox.rotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
-		params->fractal.mandelbox.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)), &special->mandelboxFoldingLimit);
-		params->fractal.mandelbox.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)), &special->mandelboxFoldingValue);
-		params->fractal.mandelbox.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)), &special->mandelboxFoldingSphericalFixed);
-		params->fractal.mandelbox.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)), &special->mandelboxFoldingSphericalMin);
+		params->fractal.mandelbox.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)));
+		params->fractal.mandelbox.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)));
+		params->fractal.mandelbox.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)));
+		params->fractal.mandelbox.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)));
 
 		for (int component = 0; component < 3; ++component)
 			params->fractal.mandelbox.doubles.rotationMain[component] = atofData(gtk_entry_get_text(GTK_ENTRY(
-							Interface.edit_mandelboxRotationMain[component])), &special->mandelboxRotationMain[component]) / 180.0 * M_PI;
+							Interface.edit_mandelboxRotationMain[component]))) / 180.0 * M_PI;
 
 		for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 			for (int axis = 0; axis < 3; ++axis)
 				for (int component = 0; component < 3; ++component)
 					params->fractal.mandelbox.doubles.rotation[fold][axis][component] = atofData(
-						gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component])),
-						&special->mandelboxRotation[fold][axis][component]) / 180.0 * M_PI;
+						gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component]))) / 180.0 * M_PI;
 
-		params->fractal.mandelbox.doubles.colorFactorR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR)), &special->mandelboxColorFactorR);
-		params->fractal.mandelbox.doubles.colorFactorX = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX)), &special->mandelboxColorFactorX);
-		params->fractal.mandelbox.doubles.colorFactorY = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY)), &special->mandelboxColorFactorY);
-		params->fractal.mandelbox.doubles.colorFactorZ = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ)), &special->mandelboxColorFactorZ);
-		params->fractal.mandelbox.doubles.colorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)), &special->mandelboxColorFactorSp1);
-		params->fractal.mandelbox.doubles.colorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)), &special->mandelboxColorFactorSp2);
-		params->fractal.mandelbox.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)), &special->mandelboxScale);
+		params->fractal.mandelbox.doubles.colorFactorR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR)));
+		params->fractal.mandelbox.doubles.colorFactorX = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX)));
+		params->fractal.mandelbox.doubles.colorFactorY = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY)));
+		params->fractal.mandelbox.doubles.colorFactorZ = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ)));
+		params->fractal.mandelbox.doubles.colorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)));
+		params->fractal.mandelbox.doubles.colorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)));
+		params->fractal.mandelbox.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)));
 
 		params->image_width = (params->image_width/8)*8;
 		params->image_height = (params->image_height/8)*8;
-
-		special->paletteOffset.active = false;
-		special->fogVisibility.active = false;
-		special->fogVisibilityFront.active = false;
-		special->DOFFocus.active = false;
-		special->DOFRadius.active = false;
 
 		for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 		{
@@ -604,26 +536,12 @@ void ReadInterface(sParamRender *params, sParamSpecial *special)
 
 	RecalculateIFSParams(params->fractal);
 	CreateFormulaSequence(params->fractal);
-
-	if (freeSpecial) delete special;
 }
 
-char* DoubleToString(double value, sAddData *addData)
+char* DoubleToString(double value)
 {
 	static char text[100];
 	sprintf(text, "%.16lg", value);
-
-	if (addData != 0 && addData->active == true)
-	{
-		char *symbol;
-		if (addData->mode == soundEnvelope) symbol = (char*) "s0";
-		if (addData->mode == soundA) symbol = (char*) "sa";
-		if (addData->mode == soundB) symbol = (char*) "sb";
-		if (addData->mode == soundC) symbol = (char*) "sc";
-		if (addData->mode == soundD) symbol = (char*) "sd";
-		sprintf(text, "%s %.16lg", symbol, addData->amp);
-	}
-
 	return text;
 }
 
@@ -635,92 +553,84 @@ IntToString(int value)
 	return text;
 }
 
-void WriteInterface(sParamRender *params, sParamSpecial *special)
+void WriteInterface(sParamRender *params)
 {
-	bool freeSpecial = false;
-	if (special == 0)
-	{
-		special = new sParamSpecial;
-		freeSpecial = true;
-		memset(special, 0, sizeof(sParamSpecial));
-	}
-
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_va), DoubleToString(params->doubles.vp.x, &special->vpX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vb), DoubleToString(params->doubles.vp.y, &special->vpY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vc), DoubleToString(params->doubles.vp.z, &special->vpZ));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_alfa), DoubleToString(params->doubles.alfa * 180.0 / M_PI, &special->alfa));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_beta), DoubleToString(params->doubles.beta * 180.0 / M_PI, &special->beta));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gammaAngle), DoubleToString(params->doubles.gamma * 180.0 / M_PI, &special->gamma));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_zoom), DoubleToString(params->doubles.zoom, &special->zoom));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_persp), DoubleToString(params->doubles.persp, &special->persp));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_stepFactor), DoubleToString(params->doubles.DE_factor, &special->DE_factor));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), DoubleToString(params->doubles.quality, &special->quality));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_va), DoubleToString(params->doubles.vp.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vb), DoubleToString(params->doubles.vp.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vc), DoubleToString(params->doubles.vp.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_alfa), DoubleToString(params->doubles.alfa * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_beta), DoubleToString(params->doubles.beta * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gammaAngle), DoubleToString(params->doubles.gamma * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_zoom), DoubleToString(params->doubles.zoom));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_persp), DoubleToString(params->doubles.persp));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_stepFactor), DoubleToString(params->doubles.DE_factor));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), DoubleToString(params->doubles.quality));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_roughness), DoubleToString(params->doubles.smoothness));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_maxN), IntToString(params->fractal.N));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_minN), IntToString(params->fractal.minN));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power, &special->power));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(params->image_width));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageHeight), IntToString(params->image_height));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_brightness), DoubleToString(params->doubles.imageAdjustments.brightness, &special->brightness));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gamma), DoubleToString(params->doubles.imageAdjustments.imageGamma, &special->imageGamma));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_ambient), DoubleToString(params->doubles.imageAdjustments.ambient, &special->ambient));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_ambient_occlusion), DoubleToString(params->doubles.imageAdjustments.globalIlum, &special->globalIlum));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_glow), DoubleToString(params->doubles.imageAdjustments.glow_intensity, &special->glow_intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_reflect), DoubleToString(params->doubles.imageAdjustments.reflect, &special->reflect));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shading), DoubleToString(params->doubles.imageAdjustments.shading, &special->shading));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shadows), DoubleToString(params->doubles.imageAdjustments.directLight, &special->directLight));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_specular), DoubleToString(params->doubles.imageAdjustments.specular, &special->specular));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_brightness), DoubleToString(params->doubles.imageAdjustments.brightness));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gamma), DoubleToString(params->doubles.imageAdjustments.imageGamma));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_ambient), DoubleToString(params->doubles.imageAdjustments.ambient));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_ambient_occlusion), DoubleToString(params->doubles.imageAdjustments.globalIlum));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_glow), DoubleToString(params->doubles.imageAdjustments.glow_intensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_reflect), DoubleToString(params->doubles.imageAdjustments.reflect));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shading), DoubleToString(params->doubles.imageAdjustments.shading));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shadows), DoubleToString(params->doubles.imageAdjustments.directLight));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_specular), DoubleToString(params->doubles.imageAdjustments.specular));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_AmbientOcclusionQuality), IntToString(params->globalIlumQuality));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_a), DoubleToString(params->fractal.doubles.julia.x, &special->juliaX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_b), DoubleToString(params->fractal.doubles.julia.y, &special->juliaY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_c), DoubleToString(params->fractal.doubles.julia.z, &special->juliaZ));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amin), DoubleToString(params->fractal.doubles.amin, &special->amin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amax), DoubleToString(params->fractal.doubles.amax, &special->amax));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmin), DoubleToString(params->fractal.doubles.bmin, &special->bmin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmax), DoubleToString(params->fractal.doubles.bmax, &special->bmax));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmin), DoubleToString(params->fractal.doubles.cmin, &special->cmin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmax), DoubleToString(params->fractal.doubles.cmax, &special->cmax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_a), DoubleToString(params->fractal.doubles.julia.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_b), DoubleToString(params->fractal.doubles.julia.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_julia_c), DoubleToString(params->fractal.doubles.julia.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amin), DoubleToString(params->fractal.doubles.amin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_amax), DoubleToString(params->fractal.doubles.amax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmin), DoubleToString(params->fractal.doubles.bmin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_bmax), DoubleToString(params->fractal.doubles.bmax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmin), DoubleToString(params->fractal.doubles.cmin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmax), DoubleToString(params->fractal.doubles.cmax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(params->coloring_seed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_speed), DoubleToString(params->doubles.imageAdjustments.coloring_speed, &special->coloring_speed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_1), DoubleToString(params->fractal.doubles.foldingLimit, &special->foldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_2), DoubleToString(params->fractal.doubles.foldingValue, &special->foldingValue));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_1), DoubleToString(params->fractal.doubles.foldingSphericalFixed, &special->foldingSphericalFixed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_2), DoubleToString(params->fractal.doubles.foldingSphericalMin, &special->foldingSphericalMin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightIntensity), DoubleToString(params->doubles.imageAdjustments.mainLightIntensity, &special->mainLightIntensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightIntensity), DoubleToString(params->doubles.auxLightIntensity, &special->auxLightIntensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_speed), DoubleToString(params->doubles.imageAdjustments.coloring_speed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_1), DoubleToString(params->fractal.doubles.foldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_2), DoubleToString(params->fractal.doubles.foldingValue));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_1), DoubleToString(params->fractal.doubles.foldingSphericalFixed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_2), DoubleToString(params->fractal.doubles.foldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightIntensity), DoubleToString(params->doubles.imageAdjustments.mainLightIntensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightIntensity), DoubleToString(params->doubles.auxLightIntensity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomSeed), IntToString(params->auxLightRandomSeed));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightNumber), IntToString(params->auxLightNumber));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightMaxDist), DoubleToString(params->doubles.auxLightMaxDist, &special->auxLightMaxDist));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightDistributionRadius), DoubleToString(params->doubles.auxLightDistributionRadius, &special->auxLightDistributionRadius));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1x), DoubleToString(params->doubles.auxLightPre1.x, &special->auxLightPre1X));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1y), DoubleToString(params->doubles.auxLightPre1.y, &special->auxLightPre1Y));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1z), DoubleToString(params->doubles.auxLightPre1.z, &special->auxLightPre1Z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1intensity), DoubleToString(params->doubles.auxLightPre1intensity, &special->auxLightPre1intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2x), DoubleToString(params->doubles.auxLightPre2.x, &special->auxLightPre2X));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2y), DoubleToString(params->doubles.auxLightPre2.y, &special->auxLightPre2Y));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2z), DoubleToString(params->doubles.auxLightPre2.z, &special->auxLightPre2Z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2intensity), DoubleToString(params->doubles.auxLightPre2intensity, &special->auxLightPre2intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3x), DoubleToString(params->doubles.auxLightPre3.x, &special->auxLightPre3X));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3y), DoubleToString(params->doubles.auxLightPre3.y, &special->auxLightPre3Y));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3z), DoubleToString(params->doubles.auxLightPre3.z, &special->auxLightPre3Z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3intensity), DoubleToString(params->doubles.auxLightPre3intensity, &special->auxLightPre3intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4x), DoubleToString(params->doubles.auxLightPre4.x, &special->auxLightPre4X));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4y), DoubleToString(params->doubles.auxLightPre4.y, &special->auxLightPre4Y));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4z), DoubleToString(params->doubles.auxLightPre4.z, &special->auxLightPre4Z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4intensity), DoubleToString(params->doubles.auxLightPre4intensity, &special->auxLightPre4intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlfa * 180.0 / M_PI, &special->mainLightAlfa));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightBeta), DoubleToString(params->doubles.mainLightBeta * 180.0 / M_PI, &special->mainLightBeta));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightVisibility), DoubleToString(params->doubles.auxLightVisibility, &special->auxLightVisibility));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightMaxDist), DoubleToString(params->doubles.auxLightMaxDist));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightDistributionRadius), DoubleToString(params->doubles.auxLightDistributionRadius));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1x), DoubleToString(params->doubles.auxLightPre1.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1y), DoubleToString(params->doubles.auxLightPre1.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1z), DoubleToString(params->doubles.auxLightPre1.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre1intensity), DoubleToString(params->doubles.auxLightPre1intensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2x), DoubleToString(params->doubles.auxLightPre2.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2y), DoubleToString(params->doubles.auxLightPre2.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2z), DoubleToString(params->doubles.auxLightPre2.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre2intensity), DoubleToString(params->doubles.auxLightPre2intensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3x), DoubleToString(params->doubles.auxLightPre3.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3y), DoubleToString(params->doubles.auxLightPre3.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3z), DoubleToString(params->doubles.auxLightPre3.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre3intensity), DoubleToString(params->doubles.auxLightPre3intensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4x), DoubleToString(params->doubles.auxLightPre4.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4y), DoubleToString(params->doubles.auxLightPre4.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4z), DoubleToString(params->doubles.auxLightPre4.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4intensity), DoubleToString(params->doubles.auxLightPre4intensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlfa * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightBeta), DoubleToString(params->doubles.mainLightBeta * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightVisibility), DoubleToString(params->doubles.auxLightVisibility));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX), DoubleToString(params->doubles.auxLightRandomCenter.x));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY), DoubleToString(params->doubles.auxLightRandomCenter.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreZ), DoubleToString(params->doubles.auxLightRandomCenter.z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSScale), DoubleToString(params->fractal.IFS.doubles.scale, &special->IFSScale));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSAlfa), DoubleToString(params->fractal.IFS.doubles.rotationAlfa * 180.0 / M_PI, &special->IFSRotationAlfa));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSBeta), DoubleToString(params->fractal.IFS.doubles.rotationBeta * 180.0 / M_PI, &special->IFSRotationBeta));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSGamma), DoubleToString(params->fractal.IFS.doubles.rotationGamma * 180.0 / M_PI, &special->IFSRotationGamma));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetX), DoubleToString(params->fractal.IFS.doubles.offset.x, &special->IFSOffsetX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetY), DoubleToString(params->fractal.IFS.doubles.offset.y, &special->IFSOffsetY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetZ), DoubleToString(params->fractal.IFS.doubles.offset.z, &special->IFSOffsetZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSScale), DoubleToString(params->fractal.IFS.doubles.scale));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSAlfa), DoubleToString(params->fractal.IFS.doubles.rotationAlfa * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSBeta), DoubleToString(params->fractal.IFS.doubles.rotationBeta * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSGamma), DoubleToString(params->fractal.IFS.doubles.rotationGamma * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetX), DoubleToString(params->fractal.IFS.doubles.offset.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetY), DoubleToString(params->fractal.IFS.doubles.offset.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetZ), DoubleToString(params->fractal.IFS.doubles.offset.z));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationStartFrame), IntToString(params->startFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationEndFrame), IntToString(params->endFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationFramesPerKey), IntToString(params->framesPerKeyframe));
@@ -735,34 +645,34 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound4FreqMax), IntToString(params->soundBand4Max));
 	for (int i = 0; i < HYBRID_COUNT; ++i) {
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridIter[i]), IntToString(params->fractal.hybridIters[i]));
-		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridPower[i]), DoubleToString(params->fractal.doubles.hybridPower[i], &special->hybridPower[i]));
+		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridPower[i]), DoubleToString(params->fractal.doubles.hybridPower[i]));
 	}
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_stereoDistance), DoubleToString(params->doubles.stereoEyeDistance, &special->stereoEyeDistance));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR), DoubleToString(params->fractal.mandelbox.doubles.colorFactorR, &special->mandelboxColorFactorR));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX), DoubleToString(params->fractal.mandelbox.doubles.colorFactorX, &special->mandelboxColorFactorX));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY), DoubleToString(params->fractal.mandelbox.doubles.colorFactorY, &special->mandelboxColorFactorY));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ), DoubleToString(params->fractal.mandelbox.doubles.colorFactorZ, &special->mandelboxColorFactorZ));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp1, &special->mandelboxColorFactorSp1));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp2, &special->mandelboxColorFactorSp2));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit), DoubleToString(params->fractal.mandelbox.doubles.foldingLimit, &special->mandelboxFoldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->fractal.mandelbox.doubles.foldingValue, &special->mandelboxFoldingLimit));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalFixed, &special->mandelboxFoldingSphericalFixed));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalMin, &special->mandelboxFoldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_stereoDistance), DoubleToString(params->doubles.stereoEyeDistance));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorR), DoubleToString(params->fractal.mandelbox.doubles.colorFactorR));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorX), DoubleToString(params->fractal.mandelbox.doubles.colorFactorX));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorY), DoubleToString(params->fractal.mandelbox.doubles.colorFactorY));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorZ), DoubleToString(params->fractal.mandelbox.doubles.colorFactorZ));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp1));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2), DoubleToString(params->fractal.mandelbox.doubles.colorFactorSp2));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit), DoubleToString(params->fractal.mandelbox.doubles.foldingLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->fractal.mandelbox.doubles.foldingValue));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalFixed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalMin));
 
 	for (int component = 0; component < 3; ++component)
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMain[component]), DoubleToString(
-					params->fractal.mandelbox.doubles.rotationMain[component] * 180.0 / M_PI, &special->mandelboxRotationMain[component]));
+					params->fractal.mandelbox.doubles.rotationMain[component] * 180.0 / M_PI));
 
 	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
 		for (int axis = 0; axis < 3; ++axis)
 			for (int component = 0; component < 3; ++component)
 				gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component]),
-						DoubleToString(params->fractal.mandelbox.doubles.rotation[fold][axis][component] * 180.0 / M_PI, &special->mandelboxRotation[fold][axis][component]));
+						DoubleToString(params->fractal.mandelbox.doubles.rotation[fold][axis][component] * 180.0 / M_PI));
 
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->fractal.mandelbox.doubles.scale, &special->mandelboxScale));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax, &special->viewDistanceMax));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin, &special->viewDistanceMin));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->fractal.doubles.constantFactor, &special->fractalConstantFactor));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxScale), DoubleToString(params->fractal.mandelbox.doubles.scale));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMaxDistance), DoubleToString(params->doubles.viewDistanceMax));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_viewMinDistance), DoubleToString(params->doubles.viewDistanceMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FractalConstantFactor), DoubleToString(params->fractal.doubles.constantFactor));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowFoldingFactor), DoubleToString(params->fractal.doubles.FoldingIntPowFoldFactor));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowZFactor), DoubleToString(params->fractal.doubles.FoldingIntPowZfactor));
 
@@ -892,8 +802,6 @@ void WriteInterface(sParamRender *params, sParamSpecial *special)
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorMainLight), &color);
 
 	DrawPalette(params->palette);
-
-	if (freeSpecial) delete special;
 }
 
 void AddComboTextsFractalFormula(GtkComboBox *combo)

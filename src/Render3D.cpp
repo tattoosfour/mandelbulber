@@ -1246,14 +1246,14 @@ int main(int argc, char *argv[])
 }
 
 //Init parameters
-void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
+void InitMainParameters(sParamRender *fractParam)
 {
 	WriteLog("Memory allocated for fractal parameters");
 
 	//reading parameters from interface
 	if (!noGUI)
 	{
-		ReadInterface(fractParam, fractSpecial);
+		ReadInterface(fractParam);
 		printf("Data has been read from interface\n");
 		WriteLog("Data got from interface");
 	}
@@ -1261,7 +1261,7 @@ void InitMainParameters(sParamRender *fractParam, sParamSpecial *fractSpecial)
 	{
 		memcpy(fractParam, &noGUIdata.fractparams, sizeof(sParamRender));
 		Params2InterfaceData(&noGUIdata.fractparams);
-		ReadInterface(fractParam, fractSpecial);
+		ReadInterface(fractParam);
 		Interface_data.imageFormat = noGUIdata.imageFormat;
 		WriteLog("Data got from interface");
 	}
@@ -1386,14 +1386,13 @@ void MainRender(void)
 
 	//allocating memory for fractal parameters
 	sParamRender fractParam;
-	sParamSpecial fractSpecial;
 
 	if (noGUI)
 	{
 		mainImage.SetPalette(noGUIdata.fractparams.palette);
 	}
 
-	InitMainParameters(&fractParam, &fractSpecial);
+	InitMainParameters(&fractParam);
 
 	if (!LoadTextures(&fractParam)) return;
 
@@ -1492,7 +1491,7 @@ void MainRender(void)
 			IndexFilename(filename2, fractParam.file_keyframes, (char*) "fract", keyNumber);
 
 			sParamRender fractParamLoaded;
-			LoadSettings(filename2, fractParamLoaded, NULL, true);
+			LoadSettings(filename2, fractParamLoaded, true);
 			WriteLogDouble("Keyframe loaded", keyNumber);
 
 			morphParamRender.AddData(keyNumber, (double*) &fractParamLoaded.doubles);
@@ -1706,7 +1705,7 @@ void MainRender(void)
 		if (!noGUI)
 		{
 			if (fractParam.animMode) WriteInterface(&fractParam);
-			else WriteInterface(&fractParam, &fractSpecial);
+			else WriteInterface(&fractParam);
 			WriteLog("GUI data refreshed");
 		}
 
@@ -1885,7 +1884,7 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 	if (FileIfExist(settingsFile))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(settingsFile, fractParamLoaded, NULL, true);
+		LoadSettings(settingsFile, fractParamLoaded, true);
 
 		if (mode == 1)
 		{

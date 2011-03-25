@@ -393,7 +393,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		if (FileIfExist(filename2))
 		{
 			sParamRender fractParamLoaded;
-			LoadSettings(filename2, fractParamLoaded, NULL, true);
+			LoadSettings(filename2, fractParamLoaded, true);
 			KeepOtherSettings(&fractParamLoaded);
 			WriteInterface(&fractParamLoaded);
 			last_keyframe_position = fractParamLoaded.doubles.vp;
