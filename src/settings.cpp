@@ -975,21 +975,25 @@ void DefaultValues(sParamRender &params)
 
 void KeepOtherSettings(sParamRender *params)
 {
-	smart_ptr<double> doublesParamRender(new double[sizeof(sParamRenderD)]);
-	smart_ptr<double> doublesFractal(new double[sizeof(sFractalD)]);
-	smart_ptr<double> doublesMandelbox(new double[sizeof(sFractalMandelboxD)]);
-	smart_ptr<double> doublesIFS(new double[sizeof(sFractalIFSD)]);
+	double *doublesParamRender = new double[sizeof(sParamRenderD)];
+	double *doublesFractal = new double[sizeof(sFractalD)];
+	double *doublesMandelbox = new double[sizeof(sFractalMandelboxD)];
+	double *doublesIFS = new double[sizeof(sFractalIFSD)];
 
-	memcpy(doublesParamRender.ptr(),&params->doubles,sizeof(sParamRenderD));
-	memcpy(doublesFractal.ptr(),&params->fractal.doubles,sizeof(sFractalD));
-	memcpy(doublesMandelbox.ptr(),&params->fractal.mandelbox.doubles,sizeof(sFractalMandelboxD));
-	memcpy(doublesIFS.ptr(),&params->fractal.IFS.doubles,sizeof(sFractalIFSD));
+	memcpy(doublesParamRender,&params->doubles,sizeof(sParamRenderD));
+	memcpy(doublesFractal,&params->fractal.doubles,sizeof(sFractalD));
+	memcpy(doublesMandelbox,&params->fractal.mandelbox.doubles,sizeof(sFractalMandelboxD));
+	memcpy(doublesIFS,&params->fractal.IFS.doubles,sizeof(sFractalIFSD));
 
 	ReadInterface(params);
 
-	memcpy(&params->doubles,doublesParamRender.ptr(),sizeof(sParamRenderD));
-	memcpy(&params->fractal.doubles,doublesFractal.ptr(),sizeof(sFractalD));
-	memcpy(&params->fractal.mandelbox.doubles,doublesMandelbox.ptr(),sizeof(sFractalMandelboxD));
-	memcpy(&params->fractal.IFS.doubles,doublesIFS.ptr(),sizeof(sFractalIFSD));
+	memcpy(&params->doubles,doublesParamRender,sizeof(sParamRenderD));
+	memcpy(&params->fractal.doubles,doublesFractal,sizeof(sFractalD));
+	memcpy(&params->fractal.mandelbox.doubles,doublesMandelbox,sizeof(sFractalMandelboxD));
+	memcpy(&params->fractal.IFS.doubles,doublesIFS,sizeof(sFractalIFSD));
 
+	delete[] doublesParamRender;
+	delete[] doublesFractal;
+	delete[] doublesMandelbox;
+	delete[] doublesIFS;
 }

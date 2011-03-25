@@ -519,6 +519,8 @@ void ReadInterface(sParamRender *params)
 	params->doubles.max_y = 20.0 / params->doubles.zoom;
 	params->doubles.resolution = 1.0 / params->image_width;
 
+	params->quiet = false;
+
 	InterfaceData2Params(params);
 
 	Interface_data.imageFormat = (enumImageFormat) params->imageFormat;
