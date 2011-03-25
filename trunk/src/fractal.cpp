@@ -47,7 +47,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double mR2 = minRadius * minRadius;
 	double tglad_factor1 = fR2 / mR2;
 
-	double tgladDE = par.mandelbox.doubles.scale;
+	double tgladDE = 1.0;
 
 	double scale = par.mandelbox.doubles.scale;
 
@@ -497,7 +497,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z = par.mandelbox.mainRot.RotateVector(z);
 
 				z = z * scale + constant;
-				tgladDE *= scale;
+				tgladDE = tgladDE*fabs(scale)+1.0;
 
 				r = z.Length();
 				break;
