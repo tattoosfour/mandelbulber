@@ -1096,14 +1096,14 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frLimits = gtk_frame_new("Limits");
 	Interface.frImage = gtk_frame_new("Image parameters");
 	Interface.frEffects = gtk_frame_new("Shading effects");
-	Interface.frColors = gtk_frame_new("Colors");
+	Interface.frColors = gtk_frame_new("Colours");
 	Interface.frLoadSave = gtk_frame_new("Settings");
 	Interface.frAnimation = gtk_frame_new("Flight animation");
 	Interface.frAnimationFrames = gtk_frame_new("Frames to render");
 	Interface.frPostFog = gtk_frame_new("Fog");
 	Interface.frPostSSAO = gtk_frame_new("Screen space ambient occlusion");
 	Interface.frPostDOF = gtk_frame_new("Depth of field");
-	Interface.frLightBallance = gtk_frame_new("Light brightness ballance");
+	Interface.frLightBallance = gtk_frame_new("Light brightness balance");
 	Interface.frLightsParameters = gtk_frame_new("Random lights parameters");
 	Interface.frLightsCommon = gtk_frame_new("Common parameters");
 	Interface.frPredefinedLights = gtk_frame_new("Predefined Lights");
@@ -1138,12 +1138,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buFiles = gtk_button_new_with_label("Select file paths (output images, textures)");
 	Interface.buColorGlow1 = gtk_color_button_new();
 	Interface.buColorGlow2 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow1), "Glow color 1");
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow2), "Glow color 2");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow1), "Glow colour 1");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow2), "Glow colour 2");
 	Interface.buColorBackgroud1 = gtk_color_button_new();
 	Interface.buColorBackgroud2 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud1), "Background color 1");
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background color 2");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud1), "Background colour 1");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background colour 2");
 	Interface.buLoadSettings = gtk_button_new_with_label("Load Settings");
 	Interface.buSaveSettings = gtk_button_new_with_label("Save Settings");
 	Interface.buUp = gtk_button_new();
@@ -1161,7 +1161,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buAnimationContinueRecord = gtk_button_new_with_label("Continue recording");
 	Interface.buAnimationRenderTrack = gtk_button_new_with_label("Render animation");
 	Interface.buColorFog = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog), "Fog color");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog), "Fog colour");
 	Interface.buColorSSAO = gtk_color_button_new();
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorSSAO), "Screen space ambient occlusion color");
 	Interface.buUpdateSSAO = gtk_button_new_with_label("Update image");
@@ -1336,9 +1336,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Menger sponge");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Tglad's formula (Mandelbox)");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Kaleidoscopic IFS");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified mandelbulb 3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 3");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
@@ -1428,7 +1428,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_IFSx = gtk_label_new("symmetry x");
 	Interface.label_IFSy = gtk_label_new("symmetry y");
 	Interface.label_IFSz = gtk_label_new("symmetry z");
-	Interface.label_IFSalfa = gtk_label_new("alfa");
+	Interface.label_IFSalfa = gtk_label_new("alpha");
 	Interface.label_IFSbeta = gtk_label_new("beta");
 	Interface.label_IFSgamma = gtk_label_new("gamma");
 	Interface.label_IFSdistance = gtk_label_new("distance");
@@ -1562,7 +1562,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	//		box angle
 	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxAngle, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "alfa (yaw):", 15, Interface.edit_alfa), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "alpha (yaw):", 15, Interface.edit_alfa), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "beta (pitch):", 15, Interface.edit_beta), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "gamma (roll):", 15, Interface.edit_gammaAngle), false, false, 1);
 
@@ -1718,7 +1718,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16Alpha, true, true, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Autosave / animation image format:", Interface.comboImageFormat), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), Interface.checkAutoSaveImage, false, false, 1);
 
 	//frame effects
@@ -1771,10 +1771,10 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frColors), Interface.boxColors);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow color 1:", Interface.buColorGlow1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow color 2:", Interface.buColorGlow2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background color 1:", Interface.buColorBackgroud1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background color 2:", Interface.buColorBackgroud2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow colour 1:", Interface.buColorGlow1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow colour 2:", Interface.buColorGlow2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background colour 1:", Interface.buColorBackgroud1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background colour 2:", Interface.buColorBackgroud2), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.buApplyBrighness, false, false, 1);
 
@@ -1931,7 +1931,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("2,0", "scale:", 6, Interface.edit_IFSScale), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation alfa:", 6, Interface.edit_IFSAlfa), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation alpha:", 6, Interface.edit_IFSAlfa), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation beta:", 6, Interface.edit_IFSBeta), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation gamma:", 6, Interface.edit_IFSGamma), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit2, false, false, 1);
@@ -2032,13 +2032,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.boxMandelboxRotationMain, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.checkMandelboxRotationsEnable, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "Main rotation: alfa", 6, Interface.edit_mandelboxRotationMain[0]), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "Main rotation: alpha", 6, Interface.edit_mandelboxRotationMain[0]), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "beta", 6, Interface.edit_mandelboxRotationMain[1]), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "gamma", 6, Interface.edit_mandelboxRotationMain[2]), false, false, 1);
 
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Negative plane"), 1, 4, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Positive plane"), 4, 7, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 1, 2, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alpha"), 1, 2, 1, 2);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 2, 3, 1, 2);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 3, 4, 1, 2);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 4, 5, 1, 2);
