@@ -219,7 +219,7 @@ void *MainThread(void *ptr)
 			if (parametry->thread_done[z] == 0)
 			{
 				//giving information for another threads that this thread renders this z value
-				parametry->thread_done[z] = start + 1;
+				parametry->thread_done[z] = thread_number + 1;
 
 				//WriteLogDouble("Started rendering line", z);
 
@@ -281,7 +281,7 @@ void *MainThread(void *ptr)
 					for (double y = min_y; y < max_y; y += stepYpersp)
 					{
 						//recheck threads
-						if (parametry->thread_done[z] == start + 1)
+						if (parametry->thread_done[z] == thread_number + 1)
 						{
 
 							//recalculating normalised y to fractal y
@@ -313,7 +313,7 @@ void *MainThread(void *ptr)
 									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
 
 								}
-								else if(perspectiveType == equirectangular)
+								else if (perspectiveType == equirectangular)
 								{
 									point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
 									point3D1.z = sin(fov * z2) * y;
@@ -326,7 +326,7 @@ void *MainThread(void *ptr)
 									point3D1.z = z2 * wsp_persp;
 								}
 
-							  point3D2 = mRot.RotateVector(point3D1);
+								point3D2 = mRot.RotateVector(point3D1);
 								CVector3 point = point3D2 + vp;
 
 								if (counter == 1)
@@ -340,7 +340,7 @@ void *MainThread(void *ptr)
 								dist = CalculateDistance(point, calcParam, &max_iter);
 
 								//it is for situation when DE is calculated with very big error
-								if (dist > 5.0 / DE_factor)
+								if (!param.fractal.dynamicDEcorrection && dist > 5.0 / DE_factor)
 								{
 									dist = 5.0 / DE_factor;
 								}
@@ -394,7 +394,7 @@ void *MainThread(void *ptr)
 								if (!binary)
 								{
 									if (perspectiveType == fishEye || perspectiveType == equirectangular) stepYpersp = dist * DE_factor;
-									else stepYpersp = (dist-0.5*dist_thresh) / zoom * DE_factor * correction;
+									else stepYpersp = (dist - 0.5 * dist_thresh) / zoom * DE_factor;
 								}
 
 								//step in binary searching mode
@@ -423,64 +423,80 @@ void *MainThread(void *ptr)
 										break;
 									}
 								}
-							}
-						}
 
-						//DE fractor - dynamic correction
-						if (!firstLoop)
-						{
-							double deltaDist = lastDist - dist;
-							if (deltaDist <= 0 && param.fractal.dynamicDEcorrection)
-							{
-								if(correction > 1.0) correction= 1.0;
-							}
-							else
-							{
-								double deltaY = (lastStepY) * zoom / DE_factor / correction + 0.5 * dist_thresh;
-								DE_counterForDEerror++;
-								DEerror += fabs(deltaDist - deltaY) / deltaY;
-
-								if (param.fractal.dynamicDEcorrection)
+								//DE fractor - dynamic correction
+								if (!firstLoop && !binary)
 								{
-									double newCorrection = deltaY / deltaDist;
-									if (newCorrection > 3.0) newCorrection = 3.0;
+									double deltaDist = lastDist - dist;
 
-									if (newCorrection < lastCorrection) correction = newCorrection * (newCorrection*newCorrection) / (correction*correction) * 0.5;
-									else correction = correction + (newCorrection - lastCorrection) * lastCorrection * 0.1;
+									double deltaY = (lastStepY) * zoom / DE_factor / correction + 0.5 * dist_thresh;
+									DE_counterForDEerror++;
+									if(deltaDist > deltaY || deltaDist == 0)
+									{
+										DEerror += fabs((deltaDist - deltaY) / deltaY);
+									}
+									else
+									{
+										DEerror += fabs((deltaY - deltaDist) / deltaDist);
+									}
 
-									if (correction > 3.0) correction = 3.0;
-									if (correction < 0.001) correction = 0.001;
+									if (param.fractal.dynamicDEcorrection)
+									{
+										CVector3 vn = CalculateNormals(&param, &calcParam, point, dist * 0.1);
+										CVector3 direction = point - viewVectorStart;
+										direction.Normalize();
+										double directionFactor = vn.Dot(direction) * (-1.0);
+
+										double newCorrection = fabs(deltaY / deltaDist * directionFactor);
+										//if(thread_number == 0)
+										//{
+										//	printf("tresh: %f, dist: %f, ddist: %f, dy: %f, newCorr: %f, direct: %f, last: %f\n", dist_thresh, dist, deltaDist, deltaY, newCorrection, directionFactor, correction);
+										//}
+										if (newCorrection > 1.0) newCorrection = 1.0;
+										if (newCorrection < 0.01) newCorrection = 0.01;
+
+										if (newCorrection < lastCorrection) correction = newCorrection * (newCorrection * newCorrection) / (correction * correction) * 0.5;
+										else correction = correction + (newCorrection - lastCorrection) * lastCorrection * 0.2;
+
+										//if(fabs(directionFactor) < 0.1) correction = lastCorrection;
+
+										if (correction > 1.0) correction = 1.0;
+										if (correction < 0.01) correction = 0.01;
+									}
+									else
+									{
+										correction = 1.0;
+									}
+
+									//printf("%f ",correction);
 								}
 								else
 								{
-									correction = 1.0;
+									if (param.fractal.dynamicDEcorrection)
+									{
+										correction = 1.0;
+									}
+									else
+									{
+										correction = 1.0;
+									}
 								}
-							}
-							//printf("%f ",correction);
-						}
-						else
-						{
-							if (param.fractal.dynamicDEcorrection)
-							{
-								correction = 0.1;
-							}
-							else
-							{
-								correction = 1.0;
-							}
-						}
 
-						if (lastDist - dist > 0)
-						{
-							firstLoop = false;
-						}
+								if (lastDist - dist > 0)
+								{
+									firstLoop = false;
+								}
 
-						lastDist = dist;
-						lastStepY = stepYpersp;
-						lastCorrection = correction;
+								stepYpersp *= correction;
+
+								lastDist = dist;
+								lastStepY = stepYpersp;
+								lastCorrection = correction;
+							}
+						}
 					} //next y
 
-					//printf("\n");
+					//if(thread_number == 0) printf("next y\n");
 
 					DE_counter += counter;
 					Pixel_counter++;
@@ -494,7 +510,7 @@ void *MainThread(void *ptr)
 
 					//if fractal surface was found
 					if (found)
-			        {
+					{
 						//-------------------- SHADING ----------------------
 						double y = y_start;
 
@@ -523,7 +539,7 @@ void *MainThread(void *ptr)
 							point3D1.z = z2 * wsp_persp;
 						}
 
-					  point3D2 = mRot.RotateVector(point3D1);
+						point3D2 = mRot.RotateVector(point3D1);
 						CVector3 point = point3D2 + vp;
 
 						viewVectorEnd = point;
@@ -535,7 +551,7 @@ void *MainThread(void *ptr)
 						//sVector lightVector = { -0.702, -0.702, -0.702 };
 
 						//normal vector
-						CVector3 vn = CalculateNormals(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance);
+						CVector3 vn = CalculateNormals(&param, &calcParam, point, dist_thresh);
 
 						//delta for all shading algorithms depended on depth and resolution (dynamic shaders resolution)
 						if (perspectiveType == fishEye || perspectiveType == equirectangular)
@@ -965,10 +981,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					int time_min = (int) (time / 60) % 60;
 					int time_h = time / 3600;
 					double iterations_per_sec = N_counter / time;
-					double avgDEerror = DEerror / DE_counterForDEerror*100.0;
+					//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
 					double avgMissedDE = (double)Missed_DE_counter / Pixel_counter;
-					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, DE error %.1f%%, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
-							iterations_per_sec, avgDEerror, avgMissedDE);
+					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
+							iterations_per_sec, avgMissedDE);
 					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 					gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
 				}

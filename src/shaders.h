@@ -31,7 +31,7 @@ extern int lightsPlaced;
 sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 lightVect, double wsp_persp, double dist_thresh);
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount, CVector3 normal);
-CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance);
+CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh);
 sShaderOutput MainShading(CVector3 normal, CVector3 lightVector);
 sShaderOutput MainSpecular(CVector3 normal, CVector3 lightVector, CVector3 viewVector);
 sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture);

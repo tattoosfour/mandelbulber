@@ -113,7 +113,7 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 	return AO;
 }
 
-CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance)
+CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh)
 {
 	CVector3 normal(0, 0, 0);
 	//calculating normal vector based on distance estimation (gradient of distance function)
