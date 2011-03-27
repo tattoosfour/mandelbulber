@@ -51,4 +51,5 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 bool LoadTextures(sParamRender *params);
 void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode);
 
+
 #endif /* RENDER3D_H_ */
