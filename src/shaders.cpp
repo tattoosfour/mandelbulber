@@ -8,6 +8,7 @@
 #include <cstdlib>
 
 #include "shaders.h"
+#include "interface.h"
 
 sLight *Lights;
 int lightsPlaced = 0;
@@ -448,6 +449,16 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 	{
 		if (i < fractParam->auxLightNumber || Lights[i].enabled)
 		{
+			char progressText[1000];
+			double percent_done = (double) i / numberOfLights * 100.0;
+			sprintf(progressText, "Rendering visible lights. Done %.1f%%", percent_done);
+			if(image->IsPreview())
+			{
+				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
+
 			point3D1 = Lights[i].position - fractParam->doubles.vp;
 			point3D2 = mRot.RotateVector(point3D1);
 			double y2 = point3D2.y;
@@ -461,10 +472,10 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 			int xs = (int) x;
 			int ys = (int) z;
 
-			if (xs >= 0 && xs < width && ys >= 0 && ys < height)
+			if (xs >= -width*0.3 && xs < width*1.3 && ys >= -width*0.3 && ys < height*1.3)
 			{
 
-				if (y < image->GetPixelZBuffer(xs,ys) && y > (-1.0 / fractParam->doubles.persp))
+				if (y > (-1.0 / fractParam->doubles.persp))
 				{
 					int R = Lights[i].colour.R;
 					int G = Lights[i].colour.G;
@@ -496,6 +507,33 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 							double bellFunction = (cos(r2 * M_PI/(size*5.0)) + 1.0) / 2.0;
 
 							double bright = bellFunction / (r * r);
+
+							double coveringFactor1 = 1.0;
+
+							for(double rr=0; rr<r2; rr+=1.0)
+							{
+								double xtemp = dx/r2 * rr + x;
+								double ytemp = dy/r2 * rr + z;
+								if (xtemp < 0) xtemp = 0;
+								if (xtemp >= width - 1) xtemp = width - 1;
+								if (ytemp < 0) ytemp = 0;
+								if (ytemp >= height - 1) ytemp = height - 1;
+								double tempz = image->GetPixelZBuffer((int)xtemp,(int)ytemp);
+								if(tempz < y)
+								{
+									coveringFactor1 = rr/r2*0.9;
+									break;
+								}
+							}
+
+							double coveringFactor2 = 0.1;
+							if(image->GetPixelZBuffer(xx,yy) < y)
+							{
+								coveringFactor2 = 0;
+							}
+
+							bright*=(coveringFactor1 + coveringFactor2);
+
 							if (bright > 10.0) bright = 10.0;
 
 							sRGB16 oldPixel = image->GetPixelImage(xx,yy);
