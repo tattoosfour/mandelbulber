@@ -16,11 +16,6 @@ enum dataMode
 	soundNone = 0, soundEnvelope = 1, soundA = 2, soundB = 3, soundC = 4, soundD = 5
 };
 
-enum enumPerspectiveType
-{
-	threePoint = 0, fishEye = 1, equirectangular = 2
-};
-
 struct sParamRenderD
 {
 	CVector3 vp; //view point

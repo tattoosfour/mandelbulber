@@ -132,23 +132,13 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				if (y < 1e19)
 				{
 					CVector3 vector, vector2;
-					double persp_factor = 1.0 + y * params.doubles.persp;
-					double y2 = y;
-					if (perspectiveType == fishEye)
+					double y2 = 0;
+					double perspFactor1 = y * params.doubles.persp + 1.0;
+
+					if(perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
 						if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
 						else if(clickMode >= 5) y2 = y - lightPlacementDistance;
-						vector.x = sin(params.doubles.persp * x2) * y2;
-						vector.z = sin(params.doubles.persp * z2) * y2;
-						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
-					}
-					else if(perspectiveType == equirectangular)
-					{
-						if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
-						else if(clickMode >= 5) y2 = y - lightPlacementDistance;
-						vector.x = sin(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
-						vector.z = sin(params.doubles.persp * z2) * y2;
-						vector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2) * y2;
 					}
 					else
 					{
@@ -156,21 +146,21 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface))) delta_y = 0;
 						else delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
 
-						if (clickMode == 1) y2 = ((y - delta_y) * params.doubles.zoom);
-						else if (clickMode >= 5)
+						if (clickMode == 1)
 						{
-							y2 = y * params.doubles.zoom - lightPlacementDistance;
-							persp_factor = 1.0 + y2 * params.doubles.persp / params.doubles.zoom;
+							y2 = y - delta_y;
+							double perspFactor2 = y2 * params.doubles.persp + 1.0;
+							x2 *= perspFactor1/perspFactor2;
+							z2 *= perspFactor1/perspFactor2;
 						}
-						vector.x = x2 * persp_factor;
-						vector.y = y2;
-						vector.z = z2 * persp_factor;
+						else if (clickMode >= 5) y2 = y - lightPlacementDistance;
 					}
-					vector2 = mRot.RotateVector(vector);
+
+					CVector3 point = Projection3D(CVector3(x2, y2, z2), params.doubles.vp, mRot, perspectiveType, params.doubles.persp, params.doubles.zoom);
 
 					if(clickMode == 1)
 					{
-					  params.doubles.vp = vector2 + params.doubles.vp;
+					  params.doubles.vp = point;
 						params.doubles.zoom /= closeUpRatio;
 
 						char distanceString[1000];
@@ -191,30 +181,30 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 					}
 					if(clickMode >= 5)
 					{
-						double distance = CalculateDistance(vector2 + params.doubles.vp, params.fractal);
+						double distance = CalculateDistance(point, params.fractal);
 						if (clickMode == 5)
 						{
-							params.doubles.auxLightPre1 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre1 = point;
 							params.doubles.auxLightPre1intensity = distance * distance;
 						}
 						if (clickMode == 6)
 						{
-							params.doubles.auxLightPre2 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre2 = point;
 							params.doubles.auxLightPre2intensity = distance * distance;
 						}
 						if (clickMode == 7)
 						{
-							params.doubles.auxLightPre3 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre3 = point;
 							params.doubles.auxLightPre3intensity = distance * distance;
 						}
 						if (clickMode == 8)
 						{
-							params.doubles.auxLightPre4 = vector2 + params.doubles.vp;
+							params.doubles.auxLightPre4 = point;
 							params.doubles.auxLightPre4intensity = distance * distance;
 						}
 						if (clickMode == 9)
 						{
-							params.doubles.auxLightRandomCenter = vector2 + params.doubles.vp;
+							params.doubles.auxLightRandomCenter = point;
 						}
 						WriteInterface(&params);
 						PlaceRandomLights(&params, false);

@@ -284,8 +284,6 @@ void *MainThread(void *ptr)
 						if (parametry->thread_done[z] == thread_number + 1)
 						{
 
-							//recalculating normalised y to fractal y
-							double y2 = y * zoom;
 							//perspective factor (wsp = factor in Polish :-)
 							double wsp_persp = 1.0 + y * persp;
 
@@ -305,29 +303,7 @@ void *MainThread(void *ptr)
 								counter++;
 
 								//rotate coordinate system from screen to fractal coordinates and perspective projection
-								CVector3 point3D1, point3D2;
-								if (perspectiveType == fishEye)
-								{
-									point3D1.x = sin(fov * x2) * y;
-									point3D1.z = sin(fov * z2) * y;
-									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-
-								}
-								else if (perspectiveType == equirectangular)
-								{
-									point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
-									point3D1.z = sin(fov * z2) * y;
-									point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-								}
-								else //tree-point perspective
-								{
-									point3D1.x = x2 * wsp_persp;
-									point3D1.y = y2;
-									point3D1.z = z2 * wsp_persp;
-								}
-
-								point3D2 = mRot.RotateVector(point3D1);
-								CVector3 point = point3D2 + vp;
+								CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
 
 								if (counter == 1)
 								{
@@ -514,33 +490,8 @@ void *MainThread(void *ptr)
 						//-------------------- SHADING ----------------------
 						double y = y_start;
 
-						//translate coordinate system from screen to fractal
-						double y2 = y * zoom;
+						CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
 						double wsp_persp = 1.0 + y * persp;
-						CVector3 point3D1, point3D2;
-
-						if (perspectiveType == fishEye)
-						{
-							point3D1.x = sin(fov * x2) * y;
-							point3D1.z = sin(fov * z2) * y;
-							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-
-						}
-						else if(perspectiveType == equirectangular)
-						{
-							point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
-							point3D1.z = sin(fov * z2) * y;
-							point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-						}
-						else //tree-point perspective
-						{
-							point3D1.x = x2 * wsp_persp;
-							point3D1.y = y2;
-							point3D1.z = z2 * wsp_persp;
-						}
-
-						point3D2 = mRot.RotateVector(point3D1);
-						CVector3 point = point3D2 + vp;
 
 						viewVectorEnd = point;
 

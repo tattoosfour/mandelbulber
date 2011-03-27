@@ -68,3 +68,34 @@ void QuickSortZBuffer(sSortZ *dane, int l, int p)
   if(l<j) QuickSortZBuffer(dane, l, j);
   if(i<p) QuickSortZBuffer(dane, i, p);
 }
+
+CVector3 Projection3D(CVector3 point, CVector3 vp, CRotationMatrix mRot, enumPerspectiveType perspectiveType, double fov, double zoom)
+{
+	double perspFactor = 1.0 + point.y * fov;
+	CVector3 vector1, vector2;
+
+	if (perspectiveType == fishEye)
+	{
+		vector1.x = sin(fov * point.x) * point.y;
+		vector1.z = sin(fov * point.z) * point.y;
+		vector1.y = cos(fov * point.x) * cos(fov * point.z) * point.y;
+
+	}
+	else if(perspectiveType == equirectangular)
+	{
+		vector1.x = sin(fov * point.x) * cos(fov * point.z) * point.y;
+		vector1.z = sin(fov * point.z) * point.y;
+		vector1.y = cos(fov * point.x) * cos(fov * point.z) * point.y;
+	}
+	else //tree-point perspective
+	{
+		vector1.x = point.x * perspFactor;
+		vector1.y = point.y * zoom;
+		vector1.z = point.z * perspFactor;
+	}
+
+	vector2 = mRot.RotateVector(vector1);
+
+	CVector3 result = vector2 + vp;
+	return result;
+}
