@@ -449,16 +449,6 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 	{
 		if (i < fractParam->auxLightNumber || Lights[i].enabled)
 		{
-			char progressText[1000];
-			double percent_done = (double) i / numberOfLights * 100.0;
-			sprintf(progressText, "Rendering visible lights. Done %.1f%%", percent_done);
-			if(image->IsPreview())
-			{
-				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-				while (gtk_events_pending())
-					gtk_main_iteration();
-			}
-
 			point3D1 = Lights[i].position - fractParam->doubles.vp;
 			point3D2 = mRot.RotateVector(point3D1);
 			double y2 = point3D2.y;
@@ -554,6 +544,15 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 						}
 					}
 				}
+			}
+			char progressText[1000];
+			double percent_done = (double) (i+1) / numberOfLights * 100.0;
+			sprintf(progressText, "Rendering visible lights. Done %.1f%%", percent_done);
+			if(image->IsPreview())
+			{
+				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+				while (gtk_events_pending())
+					gtk_main_iteration();
 			}
 		}
 	}
