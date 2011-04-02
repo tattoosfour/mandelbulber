@@ -153,7 +153,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 							x2 *= perspFactor1/perspFactor2;
 							z2 *= perspFactor1/perspFactor2;
 						}
-						else if (clickMode >= 5) y2 = y - lightPlacementDistance;
+						else if (clickMode >= 5) y2 = y - lightPlacementDistance/params.doubles.zoom;
 					}
 
 					CVector3 point = Projection3D(CVector3(x2, y2, z2), params.doubles.vp, mRot, perspectiveType, params.doubles.persp, params.doubles.zoom);
