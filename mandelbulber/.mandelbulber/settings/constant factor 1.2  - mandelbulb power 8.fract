@@ -21,6 +21,7 @@ N 255;
 minN 1;
 fractal_constant_factor 1.4;
 quality 2;
+smoothness 1;
 julia_mode 0;
 julia_a 0;
 julia_b 0;
