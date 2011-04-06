@@ -1,4 +1,4 @@
-MANDELBULBER 0.991 - win32
+MANDELBULBER 1.0 - win32
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman
@@ -15,7 +15,7 @@ Licence: GNU GPL v3.0
 1. REQUIREMENTS
 
 - very fast CPU (recomended 2GHz, 4 cores)
-- 500MB RAM
+- 1GB RAM
 
 
 2. INSTALATION
@@ -49,7 +49,7 @@ options:
   -flight         - render flight animation
   -keyframe       - render keyframe animation
   -start N        - start renderig from frame number N
-  -end            - rendering will end on frame number N
+  -end N          - rendering will end on frame number N
   -format FORMAT  - image output format
      jpg - JPEG format
      png - PNG format

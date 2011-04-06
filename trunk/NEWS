@@ -1,5 +1,23 @@
 Version history
 
+v1.0
+
+- Fixed memory leak in ThumbnailRender()
+- Improved Catmull-Rom Splines - automatic switching between linear and logarithmic scale
+- Lights are placed more precisely when the FOV value is high
+- Added checking of some parameters - more "idiot resistant"
+- Fixed problems with displaying first keyframe in Timeline window
+- Small improvement for 3D Navigator / Backward button
+- Corrected "ambient" effect in shading algorithm in CalculatePilex() function
+- Added displaying of "Distance from last keyframe" also after zooming by mouse pointer
+- Added image preview in FileChoosers for loading textures
+- Fixed missed delete[] in KeepOtherSettings() function
+- Fixed uninitialised variable param.qiet in MainThread() function
+- Improved DE calculation for Mandelbox formula. Reference: http://www.fractalforums.com/3d-fractal-generation/a-mandelbox-distance-estimate-formula/msg15354/#msg15354
+- Mandelbulb formula (without DE) exchanged to optimised version of formula. Reference: http://www.fractalforums.com/mandelbulb-implementation/realtime-renderingoptimisations/
+- Improved dynamic DE correction
+- Improved rendering of visible auxiliary lights
+
 v0.991
 - fixed problem with decreased quality of images. Added "smoothness" parameter.
 
