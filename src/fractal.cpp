@@ -507,6 +507,49 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
+			case smoothMandelbox:
+			{
+				double sm = 3.0;
+
+				double zk1 = 1.0 / (1.0 + 1.0 / exp(sm * (z.x - par.mandelbox.doubles.foldingLimit)));
+				double zk2 = 1.0 / (1.0 + 1.0 / exp(sm * (z.x + par.mandelbox.doubles.foldingLimit)));
+				z.x = z.x * (1.0 - zk1) + (par.mandelbox.doubles.foldingValue - z.x) * zk1;
+				z.x = z.x * (zk2) + (-par.mandelbox.doubles.foldingValue - z.x) * (1.0 - zk2);
+				tgladColor += (zk1 + (1.0 - zk2)) * par.mandelbox.doubles.colorFactorX;
+
+				double zk3 = 1.0 / (1.0 + 1.0 / exp(sm * (z.y - par.mandelbox.doubles.foldingLimit)));
+				double zk4 = 1.0 / (1.0 + 1.0 / exp(sm * (z.y + par.mandelbox.doubles.foldingLimit)));
+				z.y = z.y * (1.0 - zk3) + (par.mandelbox.doubles.foldingValue - z.y) * zk3;
+				z.y = z.y * (zk4) + (-par.mandelbox.doubles.foldingValue - z.y) * (1.0 - zk4);
+				tgladColor += (zk3 + (1.0 - zk4)) * par.mandelbox.doubles.colorFactorY;
+
+				double zk5 = 1.0 / (1.0 + 1.0 / exp(sm * (z.z - par.mandelbox.doubles.foldingLimit)));
+				double zk6 = 1.0 / (1.0 + 1.0 / exp(sm * (z.z + par.mandelbox.doubles.foldingLimit)));
+				z.z = z.z * (1.0 - zk5) + (par.mandelbox.doubles.foldingValue - z.z) * zk5;
+				z.z = z.z * (zk6) + (-par.mandelbox.doubles.foldingValue - z.z) * (1.0 - zk6);
+				tgladColor += (zk5 + (1.0 - zk6)) * par.mandelbox.doubles.colorFactorZ;
+
+				r = z.Length();
+				double r2 = r * r;
+				double tglad_factor2 = fR2 / r2;
+				double rk1 = 1.0 - 1.0 / (1.0 + 1.0 / exp(sm * (r2 - mR2)));
+				double rk2 = 1.0 - 1.0 / (1.0 + 1.0 / exp(sm * (r2 - fR2)));
+				double rk21 = (1.0 - rk1) * rk2;
+
+				z = z * (1.0 - rk1) + z * (tglad_factor1 * rk1);
+				z = z * (1.0 - rk21) + z * (tglad_factor2 * rk21);
+				tgladDE = tgladDE * (1.0 - rk1) + tgladDE * (tglad_factor1 * rk1);
+				tgladDE = tgladDE * (1.0 - rk21) + tgladDE * (tglad_factor2 * rk21);
+				tgladColor += rk1 * par.mandelbox.doubles.colorFactorSp1;
+				tgladColor += rk21 * par.mandelbox.doubles.colorFactorSp2;
+
+				z = par.mandelbox.mainRot.RotateVector(z);
+				z = z * scale + constant;
+
+				tgladDE = tgladDE * fabs(scale) + 1.0;
+				r = z.Length();
+				break;
+			}
 			case foldingIntPow2:
 			{
 				if (z.x > par.doubles.FoldingIntPowFoldFactor) z.x = par.doubles.FoldingIntPowFoldFactor * 2.0 - z.x;
@@ -613,7 +656,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 		}
-		else if (actualFormula == tglad)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox)
 		{
 			if (r > 1024)
 			{
@@ -625,7 +668,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 		{
 			if (Mode == normal) //condition for all other trigonometric and hypercomplex fractals
 			{
-				if (r > 1e4)
+				if (r > 1e2)
 				{
 					distance = 0.5 * r * log(r) / r_dz;
 					break;
@@ -691,7 +734,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
 		} 
-		else if (actualFormula == tglad)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox)
 			return tgladColor * 100.0 + z.Length()*par.mandelbox.doubles.colorFactorR;
 		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 			return min * 1000.0;

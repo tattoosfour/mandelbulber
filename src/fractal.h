@@ -33,7 +33,8 @@ enum enumFractalFormula
 	mandelbulb2 = 13,
 	mandelbulb3 = 14,
 	mandelbulb4 = 15,
-	foldingIntPow2 = 16
+	foldingIntPow2 = 16,
+	smoothMandelbox = 17
 };
 
 enum enumCalculationMode
