@@ -186,6 +186,7 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 11) formula2 = mandelbulb3;
 	if (formula == 12) formula2 = mandelbulb4;
 	if (formula == 13) formula2 = foldingIntPow2;
+	if (formula == 14) formula2 = smoothMandelbox;
 	return formula2;
 }
 
@@ -206,6 +207,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == mandelbulb3) formula2 = 11;
 	if (formula == mandelbulb4) formula2 = 12;
 	if (formula == foldingIntPow2) formula2 = 13;
+	if (formula == smoothMandelbox) formula2 = 14;
 	return formula2;
 }
 
@@ -455,7 +457,8 @@ void ReadInterface(sParamRender *params)
 		if (formula == 11) params->fractal.formula = mandelbulb3;
 		if (formula == 12) params->fractal.formula = mandelbulb4;
 		if (formula == 13) params->fractal.formula = foldingIntPow2;
-		if (formula == 14) params->fractal.formula = hybrid;
+		if (formula == 14) params->fractal.formula = smoothMandelbox;
+		if (formula == 15) params->fractal.formula = hybrid;
 
 		CheckPrameters(params);
 
@@ -511,10 +514,9 @@ void ReadInterface(sParamRender *params)
 
 	}
 
-	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic || params->fractal.formula == tglad)
-		params->fractal.analitycDE = true;
-	else
-		params->fractal.analitycDE = false;
+	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
+			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox) params->fractal.analitycDE = true;
+	else params->fractal.analitycDE = false;
 
 	params->doubles.max_y = 20.0 / params->doubles.zoom;
 	params->doubles.resolution = 1.0 / params->image_width;
@@ -745,7 +747,8 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == mandelbulb3) formula = 11;
 	if (params->fractal.formula == mandelbulb4) formula = 12;
 	if (params->fractal.formula == foldingIntPow2) formula = 13;
-	if (params->fractal.formula == hybrid) formula = 14;
+	if (params->fractal.formula == smoothMandelbox) formula = 14;
+	if (params->fractal.formula == hybrid) formula = 15;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -822,6 +825,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 2");
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 3");
 	gtk_combo_box_append_text(combo, "FoldingIntPow2");
+	gtk_combo_box_append_text(combo, "Smooth Mandelbox");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1340,6 +1344,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 3");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Smooth Mandelbox");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 

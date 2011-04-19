@@ -832,7 +832,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
 	}
 
-	if (formula == 8)
+	if (formula == 8 || formula == 14)
 	{
 		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
 	}
@@ -859,7 +859,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.edit_power, false);
 	}
 
-	if ((formula == 14)) //hybrid
+	if ((formula == 15)) //hybrid
 	{
 		gtk_widget_set_sensitive(Interface.tab_box_hybrid, true);
 		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
