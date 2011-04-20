@@ -509,7 +509,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case smoothMandelbox:
 			{
-				double sm = 3.0;
+				double sm = par.mandelbox.doubles.sharpness;
 
 				double zk1 = SmoothConditionAGreaterB(z.x, par.mandelbox.doubles.foldingLimit,sm);
 				double zk2 = SmoothConditionALessB(z.x, -par.mandelbox.doubles.foldingLimit,sm);
