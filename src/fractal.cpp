@@ -511,29 +511,29 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			{
 				double sm = 3.0;
 
-				double zk1 = 1.0 / (1.0 + 1.0 / exp(sm * (z.x - par.mandelbox.doubles.foldingLimit)));
-				double zk2 = 1.0 / (1.0 + 1.0 / exp(sm * (z.x + par.mandelbox.doubles.foldingLimit)));
+				double zk1 = SmoothConditionAGreaterB(z.x, par.mandelbox.doubles.foldingLimit,sm);
+				double zk2 = SmoothConditionALessB(z.x, -par.mandelbox.doubles.foldingLimit,sm);
 				z.x = z.x * (1.0 - zk1) + (par.mandelbox.doubles.foldingValue - z.x) * zk1;
-				z.x = z.x * (zk2) + (-par.mandelbox.doubles.foldingValue - z.x) * (1.0 - zk2);
-				tgladColor += (zk1 + (1.0 - zk2)) * par.mandelbox.doubles.colorFactorX;
+				z.x = z.x * (1.0 - zk2) + (-par.mandelbox.doubles.foldingValue - z.x) * zk2;
+				tgladColor += (zk1 + zk2) * par.mandelbox.doubles.colorFactorX;
 
-				double zk3 = 1.0 / (1.0 + 1.0 / exp(sm * (z.y - par.mandelbox.doubles.foldingLimit)));
-				double zk4 = 1.0 / (1.0 + 1.0 / exp(sm * (z.y + par.mandelbox.doubles.foldingLimit)));
+				double zk3 = SmoothConditionAGreaterB(z.y, par.mandelbox.doubles.foldingLimit,sm);
+				double zk4 = SmoothConditionALessB(z.y, -par.mandelbox.doubles.foldingLimit,sm);
 				z.y = z.y * (1.0 - zk3) + (par.mandelbox.doubles.foldingValue - z.y) * zk3;
-				z.y = z.y * (zk4) + (-par.mandelbox.doubles.foldingValue - z.y) * (1.0 - zk4);
-				tgladColor += (zk3 + (1.0 - zk4)) * par.mandelbox.doubles.colorFactorY;
+				z.y = z.y * (1.0 - zk4) + (-par.mandelbox.doubles.foldingValue - z.y) * zk4;
+				tgladColor += (zk3 + zk4) * par.mandelbox.doubles.colorFactorY;
 
-				double zk5 = 1.0 / (1.0 + 1.0 / exp(sm * (z.z - par.mandelbox.doubles.foldingLimit)));
-				double zk6 = 1.0 / (1.0 + 1.0 / exp(sm * (z.z + par.mandelbox.doubles.foldingLimit)));
+				double zk5 = SmoothConditionAGreaterB(z.z, par.mandelbox.doubles.foldingLimit,sm);
+				double zk6 = SmoothConditionALessB(z.z, -par.mandelbox.doubles.foldingLimit,sm);
 				z.z = z.z * (1.0 - zk5) + (par.mandelbox.doubles.foldingValue - z.z) * zk5;
-				z.z = z.z * (zk6) + (-par.mandelbox.doubles.foldingValue - z.z) * (1.0 - zk6);
-				tgladColor += (zk5 + (1.0 - zk6)) * par.mandelbox.doubles.colorFactorZ;
+				z.z = z.z * (1.0 - zk6) + (-par.mandelbox.doubles.foldingValue - z.z) * zk6;
+				tgladColor += (zk5 + zk6) * par.mandelbox.doubles.colorFactorZ;
 
 				r = z.Length();
 				double r2 = r * r;
 				double tglad_factor2 = fR2 / r2;
-				double rk1 = 1.0 - 1.0 / (1.0 + 1.0 / exp(sm * (r2 - mR2)));
-				double rk2 = 1.0 - 1.0 / (1.0 + 1.0 / exp(sm * (r2 - fR2)));
+				double rk1 = SmoothConditionALessB(r2, mR2, sm);
+				double rk2 = SmoothConditionALessB(r2, fR2, sm);
 				double rk21 = (1.0 - rk1) * rk2;
 
 				z = z * (1.0 - rk1) + z * (tglad_factor1 * rk1);
