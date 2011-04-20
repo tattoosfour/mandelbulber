@@ -99,3 +99,4 @@ CVector3 Projection3D(CVector3 point, CVector3 vp, CRotationMatrix mRot, enumPer
 	CVector3 result = vector2 + vp;
 	return result;
 }
+
