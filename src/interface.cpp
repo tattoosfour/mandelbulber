@@ -353,6 +353,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.mandelbox.doubles.foldingValue = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue)));
 		params->fractal.mandelbox.doubles.foldingSphericalFixed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius)));
 		params->fractal.mandelbox.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius)));
+		params->fractal.mandelbox.doubles.sharpness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSharpness)));
 
 		for (int component = 0; component < 3; ++component)
 			params->fractal.mandelbox.doubles.rotationMain[component] = atofData(gtk_entry_get_text(GTK_ENTRY(
@@ -662,6 +663,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxFoldingValue), DoubleToString(params->fractal.mandelbox.doubles.foldingValue));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalFixed));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalMin));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSharpness), DoubleToString(params->fractal.mandelbox.doubles.sharpness));
 
 	for (int component = 0; component < 3; ++component)
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMain[component]), DoubleToString(
@@ -1306,6 +1308,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxFoldingValue = gtk_entry_new();
 	Interface.edit_mandelboxSpFoldingFixedRadius = gtk_entry_new();
 	Interface.edit_mandelboxSpFoldingMinRadius = gtk_entry_new();
+	Interface.edit_mandelboxSharpness = gtk_entry_new();
 
 	for (int component = 0; component < 3; ++component)
 		Interface.edit_mandelboxRotationMain[component] = gtk_entry_new();
@@ -2033,6 +2036,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("2", "Folding value", 6, Interface.edit_mandelboxFoldingValue), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Fixed radius", 6, Interface.edit_mandelboxSpFoldingFixedRadius), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, Interface.edit_mandelboxSpFoldingMinRadius), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("3,0", "Sharpness", 6, Interface.edit_mandelboxSharpness), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);

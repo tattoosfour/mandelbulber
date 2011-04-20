@@ -820,9 +820,11 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 
 void ChangedComboFormula(GtkWidget *widget, gpointer data)
 {
-	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
+	sParamRender params;
+	ReadInterface(&params);
+	enumFractalFormula formula = params.fractal.formula;
 
-	if (formula == 0 || formula == 1)
+	if (formula == trig_DE || formula == trig_optim)
 	{
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, true);
 	}
@@ -832,43 +834,11 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
 	}
 
-	if (formula == 8 || formula == 14)
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
-	}
-	else
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, false);
-	}
-
-	if ((formula == 9) || gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode)))
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
-	}
-	else
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_IFS, false);
-	}
-
-	if (formula == 0 || formula == 1 || formula == 4 || formula == 12)
-	{
-		gtk_widget_set_sensitive(Interface.edit_power, true);
-	}
-	else
-	{
-		gtk_widget_set_sensitive(Interface.edit_power, false);
-	}
-
-	if ((formula == 15)) //hybrid
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_hybrid, true);
-		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
-		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
-	}
-	else
-	{
-		gtk_widget_set_sensitive(Interface.tab_box_hybrid, false);
-	}
+	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == tglad || formula == smoothMandelbox || formula == hybrid);
+	gtk_widget_set_sensitive(Interface.tab_box_IFS, formula == kaleidoscopic || params.fractal.IFS.foldingMode || formula == hybrid);
+	gtk_widget_set_sensitive(Interface.edit_power, formula == trig_DE || formula == trig_optim || formula == xenodreambuie || formula == mandelbulb4);
+	gtk_widget_set_sensitive(Interface.tab_box_hybrid, formula == hybrid);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxSharpness, formula == smoothMandelbox);
 }
 
 void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data)

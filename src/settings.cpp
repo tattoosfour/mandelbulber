@@ -304,6 +304,7 @@ void SaveSettings(char *filename, const sParamRender& params)
 	fprintfDot(fileSettings, "mandelbox_folding_value", params.fractal.mandelbox.doubles.foldingValue);
 	fprintfDot(fileSettings, "mandelbox_folding_min_radius", params.fractal.mandelbox.doubles.foldingSphericalMin);
 	fprintfDot(fileSettings, "mandelbox_folding_fixed_radius", params.fractal.mandelbox.doubles.foldingSphericalFixed);
+	fprintfDot(fileSettings, "mandelbox_sharpness", params.fractal.mandelbox.doubles.sharpness);
 
 	for (int component = 0; component < 3; ++component) {
 		fprintf(fileSettings, "mandelbox_rotation_main_%s", component_names[component]);
@@ -606,7 +607,7 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 				else if (!strcmp(str1, "sound_animation_band4_min")) params.soundBand4Min = atoi(str2);
 				else if (!strcmp(str1, "sound_animation_band4_max")) params.soundBand4Max = atoi(str2);
 
-			    else if (!strcmp(str1, "hybrid_cyclic")) params.fractal.hybridCyclic = atoi(str2);
+			  else if (!strcmp(str1, "hybrid_cyclic")) params.fractal.hybridCyclic = atoi(str2);
 
 				else if (!strcmp(str1, "fish_eye")) params.perspectiveType = (enumPerspectiveType)atoi(str2);
 
@@ -618,6 +619,7 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 				else if (!strcmp(str1, "mandelbox_folding_value")) params.fractal.mandelbox.doubles.foldingValue = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.fractal.mandelbox.doubles.foldingSphericalMin = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "mandelbox_folding_fixed_radius")) params.fractal.mandelbox.doubles.foldingSphericalFixed = atof2(str2, locale_dot);
+				else if (!strcmp(str1, "mandelbox_sharpness")) params.fractal.mandelbox.doubles.sharpness = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "mandelbox_color_R")) params.fractal.mandelbox.doubles.colorFactorR = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "mandelbox_color_X")) params.fractal.mandelbox.doubles.colorFactorX = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "mandelbox_color_Y")) params.fractal.mandelbox.doubles.colorFactorY = atof2(str2, locale_dot);
@@ -728,9 +730,9 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 300)
+		if (lineCounter != 301)
 		{
-			printf("number of lines in settings file (should be 300): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 301): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -937,6 +939,7 @@ void DefaultValues(sParamRender &params)
 	params.fractal.mandelbox.doubles.foldingValue = 2;
 	params.fractal.mandelbox.doubles.foldingSphericalMin = 0.5;
 	params.fractal.mandelbox.doubles.foldingSphericalFixed = 1.0;
+	params.fractal.mandelbox.doubles.sharpness = 3.0;
 	params.fractal.mandelbox.doubles.scale = 2.0;
 	params.fractal.mandelbox.rotationsEnabled = false;
 

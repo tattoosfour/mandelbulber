@@ -83,6 +83,7 @@ struct sFractalMandelboxD
 	double foldingValue;
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
+	double sharpness;
 };
 
 struct sFractalMandelbox
