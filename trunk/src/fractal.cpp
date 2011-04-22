@@ -78,8 +78,10 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 		if (hybridEnabled)
 		{
-			actualFormula = par.formulaSequence[L];
-			p = par.hybridPowerSequence[L];
+			int tempL = L;
+			if(tempL > (int)par.formulaSequence.size()-1) tempL = (int)par.formulaSequence.size()-1;
+			actualFormula = par.formulaSequence[tempL];
+			p = par.hybridPowerSequence[tempL];
 			scale = p;
 		}
 
