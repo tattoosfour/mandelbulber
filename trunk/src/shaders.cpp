@@ -269,7 +269,7 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	if (shade2 > 15.0) shade2 = 15.0;
 
 	//calculate shadow
-	if (shade > 0.01 || shade2 > 0.01)
+	if ((shade > 0.01 || shade2 > 0.01) && fractParams->shadow)
 	{
 		double delta = fractParams->doubles.resolution * fractParams->doubles.zoom * wsp_persp;
 		double stepFactor = 1.0;
@@ -299,8 +299,11 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	}
 	else
 	{
-		shade = 0;
-		shade2 = 0;
+		if(fractParams->shadow)
+		{
+			shade = 0;
+			shade2 = 0;
+		}
 	}
 
 	shading.R = shade * light.colour.R / 65536.0;
