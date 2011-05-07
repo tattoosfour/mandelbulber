@@ -263,6 +263,8 @@ gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data)
 	if (width != renderWindow.lastWindowWidth || height != renderWindow.lastWindowHeight)
 	{
 		ChangedComboScale(renderWindow.comboImageScale, NULL);
+		renderWindow.lastWindowWidth = width;
+		renderWindow.lastWindowHeight = height;
 	}
 	return false;
 }
@@ -807,9 +809,8 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 	}
 	Interface_data.imageScale = imageScale;
 
-	mainImage.CreatePreview(imageScale);
 	gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
-
+	mainImage.CreatePreview(imageScale);
 	mainImage.ConvertTo8bit();
 	mainImage.UpdatePreview();
 	mainImage.RedrawInWidget(renderWindow.drawingArea);
