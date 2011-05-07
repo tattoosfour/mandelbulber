@@ -761,8 +761,8 @@ void *MainThread(void *ptr)
 				if (*parametry->done == height - 1)
 				{
 					double avg_N = (double) N_counter / Loop_counter;
-					double avg_DE = (double) DE_counter / Pixel_counter;
-					printf("Average N = %f, Average DE steps = %f, Failed DE = %d\n", avg_N, avg_DE, Missed_DE_counter);
+					double avg_DE = (double) DE_counter / Pixel_counter * 100.0;
+					printf("Average N = %f, Average DE steps = %f, Failed DE = %d%%\n", avg_N, avg_DE, Missed_DE_counter);
 				}
 
 				//WriteLogDouble("Rendering line finished", z);
@@ -933,7 +933,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					int time_h = time / 3600;
 					double iterations_per_sec = N_counter / time;
 					//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
-					double avgMissedDE = (double)Missed_DE_counter / Pixel_counter;
+					double avgMissedDE = (double)Missed_DE_counter / Pixel_counter * 100.0;
 					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
 							iterations_per_sec, avgMissedDE);
 					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
@@ -1010,7 +1010,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			double avg_N = (double) N_counter / Loop_counter;
 			double avg_DE = (double) DE_counter / Pixel_counter;
 			double avgDEerror = DEerror / DE_counterForDEerror*100.0;
-			double avgMissedDE = (double)Missed_DE_counter / Pixel_counter;
+			double avgMissedDE = (double)Missed_DE_counter / Pixel_counter*100.0;
 			sprintf(progressText, "Render time %dh%dm%ds, iters/s %.0f, avg. N %.1f, avg. DEsteps %.1f, DEerror %.1f%%, MissedDE %.3f%%", time_h, time_min, time_s,
 					iterations_per_sec, avg_N, avg_DE, avgDEerror, avgMissedDE);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
@@ -1858,38 +1858,44 @@ void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
 			KeepOtherSettings(&fractParamLoaded);
 		}
 
-		fractParamLoaded.image_width = miniImage->GetWidth();
-		fractParamLoaded.image_height = miniImage->GetHeight();
-		fractParamLoaded.doubles.resolution = 0.5 / fractParamLoaded.image_width;
-		fractParamLoaded.doubles.max_y = 20.0 / fractParamLoaded.doubles.zoom;
-		if (fractParamLoaded.fractal.formula == trig_DE || fractParamLoaded.fractal.formula == menger_sponge || fractParamLoaded.fractal.formula == kaleidoscopic || fractParamLoaded.fractal.formula == tglad)
-			fractParamLoaded.fractal.analitycDE = true;
-		else fractParamLoaded.fractal.analitycDE = false;
-		fractParamLoaded.recordMode = false;
-		fractParamLoaded.animMode = false;
-		fractParamLoaded.quiet = true;
-
-		RecalculateIFSParams(fractParamLoaded.fractal);
-		CreateFormulaSequence(fractParamLoaded.fractal);
-
-		miniImage->ClearImage();
-		miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.effectColours, fractParamLoaded.imageSwitches);
-		miniImage->SetPalette(fractParamLoaded.palette);
-
-		LoadTextures(&fractParamLoaded);
-
-		programClosed = false;
-		isPostRendering = false;
-
-		PlaceRandomLights(&fractParamLoaded, false);
-
-		Render(fractParamLoaded, miniImage, NULL);
-
-		delete fractParamLoaded.backgroundTexture;
-		WriteLog("Released memory for background texture");
-		delete fractParamLoaded.envmapTexture;
-		WriteLog("Released memory for envmap texture");
-		delete fractParamLoaded.lightmapTexture;
-		WriteLog("Released memory for lightmap texture");
+		ThumbnailRender2(fractParamLoaded, miniImage);
 	}
+}
+
+void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage)
+{
+	fractParamLoaded.image_width = miniImage->GetWidth();
+	fractParamLoaded.image_height = miniImage->GetHeight();
+	fractParamLoaded.doubles.resolution = 0.5 / fractParamLoaded.image_width;
+	fractParamLoaded.doubles.max_y = 20.0 / fractParamLoaded.doubles.zoom;
+
+	if (fractParamLoaded.fractal.formula == trig_DE || fractParamLoaded.fractal.formula == trig_optim || fractParamLoaded.fractal.formula == menger_sponge || fractParamLoaded.fractal.formula == kaleidoscopic
+			|| fractParamLoaded.fractal.formula == tglad || fractParamLoaded.fractal.formula == smoothMandelbox) fractParamLoaded.fractal.analitycDE = true;
+	else fractParamLoaded.fractal.analitycDE = false;
+	fractParamLoaded.recordMode = false;
+	fractParamLoaded.animMode = false;
+	fractParamLoaded.quiet = true;
+
+	RecalculateIFSParams(fractParamLoaded.fractal);
+	CreateFormulaSequence(fractParamLoaded.fractal);
+
+	miniImage->ClearImage();
+	miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.effectColours, fractParamLoaded.imageSwitches);
+	miniImage->SetPalette(fractParamLoaded.palette);
+
+	LoadTextures(&fractParamLoaded);
+
+	programClosed = false;
+	isPostRendering = false;
+
+	PlaceRandomLights(&fractParamLoaded, false);
+
+	Render(fractParamLoaded, miniImage, NULL);
+
+	delete fractParamLoaded.backgroundTexture;
+	WriteLog("Released memory for background texture");
+	delete fractParamLoaded.envmapTexture;
+	WriteLog("Released memory for envmap texture");
+	delete fractParamLoaded.lightmapTexture;
+	WriteLog("Released memory for lightmap texture");
 }

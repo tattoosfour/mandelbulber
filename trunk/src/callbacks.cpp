@@ -1863,3 +1863,106 @@ double ScanSizeOfFractal(sParamRender *params)
 	}
 	return maxDist;
 }
+
+void PressedAutoDEStep(GtkWidget *widget, gpointer widget_pointer)
+{
+	AutoDEStep(false);
+}
+
+void PressedAutoDEStepHQ(GtkWidget *widget, gpointer widget_pointer)
+{
+	AutoDEStep(true);
+}
+
+void AutoDEStep(bool highQuality)
+{
+	char progressText[1000];
+
+	sParamRender fractParams;
+	ReadInterface(&fractParams);
+	smart_ptr<cImage> testImage;
+	testImage.reset(new cImage(64, 64));
+	fractParams.doubles.quality = fractParams.doubles.quality * fractParams.image_width / 64.0;
+	fractParams.shadow = false;
+	fractParams.auxLightNumber = 0;
+	fractParams.global_ilumination = false;
+	fractParams.SSAOEnabled = false;
+	fractParams.DOFEnabled = false;
+	fractParams.auxLightPre1Enabled = false;
+	fractParams.auxLightPre2Enabled = false;
+	fractParams.auxLightPre3Enabled = false;
+	fractParams.auxLightPre4Enabled = false;
+	fractParams.fractal.iterThresh = false;
+	if (fractParams.fractal.N < 200) fractParams.fractal.N = 200;
+	if (fractParams.fractal.limits_enabled) return;
+
+	int scanCount = 0;
+	double DEfactor = 1.0;
+	double step = 1.0;
+
+	double limit = 1.0;
+	if(highQuality) limit = 0.01;
+
+	programClosed = false;
+	for (int i = 0; i < 100; i++)
+	{
+		scanCount++;
+		fractParams.doubles.DE_factor = DEfactor;
+		ThumbnailRender2(fractParams, testImage.ptr());
+		double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
+		printf("DE factor = %f, Missed DE = %f%%\n", DEfactor, avgMissedDE);
+		if (avgMissedDE < limit)
+		{
+			if (scanCount == 1)
+			{
+				if (step < 10000)
+				{
+					DEfactor = DEfactor * 10.0;
+					step = step * 10.0;
+					scanCount = 0;
+					continue;
+				}
+				else
+				{
+					return;
+				}
+			}
+			else
+			{
+				if (step < 0.05 * DEfactor) break;
+				DEfactor += step;
+			}
+		}
+		step /= 2.0;
+		DEfactor -= step;
+
+		while (gtk_events_pending())
+			gtk_main_iteration();
+
+		sprintf(progressText, "Scanning for the best DE factor: DE factor = %f, Missed DE = %f%%", DEfactor, avgMissedDE);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+
+		double progress;
+		if(highQuality)
+		{
+		progress = 1.0 - (log10(avgMissedDE + (step / DEfactor)/10.0) + 3.0) / 5.0;
+		}
+		else
+		{
+			progress = 1.0 - (log10(avgMissedDE + (step / DEfactor)/1.0) + 1.2) / 3.0;
+		}
+		printf("progress = %f, log = %f\n", progress, log10(avgMissedDE + (step / DEfactor)));
+
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), progress);
+		if (programClosed) break;
+	}
+
+	sprintf(progressText, "Optimal DE factor found: DE factor = %f", DEfactor);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+
+	ReadInterface(&fractParams);
+	fractParams.doubles.DE_factor = DEfactor;
+	fractParams.doubles.imageAdjustments.glow_intensity = 1.0 * DEfactor;
+	WriteInterface(&fractParams);
+}
