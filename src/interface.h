@@ -283,6 +283,8 @@ struct sInterface
 	GtkWidget *buIFSDefaultDodeca;
 	GtkWidget *buIFSDefaultIcosa;
 	GtkWidget *buIFSDefaultOcta;
+	GtkWidget *buAutoDEStep;
+	GtkWidget *buAutoDEStepHQ;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;

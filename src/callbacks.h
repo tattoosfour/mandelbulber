@@ -91,8 +91,11 @@ void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data);
 void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer);
+void PressedAutoDEStep(GtkWidget *widget, gpointer widget_pointer);
+void PressedAutoDEStepHQ(GtkWidget *widget, gpointer widget_pointer);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);
+void AutoDEStep(bool highQuality);
 
 #endif /* CALLBACKS_H_ */

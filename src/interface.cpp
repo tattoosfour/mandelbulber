@@ -1128,7 +1128,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMandelboxRotations = gtk_frame_new("Rotation of Mandelbox folding planes");
 	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
 
-
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
 	Interface.vSeparator1 = gtk_vseparator_new();
@@ -1197,6 +1196,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buIFSDefaultDodeca = gtk_button_new_with_label("Dodecahedron");
 	Interface.buIFSDefaultIcosa = gtk_button_new_with_label("Icosahedron");
 	Interface.buIFSDefaultOcta = gtk_button_new_with_label("Octahedron");
+	Interface.buAutoDEStep = gtk_button_new_with_label("LQ");
+	Interface.buAutoDEStepHQ = gtk_button_new_with_label("HQ");
 
 
 	//edit
@@ -1545,6 +1546,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkIFSFoldingMode, ChangedIFSFoldingMode);
 	CONNECT_SIGNAL_CLICKED(Interface.checkLimits, ChangedLimits);
 	CONNECT_SIGNAL_CLICKED(Interface.checkMandelboxRotationsEnable, ChangedMandelboxRotations);
+	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStep, PressedAutoDEStep);
+	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -1678,6 +1681,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Min. iterations:", 5, Interface.edit_minN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail level:", 5, Interface.edit_DE_thresh), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStep, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStepHQ, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Smoothness:", 5, Interface.edit_roughness), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
