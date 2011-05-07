@@ -445,8 +445,11 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 
 	if (numberOfLights < 4) numberOfLights = 4;
 
+	programClosed = false;
 	for (int i = 0; i < numberOfLights; ++i)
 	{
+		if(programClosed) break;
+
 		if (i < fractParam->auxLightNumber || Lights[i].enabled)
 		{
 			point3D1 = Lights[i].position - fractParam->doubles.vp;
