@@ -436,6 +436,7 @@ struct sInterface
 	GtkWidget *label_soundEnvelope;
 	GtkWidget *label_HybridFormula[HYBRID_COUNT];
 	GtkWidget *label_NavigatorEstimatedDistance;
+	GtkWidget *label_DE_threshold;
 
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
@@ -480,6 +481,7 @@ struct sInterface
 	GtkWidget *checkInteriorMode;
 	GtkWidget *checkDECorrectionMode;
 	GtkWidget *checkDELinearMode;
+	GtkWidget *checkConstantDEThreshold;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

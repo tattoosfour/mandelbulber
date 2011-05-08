@@ -134,6 +134,7 @@ struct sFractal
 	bool hybridCyclic;
 	bool dynamicDEcorrection;
 	bool linearDEmode;
+	bool constantDEThreshold;
 
 	enumFractalFormula formula;
 

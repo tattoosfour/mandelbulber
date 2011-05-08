@@ -333,6 +333,7 @@ void SaveSettings(char *filename, const sParamRender& params)
 	fprintfDot(fileSettings, "FoldingIntPow_z_factor", params.fractal.doubles.FoldingIntPowZfactor);
 	fprintf(fileSettings, "dynamic_DE_correction %d;\n", params.fractal.dynamicDEcorrection);
 	fprintf(fileSettings, "linear_DE_mode %d;\n", params.fractal.linearDEmode);
+	fprintf(fileSettings, "constant_DE_threshold %d;\n", params.fractal.constantDEThreshold);
 
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
@@ -633,6 +634,7 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 				else if (!strcmp(str1, "interior_mode")) params.fractal.interiorMode = atoi(str2);
 				else if (!strcmp(str1, "dynamic_DE_correction")) params.fractal.dynamicDEcorrection = atoi(str2);
 				else if (!strcmp(str1, "linear_DE_mode")) params.fractal.linearDEmode = atoi(str2);
+				else if (!strcmp(str1, "constant_DE_threshold")) params.fractal.constantDEThreshold = atoi(str2);
 
 				else if (!strcmp(str1, "FoldingIntPow_folding_factor")) params.fractal.doubles.FoldingIntPowFoldFactor = atof2(str2, locale_dot);
 				else if (!strcmp(str1, "FoldingIntPow_z_factor")) params.fractal.doubles.FoldingIntPowZfactor = atof2(str2, locale_dot);
@@ -730,7 +732,7 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 
 		lightsPlaced = 0;
 
-		if (lineCounter != 301)
+		if (lineCounter != 302)
 		{
 			printf("number of lines in settings file (should be 301): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
@@ -785,6 +787,7 @@ void DefaultValues(sParamRender &params)
 	params.fractal.doubles.FoldingIntPowZfactor = 5.0;
 	params.fractal.dynamicDEcorrection = false;
 	params.fractal.linearDEmode = false;
+	params.fractal.constantDEThreshold = false;
 	params.doubles.DE_factor = 1.0; //factor for distance estimation steps
 	params.image_width = 800; //image width
 	params.image_height = 600; //image height
