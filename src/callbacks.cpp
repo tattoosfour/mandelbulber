@@ -1949,7 +1949,7 @@ void AutoDEStep(bool highQuality)
 		}
 		else
 		{
-			progress = 1.0 - (log10(avgMissedDE + (step / DEfactor)/1.0) + 1.2) / 3.0;
+			progress = 1.0 - (log10(avgMissedDE + (step / DEfactor)/1.0) + 2.0) / 4.0;
 		}
 		printf("progress = %f, log = %f\n", progress, log10(avgMissedDE + (step / DEfactor)));
 
@@ -1965,4 +1965,16 @@ void AutoDEStep(bool highQuality)
 	fractParams.doubles.DE_factor = DEfactor;
 	fractParams.doubles.imageAdjustments.glow_intensity = 1.0 * DEfactor;
 	WriteInterface(&fractParams);
+}
+
+void ChangedConstantDEThreshold(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkConstantDEThreshold)))
+	{
+		gtk_label_set_text(GTK_LABEL(Interface.label_DE_threshold),"DE threshold:");
+	}
+	else
+	{
+		gtk_label_set_text(GTK_LABEL(Interface.label_DE_threshold),"Detail level:");
+	}
 }

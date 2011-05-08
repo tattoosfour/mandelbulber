@@ -287,16 +287,22 @@ void *MainThread(void *ptr)
 							//perspective factor (wsp = factor in Polish :-)
 							double wsp_persp = 1.0 + y * persp;
 
-							//recalculating dynamic DE threshold
-							if (perspectiveType == fishEye || perspectiveType == equirectangular)
+							if (param.fractal.constantDEThreshold)
 							{
-								dist_thresh = 2.0 * y * resolution / quality * fov;
+								dist_thresh = quality;
 							}
 							else
 							{
-								dist_thresh = zoom * stepY * wsp_persp / quality;
+								//recalculating dynamic DE threshold
+								if (perspectiveType == fishEye || perspectiveType == equirectangular)
+								{
+									dist_thresh = 2.0 * y * resolution / quality * fov;
+								}
+								else
+								{
+									dist_thresh = zoom * stepY * wsp_persp / quality;
+								}
 							}
-
 							if (wsp_persp > 0) //checking for sure :-)
 							{
 								//DE steps counter

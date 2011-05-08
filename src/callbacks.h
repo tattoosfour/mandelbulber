@@ -93,6 +93,7 @@ void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer);
 void PressedAutoDEStep(GtkWidget *widget, gpointer widget_pointer);
 void PressedAutoDEStepHQ(GtkWidget *widget, gpointer widget_pointer);
+void ChangedConstantDEThreshold(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

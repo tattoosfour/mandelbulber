@@ -347,6 +347,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.constantFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FractalConstantFactor)));
 		params->fractal.dynamicDEcorrection = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode));
 		params->fractal.linearDEmode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode));
+		params->fractal.constantDEThreshold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkConstantDEThreshold));
 
 		params->fractal.mandelbox.rotationsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable));
 		params->fractal.mandelbox.doubles.foldingLimit = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxFoldingLimit)));
@@ -711,6 +712,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkInteriorMode), params->fractal.interiorMode);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode), params->fractal.dynamicDEcorrection);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode), params->fractal.linearDEmode);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkConstantDEThreshold), params->fractal.constantDEThreshold);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1409,6 +1411,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkInteriorMode = gtk_check_button_new_with_label("Interior mode");
 	Interface.checkDECorrectionMode = gtk_check_button_new_with_label("Dynamic DE correction");
 	Interface.checkDELinearMode = gtk_check_button_new_with_label("Linear DE mode");
+	Interface.checkConstantDEThreshold = gtk_check_button_new_with_label("Const. DE threshold");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1445,6 +1448,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_IFSenabled = gtk_label_new("enabled");
 	Interface.label_paletteOffset = gtk_label_new("offset:");
 	Interface.label_soundEnvelope = gtk_label_new("sound envelope");
+	Interface.label_DE_threshold = gtk_label_new("Detail level:");
 	gtk_misc_set_alignment(GTK_MISC(Interface.label_soundEnvelope), 0, 0);
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
@@ -1548,6 +1552,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkMandelboxRotationsEnable, ChangedMandelboxRotations);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStep, PressedAutoDEStep);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
+	CONNECT_SIGNAL_CLICKED(Interface.checkConstantDEThreshold, ChangedConstantDEThreshold);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -1679,7 +1684,10 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Max. iterations:", 5, Interface.edit_maxN), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Min. iterations:", 5, Interface.edit_minN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Detail level:", 5, Interface.edit_DE_thresh), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.label_DE_threshold, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.edit_DE_thresh, false, false, 1);
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), "1,0");
+	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_DE_thresh), 5);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStep, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStepHQ, false, false, 1);
@@ -1690,6 +1698,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkInteriorMode, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDECorrectionMode, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDELinearMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkConstantDEThreshold, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxViewDistance, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, Interface.edit_viewMinDistance), false, false, 1);
@@ -2288,7 +2297,9 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.buGetPaletteFromImage, "Grab colours from selected image");
 	gtk_widget_set_tooltip_text(Interface.sliderFogDepth, "Visibility distance measured from Front value");
 	gtk_widget_set_tooltip_text(Interface.sliderFogDepth, "Front distance of fog");
-
+	gtk_widget_set_tooltip_text(Interface.buAutoDEStep, "Scan for optimal DE factor for low image quality");
+	gtk_widget_set_tooltip_text(Interface.buAutoDEStepHQ, "Scan for optimal DE factor for high image quality");
+	gtk_widget_set_tooltip_text(Interface.checkConstantDEThreshold, "Switches to constant DE threshold mode\nDetail size not depends on image resolution and perspective depthness");
 }
 
 bool ReadComandlineParams(int argc, char *argv[])
