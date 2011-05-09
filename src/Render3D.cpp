@@ -13,6 +13,10 @@
 #define HAVE_BOOLEAN  /* prevent jmorecfg.h from redefining it */
 #endif
 
+#ifndef WIN32
+#include <sys/time.h>
+#endif
+
 #include <cstdio>
 #include <string.h>
 #include <cstdlib>
@@ -56,7 +60,9 @@ double real_clock(void)
 #ifdef WIN32 /* WINDOWS */
 	return (double) clock() / CLOCKS_PER_SEC;
 #else               /*other unix - try sysconf*/
-	return (double) clock() / CLOCKS_PER_SEC / NR_THREADS;
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	return tv.tv_sec + 1e-6 * tv.tv_usec;
 #endif  /* WINDOWS */
 }
 
