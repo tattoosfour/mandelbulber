@@ -1460,7 +1460,7 @@ void CreateInterface(sParamRender *default_settings)
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL v3\n"
 		"www: http://sites.google.com/site/mandelbulber/home\n"
-		"thanks to: Knighty, Makemeunsee, Marius Schilder, Ryan Hitchman"
+		"thanks to: Knighty, Makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler"
 	);
 
 	//sliders
