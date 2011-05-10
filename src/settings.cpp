@@ -720,12 +720,6 @@ bool LoadOneSetting(char* str1, char *str2, sParamRender &params, bool disableMe
 
 void LoadSettingsPost(sParamRender &params)
 {
-	params.doubles.max_y = 20.0 / params.doubles.zoom;
-	params.doubles.resolution = 1.0 / params.image_width;
-
-	if (params.fractal.formula == 1) params.fractal.analitycDE = true;
-	else params.fractal.analitycDE = false;
-
 	if (!paletteLoadedFromSettingsFile)
 	{
 		printf("Palette not found in settings file. Generating random palette\n");
