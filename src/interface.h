@@ -616,6 +616,7 @@ struct sNoGUIdata
 	int endFrame;
 	enumImageFormat imageFormat;
 	sParamRender fractparams;
+	std::vector<const char *> overrideStrings;
 };
 //Global variables
 
