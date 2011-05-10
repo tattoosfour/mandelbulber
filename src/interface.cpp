@@ -2397,6 +2397,55 @@ bool ReadComandlineParams(int argc, char *argv[])
 					printf("commandline: wrong image format\n");
 				}
 			}
+			if (strcmp(argv[i], "-res") == 0)
+			{
+				i++;
+				if(i < argc)
+				{
+					int w, h;
+					int res = sscanf(argv[i], "%dx%d", &w, &h);
+					if(res != 2)
+					{
+						printf("commandline: Argument must be -res WWWWxHHHH\n");
+					}
+					else
+					{
+						static char width_override[100], height_override[100];
+						snprintf(width_override, sizeof(width_override), "image_width=%d", w);
+						snprintf(height_override, sizeof(height_override), "image_height=%d", h);
+						noGUIdata.overrideStrings.push_back(width_override);
+						noGUIdata.overrideStrings.push_back(height_override);
+						continue;
+					}
+				}
+				else
+				{
+					printf("commandline: Argument must be -res WWWWxHHHH\n");
+				}
+			}
+			if (strcmp(argv[i], "-fpk") == 0)
+			{
+				i++;
+				if(i < argc)
+				{
+					int fpk = atoi(argv[i]);
+					if(fpk <= 0)
+					{
+						printf("commandline: argument must be -fpk NNN\n");
+					}
+					else
+					{
+						static char fpk_override[100];
+						snprintf(fpk_override, sizeof(fpk_override), "frames_per_keyframe=%d", fpk);
+						noGUIdata.overrideStrings.push_back(fpk_override);
+						continue;
+					}
+				}
+				else
+				{
+					printf("commandline: argument must be -fpk NNN\n");
+				}
+			}
 			if (strcmp(argv[i], "-o") == 0)
 			{
 				i++;
