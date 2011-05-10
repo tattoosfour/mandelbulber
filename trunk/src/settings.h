@@ -14,6 +14,8 @@ void fprintfDot(FILE *file, const char *string, double value);
 double atof2(char *str, bool locale_dot);
 void SaveSettings(char *filename, const sParamRender &params);
 bool LoadSettings(char *filename, sParamRender &params, bool disableMessages = false);
+bool LoadOneSetting(char *str1, char *s2, sParamRender &params, bool disableMessages = false);
+void LoadSettingsPost(sParamRender &params);
 void DefaultValues(sParamRender &params);
 void IFSToMorph(double *IFSdouble, const sFractal &fractal);
 void MorphToIFS(double *IFSdouble, sFractal &fractal);
