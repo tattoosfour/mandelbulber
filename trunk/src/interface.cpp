@@ -520,7 +520,6 @@ void ReadInterface(sParamRender *params)
 			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox) params->fractal.analitycDE = true;
 	else params->fractal.analitycDE = false;
 
-	params->doubles.max_y = 20.0 / params->doubles.zoom;
 	params->doubles.resolution = 1.0 / params->image_width;
 
 	params->quiet = false;
