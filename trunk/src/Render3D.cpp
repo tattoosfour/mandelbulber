@@ -1165,6 +1165,7 @@ int main(int argc, char *argv[])
 			else
 			{
 				LoadOneSetting(str1, str2, noGUIdata.fractparams);
+				printf("Prameter overrided: %s = %s\n", str1, str2);
 			}
 		}
 		if(!noGUIdata.overrideStrings.empty())
