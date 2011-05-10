@@ -370,6 +370,28 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 		fclose(fileSettings);
 		LoadSettingsPost(params);
 
+		//overriding of parameters defined by command line
+		for(std::vector<const char *>::const_iterator it=noGUIdata.overrideStrings.begin();
+				it != noGUIdata.overrideStrings.end(); it++)
+		{
+			char str1[100], str2[2000];
+			int c = sscanf(*it, "%99[^= \t]%*1[= ]%1999s", str1, str2);
+			if(c != 2)
+			{
+				printf("Warning! Bad override string: %s [c=%d]\n", *it, c);
+				WriteLog("Warning! Bad override string:");
+				WriteLog(*it);
+			}
+			else
+			{
+				LoadOneSetting(str1, str2, params);
+				printf("Prameter overrided: %s = %s\n", str1, str2);
+			}
+		}
+		if(!noGUIdata.overrideStrings.empty())
+			LoadSettingsPost(params);
+
+		//checking number of lines in loaded file
 		if (lineCounter != 302)
 		{
 			printf("number of lines in settings file (should be 302): %d\n", lineCounter);
