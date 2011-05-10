@@ -2395,6 +2395,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 				else
 				{
 					printf("commandline: wrong image format\n");
+					goto bad_arg;
 				}
 			}
 			if (strcmp(argv[i], "-res") == 0)
@@ -2407,6 +2408,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 					if(res != 2)
 					{
 						printf("commandline: Argument must be -res WWWWxHHHH\n");
+						goto bad_arg;
 					}
 					else
 					{
@@ -2421,6 +2423,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 				else
 				{
 					printf("commandline: Argument must be -res WWWWxHHHH\n");
+					goto bad_arg;
 				}
 			}
 			if (strcmp(argv[i], "-fpk") == 0)
@@ -2432,6 +2435,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 					if(fpk <= 0)
 					{
 						printf("commandline: argument must be -fpk NNN\n");
+						goto bad_arg;
 					}
 					else
 					{
@@ -2444,6 +2448,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 				else
 				{
 					printf("commandline: argument must be -fpk NNN\n");
+					goto bad_arg;
 				}
 			}
 			if (strcmp(argv[i], "-o") == 0)
@@ -2461,6 +2466,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 			}
 			if (i < argc - 1 || (strcmp(argv[i], "-help") == 0))
 			{
+bad_arg:
 				printf("commandline: wrong parameters\n");
 				printf("Syntax:\nmandelbulber [options...] [settings_file]\n");
 				printf("options:\n");
