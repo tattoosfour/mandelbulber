@@ -2397,6 +2397,19 @@ bool ReadComandlineParams(int argc, char *argv[])
 					printf("commandline: wrong image format\n");
 				}
 			}
+			if (strcmp(argv[i], "-o") == 0)
+			{
+				i++;
+				if(i < argc)
+				{
+					noGUIdata.overrideStrings.push_back(argv[i]);
+					continue;
+				}
+				else
+				{
+					printf("commandline: need override argument after -o\n");
+				}
+			}
 			if (i < argc - 1 || (strcmp(argv[i], "-help") == 0))
 			{
 				printf("commandline: wrong parameters\n");
@@ -2408,6 +2421,7 @@ bool ReadComandlineParams(int argc, char *argv[])
 				printf("  -keyframe       - render keyframe animation\n");
 				printf("  -start N        - start renderig from frame number N\n");
 				printf("  -end            - rendering will end on frame number N\n");
+				printf("  -o key=value    - override item 'key' from settings file with new value 'value'\n");
 				printf("  -format FORMAT  - image output format\n");
 				printf("     jpg - JPEG format\n");
 				printf("     png - PNG format\n");
