@@ -14,6 +14,7 @@
  */
 
 #include <cstdlib>
+#include <locale.h>
 
 #include "files.h"
 #include "interface.h"
@@ -28,37 +29,14 @@ bool paletteLoadedFromSettingsFile = false;
 
 void fprintfDot(FILE *file, const char *string, double value)
 {
-	char str[100];
-
-	int length = sprintf(str, "%s %.16lg;\n", string, value);
-
-	for (int i = 0; i < length; i++)
-	{
-		if (str[i] == ',')
-		{
-			str[i] = '.';
-		}
-	}
-	fprintf(file, "%s", str);
+	char str[G_ASCII_DTOSTR_BUF_SIZE];
+	g_ascii_dtostr(str, sizeof(str), value);
+	fprintf(file, "%s %s;\n", string, str);
 }
 
 double atof2(char *str, bool locale_dot)
 {
-	double val;
-	if (!locale_dot)
-	{
-		int length = strlen(str);
-		for (int i = 0; i < length; i++)
-		{
-			if (str[i] == '.')
-			{
-				str[i] = ',';
-			}
-		}
-	}
-
-	val = atof(str);
-	return val;
+	return g_ascii_strtod(str, NULL);
 }
 
 void MakePaletteString(const sRGB *palette, char *paletteString)
