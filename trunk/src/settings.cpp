@@ -368,7 +368,6 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 			}
 		}
 		fclose(fileSettings);
-		LoadSettingsPost(params);
 
 		//overriding of parameters defined by command line
 		for(std::vector<const char *>::const_iterator it=noGUIdata.overrideStrings.begin();
@@ -388,8 +387,8 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 				printf("Prameter overrided: %s = %s\n", str1, str2);
 			}
 		}
-		if(!noGUIdata.overrideStrings.empty())
-			LoadSettingsPost(params);
+
+		LoadSettingsPost(params);
 
 		//checking number of lines in loaded file
 		if (lineCounter != 302)
