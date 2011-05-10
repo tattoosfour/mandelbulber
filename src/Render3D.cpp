@@ -21,6 +21,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <unistd.h>
+#include <locale.h>
 
 #include "Render3D.h"
 #include "files.h"
@@ -1060,6 +1061,8 @@ int main(int argc, char *argv[])
 	//read $home env variable
 	char *homedir;
 	char data_directory[1000];
+
+	setlocale(LC_ALL, "");
 
 #ifdef WIN32 /* WINDOWS */
 	homedir = getenv("USERPROFILE");
