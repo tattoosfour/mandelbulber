@@ -1148,6 +1148,24 @@ int main(int argc, char *argv[])
 			noGUIsettingsLoaded = true;
 			WriteLog("Parameters loaded in noGUI mode");
 		}
+		for(std::vector<const char *>::const_iterator it=noGUIdata.overrideStrings.begin();
+				it != noGUIdata.overrideStrings.end(); it++)
+		{
+			char str1[100], str2[2000];
+			int c = sscanf(*it, "%99[^= \t]%*1[= ]%1999s", str1, str2);
+			if(c != 2)
+			{
+				printf("Warning! Bad override string: %s [c=%d]\n", *it, c);
+				WriteLog("Warning! Bad override string:");
+				WriteLog(*it);
+			}
+			else
+			{
+				LoadOneSetting(str1, str2, noGUIdata.fractparams);
+			}
+		}
+		if(!noGUIdata.overrideStrings.empty())
+			LoadSettingsPost(noGUIdata.fractparams);
 	}
 
 #ifdef WIN32 /* WINDOWS */
