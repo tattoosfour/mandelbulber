@@ -36,7 +36,17 @@ void fprintfDot(FILE *file, const char *string, double value)
 
 double atof2(char *str)
 {
-	return g_ascii_strtod(str, NULL);
+	char *end;
+	double v = g_ascii_strtod(str, &end);
+	if(end && *end == localeconv()->decimal_point[0])
+	{
+		// end did not point to the string's terminating NUL,
+		// but to the radix character of the user's locale.
+		// This must be a "-o" commandline- setting, so convert
+		// the value using locale-aware strtod
+		v = strtod(str, NULL);
+	}
+	return v;
 }
 
 void MakePaletteString(const sRGB *palette, char *paletteString)
