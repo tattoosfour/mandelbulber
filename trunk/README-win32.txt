@@ -1,4 +1,4 @@
-MANDELBULBER 1.0 - win32
+MANDELBULBER 1.01 - win32
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman
@@ -41,20 +41,23 @@ Please download user manual: http://sourceforge.net/projects/mandelbulber/files/
 
 command-line mode:
 
-Syntax:
+Syntax:                                                                                              
 mandelbulber [options...] [settings_file]
 options:
-  -nogui          - start program without GUI
-  -lowmem         - start program in low memory mode
-  -flight         - render flight animation
-  -keyframe       - render keyframe animation
-  -start N        - start renderig from frame number N
-  -end N          - rendering will end on frame number N
-  -format FORMAT  - image output format
+  -nogui            - start program without GUI
+  -lowmem           - low memory usage mode
+  -flight           - render flight animation
+  -keyframe         - render keyframe animation
+  -start N          - start renderig from frame number N
+  -end N            - rendering will end on frame number N
+  -o key=value      - override item 'key' from settings file with new value 'value'
+  -res WIDTHxHEIGHT - override image resolution
+  -fpk N            - override frames per key parameter
+  -format FORMAT    - image output format
      jpg - JPEG format
      png - PNG format
      png16 - 16-bit PNG format
      png16alpha - 16-bit PNG with alpha channel format
-[settings_file] - file with fractal settings (program also tries
+[settings_file]     - file with fractal settings (program also tries
 to find file in ./mandelbulber/settings directory)
 When settings_file is put as command argument then program will start in noGUI mode

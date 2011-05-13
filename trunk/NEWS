@@ -1,5 +1,16 @@
 Version history
 
+v1.01
+- added Smooth Mandelbox formula
+- added function which scans for optimal DE factor
+- possible to stop program during rendering visible lights
+- shadows for auxiliary lights can be disabled
+- rendering time is displayed as a real time instead of a cpu time
+- command line: possible to set image resolution ("-res WIDTHxHEIGHT") and frames per key value ("-fpk N")
+- command line: possible to override value ("-o key=value") of any parameter (names from settings files)
+- fixed bug: there was high CPU load during moving of main render window
+- fixed bug: memory access violation in fractal.cpp (hybrid formula sequence)
+
 v1.0
 
 - Fixed memory leak in ThumbnailRender()
