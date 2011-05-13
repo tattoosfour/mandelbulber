@@ -1936,6 +1936,9 @@ void AutoDEStep(bool highQuality)
 		step /= 2.0;
 		DEfactor -= step;
 
+		DrawHistogram();
+		DrawHistogram2();
+
 		while (gtk_events_pending())
 			gtk_main_iteration();
 
