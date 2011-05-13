@@ -1455,7 +1455,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.label_NavigatorEstimatedDistance = gtk_label_new("Estimated distance to the surface:");
 
-	Interface.label_about = gtk_label_new("Mandelbulber 1.0\n"
+	Interface.label_about = gtk_label_new("Mandelbulber 1.01\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL v3\n"
 		"www: http://sites.google.com/site/mandelbulber/home\n"
