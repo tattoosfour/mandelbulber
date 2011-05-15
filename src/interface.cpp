@@ -309,6 +309,19 @@ void ReadInterface(sParamRender *params)
 		params->doubles.auxLightRandomCenter.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX)));
 		params->doubles.auxLightRandomCenter.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY)));
 		params->doubles.auxLightRandomCenter.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreZ)));
+		params->doubles.volumetricLightQuality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightQuality)));
+		params->doubles.imageAdjustments.volumetricLightIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightIntensity)));
+		params->doubles.volumetricLightIntensity[0] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightMainIntensity)));
+		params->doubles.volumetricLightIntensity[1] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightAux1Intensity)));
+		params->doubles.volumetricLightIntensity[2] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightAux2Intensity)));
+		params->doubles.volumetricLightIntensity[3] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightAux3Intensity)));
+		params->doubles.volumetricLightIntensity[4] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricLightAux4Intensity)));
+		params->volumetricLightEnabled[0] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightMainEnabled));
+		params->volumetricLightEnabled[1] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux1Enabled));
+		params->volumetricLightEnabled[2] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux2Enabled));
+		params->volumetricLightEnabled[3] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux3Enabled));
+		params->volumetricLightEnabled[4] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled));
+
 		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)));
 		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa))) / 180.0 * M_PI;
 		params->fractal.IFS.doubles.rotationBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSBeta))) / 180.0 * M_PI;
@@ -682,6 +695,14 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowFoldingFactor), DoubleToString(params->fractal.doubles.FoldingIntPowFoldFactor));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_FoldingIntPowZFactor), DoubleToString(params->fractal.doubles.FoldingIntPowZfactor));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightMainIntensity), DoubleToString(params->doubles.volumetricLightIntensity[0]));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightAux1Intensity), DoubleToString(params->doubles.volumetricLightIntensity[1]));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightAux2Intensity), DoubleToString(params->doubles.volumetricLightIntensity[2]));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightAux3Intensity), DoubleToString(params->doubles.volumetricLightIntensity[3]));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightAux4Intensity), DoubleToString(params->doubles.volumetricLightIntensity[4]));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightQuality), DoubleToString(params->doubles.volumetricLightQuality));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightIntensity), DoubleToString(params->doubles.imageAdjustments.volumetricLightIntensity));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -712,6 +733,11 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDECorrectionMode), params->fractal.dynamicDEcorrection);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDELinearMode), params->fractal.linearDEmode);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkConstantDEThreshold), params->fractal.constantDEThreshold);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightMainEnabled), params->volumetricLightEnabled[0]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux1Enabled), params->volumetricLightEnabled[1]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux2Enabled), params->volumetricLightEnabled[2]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux3Enabled), params->volumetricLightEnabled[3]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled), params->volumetricLightEnabled[4]);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1082,6 +1108,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxMandelboxColor2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor3 = gtk_hbox_new(FALSE, 1);
 	Interface.boxViewDistance = gtk_hbox_new(FALSE, 1);
+	Interface.boxVolumetricLight = gtk_vbox_new(FALSE, 1);
+	Interface.boxVolumetricLightGeneral = gtk_hbox_new(FALSE, 1);
+	Interface.boxVolumetricLightMain = gtk_hbox_new(FALSE, 1);
+	Interface.boxVolumetricLightAux = gtk_hbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1128,6 +1158,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMandelboxMainParams = gtk_frame_new("Main Mandelbox parameters");
 	Interface.frMandelboxRotations = gtk_frame_new("Rotation of Mandelbox folding planes");
 	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
+	Interface.frVolumetricLight = gtk_frame_new("Volumetric light");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1332,6 +1363,14 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_viewMaxDistance = gtk_entry_new();
 	Interface.edit_FractalConstantFactor = gtk_entry_new();
 
+	Interface.edit_volumetricLightQuality = gtk_entry_new();
+	Interface.edit_volumetricLightIntensity = gtk_entry_new();
+	Interface.edit_volumetricLightMainIntensity = gtk_entry_new();
+	Interface.edit_volumetricLightAux1Intensity = gtk_entry_new();
+	Interface.edit_volumetricLightAux2Intensity = gtk_entry_new();
+	Interface.edit_volumetricLightAux3Intensity = gtk_entry_new();
+	Interface.edit_volumetricLightAux4Intensity = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1411,6 +1450,11 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkDECorrectionMode = gtk_check_button_new_with_label("Dynamic DE correction");
 	Interface.checkDELinearMode = gtk_check_button_new_with_label("Linear DE mode");
 	Interface.checkConstantDEThreshold = gtk_check_button_new_with_label("Const. DE threshold");
+	Interface.checkVolumetricLightMainEnabled = gtk_check_button_new_with_label("Enable");
+	Interface.checkVolumetricLightAux1Enabled = gtk_check_button_new_with_label("");
+	Interface.checkVolumetricLightAux2Enabled = gtk_check_button_new_with_label("");
+	Interface.checkVolumetricLightAux3Enabled = gtk_check_button_new_with_label("");
+	Interface.checkVolumetricLightAux4Enabled = gtk_check_button_new_with_label("");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1946,6 +1990,28 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "intensity:", 12, Interface.edit_auxLightPre4intensity), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.buColorAuxLightPre4, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.checkAuxLightPre4Enabled, false, false, 1);
+
+	//frame: volumetric lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frVolumetricLight, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frVolumetricLight), Interface.boxVolumetricLight);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightGeneral, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightGeneral), CreateEdit("5,0", "Effect quality:", 12, Interface.edit_volumetricLightQuality), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightGeneral), CreateEdit("1,0", "Effect intensity (post tunning):", 12, Interface.edit_volumetricLightIntensity), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightMain, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), CreateEdit("1,0", "Intensity for main light:", 12, Interface.edit_volumetricLightMainIntensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), Interface.checkVolumetricLightMainEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightAux, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #1:", 12, Interface.edit_volumetricLightAux1Intensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux1Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #2:", 12, Interface.edit_volumetricLightAux2Intensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux2Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #3:", 12, Interface.edit_volumetricLightAux3Intensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux3Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #4:", 12, Interface.edit_volumetricLightAux4Intensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux4Enabled, false, false, 1);
 
 	//tab IFS
 	//frame: main IFS
