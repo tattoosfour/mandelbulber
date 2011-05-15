@@ -1893,6 +1893,8 @@ void AutoDEStep(bool highQuality)
 	fractParams.auxLightPre3Enabled = false;
 	fractParams.auxLightPre4Enabled = false;
 	fractParams.fractal.iterThresh = false;
+	for(int i=0; i<5; i++)
+		fractParams.volumetricLightEnabled[i] = false;
 	if (fractParams.fractal.N < 200) fractParams.fractal.N = 200;
 	if (fractParams.fractal.limits_enabled) return;
 

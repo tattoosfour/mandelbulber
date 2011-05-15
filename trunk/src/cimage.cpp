@@ -143,9 +143,9 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float
 	int glowG = (ecol.glow_color1.G * glowN + ecol.glow_color2.G * glow);
 	int glowB = (ecol.glow_color1.B * glowN + ecol.glow_color2.B * glow);
 
-	col.R = col.R * (1.0 - glow) + glowR * glow;
-	col.G = col.G * (1.0 - glow) + glowG * glow;
-	col.B = col.B * (1.0 - glow) + glowB * glow;
+	col.R = col.R * (1.0 - glow) + glowR * glow + pixel.volumetricFog.R * 16.0 * adj.volumetricLightIntensity;
+	col.G = col.G * (1.0 - glow) + glowG * glow + pixel.volumetricFog.G * 16.0 * adj.volumetricLightIntensity;
+	col.B = col.B * (1.0 - glow) + glowB * glow + pixel.volumetricFog.B * 16.0 * adj.volumetricLightIntensity;
 	alpha2 += 65535.0 * glow;
 	if (alpha2 > 65535) alpha2 = 65535;
 

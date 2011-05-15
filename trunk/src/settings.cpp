@@ -323,6 +323,15 @@ void SaveSettings(char *filename, const sParamRender& params)
 	fprintf(fileSettings, "linear_DE_mode %d;\n", params.fractal.linearDEmode);
 	fprintf(fileSettings, "constant_DE_threshold %d;\n", params.fractal.constantDEThreshold);
 
+	fprintfDot(fileSettings, "volumetric_light_intensity", params.doubles.imageAdjustments.volumetricLightIntensity);
+	fprintfDot(fileSettings, "volumetric_light_quality", params.doubles.volumetricLightQuality);
+	for(int i=0; i<5; i++)
+	{
+		fprintf(fileSettings, "volumetric_light_intensity_%d", i);
+		fprintfDot(fileSettings, "", params.doubles.volumetricLightIntensity[i]);
+		fprintf(fileSettings, "volumetric_light_enabled_%d %d;\n", i, params.volumetricLightEnabled[i]);
+	}
+
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
 	fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
@@ -391,9 +400,9 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 		LoadSettingsPost(params);
 
 		//checking number of lines in loaded file
-		if (lineCounter != 302)
+		if (lineCounter != 314)
 		{
-			printf("number of lines in settings file (should be 302): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 314): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -672,6 +681,9 @@ bool LoadOneSetting(char* str1, char *str2, sParamRender &params, bool disableMe
 	else if (!strcmp(str1, "FoldingIntPow_folding_factor")) params.fractal.doubles.FoldingIntPowFoldFactor = atof2(str2);
 	else if (!strcmp(str1, "FoldingIntPow_z_factor")) params.fractal.doubles.FoldingIntPowZfactor = atof2(str2);
 
+	else if (!strcmp(str1, "volumetric_light_intensity")) params.doubles.imageAdjustments.volumetricLightIntensity = atof2(str2);
+	else if (!strcmp(str1, "volumetric_light_quality")) params.doubles.volumetricLightQuality = atof2(str2);
+
 	else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 	else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
 	else if (!strcmp(str1, "file_envmap")) strcpy(params.file_envmap, str2);
@@ -684,22 +696,41 @@ bool LoadOneSetting(char* str1, char *str2, sParamRender &params, bool disableMe
 	{
 		int matched = false;
 		char buf[100];
-		for (int i = 1; i <= HYBRID_COUNT; ++i) {
-			sprintf(buf, "hybrid_formula_%d", i);
+		for (int i = 0; i < 5; ++i) {
+			sprintf(buf, "volumetric_light_enabled_%d", i);
 			if (!strcmp(str1, buf)) {
-				params.fractal.hybridFormula[i-1] = (enumFractalFormula) atoi(str2);
+				params.volumetricLightEnabled[i] = atoi(str2);
+				matched = true;
+				break;
+			}
+			sprintf(buf, "volumetric_light_intensity_%d", i);
+			if (!strcmp(str1, buf)) {
+				params.doubles.volumetricLightIntensity[i] = atof2(str2);
+				matched = true;
+				break;
+			}
+		}
+
+		for (int i = 1; i <= HYBRID_COUNT; ++i)
+		{
+			sprintf(buf, "hybrid_formula_%d", i);
+			if (!strcmp(str1, buf))
+			{
+				params.fractal.hybridFormula[i - 1] = (enumFractalFormula) atoi(str2);
 				matched = true;
 				break;
 			}
 			sprintf(buf, "hybrid_iterations_%d", i);
-			if (!strcmp(str1, buf)) {
-				params.fractal.hybridIters[i-1] = atoi(str2);
+			if (!strcmp(str1, buf))
+			{
+				params.fractal.hybridIters[i - 1] = atoi(str2);
 				matched = true;
 				break;
 			}
 			sprintf(buf, "hybrid_power_%d", i);
-			if (!strcmp(str1, buf)) {
-				params.fractal.doubles.hybridPower[i-1] = atof2(str2);
+			if (!strcmp(str1, buf))
+			{
+				params.fractal.doubles.hybridPower[i - 1] = atof2(str2);
 				matched = true;
 				break;
 			}
@@ -964,6 +995,14 @@ void DefaultValues(sParamRender &params)
 	params.doubles.viewDistanceMax = 50;
 
 	params.fractal.doubles.constantFactor = 1.0;
+
+	params.doubles.imageAdjustments.volumetricLightIntensity = 1.0;
+	params.doubles.volumetricLightQuality = 5.0;
+	for(int i=0; i<5; i++)
+	{
+		params.doubles.volumetricLightIntensity[i]=1.0;
+		params.volumetricLightEnabled[i] = false;
+	}
 
 	params.quiet = false;
 

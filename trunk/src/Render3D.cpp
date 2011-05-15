@@ -497,23 +497,19 @@ void *MainThread(void *ptr)
 					sComplexImage pixelData;
 					memset(&pixelData,0,sizeof(sComplexImage));
 
+					CVector3 lightVector = vDelta;
+
+					double y = y_start;
+					CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
+					double wsp_persp = 1.0 + y * persp;
+
+					viewVectorEnd = point;
+					CVector3 viewVector = viewVectorEnd - viewVectorStart;
+					viewVector.Normalize();
 					//if fractal surface was found
 					if (found)
 					{
 						//-------------------- SHADING ----------------------
-						double y = y_start;
-
-						CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
-						double wsp_persp = 1.0 + y * persp;
-
-						viewVectorEnd = point;
-
-						CVector3 viewVector = viewVectorEnd - viewVectorStart;
-						viewVector.Normalize();
-
-						CVector3 lightVector = vDelta;
-						//sVector lightVector = { -0.702, -0.702, -0.702 };
-
 						//normal vector
 						CVector3 vn = CalculateNormals(&param, &calcParam, point, dist_thresh);
 
@@ -722,6 +718,62 @@ void *MainThread(void *ptr)
 					//drawing transparent glow
 					if(!image->IsLowMemMode()) image->PutPixelGlow(x, z, counter);
 					pixelData.glowBuf16 = counter;
+
+					//************* volumetric fog
+					double tempDist = last_distance;
+					sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+
+					bool volFogEnabled = false;
+					for (int i = 0; i < 5; i++)
+					{
+						if (param.volumetricLightEnabled[i]) volFogEnabled = true;
+					}
+
+					if (volFogEnabled)
+					{
+						for (double scan = y; scan > min_y; scan -= tempDist / zoom)
+						{
+							CVector3 pointTemp = Projection3D(CVector3(x2, scan, z2), vp, mRot, perspectiveType, fov, zoom);
+							double wsp_perspTemp = 1.0 + scan * persp;
+							double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
+							tempDist = CalculateDistance(pointTemp, calcParam, &max_iter) * DE_factor / param.doubles.volumetricLightQuality + dist_threshTemp;
+
+							for(int i=0; i<5; i++)
+							{
+								if (i == 0 &&  param.volumetricLightEnabled[0])
+								{
+									sShaderOutput shadowOutputTemp = MainShadow(&param, &calcParam, pointTemp, lightVector, wsp_perspTemp, dist_threshTemp);
+									volFog.R += 100.0 * shadowOutputTemp.R * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.R / 65536.0;
+									volFog.G += 100.0 * shadowOutputTemp.G * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.G / 65536.0;
+									volFog.B += 100.0 * shadowOutputTemp.B * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.B / 65536.0;
+								}
+								if(i>0)
+								{
+									if(Lights[i-1].enabled && param.volumetricLightEnabled[i])
+									{
+										CVector3 d = Lights[i-1].position - pointTemp;
+										double distance = d.Length();
+										double distance2 = distance * distance;
+										CVector3 lightVectorTemp = d;
+										lightVectorTemp.Normalize();
+										double light = AuxShadow(&param, &calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp);
+										volFog.R += 1000.0 * light * Lights[i-1].colour.R/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
+										volFog.G += 1000.0 * light * Lights[i-1].colour.G/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
+										volFog.B += 1000.0 * light * Lights[i-1].colour.B/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
+									}
+								}
+							}
+						}
+					}
+					if(volFog.R>65535.0) volFog.R = 65535.0;
+					if(volFog.G>65535.0) volFog.G = 65535.0;
+					if(volFog.B>65535.0) volFog.B = 65535.0;
+
+					pixelData.volumetricFog.R = volFog.R;
+					pixelData.volumetricFog.G = volFog.G;
+					pixelData.volumetricFog.B = volFog.B;
+					//printf("volfog = %g\n", volFog);
+					image->PutPixelVolumetricFog(x, z, pixelData.volumetricFog);
 
 					if(image->IsLowMemMode())
 					{

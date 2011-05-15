@@ -53,6 +53,8 @@ struct sParamRenderD
 	double stereoEyeDistance;
 	double viewDistanceMin;
 	double viewDistanceMax;
+	double volumetricLightQuality;
+	double volumetricLightIntensity[5];
 
 	sImageAdjustments imageAdjustments;
 };
@@ -98,6 +100,7 @@ struct sParamRender
 	bool auxLightPre2Enabled;
 	bool auxLightPre3Enabled;
 	bool auxLightPre4Enabled;
+	bool volumetricLightEnabled[5];
 	bool soundEnabled;
 	bool stereoEnabled;
 	bool quiet;

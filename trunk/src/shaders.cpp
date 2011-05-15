@@ -271,31 +271,9 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	//calculate shadow
 	if ((shade > 0.01 || shade2 > 0.01) && fractParams->shadow)
 	{
-		double delta = fractParams->doubles.resolution * fractParams->doubles.zoom * wsp_persp;
-		double stepFactor = 1.0;
-		double step = delta * fractParams->doubles.DE_factor * stepFactor;
-		double dist = step;
-		for (double i = dist_thresh; i < distance; i += dist * stepFactor * fractParams->doubles.DE_factor)
-		{
-			CVector3 point2 = point + lightVector * i;
-
-			bool max_iter;
-			dist = CalculateDistance(point2, *calcParam, &max_iter);
-			if (fractParams->fractal.iterThresh)
-			{
-				if (dist < dist_thresh && !max_iter)
-				{
-					dist = dist_thresh * 1.01;
-				}
-			}
-			if (dist < 0.5 * dist_thresh || max_iter)
-			{
-				shade = 0;
-				shade2 = 0;
-				break;
-			}
-		}
-
+		double light = AuxShadow(fractParams, calcParam, wsp_persp, dist_thresh, distance, point, lightVector);
+		shade *= light;
+		shade2 *= light;
 	}
 	else
 	{
@@ -315,6 +293,35 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	outSpecular->B = shade2 * light.colour.B / 65536.0;
 
 	return shading;
+}
+
+double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector)
+{
+	double delta = fractParams->doubles.resolution * fractParams->doubles.zoom * wsp_persp;
+	double stepFactor = 1.0;
+	double step = delta * fractParams->doubles.DE_factor * stepFactor;
+	double dist = step;
+	double light = 1.0;
+	for (double i = dist_thresh; i < distance; i += dist * stepFactor * fractParams->doubles.DE_factor)
+	{
+		CVector3 point2 = point + lightVector * i;
+
+		bool max_iter;
+		dist = CalculateDistance(point2, *calcParam, &max_iter);
+		if (fractParams->fractal.iterThresh)
+		{
+			if (dist < dist_thresh && !max_iter)
+			{
+				dist = dist_thresh * 1.01;
+			}
+		}
+		if (dist < 0.5 * dist_thresh || max_iter)
+		{
+			light = 0.0;
+			break;
+		}
+	}
+	return light;
 }
 
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined)

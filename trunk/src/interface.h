@@ -180,6 +180,10 @@ struct sInterface
 	GtkWidget *boxMandelboxColor3;
 	GtkWidget *boxViewDistance;
 	GtkWidget *boxIFSDefaults;
+	GtkWidget *boxVolumetricLight;
+	GtkWidget *boxVolumetricLightGeneral;
+	GtkWidget *boxVolumetricLightMain;
+	GtkWidget *boxVolumetricLightAux;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -224,6 +228,7 @@ struct sInterface
 	GtkWidget *frFractalFolding;
 	GtkWidget *frFractalRayMarching;
 	GtkWidget *frFractalFoldingIntPow;
+	GtkWidget *frVolumetricLight;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -408,6 +413,13 @@ struct sInterface
 	GtkWidget *edit_FoldingIntPowZFactor;
 	GtkWidget *edit_FoldingIntPowFoldingFactor;
 	GtkWidget *edit_roughness;
+	GtkWidget *edit_volumetricLightQuality;
+	GtkWidget *edit_volumetricLightIntensity;
+	GtkWidget *edit_volumetricLightMainIntensity;
+	GtkWidget *edit_volumetricLightAux1Intensity;
+	GtkWidget *edit_volumetricLightAux2Intensity;
+	GtkWidget *edit_volumetricLightAux3Intensity;
+	GtkWidget *edit_volumetricLightAux4Intensity;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -482,6 +494,11 @@ struct sInterface
 	GtkWidget *checkDECorrectionMode;
 	GtkWidget *checkDELinearMode;
 	GtkWidget *checkConstantDEThreshold;
+	GtkWidget *checkVolumetricLightMainEnabled;
+	GtkWidget *checkVolumetricLightAux1Enabled;
+	GtkWidget *checkVolumetricLightAux2Enabled;
+	GtkWidget *checkVolumetricLightAux3Enabled;
+	GtkWidget *checkVolumetricLightAux4Enabled;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
