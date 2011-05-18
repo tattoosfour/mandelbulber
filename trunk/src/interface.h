@@ -499,6 +499,7 @@ struct sInterface
 	GtkWidget *checkVolumetricLightAux2Enabled;
 	GtkWidget *checkVolumetricLightAux3Enabled;
 	GtkWidget *checkVolumetricLightAux4Enabled;
+	GtkWidget *checkPenetratingLights;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

@@ -101,6 +101,7 @@ struct sParamRender
 	bool auxLightPre3Enabled;
 	bool auxLightPre4Enabled;
 	bool volumetricLightEnabled[5];
+	bool penetratingLights;
 	bool soundEnabled;
 	bool stereoEnabled;
 	bool quiet;

@@ -271,7 +271,7 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	//calculate shadow
 	if ((shade > 0.01 || shade2 > 0.01) && fractParams->shadow)
 	{
-		double light = AuxShadow(fractParams, calcParam, wsp_persp, dist_thresh, distance, point, lightVector);
+		double light = AuxShadow(fractParams, calcParam, wsp_persp, dist_thresh, distance, point, lightVector, fractParams->penetratingLights);
 		shade *= light;
 		shade2 *= light;
 	}
@@ -295,7 +295,7 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	return shading;
 }
 
-double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector)
+double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector, bool linear)
 {
 	double delta = fractParams->doubles.resolution * fractParams->doubles.zoom * wsp_persp;
 	double stepFactor = 1.0;
@@ -317,7 +317,14 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 		}
 		if (dist < 0.5 * dist_thresh || max_iter)
 		{
-			light = 0.0;
+			if(linear)
+			{
+				light = i/distance;
+			}
+			else
+			{
+				light = 0.0;
+			}
 			break;
 		}
 	}

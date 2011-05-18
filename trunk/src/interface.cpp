@@ -321,6 +321,7 @@ void ReadInterface(sParamRender *params)
 		params->volumetricLightEnabled[2] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux2Enabled));
 		params->volumetricLightEnabled[3] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux3Enabled));
 		params->volumetricLightEnabled[4] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled));
+		params->penetratingLights = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPenetratingLights));
 
 		params->fractal.IFS.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSScale)));
 		params->fractal.IFS.doubles.rotationAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSAlfa))) / 180.0 * M_PI;
@@ -738,6 +739,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux2Enabled), params->volumetricLightEnabled[2]);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux3Enabled), params->volumetricLightEnabled[3]);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled), params->volumetricLightEnabled[4]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPenetratingLights), params->penetratingLights);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1455,6 +1457,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkVolumetricLightAux2Enabled = gtk_check_button_new_with_label("");
 	Interface.checkVolumetricLightAux3Enabled = gtk_check_button_new_with_label("");
 	Interface.checkVolumetricLightAux4Enabled = gtk_check_button_new_with_label("");
+	Interface.checkPenetratingLights = gtk_check_button_new_with_label("Penetrating lights");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1939,6 +1942,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Main light intensity:", 6, Interface.edit_mainLightIntensity), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Auxiliary lights intensity:", 6, Interface.edit_auxLightIntensity), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Lights visibility:", 6, Interface.edit_auxLightVisibility), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), Interface.checkPenetratingLights, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsParameters, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLightsParameters), Interface.boxLightsParameters);
