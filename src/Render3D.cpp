@@ -756,7 +756,7 @@ void *MainThread(void *ptr)
 										double distance2 = distance * distance;
 										CVector3 lightVectorTemp = d;
 										lightVectorTemp.Normalize();
-										double light = AuxShadow(&param, &calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp);
+										double light = AuxShadow(&param, &calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param.penetratingLights);
 										volFog.R += 1000.0 * light * Lights[i-1].colour.R/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
 										volFog.G += 1000.0 * light * Lights[i-1].colour.G/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
 										volFog.B += 1000.0 * light * Lights[i-1].colour.B/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
