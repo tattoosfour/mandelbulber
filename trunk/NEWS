@@ -1,5 +1,8 @@
 Version history
 
+v1.02
+- added volumetric light effect
+
 v1.01
 - added Smooth Mandelbox formula
 - added function which scans for optimal DE factor

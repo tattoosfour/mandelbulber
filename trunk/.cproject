@@ -493,7 +493,7 @@
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release.630092290" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
 <builder buildPath="${workspace_loc:/mandelbulber2/Release}" id="cdt.managedbuild.target.gnu.builder.exe.release.1904701719" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" parallelizationNumber="-4" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1257493781" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1810903300" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
+<tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1810903300" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 <option id="gnu.cpp.compiler.exe.release.option.optimization.level.778935383" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.more" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.release.option.debugging.level.1873139707" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.optimization.flags.1541106182" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-march=native -mfpmath=387,sse -ffast-math" valueType="string"/>
@@ -506,7 +506,7 @@
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1910366752" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.558616235" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.189014835" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+<tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.189014835" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 <option id="gnu.cpp.link.option.flags.911732937" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`pkg-config --libs gtk+-2.0 gthread-2.0`" valueType="string"/>
 <option id="gnu.cpp.link.option.libs.530854701" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="png"/>
