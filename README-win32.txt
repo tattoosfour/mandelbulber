@@ -1,7 +1,7 @@
-MANDELBULBER 1.01 - win32
+MANDELBULBER 1.02 - win32
 
 project leader: Krzysztof Marczak
-project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman
+project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler
 
 contact: buddhi1980@gmail.com
 www: http://sites.google.com/site/mandelbulber/
