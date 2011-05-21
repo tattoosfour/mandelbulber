@@ -2256,6 +2256,7 @@ void CreateInterface(sParamRender *default_settings)
 	renderRequest = false;
 
   g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
+  g_timeout_add (100,(GSourceFunc)CallerTimerLoopWindowRefresh,NULL);
 
 	gdk_threads_enter();
 	gtk_main();
