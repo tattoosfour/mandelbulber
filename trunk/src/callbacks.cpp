@@ -28,6 +28,9 @@
 double last_navigator_step;
 CVector3 last_keyframe_position;
 bool renderRequest = false;
+bool refreshNeeded = false;
+bool imageCompileNeeded = false;
+bool refreshInNextLoop = false;
 
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 {
@@ -55,6 +58,31 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 		gdk_threads_enter();
 		MainRender();
 		gdk_threads_leave();
+	}
+	return true;
+}
+
+gboolean CallerTimerLoopWindowRefresh(GtkWidget *widget)
+{
+	if(refreshInNextLoop && !refreshNeeded)
+	{
+		refreshInNextLoop = false;
+		if(imageCompileNeeded)
+		{
+			imageCompileNeeded = false;
+			mainImage.CompileImage();
+		}
+
+		mainImage.CreatePreview(Interface_data.imageScale);
+		mainImage.ConvertTo8bit();
+		mainImage.UpdatePreview();
+		mainImage.RedrawInWidget(renderWindow.drawingArea);
+	}
+
+	if(refreshNeeded)
+	{
+		refreshInNextLoop = true;
+		refreshNeeded = false;
 	}
 	return true;
 }
@@ -429,8 +457,8 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 	//NowaPaleta(paleta, 1.0);
 	DrawPalette(mainImage.GetPalettePtr());
 
-	if (!isRendering)
-	{
+	//if (!isRendering)
+	//{
 		mainImage.CompileImage();
 		PostRenderingLights(&mainImage, &params);
 		mainImage.ConvertTo8bit();
@@ -438,7 +466,7 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
-	}
+	//}
 }
 
 void PressedLoadSettings(GtkWidget *widget, gpointer data)
@@ -809,14 +837,7 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 	}
 	Interface_data.imageScale = imageScale;
 
-	gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
-	mainImage.CreatePreview(imageScale);
-	mainImage.ConvertTo8bit();
-	mainImage.UpdatePreview();
-	mainImage.RedrawInWidget(renderWindow.drawingArea);
-
-	while (gtk_events_pending())
-		gtk_main_iteration();
+	refreshNeeded = true;
 }
 
 void ChangedComboFormula(GtkWidget *widget, gpointer data)
@@ -949,6 +970,10 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 	sEffectColours *ecol = mainImage.GetEffectColours();
 	ecol->fogColor = color2;
 
+	imageCompileNeeded = true;
+	refreshNeeded = true;
+
+	/*
 	if (!isRendering)
 	{
 		mainImage.CompileImage();
@@ -958,6 +983,7 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
+	*/
 }
 
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
@@ -1506,15 +1532,9 @@ void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
 	DrawPalette(mainImage.GetPalettePtr());
-	if (!isRendering && !Interface_data.disableInitRefresh)
-	{
-		mainImage.CompileImage();
-		mainImage.ConvertTo8bit();
-		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(renderWindow.drawingArea);
-		while (gtk_events_pending())
-			gtk_main_iteration();
-	}
+
+	imageCompileNeeded = true;
+	refreshNeeded = true;
 }
 
 void PressedRandomPalette(GtkWidget *widget, gpointer data)
