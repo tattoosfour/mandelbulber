@@ -31,12 +31,17 @@ extern int lightsPlaced;
 sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 lightVect, double wsp_persp, double dist_thresh);
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount, CVector3 normal);
+sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point);
 CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh);
 sShaderOutput MainShading(CVector3 normal, CVector3 lightVector);
 sShaderOutput MainSpecular(CVector3 normal, CVector3 lightVector, CVector3 viewVector);
 sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture);
+int SurfaceColour(sFractal *calcParam, CVector3 point);
+sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector);
 sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, sLight light, double wsp_persp, double dist_thresh,
-		int number, sShaderOutput *outSpecular, bool accurate);
+		int number, sShaderOutput *outSpecular);
+sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double wsp_persp, double dist_thresh,
+		sShaderOutput *specularAuxOut);
 double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector, bool linear);
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
 void PostRenderingLights(cImage *image, sParamRender *fractParam);

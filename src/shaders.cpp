@@ -53,6 +53,19 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 	return shadow;
 }
 
+sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point)
+{
+	sShaderOutput output;
+	double min_radius = Compute<fake_AO>(point, *calcParam);
+	double j = (min_radius - 0.65) * 1.0; //0.65
+	if (j > 1.0) j = 1.0;
+	if (j < 0) j = 0;
+	output.R = j;
+	output.G = j;
+	output.B = j;
+	return output;
+}
+
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount, CVector3 normal)
 {
@@ -240,8 +253,47 @@ sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture
 	return envReflect;
 }
 
+int SurfaceColour(sFractal *calcParam, CVector3 point)
+{
+	calcParam->N *= 10;
+	int nrKol = floor(Compute<colouring> (point, *calcParam));
+	calcParam->N /= 10;
+	nrKol = abs(nrKol) % 65536;
+	return nrKol;
+}
+
+sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
+{
+	sShaderOutput pixel2;
+	if (param->textured_background)
+	{
+		double alfaTexture = fmod(viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
+		double betaTexture = viewVector.GetBeta();
+		if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
+		if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
+		double texX = alfaTexture / (2.0 * M_PI) * param->backgroundTexture->Width();
+		double texY = (betaTexture / (M_PI) + 0.5) * param->backgroundTexture->Height();
+		sRGB8 pixel = param->backgroundTexture->Pixel(texX, texY);
+		pixel2 = (sShaderOutput){ pixel.R/256.0, pixel.G/256.0, pixel.B/256.0};
+	}
+	else
+	{
+		CVector3 vector(0.5, 0.5, -0.5);
+		vector.Normalize();
+		double grad = (viewVector.Dot(vector)+1.0)/2.0;
+		double Ngrad = 1.0 - grad;
+		sRGB16 pixel;
+		pixel.R = (param->background_color1.R * Ngrad + param->background_color2.R * grad);
+		pixel.G = (param->background_color1.G * Ngrad + param->background_color2.G * grad);
+		pixel.B = (param->background_color1.B * Ngrad + param->background_color2.B * grad);
+
+		pixel2 = (sShaderOutput){ pixel.R/65536.0, pixel.G/65536.0, pixel.B/65536.0};
+	}
+	return pixel2;
+}
+
 sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, sLight light, double wsp_persp,
-		double dist_thresh, int number, sShaderOutput *outSpecular, bool accurate)
+		double dist_thresh, int number, sShaderOutput *outSpecular)
 {
 	sShaderOutput shading;
 
@@ -293,6 +345,31 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	outSpecular->B = shade2 * light.colour.B / 65536.0;
 
 	return shading;
+}
+
+sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double wsp_persp, double dist_thresh,
+		sShaderOutput *specularAuxOut)
+{
+	int numberOfLights = lightsPlaced;
+	if (numberOfLights < 4) numberOfLights = 4;
+	sShaderOutput shadeAuxSum = { 0, 0, 0 };
+	sShaderOutput specularAuxSum = { 0, 0, 0 };
+	for (int i = 0; i < numberOfLights; i++)
+	{
+		if (i < param->auxLightNumber || Lights[i].enabled)
+		{
+			sShaderOutput specularAuxOutTemp;
+			sShaderOutput shadeAux = LightShading(param, calcParam, point, normal, viewVector, Lights[i], wsp_persp, dist_thresh, numberOfLights, &specularAuxOutTemp);
+			shadeAuxSum.R += shadeAux.R;
+			shadeAuxSum.G += shadeAux.G;
+			shadeAuxSum.B += shadeAux.B;
+			specularAuxSum.R += specularAuxOutTemp.R;
+			specularAuxSum.G += specularAuxOutTemp.G;
+			specularAuxSum.B += specularAuxOutTemp.B;
+		}
+	}
+	*specularAuxOut = specularAuxSum;
+	return shadeAuxSum;
 }
 
 double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector, bool linear)

@@ -115,10 +115,8 @@ void *MainThread(void *ptr)
 	sRGB glow_color2 = param.effectColours.glow_color2;
 	sRGB background_color1 = param.background_color1;
 	sRGB background_color2 = param.background_color2;
-	bool textured_background = param.textured_background;
 
 	bool fractColor = param.imageSwitches.coloringEnabled;
-	cTexture *background_texture = param.backgroundTexture;
 	cTexture *envmap_texture = param.envmapTexture;
 	cTexture *lightmap_texture = param.lightmapTexture;
 
@@ -499,6 +497,8 @@ void *MainThread(void *ptr)
 
 					CVector3 lightVector = vDelta;
 
+					//Note: Reflection vector r = i - (2 * n * dot(i, n))
+
 					double y = y_start;
 					CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
 					double wsp_persp = 1.0 + y * persp;
@@ -506,136 +506,117 @@ void *MainThread(void *ptr)
 					viewVectorEnd = point;
 					CVector3 viewVector = viewVectorEnd - viewVectorStart;
 					viewVector.Normalize();
+
+					//delta for all shading algorithms depended on depth and resolution (dynamic shaders resolution)
+					if (perspectiveType == fishEye || perspectiveType == equirectangular)
+					{
+						delta = resolution * y * fov;
+						wsp_persp = 2.0 * y;
+						zoom = param.doubles.zoom = 1.0;
+					}
+					else
+					{
+						delta = resolution * zoom * wsp_persp;
+					}
+
 					//if fractal surface was found
 					if (found)
 					{
 						//-------------------- SHADING ----------------------
+
+						//initial values
+						sShaderOutput shadowOutput = { 1.0, 1.0, 1.0 };
+						sShaderOutput AO;
+						sRGB16 oldAO = image->GetPixelAmbient(x, z);
+						AO.R = oldAO.R / 4096.0;
+						AO.G = oldAO.G / 4096.0;
+						AO.B = oldAO.B / 4096.0;
+						sShaderOutput shade;
+						sShaderOutput shadeAux;
+						sShaderOutput shadeAuxSpec;
+						int colorIndex = 0;
+
 						//normal vector
 						CVector3 vn = CalculateNormals(&param, &calcParam, point, dist_thresh);
 
-						//delta for all shading algorithms depended on depth and resolution (dynamic shaders resolution)
-						if (perspectiveType == fishEye || perspectiveType == equirectangular)
-						{
-							delta = resolution * y * fov;
-							wsp_persp = 2.0 * y;
-							zoom = param.doubles.zoom = 1.0;
-						}
-						else
-						{
-							delta = resolution * zoom * wsp_persp;
-						}
-
 						//********* calculate hard shadow
-						unsigned short shadow16 = 4096;
-						if (shadow)
-						{
-							sShaderOutput shadowOutput = MainShadow(&param, &calcParam, point, lightVector, wsp_persp, dist_thresh);
-							shadow16 = shadowOutput.R * 4096.0;
-						}
-
-						if(!image->IsLowMemMode()) image->PutPixelShadow(x, z, shadow16);
-						pixelData.shadowsBuf16 = shadow16;
+						if (shadow) shadowOutput = MainShadow(&param, &calcParam, point, lightVector, wsp_persp, dist_thresh);
 
 						//******* calculate global illumination (ambient occlusion)
-
-						sShaderOutput AO = { 0, 0, 0 };
-
 						if (global_ilumination)
 						{
 							//ambient occlusion based on orbit traps
 							if (fastGlobalIllumination)
 							{
-								double min_radius = Compute<fake_AO>(point, calcParam);
-								double j = (min_radius - 0.65) * 1.0; //0.65
-								if (j > 1.0) j = 1.0;
-								if (j < 0) j = 0;
-								AO.R = j;
-								AO.G = j;
-								AO.B = j;
+								AO = FastAmbientOcclusion(&calcParam, point);
 							}
-
 							//ambient occlusion based on many rays in spherical directions
-
 							else
 							{
 								AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vn);
 							}
-							sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
-							if(!image->IsLowMemMode()) image->PutPixelAmbient(x, z, globalLight);
-							pixelData.ambientBuf16 = globalLight;
 						}
 
 						//calculate shading based on angle of incidence
-						sShaderOutput shade = MainShading(vn, lightVector);
-						if(!image->IsLowMemMode()) image->PutPixelShading(x, z, shade.R * 4096.0);
-						pixelData.shadingBuf16 = shade.R * 4096;
-
-						int numberOfLights = lightsPlaced;
-						if (numberOfLights < 4) numberOfLights = 4;
-						bool accurate;
-						sShaderOutput shadeAuxSum = { 0, 0, 0 };
-						sShaderOutput specularAuxSum = { 0, 0, 0 };
-						for (int i = 0; i < numberOfLights; i++)
-						{
-							if (i < param.auxLightNumber || Lights[i].enabled)
-							{
-								if (i < 4) accurate = true;
-								else accurate = false;
-
-								sShaderOutput specularAuxOut;
-								sShaderOutput shadeAux = LightShading(&param, &calcParam, point, vn, viewVector, Lights[i], wsp_persp, dist_thresh, numberOfLights, &specularAuxOut, accurate);
-								shadeAuxSum.R += shadeAux.R;
-								shadeAuxSum.G += shadeAux.G;
-								shadeAuxSum.B += shadeAux.B;
-								specularAuxSum.R += specularAuxOut.R;
-								specularAuxSum.G += specularAuxOut.G;
-								specularAuxSum.B += specularAuxOut.B;
-							}
-						}
-						sRGB16 shadeAux16 = { shadeAuxSum.R * 4096.0, shadeAuxSum.G * 4096.0, shadeAuxSum.B * 4096.0 };
-						if(!image->IsLowMemMode()) image->PutPixelAuxLight(x, z, shadeAux16);
-						pixelData.auxLight = shadeAux16;
-
-						sRGB16 specularAux16 = { specularAuxSum.R * 4096.0, specularAuxSum.G * 4096.0, specularAuxSum.B * 4096.0 };
-						if(!image->IsLowMemMode()) image->PutPixelAuxSpecular(x, z, specularAux16);
-						pixelData.auxSpecular = specularAux16;
+						shade = MainShading(vn, lightVector);
 
 						//calculate specular reflection effect
 						sShaderOutput specular = MainSpecular(vn, lightVector, viewVector);
-						if(!image->IsLowMemMode()) image->PutPixelSpecular(x, z, specular.R * 4096.0);
-						pixelData.specularBuf16 = specular.R * 4096.0;
+
+						//calculate shading from auxiliary lights
+						shadeAux = AuxLightsShader(&param, &calcParam, point, vn, viewVector, wsp_persp, dist_thresh, &shadeAuxSpec);
 
 						//calculate environment mapping reflection effect
 						sShaderOutput envMapping = EnvMapping(vn, viewVector, envmap_texture);
-						sRGB8 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
-						if(!image->IsLowMemMode()) image->PutPixelReflect(x, z, reflection);
-						pixelData.reflectBuf8 = reflection;
 
 						//coloured surface of fractal
-						int colorIndex = 0;
-						if (fractColor)
-						{
-							calcParam.N *= 10;
-							int nrKol = floor(Compute<colouring>(point, calcParam));
-							calcParam.N /= 10;
-							nrKol = abs(nrKol) % 65536;
-							colorIndex = nrKol;
-						}
-						image->PutPixelColor(x, z, colorIndex);
+						if (fractColor)	colorIndex = SurfaceColour(&calcParam, point);
 
-						//zBuffer
+						unsigned short shadow16 = shadowOutput.R * 4096.0;
+						sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
+						unsigned short shade16 = shade.R * 4096.0;
+						sRGB16 shadeAux16 = { shadeAux.R * 4096.0, shadeAux.G * 4096.0, shadeAux.B * 4096.0 };
+						sRGB16 specularAux16 = { shadeAuxSpec.R * 4096.0, shadeAuxSpec.G * 4096.0, shadeAuxSpec.B * 4096.0 };
+						sRGB8 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
+
+						if (!image->IsLowMemMode())
+						{
+							image->PutPixelShadow(x, z, shadow16);
+							image->PutPixelAmbient(x, z, globalLight);
+							image->PutPixelShading(x, z, shade16);
+							image->PutPixelSpecular(x, z, specular.R * 4096.0);
+							image->PutPixelAuxLight(x, z, shadeAux16);
+							image->PutPixelAuxSpecular(x, z, specularAux16);
+							image->PutPixelReflect(x, z, reflection);
+							image->PutPixelBackground(x, z, black16);
+						}
+
+						image->PutPixelColor(x, z, colorIndex);
 						image->PutPixelZBuffer(x, z, y);
 
-						//no background in this place
-						if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, black16);
+						pixelData.shadowsBuf16 = shadow16;
+						pixelData.ambientBuf16 = globalLight;
+						pixelData.shadingBuf16 = shade16;
+						pixelData.specularBuf16 = specular.R * 4096.0;
+						pixelData.auxLight = shadeAux16;
+						pixelData.auxSpecular = specularAux16;
+						pixelData.reflectBuf8 = reflection;
 						pixelData.backgroundBuf16 = black16;
 
 					}//end if found
 
 					else
 					{
+						sShaderOutput background = { 0.0, 0.0, 0.0 };
+
+						//------------- render 3D background
+						background = TexturedBackground(&param, viewVector);
+
+						sRGB16 background16 = { background.R * 65536.0, background.G * 65536.0, background.B * 65536.0 };
+
 						if (!image->IsLowMemMode())
 						{
+							image->PutPixelBackground(x, z, background16);
 							image->PutPixelAmbient(x, z, black16);
 							image->PutPixelAuxLight(x, z, black16);
 							image->PutPixelAuxSpecular(x, z, black16);
@@ -646,72 +627,6 @@ void *MainThread(void *ptr)
 							image->PutPixelSpecular(x, z, 0);
 						}
 
-						//------------- render 3D background
-						if (textured_background)
-						{
-							double y = 1e20;
-
-							//translate coordinate system from screen to fractal
-							double y2 = y * zoom;
-							double wsp_persp = 1.0 + y * persp;
-							CVector3 point3D1, point3D2;
-
-							if (perspectiveType == fishEye)
-							{
-								point3D1.x = sin(fov * x2) * y;
-								point3D1.z = sin(fov * z2) * y;
-								point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-
-							}
-							else if(perspectiveType == equirectangular)
-							{
-								point3D1.x = sin(fov * x2) * cos(fov * z2) * y;
-								point3D1.z = sin(fov * z2) * y;
-								point3D1.y = cos(fov * x2) * cos(fov * z2) * y;
-							}
-							else //tree-point perspective
-							{
-								point3D1.x = x2 * wsp_persp;
-								point3D1.y = y2;
-								point3D1.z = z2 * wsp_persp;
-							}
-
-						  point3D2 = mRot.RotateVector(point3D1);
-
-							CVector3 point = point3D2 + vp;
-
-							//calculate texture coordinates
-							double alfaTexture = point.GetAlfa() + M_PI;
-							double betaTexture = point.GetBeta();
-
-							if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
-
-							if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
-
-							double texX = alfaTexture / (2.0 * M_PI) * background_texture->Width();
-							double texY = (betaTexture / (M_PI) + 0.5) * background_texture->Height();
-
-							sRGB8 pixel = background_texture->Pixel(texX, texY);
-							sRGB16 pixel16;
-							pixel16.R = pixel.R * 256;
-							pixel16.G = pixel.G * 256;
-							pixel16.B = pixel.B * 256;
-							if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, pixel16);
-							pixelData.backgroundBuf16 = pixel16;
-
-						}
-						else
-						{
-							sRGB16 pixel;
-							double grad = ((double) x + z) / (width + height);
-							double Ngrad = 1.0 - grad;
-							pixel.R = (background_color1.R * Ngrad + background_color2.R * grad);
-							pixel.G = (background_color1.G * Ngrad + background_color2.G * grad);
-							pixel.B = (background_color1.B * Ngrad + background_color2.B * grad);
-							if(!image->IsLowMemMode()) image->PutPixelBackground(x, z, pixel);
-							pixelData.backgroundBuf16 = pixel;
-							//PutPixelAlfa(x, z, backR, backG, backB, 65536, 1.0);
-						}
 						image->PutPixelZBuffer(x, z, 1e20);
 					}
 
