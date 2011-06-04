@@ -22,6 +22,7 @@ cImage::cImage(int w, int h, bool low_mem)
 	AllocMem();
 	gammaTable = new int[65536];
 	palette = new sRGB[256];
+	progressiveFactor = 1;
 }
 
 cImage::~cImage()
