@@ -332,6 +332,8 @@ void SaveSettings(char *filename, const sParamRender& params)
 		fprintf(fileSettings, "volumetric_light_enabled_%d %d;\n", i, params.volumetricLightEnabled[i]);
 	}
 	fprintf(fileSettings, "penetrating_lights %d;\n", params.penetratingLights);
+	fprintf(fileSettings, "raytraced_reflections %d;\n", params.imageSwitches.raytracedReflections);
+	fprintf(fileSettings, "reflections_max %d;\n", params.reflectionsMax);
 
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
@@ -401,9 +403,9 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 		LoadSettingsPost(params);
 
 		//checking number of lines in loaded file
-		if (lineCounter != 315)
+		if (lineCounter != 317)
 		{
-			printf("number of lines in settings file (should be 315): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 317): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -686,6 +688,8 @@ bool LoadOneSetting(char* str1, char *str2, sParamRender &params, bool disableMe
 	else if (!strcmp(str1, "volumetric_light_intensity")) params.doubles.imageAdjustments.volumetricLightIntensity = atof2(str2);
 	else if (!strcmp(str1, "volumetric_light_quality")) params.doubles.volumetricLightQuality = atof2(str2);
 
+	else if (!strcmp(str1, "raytraced_reflections")) params.imageSwitches.raytracedReflections = atoi(str2);
+	else if (!strcmp(str1, "reflections_max")) params.reflectionsMax = atoi(str2);
 
 	else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 	else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
@@ -936,6 +940,8 @@ void DefaultValues(sParamRender &params)
 	params.startFrame = 0;
 	params.endFrame = 1000;
 	params.framesPerKeyframe = 100;
+	params.reflectionsMax = 5;
+	params.imageSwitches.raytracedReflections = false;
 
 	params.soundEnabled = false;
 	params.doubles.soundFPS = 25.0;

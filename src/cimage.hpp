@@ -40,7 +40,7 @@ struct sComplexImage
 	sRGB16 auxLight;
 	sRGB16 auxSpecular;
 	unsigned short glowBuf16;
-	sRGB8 reflectBuf8;
+	sRGB16 reflectBuf16;
 	sRGB16 ambientBuf16;
 	sRGB16 backgroundBuf16;
 	sRGB16 volumetricFog;
@@ -77,6 +77,7 @@ struct sImageSwitches
 {
 	bool coloringEnabled;
 	bool fogEnabled;
+	bool raytracedReflections;
 };
 
 class cImage
@@ -95,7 +96,7 @@ public:
 	inline void PutPixelAuxLight(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxLight = pixel;}
 	inline void PutPixelAuxSpecular(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].auxSpecular = pixel;}
 	inline void PutPixelGlow(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].glowBuf16 = pixel;}
-	inline void PutPixelReflect(int x, int y, sRGB8 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].reflectBuf8 = pixel;}
+	inline void PutPixelReflect(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].reflectBuf16 = pixel;}
 	inline void PutPixelAmbient(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].ambientBuf16 = pixel;}
 	inline void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) colorIndexBuf16[x + y * width] = pixel;}
 	inline void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}

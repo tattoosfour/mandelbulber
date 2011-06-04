@@ -420,6 +420,7 @@ struct sInterface
 	GtkWidget *edit_volumetricLightAux2Intensity;
 	GtkWidget *edit_volumetricLightAux3Intensity;
 	GtkWidget *edit_volumetricLightAux4Intensity;
+	GtkWidget *edit_reflectionsMax;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -500,6 +501,7 @@ struct sInterface
 	GtkWidget *checkVolumetricLightAux3Enabled;
 	GtkWidget *checkVolumetricLightAux4Enabled;
 	GtkWidget *checkPenetratingLights;
+	GtkWidget *checkRaytracedReflections;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
