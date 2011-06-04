@@ -88,7 +88,7 @@ void *MainThread(void *ptr)
 	int height = image->GetHeight();
 	WriteLogDouble("Thread started", thread_number);
 
-	sRGB8 black8 = { 0, 0, 0 };
+	//sRGB8 black8 = { 0, 0, 0 };
 	sRGB16 black16 = { 0, 0, 0 };
 
 	//printf("Thread #%d started\n", z + 1);
@@ -497,7 +497,7 @@ void *MainThread(void *ptr)
 
 					CVector3 lightVector = vDelta;
 
-					//Note: Reflection vector r = i - (2 * n * dot(i, n))
+
 
 					double y = y_start;
 					CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
@@ -534,6 +534,7 @@ void *MainThread(void *ptr)
 						sShaderOutput shade;
 						sShaderOutput shadeAux;
 						sShaderOutput shadeAuxSpec;
+						sShaderOutput envMapping;
 						int colorIndex = 0;
 
 						//normal vector
@@ -567,17 +568,150 @@ void *MainThread(void *ptr)
 						shadeAux = AuxLightsShader(&param, &calcParam, point, vn, viewVector, wsp_persp, dist_thresh, &shadeAuxSpec);
 
 						//calculate environment mapping reflection effect
-						sShaderOutput envMapping = EnvMapping(vn, viewVector, envmap_texture);
+						envMapping = EnvMapping(vn, viewVector, envmap_texture);
 
 						//coloured surface of fractal
 						if (fractColor)	colorIndex = SurfaceColour(&calcParam, point);
+
+						//--------------- raytraced reflection
+						if(param.imageSwitches.raytracedReflections)
+						{
+							CVector3 pointTemp = point;
+							CVector3 viewTemp = viewVector;
+							CVector3 vnTemp = vn;
+							bool maxIterTemp;
+
+							double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0)*zoom;
+
+							envMapping = (sShaderOutput){0,0,0};
+							sShaderOutput shadeBuff[10];
+							sShaderOutput shadowBuff[10];
+							sShaderOutput specularBuff[10];
+							sShaderOutput colorBuff[10];
+							sShaderOutput ambientBuff[10];
+							sShaderOutput auxLightsBuff[10];
+							sShaderOutput auxSpecBuff[10];
+							double fogBuff[10];
+							sShaderOutput finishBackgroud;
+							double glowBuff1 = 0.0;
+							int numberOfReflections = -1;
+							int maxReflections = param.reflectionsMax;
+							for(int i=0; i<maxReflections; i++)
+							{
+								viewTemp = viewTemp - vnTemp * viewTemp.Dot(vnTemp)*2.0;
+								double distTemp = dist_thresh;
+								bool surfaceFound = false;
+								double glowBuff2 = 0.0;
+								for(double scan = dist_thresh*2.0; scan<100.0; scan+=(distTemp-0.5*dist_thresh)*DE_factor)
+								{
+									glowBuff2++;
+									CVector3 pointScan = pointTemp + viewTemp * scan;
+									distTemp = CalculateDistance(pointScan, calcParam, &maxIterTemp);
+									if(distTemp < dist_thresh)
+									{
+										surfaceFound = true;
+										pointTemp = pointScan;
+										vnTemp = CalculateNormals(&param, &calcParam, pointTemp, dist_thresh);
+										shadeBuff[i] = MainShading(vnTemp, lightVector);
+										specularBuff[i] = MainSpecular(vnTemp, lightVector, viewTemp);
+										shadowBuff[i] = (sShaderOutput){1.0,1.0,1.0};
+										if (shadow) shadowBuff[i] = MainShadow(&param, &calcParam, pointTemp, lightVector, wsp_persp, dist_thresh);
+										ambientBuff[i]=(sShaderOutput){0,0,0};
+										if (global_ilumination)
+										{
+											if (fastGlobalIllumination)
+												ambientBuff[i] = FastAmbientOcclusion(&calcParam, pointTemp);
+											else
+												ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vnTemp);
+										}
+
+										auxLightsBuff[i] = AuxLightsShader(&param, &calcParam, pointTemp, vnTemp, viewTemp, wsp_persp, dist_thresh, &auxSpecBuff[i]);
+
+										int colorIndexTemp = SurfaceColour(&calcParam, pointTemp);
+										sRGB color = { 256, 256, 256 };
+										if (param.imageSwitches.coloringEnabled)
+										{
+											int color_number = (int) (colorIndexTemp * param.doubles.imageAdjustments.coloring_speed + 256 * param.doubles.imageAdjustments.paletteOffset) % 65536;
+											color = image->IndexToColour(color_number);
+										}
+										colorBuff[i] = (sShaderOutput){color.R/256.0,color.G/256.0,color.B/256.0};
+
+										fogBuff[i] = scan;
+
+										numberOfReflections = i;
+										break;
+									}
+								}
+								glowBuff1 += glowBuff2 * pow(param.doubles.imageAdjustments.reflect, i + 1.0);
+								if(!surfaceFound)
+								{
+									finishBackgroud = TexturedBackground(&param, viewTemp);
+									break;
+								}
+							}
+							double reflect = param.doubles.imageAdjustments.reflect;
+							if(numberOfReflections<maxReflections-1)
+							{
+								if(param.imageSwitches.fogEnabled)
+								{
+									envMapping.R = param.effectColours.fogColor.R / 65536.0 * reflect;
+									envMapping.G = param.effectColours.fogColor.G / 65536.0 * reflect;
+									envMapping.B = param.effectColours.fogColor.B / 65536.0 * reflect;
+								}
+								else
+								{
+									envMapping.R = finishBackgroud.R * reflect;
+									envMapping.G = finishBackgroud.G * reflect;
+									envMapping.B = finishBackgroud.B * reflect;
+								}
+							}
+							for(int i=numberOfReflections; i>=0; i--)
+							{
+								sShaderOutput reflectTemp;
+								reflectTemp.R = shadeBuff[i].R * shadowBuff[i].R * colorBuff[i].R + specularBuff[i].R * shadowBuff[i].R + ambientBuff[i].R + auxLightsBuff[i].R * colorBuff[i].R + auxSpecBuff[i].R;
+								reflectTemp.G = shadeBuff[i].R * shadowBuff[i].G * colorBuff[i].G + specularBuff[i].G * shadowBuff[i].G + ambientBuff[i].R + auxLightsBuff[i].G * colorBuff[i].G + auxSpecBuff[i].G;
+								reflectTemp.B = shadeBuff[i].R * shadowBuff[i].B * colorBuff[i].B + specularBuff[i].B * shadowBuff[i].B + ambientBuff[i].R + auxLightsBuff[i].B * colorBuff[i].B + auxSpecBuff[i].B;
+
+								if(param.imageSwitches.fogEnabled)
+								{
+									double fog = fogBuff[i] / fog_visibility;
+									if (fog > 1.0) fog = 1.0;
+									if (fog < 0) fog = 0;
+									double a = fog;
+									double aN = 1.0 - a;
+									reflectTemp.R = (reflectTemp.R * aN + param.effectColours.fogColor.R / 65536.0 * a);
+									reflectTemp.G = (reflectTemp.G * aN + param.effectColours.fogColor.G / 65536.0 * a);
+									reflectTemp.B = (reflectTemp.B * aN + param.effectColours.fogColor.B / 65536.0 * a);
+								}
+
+								envMapping.R = reflect*envMapping.R + (1.0 - reflect)*reflectTemp.R;
+								envMapping.G = reflect*envMapping.G + (1.0 - reflect)*reflectTemp.G;
+								envMapping.B = reflect*envMapping.B + (1.0 - reflect)*reflectTemp.B;
+							}
+
+							double glow = glowBuff1 * param.doubles.imageAdjustments.glow_intensity / 512.0;
+							double glowN = 1.0 - glow;
+							if (glowN < 0.0) glowN = 0.0;
+							double glowR = (param.effectColours.glow_color1.R * glowN /65536.0 + param.effectColours.glow_color2.R * glow /65536.0);
+							double glowG = (param.effectColours.glow_color1.G * glowN /65536.0 + param.effectColours.glow_color2.G * glow /65536.0);
+							double glowB = (param.effectColours.glow_color1.B * glowN /65536.0 + param.effectColours.glow_color2.B * glow /65536.0);
+
+							envMapping.R = envMapping.R * (1.0 - glow) + glowR * glow;
+							envMapping.G = envMapping.G * (1.0 - glow) + glowG * glow;
+							envMapping.B = envMapping.B * (1.0 - glow) + glowB * glow;
+
+							if(envMapping.R>10.0) envMapping.R = 10.0;
+							if(envMapping.G>10.0) envMapping.G = 10.0;
+							if(envMapping.B>10.0) envMapping.B = 10.0;
+						}
+						//---------- end of raytraced reflection
 
 						unsigned short shadow16 = shadowOutput.R * 4096.0;
 						sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
 						unsigned short shade16 = shade.R * 4096.0;
 						sRGB16 shadeAux16 = { shadeAux.R * 4096.0, shadeAux.G * 4096.0, shadeAux.B * 4096.0 };
 						sRGB16 specularAux16 = { shadeAuxSpec.R * 4096.0, shadeAuxSpec.G * 4096.0, shadeAuxSpec.B * 4096.0 };
-						sRGB8 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
+						sRGB16 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
 
 						if (!image->IsLowMemMode())
 						{
@@ -600,7 +734,7 @@ void *MainThread(void *ptr)
 						pixelData.specularBuf16 = specular.R * 4096.0;
 						pixelData.auxLight = shadeAux16;
 						pixelData.auxSpecular = specularAux16;
-						pixelData.reflectBuf8 = reflection;
+						pixelData.reflectBuf16 = reflection;
 						pixelData.backgroundBuf16 = black16;
 
 					}//end if found
@@ -621,7 +755,7 @@ void *MainThread(void *ptr)
 							image->PutPixelAuxLight(x, z, black16);
 							image->PutPixelAuxSpecular(x, z, black16);
 							image->PutPixelColor(x, z, 0);
-							image->PutPixelReflect(x, z, black8);
+							image->PutPixelReflect(x, z, black16);
 							image->PutPixelShading(x, z, 0);
 							image->PutPixelShadow(x, z, 0);
 							image->PutPixelSpecular(x, z, 0);

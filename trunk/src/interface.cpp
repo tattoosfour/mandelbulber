@@ -407,6 +407,9 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.FoldingIntPowFoldFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FoldingIntPowFoldingFactor)));
 		params->fractal.doubles.FoldingIntPowZfactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_FoldingIntPowZFactor)));
 
+		params->reflectionsMax = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_reflectionsMax)));
+		params->imageSwitches.raytracedReflections = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkRaytracedReflections));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1.R = color.red;
@@ -518,7 +521,7 @@ void ReadInterface(sParamRender *params)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
 		}
 
-		if (!params->SSAOEnabled && !params->global_ilumination && params->doubles.imageAdjustments.reflect > 0)
+		if (!params->SSAOEnabled && !params->global_ilumination && params->doubles.imageAdjustments.reflect > 0 && !params->imageSwitches.raytracedReflections)
 		{
 			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
 					"Warning! For reflection effect the Screen Space Ambient Occlusion (SSAO) effect has to be activated");
@@ -704,6 +707,8 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightQuality), DoubleToString(params->doubles.volumetricLightQuality));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricLightIntensity), DoubleToString(params->doubles.imageAdjustments.volumetricLightIntensity));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_reflectionsMax), IntToString(params->reflectionsMax));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -740,6 +745,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux3Enabled), params->volumetricLightEnabled[3]);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled), params->volumetricLightEnabled[4]);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPenetratingLights), params->penetratingLights);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkRaytracedReflections), params->imageSwitches.raytracedReflections);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1373,6 +1379,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_volumetricLightAux3Intensity = gtk_entry_new();
 	Interface.edit_volumetricLightAux4Intensity = gtk_entry_new();
 
+	Interface.edit_reflectionsMax = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1458,6 +1466,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkVolumetricLightAux3Enabled = gtk_check_button_new_with_label("");
 	Interface.checkVolumetricLightAux4Enabled = gtk_check_button_new_with_label("");
 	Interface.checkPenetratingLights = gtk_check_button_new_with_label("Penetrating lights");
+	Interface.checkRaytracedReflections = gtk_check_button_new_with_label("Ray-traced reflections");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
@@ -1808,7 +1817,9 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxShading2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("1,0", "glow:", 5, Interface.edit_glow), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("0,0", "reflect:", 5, Interface.edit_reflect), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("0,0", "reflection:", 5, Interface.edit_reflect), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), Interface.checkRaytracedReflections, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("5", "reflections depth:", 5, Interface.edit_reflectionsMax), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("4", "ambient occlusion quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks, false, false, 1);
@@ -2602,4 +2613,5 @@ void CheckPrameters(sParamRender *params)
 	if(params->globalIlumQuality <=1) params->globalIlumQuality = 1;
 	if(params->image_width < 32) params->image_width = 32;
 	if(params->image_height < 32) params->image_height = 32;
+	if(params->reflectionsMax > 10) params->reflectionsMax = 10;
 }

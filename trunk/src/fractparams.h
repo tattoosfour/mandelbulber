@@ -67,6 +67,7 @@ struct sParamRender
 	int image_width; //image width
 	int image_height; //image height
 	int globalIlumQuality; //ambient occlusion quality
+	int reflectionsMax;
 	int coloring_seed; //colouring random seed
 	int auxLightRandomSeed;
 	int auxLightNumber;
