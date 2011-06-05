@@ -1,5 +1,10 @@
 Version history
 
+v1.03
+- added ray-traced reflections
+- fixed problem with very high intensity of glow effect after use of Auto DE factor
+- resizing of render window works better on slow computers
+
 v1.02
 - added volumetric light effect
 
