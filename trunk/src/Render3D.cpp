@@ -295,6 +295,10 @@ void *MainThread(void *ptr)
 							if (param.fractal.constantDEThreshold)
 							{
 								dist_thresh = quality;
+								if (perspectiveType == fishEye || perspectiveType == equirectangular) search_accuracy = 0.01 * 2.0 * y * resolution / quality * fov;
+								else	search_accuracy = 0.01* zoom * stepY * wsp_persp  / quality;
+								if(search_accuracy>0.1) search_accuracy = 0.1;
+								search_limit = 1.0 - search_accuracy;
 							}
 							else
 							{
@@ -302,10 +306,14 @@ void *MainThread(void *ptr)
 								if (perspectiveType == fishEye || perspectiveType == equirectangular)
 								{
 									dist_thresh = 2.0 * y * resolution / quality * fov;
+									search_accuracy = 0.01*quality;
+									search_limit = 1.0 - search_accuracy;
 								}
 								else
 								{
 									dist_thresh = zoom * stepY * wsp_persp / quality;
+									search_accuracy = 0.01*quality;
+									search_limit = 1.0 - search_accuracy;
 								}
 							}
 							if (wsp_persp > 0) //checking for sure :-)
@@ -400,7 +408,7 @@ void *MainThread(void *ptr)
 									stepYpersp = stepYpersp / 2.0;
 
 									//ending binary shearching
-									if (binary_step > 10 || (dist < dist_thresh && dist > dist_thresh * search_limit))
+									if (binary_step > 20 || (dist < dist_thresh && dist > dist_thresh * search_limit))
 									{
 										found = true;
 										y_start = y;
@@ -684,9 +692,9 @@ void *MainThread(void *ptr)
 									reflectTemp.B = (reflectTemp.B * aN + param.effectColours.fogColor.B / 65536.0 * a);
 								}
 
-								envMapping.R = reflect*envMapping.R + (1.0 - reflect)*reflectTemp.R;
-								envMapping.G = reflect*envMapping.G + (1.0 - reflect)*reflectTemp.G;
-								envMapping.B = reflect*envMapping.B + (1.0 - reflect)*reflectTemp.B;
+								envMapping.R = reflect*reflectTemp.R + (1.0 - reflect)*envMapping.R;
+								envMapping.G = reflect*reflectTemp.G + (1.0 - reflect)*envMapping.G;
+								envMapping.B = reflect*reflectTemp.B + (1.0 - reflect)*envMapping.B;
 							}
 
 							double glow = glowBuff1 * param.doubles.imageAdjustments.glow_intensity / 512.0;
@@ -696,9 +704,9 @@ void *MainThread(void *ptr)
 							double glowG = (param.effectColours.glow_color1.G * glowN /65536.0 + param.effectColours.glow_color2.G * glow /65536.0);
 							double glowB = (param.effectColours.glow_color1.B * glowN /65536.0 + param.effectColours.glow_color2.B * glow /65536.0);
 
-							envMapping.R = envMapping.R * (1.0 - glow) + glowR * glow;
-							envMapping.G = envMapping.G * (1.0 - glow) + glowG * glow;
-							envMapping.B = envMapping.B * (1.0 - glow) + glowB * glow;
+							envMapping.R = envMapping.R * glowN + glowR * glow;
+							envMapping.G = envMapping.G * glowN + glowG * glow;
+							envMapping.B = envMapping.B * glowN + glowB * glow;
 
 							if(envMapping.R>10.0) envMapping.R = 10.0;
 							if(envMapping.G>10.0) envMapping.G = 10.0;

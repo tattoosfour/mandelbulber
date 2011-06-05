@@ -106,10 +106,13 @@ void cImage::ClearImage(void)
 
 sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront)
 {
-	sRGB col = { 0, 0, 0 };
 	double mLightR = ecol.mainLightColour.R / 65536.0;
 	double mLightG = ecol.mainLightColour.G / 65536.0;
 	double mLightB = ecol.mainLightColour.B / 65536.0;
+
+	double R=0.0;
+	double G=0.0;
+	double B=0.0;
 
 	int alpha2 = 65535;
 	if (zBuf > 1e19) alpha2 = 0;
@@ -131,49 +134,50 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float
 
 	if(sw.raytracedReflections)
 	{
-		col.R = pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR
+		R = (double)pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR
 				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		col.G = pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG
+		G = (double)pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG
 				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		col.B = pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB
+		B = (double)pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB
 				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 	}
 	else
 	{
-		col.R = pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
+		R = (double)pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
 				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		col.G = pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
+		G = (double)pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
 				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		col.B = pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
+		B = (double)pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
 				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 	}
-
 
 	double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;
 	double glowN = 1.0 - glow;
 	if (glowN < 0.0) glowN = 0.0;
 
-	int glowR = (ecol.glow_color1.R * glowN + ecol.glow_color2.R * glow);
-	int glowG = (ecol.glow_color1.G * glowN + ecol.glow_color2.G * glow);
-	int glowB = (ecol.glow_color1.B * glowN + ecol.glow_color2.B * glow);
+	double glowR = (ecol.glow_color1.R * glowN + ecol.glow_color2.R * glow);
+	double glowG = (ecol.glow_color1.G * glowN + ecol.glow_color2.G * glow);
+	double glowB = (ecol.glow_color1.B * glowN + ecol.glow_color2.B * glow);
 
-	col.R = col.R * (1.0 - glow) + glowR * glow + pixel.volumetricFog.R * 16.0 * adj.volumetricLightIntensity;
-	col.G = col.G * (1.0 - glow) + glowG * glow + pixel.volumetricFog.G * 16.0 * adj.volumetricLightIntensity;
-	col.B = col.B * (1.0 - glow) + glowB * glow + pixel.volumetricFog.B * 16.0 * adj.volumetricLightIntensity;
+	R = R * glowN + glowR * glow + pixel.volumetricFog.R * 16.0 * adj.volumetricLightIntensity;
+	G = G * glowN + glowG * glow + pixel.volumetricFog.G * 16.0 * adj.volumetricLightIntensity;
+	B = B * glowN + glowB * glow + pixel.volumetricFog.B * 16.0 * adj.volumetricLightIntensity;
 	alpha2 += 65535.0 * glow;
 	if (alpha2 > 65535) alpha2 = 65535;
+
+	if (R > 65535) R = 65535;
+	if (R < 0) R = 0;
+	if (G > 65535) G = 65535;
+	if (G < 0) G = 0;
+	if (B > 65535) B = 65535;
+	if (B < 0) B = 0;
+
+	sRGB col = { R, G, B };
 
 	if (sw.fogEnabled)
 	{
 		col = PostRendering_Fog(zBuf, fogVisFront, fogVisBack + fogVisFront, ecol.fogColor, col);
 	}
-
-	if (col.R > 65535) col.R = 65535;
-	if (col.R < 0) col.R = 0;
-	if (col.G > 65535) col.G = 65535;
-	if (col.G < 0) col.G = 0;
-	if (col.B > 65535) col.B = 65535;
-	if (col.B < 0) col.B = 0;
 
 	sRGB16 newPixel16;
 	newPixel16.R = gammaTable[col.R];
