@@ -72,11 +72,13 @@ gboolean CallerTimerLoopWindowRefresh(GtkWidget *widget)
 			imageCompileNeeded = false;
 			mainImage.CompileImage();
 		}
-
+		gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
+		gtk_widget_queue_resize (renderWindow.scrolled_window);
 		mainImage.CreatePreview(Interface_data.imageScale);
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
+		gtk_widget_set_size_request(renderWindow.drawingArea, mainImage.GetPreviewWidth(), mainImage.GetPreviewHeight());
 	}
 
 	if(refreshNeeded)
@@ -836,7 +838,6 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 		if (mainImage.GetHeight() * imageScale > winHeight) imageScale = (double) winHeight / mainImage.GetHeight();
 	}
 	Interface_data.imageScale = imageScale;
-
 	refreshNeeded = true;
 }
 
