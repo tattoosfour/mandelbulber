@@ -875,7 +875,7 @@ void *MainThread(void *ptr)
 				double iterations_per_sec = N_counter / time;
 				if (!param.quiet)
 				{
-					printf("Done %.3f%%, to go = %dh%dm%ds, elapsed = %dh%dm%ds, iter/s = %.0f       \r", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
+					printf("Done %.3f%%, to go = %dh%dm%ds, elapsed = %dh%dm%ds, iters/s = %.0f       \r", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
 							iterations_per_sec);
 					fflush(stdout);
 				}
@@ -955,7 +955,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		{
 			thread_done[i] = 0;
 		}
-		WriteLog("Threads data prepared");
+		WriteLog("Thread data prepared");
 
 		//running rendering threads in background
 		for (int i = 0; i < NR_THREADS; i++)
@@ -1009,7 +1009,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							WriteLog("Image compiled");
 
 							image->ConvertTo8bit();
-							WriteLog("Image converted into 8-bit");
+							WriteLog("Image converted to 8-bit");
 							image->UpdatePreview();
 							WriteLog("Preview created");
 							if (outputDarea != NULL)
@@ -1018,7 +1018,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 								DrawHistogram2();
 								WriteLog("Histograms refreshed");
 								image->RedrawInWidget(outputDarea);
-								WriteLog("Image redrawed in window");
+								WriteLog("Image redrawn in window");
 							}
 						}
 
@@ -1105,7 +1105,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		if (image->IsPreview())
 		{
 			image->ConvertTo8bit();
-			WriteLog("Image converted into 8-bit");
+			WriteLog("Image converted to 8-bit");
 			image->UpdatePreview();
 			WriteLog("Preview created");
 			if (outputDarea != NULL)
@@ -1114,7 +1114,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				DrawHistogram2();
 				WriteLog("Histograms refreshed");
 				image->RedrawInWidget(outputDarea);
-				WriteLog("Image redrawed in window");
+				WriteLog("Image redrawn in window");
 			}
 		}
 	}
@@ -1193,7 +1193,7 @@ int main(int argc, char *argv[])
 
 	//initialising GTK+
 	bool result = ReadComandlineParams(argc, argv);
-	WriteLogDouble("Parameters got from console", argc);
+	WriteLogDouble("Parameters read from console", argc);
 	if (result == false)
 	{
 		printf("Failed to start program. Wrong command syntax\n");
@@ -1298,7 +1298,7 @@ int main(int argc, char *argv[])
 				WriteLog(data_directory);
 
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-						"Error! Can't open default settings file\n%s/settings/default.fract\nPlease run install scricpt before first program start", data_directory);
+						"Error! Can't open default settings file\n%s/settings/default.fract\nPlease run install script before first program start", data_directory);
 				gtk_dialog_run(GTK_DIALOG(dialog));
 				gtk_widget_destroy(dialog);
 			}
@@ -1329,8 +1329,8 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Can't acces default data directory: %s\n", data_directory);
-		WriteLog("Can't acces default data directory");
+		printf("Can't access default data directory: %s\n", data_directory);
+		WriteLog("Can't access default data directory");
 		WriteLog(data_directory);
 	}
 	return 0;
@@ -1346,7 +1346,7 @@ void InitMainParameters(sParamRender *fractParam)
 	{
 		ReadInterface(fractParam);
 		printf("Data has been read from interface\n");
-		WriteLog("Data got from interface");
+		WriteLog("Data read from interface");
 	}
 	else
 	{
@@ -1354,7 +1354,7 @@ void InitMainParameters(sParamRender *fractParam)
 		Params2InterfaceData(&noGUIdata.fractparams);
 		ReadInterface(fractParam);
 		Interface_data.imageFormat = noGUIdata.imageFormat;
-		WriteLog("Data got from interface");
+		WriteLog("Data read from interface");
 	}
 
 	fractParam->doubles.min_y = -10; //-1e10
@@ -1427,7 +1427,7 @@ bool LoadTextures(sParamRender *params)
 	if (params->lightmapTexture->IsLoaded())
 	{
 		printf("Ambient occlusion light map texture loaded\n");
-		WriteLog("Ambient occlusion map texture loaded");
+		WriteLog("Ambient occlusion light map texture loaded");
 	}
 	else
 	{
@@ -1495,7 +1495,7 @@ void MainRender(void)
 	if (!noGUI)
 	{
 		DrawPalette(fractParam.palette);
-		WriteLog("Pallete refreshed on GUI");
+		WriteLog("Palette refreshed on GUI");
 	}
 	//placing random Lights
 	if (lightsPlaced == 0)
@@ -1718,7 +1718,7 @@ void MainRender(void)
 				fprintf(pFile_coordinates, "%.10f %.10f %.10f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alfa,
 						fractParam.doubles.beta);
 				fclose(pFile_coordinates);
-				WriteLog("Coordinate saved");
+				WriteLog("Coordinates saved");
 			}
 
 			//path play mode
@@ -1733,7 +1733,7 @@ void MainRender(void)
 					foundLastFrame = true;
 					fclose(pFile_coordinates);
 				}
-				WriteLog("Coordinate loaded");
+				WriteLog("Coordinates loaded");
 			}
 		}
 

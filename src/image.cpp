@@ -220,7 +220,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 	if (!noGUI && image->IsPreview())
 	{
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Deptp Of Field effect. Done 100%");
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Done 100%");
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}

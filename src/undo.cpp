@@ -89,7 +89,7 @@ bool CParamsUndo::GetRedo(sParamRender *params)
 		}
 		else
 		{
-			printf("Unfo file not found (index = %d)\n", level % max);
+			printf("Undo file not found (index = %d)\n", level % max);
 			result = false;
 		}
 	}

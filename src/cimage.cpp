@@ -66,7 +66,7 @@ void cImage::AllocMem(void)
 	}
 	else
 	{
-		fprintf(stderr, "Error! Cannot allocate memory for image (wrong image size\n");
+		fprintf(stderr, "Error! Cannot allocate memory for image (wrong image size)\n");
 	}
 
 	if (previewAllocated)
@@ -440,7 +440,7 @@ void cImage::UpdatePreview(void)
 	}
 	else
 	{
-		fprintf(stderr, "Error! Preview was not prepared before\n");
+		fprintf(stderr, "Error! Preview has not been prepared\n");
 	}
 }
 

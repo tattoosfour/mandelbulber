@@ -19,7 +19,7 @@ cTexture::cTexture(char *filename)
 
 		if (!LoadJPEG(filename, jbitmap))
 		{
-			printf("Error during loading JPEG: %s\n", filename);
+			printf("Error during JPEG loading: %s\n", filename);
 			loaded = false;
 		}
 		else
@@ -48,7 +48,7 @@ cTexture::cTexture(char *filename)
 	}
 	else
 	{
-		printf("Cant load texture: %s\n", filename);
+		printf("Can't load texture: %s\n", filename);
 		width = 100;
 		height = 100;
 		loaded = false;
