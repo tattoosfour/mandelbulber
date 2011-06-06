@@ -76,7 +76,7 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 
 	dialog->table_edits = gtk_table_new(7, 4, false);
 
-	dialog->label_destination = gtk_label_new("Destination image sequnce");
+	dialog->label_destination = gtk_label_new("Destination image sequence");
 	dialog->label_background = gtk_label_new("Background");
 	dialog->label_envmap = gtk_label_new("Environment map");
 	dialog->label_lightmap = gtk_label_new("Ambient occlusion color map");
@@ -514,7 +514,7 @@ void ReadInterface(sParamRender *params)
 		if (params->SSAOEnabled && params->global_ilumination)
 		{
 			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
-					"Warning! Both of Ambient occlusion based on simulated rays and Screen Space Ambient Occlusion (SSAO) are activated. SSAO will be deactivated");
+					"Warning! Both Ambient occlusion based on simulated rays and Screen Space Ambient Occlusion (SSAO) are activated. SSAO will be deactivated");
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			params->SSAOEnabled = false;
@@ -1151,7 +1151,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frLightBallance = gtk_frame_new("Light brightness balance");
 	Interface.frLightsParameters = gtk_frame_new("Random lights parameters");
 	Interface.frLightsCommon = gtk_frame_new("Common parameters");
-	Interface.frPredefinedLights = gtk_frame_new("Predefined Lights");
+	Interface.frPredefinedLights = gtk_frame_new("Predefined lights");
 	Interface.frMainLight = gtk_frame_new("Main light source (connected with camera)");
 	Interface.frIFSMain = gtk_frame_new("General IFS parameters");
 	Interface.frIFSParams = gtk_frame_new("Symmetry vectors");
@@ -1899,7 +1899,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frPostFog), Interface.boxPostFog);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.checkFogEnabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog color:", Interface.buColorFog), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", Interface.buColorFog), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.sliderFogDepth, true, true, 1);
@@ -2284,7 +2284,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.edit_power, "Fractal formula power\nOnly works with trigonometric formulas\nWhen using Tglad's formula, it is a scale factor");
 	gtk_widget_set_tooltip_text(Interface.edit_maxN, "Maximum number of iterations");
 	gtk_widget_set_tooltip_text(Interface.edit_minN, "Minimum number of iterations");
-	gtk_widget_set_tooltip_text(Interface.edit_DE_thresh, "Dynamic DE threshold factor.\n1 = DE threhold equals to 1 screen pixel\nHigher value gives more details");
+	gtk_widget_set_tooltip_text(Interface.edit_DE_thresh, "Dynamic DE threshold factor.\n1 = DE threshold equals to 1 screen pixel\nHigher value gives more details");
 	gtk_widget_set_tooltip_text(Interface.edit_DE_stepFactor, "DE steps fractor.\n1 -> step = Estimated Distance\nHigher value gives higher accuracy of finding fractal surface");
 	gtk_widget_set_tooltip_text(Interface.checkIterThresh, "Iteration count threshold mode");
 	gtk_widget_set_tooltip_text(Interface.checkLimits, "Enables cross-sections of fractal");
@@ -2305,9 +2305,9 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(renderWindow.comboImageScale, "Image scale in render window\nSmaller value <-> smaller render window");
 	gtk_widget_set_tooltip_text(Interface.edit_brightness, "Image brightness");
 	gtk_widget_set_tooltip_text(Interface.edit_gamma, "Image gamma");
-	gtk_widget_set_tooltip_text(Interface.buApplyBrighness, "Applying all shaders changes during rendering and after rendering");
+	gtk_widget_set_tooltip_text(Interface.buApplyBrighness, "Applying all shader changes during rendering and after rendering");
 	gtk_widget_set_tooltip_text(Interface.edit_shading, "angle of incidence of light effect intensity");
-	gtk_widget_set_tooltip_text(Interface.edit_shadows, "shadows intensity");
+	gtk_widget_set_tooltip_text(Interface.edit_shadows, "shadow intensity");
 	gtk_widget_set_tooltip_text(Interface.edit_specular, "intensity of specularity effect");
 	gtk_widget_set_tooltip_text(Interface.edit_ambient, "intensity of global ambient light");
 	gtk_widget_set_tooltip_text(Interface.edit_ambient_occlusion, "intensity of ambient occlusion effect");
@@ -2330,7 +2330,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.buColorBackgroud2, "Color of background bottom");
 	gtk_widget_set_tooltip_text(
 			Interface.buAnimationRecordTrack,
-			"Record of flight path. First you should set camera starting position using 3D Navigator tool and setup low resolution of image. For change flight direction please use mouse pointer");
+			"Recording of flight path. First you should set the camera starting position using the 3D Navigator tool and choose a low image resolution. For change of flight direction please use the mouse pointer");
 	gtk_widget_set_tooltip_text(Interface.buAnimationRenderTrack, "Render animation according to recorded flight path");
 	gtk_widget_set_tooltip_text(Interface.edit_animationDESpeed, "Flight speed - depends on estimated distance to fractal surface");
 	gtk_widget_set_tooltip_text(Interface.buRender, "Render and save image");
@@ -2343,23 +2343,23 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.frKeyframeAnimation, "Function for rendering animation with keyframes.\n"
 		"All keyframes are stored in keyframes/keyframeXXXXX.fract files\n"
 		"Keyframe files are settings files and can be also loaded and saved using Load Settings and Save Settings\n"
-		"Most of floating point parameters are interpolated using Catmull-Rom Splines");
-	gtk_widget_set_tooltip_text(Interface.frSound, "Sound file can be used for control of some fractal or shaders parameters.\n"
-		"After loading sound file, the sound is divided into 5 channels:\n"
+		"Most of the floating point parameters are interpolated using Catmull-Rom Splines");
+	gtk_widget_set_tooltip_text(Interface.frSound, "A sound file can be used for control of some fractal or shader parameters.\n"
+		"After loading the sound file, the sound is divided into 5 channels:\n"
 		"s0 - sound envelope (absolute value of sound amplitude)\n"
-		"sa, sb, sc, sd - selected frequncy bands of sound\n"
-		"To animate selected parameter you have to put instead of parameter value, following string:\n"
+		"sa, sb, sc, sd - selected frequency bands of sound\n"
+		"To animate a given parameter you have to use the following string instead of a parameter value:\n"
 		"sx amp - where sx is channel name, amp is a gain for channel\n"
-		"for example, in IFS parameters you can put: rotation alfa = s0 1.0, rotation beta = sc -0.3\n"
+		"for example, in the IFS parameters you can put: rotation alfa = s0 1.0, rotation beta = sc -0.3\n"
 		"Animation must be rendered in key-frame mode");
-	gtk_widget_set_tooltip_text(Interface.checkTgladMode, "Additional formula modificator. Cubic folding from Mandelbox formula");
-	gtk_widget_set_tooltip_text(Interface.checkSphericalFoldingMode, "Additional formula modificator. Spherical folding from Mandelbox formula");
+	gtk_widget_set_tooltip_text(Interface.checkTgladMode, "Additional formula modifier. Cubic folding from Mandelbox formula");
+	gtk_widget_set_tooltip_text(Interface.checkSphericalFoldingMode, "Additional formula modifier. Spherical folding from Mandelbox formula");
 
 	for (int i = 1; i < HYBRID_COUNT; ++i)
 		gtk_widget_set_tooltip_text(Interface.comboHybridFormula[i-1], g_strdup_printf("Formula #%d in sequence", i));
 
 	gtk_widget_set_tooltip_text(Interface.comboHybridFormula[HYBRID_COUNT-1],
-		g_strdup_printf("Formula #%d in sequence. When cyclic loop is disable, then this formula will be used for the rest of iterations and couldn't be set as NONE",
+		g_strdup_printf("Formula #%d in sequence. When cyclic loop is disabled, then this formula will be used for the rest of iterations and cannot be set as NONE",
 			HYBRID_COUNT - 1));
 
 	for (int i = 1; i < HYBRID_COUNT; ++i)
@@ -2370,11 +2370,11 @@ void CreateTooltips(void)
 
 	for (int i = 1; i < HYBRID_COUNT; ++i)
 		gtk_widget_set_tooltip_text(Interface.edit_hybridPower[i-1], g_strdup_printf("Power / scale parameter for formula #%d", i));
-	gtk_widget_set_tooltip_text(Interface.checkHybridCyclic, "When enable, formula sequence is looped");
+	gtk_widget_set_tooltip_text(Interface.checkHybridCyclic, "When enabled, the formula sequence is looped");
 	gtk_widget_set_tooltip_text(Interface.checkNavigatorAbsoluteDistance, "Movement step distance will be constant (absolute)");
 	gtk_widget_set_tooltip_text(Interface.edit_NavigatorAbsoluteDistance, "Absolute movement step distance");
 	gtk_widget_set_tooltip_text(Interface.edit_color_speed, "Colour variation speed");
-	gtk_widget_set_tooltip_text(Interface.buRandomPalette, "Generates random palete according to entered random seed");
+	gtk_widget_set_tooltip_text(Interface.buRandomPalette, "Generates random palette according to entered random seed");
 	gtk_widget_set_tooltip_text(Interface.buGetPaletteFromImage, "Grab colours from selected image");
 	gtk_widget_set_tooltip_text(Interface.sliderFogDepth, "Visibility distance measured from Front value");
 	gtk_widget_set_tooltip_text(Interface.sliderFogDepth, "Front distance of fog");

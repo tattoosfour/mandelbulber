@@ -21,7 +21,7 @@ bool CSound::Load(char *file)
 	sndfile = sf_open(file, SFM_READ, &sfinfo);
 	if (sndfile == NULL)
 	{
-		fprintf(stderr, "Could not open soundfile '%s'\n", file);
+		fprintf(stderr, "Could not open sound file '%s'\n", file);
 		loaded = false;
 	}
 	else
