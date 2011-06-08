@@ -26,6 +26,7 @@ const char* axis_names[] = {"X", "Y", "Z"};
 const char* component_names[] = {"alfa", "beta", "gamma"};
 
 bool paletteLoadedFromSettingsFile = false;
+bool newMandelboxParametersLoaded = false;
 
 void fprintfDot(FILE *file, const char *string, double value)
 {
@@ -350,11 +351,11 @@ void SaveSettings(char *filename, const sParamRender& params)
 	delete[] paletteString;
 }
 
-bool newMandelboxParametersLoaded = false;
 bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 {
 	DefaultValues(params);
 	paletteLoadedFromSettingsFile = false;
+	newMandelboxParametersLoaded = false;
 
 	char str1[100];
 	char str2[2000];
