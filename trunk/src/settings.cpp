@@ -35,7 +35,7 @@ void fprintfDot(FILE *file, const char *string, double value)
 	fprintf(file, "%s %s;\n", string, str);
 }
 
-double atof2(char *str)
+double atof2(const char *str)
 {
 	char *end;
 	double v = g_ascii_strtod(str, &end);
@@ -62,7 +62,7 @@ void MakePaletteString(const sRGB *palette, char *paletteString)
 	}
 }
 
-void GetPaletteFromString(sRGB *palette, char *paletteString)
+void GetPaletteFromString(sRGB *palette, const char *paletteString)
 {
 	int index = 0;
 	for (int i = 0; i < 2000; i++)
@@ -89,7 +89,7 @@ void GetPaletteFromString(sRGB *palette, char *paletteString)
 	}
 }
 
-void SaveSettings(char *filename, const sParamRender& params)
+void SaveSettings(const char *filename, const sParamRender& params)
 {
 	char *paletteString = new char[257 * 7];
 	memset(paletteString, 0, 257 * 7);
@@ -351,7 +351,7 @@ void SaveSettings(char *filename, const sParamRender& params)
 	delete[] paletteString;
 }
 
-bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
+bool LoadSettings(const char *filename, sParamRender &params, bool disableMessages)
 {
 	DefaultValues(params);
 	paletteLoadedFromSettingsFile = false;
@@ -424,7 +424,7 @@ bool LoadSettings(char *filename, sParamRender &params, bool disableMessages)
 	}
 }
 
-bool LoadOneSetting(char* str1, char *str2, sParamRender &params, bool disableMessages)
+bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bool disableMessages)
 {
 	char str3[100];
 	int c;

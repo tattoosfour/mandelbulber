@@ -22,9 +22,9 @@ CParamsUndo::CParamsUndo(void)
 
 void CParamsUndo::SaveUndo(sParamRender *params)
 {
-	char *filename1 = (char*) "undo/undo";
+	const char *filename1 = "undo/undo";
 	char filename2[1000];
-	IndexFilename(filename2, filename1, (char*) "fract", level % max);
+	IndexFilename(filename2, filename1, "fract", level % max);
 	SaveSettings(filename2, *params);
 	printf("Undo information saved (index = %d)\n", level % max);
 	level++;
@@ -39,18 +39,18 @@ bool CParamsUndo::GetUndo(sParamRender *params)
 	bool result = false;
 	if (count > 0)
 	{
-		char *filename1 = (char*) "undo/undo";
+		const char *filename1 = "undo/undo";
 		char filename2[1000];
 
 		ReadInterface(params);
-		IndexFilename(filename2, filename1, (char*) "fract", level % max);
+		IndexFilename(filename2, filename1, "fract", level % max);
 		SaveSettings(filename2, *params);
 
 		count--;
 		level--;
 		if (level < 0) level = 0;
 
-		IndexFilename(filename2, filename1, (char*) "fract", level % max);
+		IndexFilename(filename2, filename1, "fract", level % max);
 		if (FileIfExist(filename2))
 		{
 			LoadSettings(filename2, *params);
@@ -79,9 +79,9 @@ bool CParamsUndo::GetRedo(sParamRender *params)
 		level++;
 		count++;
 		if (count > max - 2) count = max - 2;
-		char *filename1 = (char*) "undo/undo";
+		const char *filename1 = "undo/undo";
 		char filename2[1000];
-		IndexFilename(filename2, filename1, (char*) "fract", level % max);
+		IndexFilename(filename2, filename1, "fract", level % max);
 		if (FileIfExist(filename2))
 		{
 			LoadSettings(filename2, *params);

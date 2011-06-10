@@ -12,7 +12,7 @@
 
 CSound sound;
 
-bool CSound::Load(char *file)
+bool CSound::Load(const char *file)
 {
 	SF_INFO sfinfo;
 	SNDFILE *sndfile;
