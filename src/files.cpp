@@ -28,7 +28,7 @@ char logfileName[1000];
 //		number - numer do dodania
 //wy:	fullname - nazwa pliku z numerem i rozszerzeniem
 //		return - ilość znaków
-int IndexFilename(char* fullname, char* filename, char* extension, int number)
+int IndexFilename(char* fullname, const char* filename, const char* extension, int number)
 {
 	int strLength;
 	strLength = sprintf(fullname, "%s%.5i.%s", filename, number, extension);
@@ -405,7 +405,7 @@ void SavePNG16Alpha(char *filename, int quality, int width, int height, cImage *
 	fclose(fp);
 }
 
-bool FileIfExist(char *filename)
+bool FileIfExist(const char *filename)
 {
 	FILE *file;
 	file = fopen(filename, "r");

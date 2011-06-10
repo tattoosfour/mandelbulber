@@ -29,14 +29,14 @@ public:
 	cTimeline();
 	~cTimeline();
 	bool IsCreated(void) {return isCreated;}
-	int Initialize(char *keyframesPath); //returns number of keyframes
+	int Initialize(const char *keyframesPath); //returns number of keyframes
 	bool GetImage(int index, sRGB8 *image);
 	void DisplayInDrawingArea(int index, GtkWidget *darea);
-	int CheckNumberOfKeyframes(char *keyframesPath);
+	int CheckNumberOfKeyframes(const char *keyframesPath);
 	void CreateInterface(int numberOfKeyframes);
 	void RebulidTimelineWindow(void);
-	void RecordKeyframe(int index, char *keyframeFile, bool modeInsert);
-	void DeleteKeyframe(int index, char *keyframesPath);
+	void RecordKeyframe(int index, const char *keyframeFile, bool modeInsert);
+	void DeleteKeyframe(int index, const char *keyframesPath);
 	void Resize(int newsize);
 	void Reset(void);
 	void Refresh(void);

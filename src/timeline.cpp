@@ -27,7 +27,7 @@ cTimeline::~cTimeline()
 {
 }
 
-int cTimeline::Initialize(char *keyframesPath)
+int cTimeline::Initialize(const char *keyframesPath)
 {
 	int numberOfKeyframes = CheckNumberOfKeyframes(keyframesPath);
 	printf("Found %d keyframes\n", numberOfKeyframes);
@@ -48,7 +48,7 @@ int cTimeline::Initialize(char *keyframesPath)
 		if (!database->IsFilled(i))
 		{
 			thumbnail.reset(new cImage(128, 128));
-			IndexFilename(filename2, keyframesPath, (char*) "fract", i);
+			IndexFilename(filename2, keyframesPath, "fract", i);
 			ThumbnailRender(filename2, thumbnail.ptr(), 1);
 			thumbnail->CreatePreview(1.0);
 			thumbnail->ConvertTo8bit();
@@ -89,13 +89,13 @@ int cTimeline::Initialize(char *keyframesPath)
 	return numberOfKeyframes;
 }
 
-int cTimeline::CheckNumberOfKeyframes(char *keyframesPath)
+int cTimeline::CheckNumberOfKeyframes(const char *keyframesPath)
 {
 	char filename2[1000];
 	int maxKeyNumber = 0;
 	do
 	{
-		IndexFilename(filename2, keyframesPath, (char*) "fract", maxKeyNumber);
+		IndexFilename(filename2, keyframesPath, "fract", maxKeyNumber);
 		maxKeyNumber++;
 	} while (FileIfExist(filename2));
 	maxKeyNumber--;
@@ -234,7 +234,7 @@ void cTimeline::RebulidTimelineWindow(void)
 	}
 }
 
-void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
+void cTimeline::RecordKeyframe(int index, const char *keyframeFile, bool modeInsert)
 {
 
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
@@ -268,11 +268,11 @@ void cTimeline::RecordKeyframe(int index, char *keyframeFile, bool modeInsert)
 	gtk_widget_queue_draw(timelineInterface.table);
 }
 
-void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
+void cTimeline::DeleteKeyframe(int index, const char *keyframesPath)
 {
 	char filename[1000];
 	char filename2[1000];
-	IndexFilename(filename, keyframesPath, (char*) "fract", index);
+	IndexFilename(filename, keyframesPath, "fract", index);
 	if (remove(filename) != 0)
 	{
 		fprintf(stderr, "Error! Cannot delete keyframe file\n");
@@ -281,8 +281,8 @@ void cTimeline::DeleteKeyframe(int index, char *keyframesPath)
 	{
 		for (int i = index; i < keyframeCount - 1; i++)
 		{
-			IndexFilename(filename, keyframesPath, (char*) "fract", i);
-			IndexFilename(filename2, keyframesPath, (char*) "fract", i + 1);
+			IndexFilename(filename, keyframesPath, "fract", i);
+			IndexFilename(filename2, keyframesPath, "fract", i + 1);
 			rename(filename2, filename);
 		}
 		database->DeleteRecord(index);
@@ -389,7 +389,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 	{
 		char filename2[1000];
 
-		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+		IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 		if (FileIfExist(filename2))
 		{
 			sParamRender fractParamLoaded;

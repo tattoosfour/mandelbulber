@@ -12,7 +12,7 @@
 class CSound
 {
 public:
-	bool Load(char* file);
+	bool Load(const char* file);
 	void SetFPS(double newFPS);
 	void CreateEnvelope(void);
 	double GetEnvelope(int frameNumber);

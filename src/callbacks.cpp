@@ -1125,7 +1125,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 {
 	char filename2[1000];
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
@@ -1140,7 +1140,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	//loading next keyframe if exists
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
@@ -1174,12 +1174,12 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 
 	for (int i = maxIndex; i >= index; i--)
 	{
-		IndexFilename(filename1, Interface_data.file_keyframes, (char*) "fract", i);
-		IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", i + 1);
+		IndexFilename(filename1, Interface_data.file_keyframes, "fract", i);
+		IndexFilename(filename2, Interface_data.file_keyframes, "fract", i + 1);
 		rename(filename1, filename2);
 	}
 
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
@@ -1194,7 +1194,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	//loading next keyframe if exists
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
@@ -1236,7 +1236,7 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 
 	char filename2[1000];
 
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 	if (FileIfExist(filename2))
 	{
 		sParamRender fractParamLoaded;
@@ -1274,7 +1274,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	char filename2[1000];
-	IndexFilename(filename2, Interface_data.file_keyframes, (char*) "fract", index);
+	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
 
 	if (FileIfExist(filename2))
 	{

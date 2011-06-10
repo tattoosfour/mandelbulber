@@ -1283,7 +1283,7 @@ int main(int argc, char *argv[])
 		//reading default configuration in GUI mode
 		if (!noGUI)
 		{
-			if (LoadSettings((char*) "settings/default.fract", fractParamDefault))
+			if (LoadSettings("settings/default.fract", fractParamDefault))
 			{
 				WriteLog("Default settings loaded");
 				printf("Default settings loaded successfully (settings/default.fract)\n");
@@ -1309,7 +1309,7 @@ int main(int argc, char *argv[])
 			{
 				char settingsFile2[1000];
 				sprintf(settingsFile2, "settings/%s", noGUIdata.settingsFile);
-				if (!LoadSettings((char*) settingsFile2, noGUIdata.fractparams))
+				if (!LoadSettings(settingsFile2, noGUIdata.fractparams))
 				{
 					printf("ERROR! Can't open settings file: %s\n", noGUIdata.settingsFile);
 					return -1;
@@ -1509,7 +1509,7 @@ void MainRender(void)
 	/*
 	if (fractParam.soundEnabled)
 	{
-		sound.Load((char*) fractParam.file_sound);
+		sound.Load(fractParam.file_sound);
 		WriteLog("Sound file loaded");
 		sound.SetFPS(25.0);
 		sound.CreateEnvelope();
@@ -1551,7 +1551,7 @@ void MainRender(void)
 	{
 		do
 		{
-			IndexFilename(filename2, fractParam.file_keyframes, (char*) "fract", maxKeyNumber);
+			IndexFilename(filename2, fractParam.file_keyframes, "fract", maxKeyNumber);
 			maxKeyNumber++;
 		} while (FileIfExist(filename2));
 		WriteLog("Keyframes counted");
@@ -1579,7 +1579,7 @@ void MainRender(void)
 	{
 		for (int keyNumber = 0; keyNumber < maxKeyNumber; keyNumber++)
 		{
-			IndexFilename(filename2, fractParam.file_keyframes, (char*) "fract", keyNumber);
+			IndexFilename(filename2, fractParam.file_keyframes, "fract", keyNumber);
 
 			sParamRender fractParamLoaded;
 			LoadSettings(filename2, fractParamLoaded, true);
@@ -1802,11 +1802,11 @@ void MainRender(void)
 
 		if (Interface_data.imageFormat == imgFormatJPG)
 		{
-			IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
+			IndexFilename(filename2, fractParam.file_destination, "jpg", index);
 		}
 		else
 		{
-			IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
+			IndexFilename(filename2, fractParam.file_destination, "png", index);
 		}
 		FILE *testFile;
 		testFile = fopen(filename2, "r");
@@ -1888,7 +1888,7 @@ void MainRender(void)
 					MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image made");
 					if (!noGUI) StereoPreview(&mainImage,stereoImage);
-					IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
+					IndexFilename(filename2, fractParam.file_destination, "jpg", index);
 					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
 					if (!noGUI)
@@ -1906,22 +1906,22 @@ void MainRender(void)
 					unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
 					if (Interface_data.imageFormat == imgFormatJPG)
 					{
-						IndexFilename(filename2, fractParam.file_destination, (char*) "jpg", index);
+						IndexFilename(filename2, fractParam.file_destination, "jpg", index);
 						SaveJPEG(filename2, 100, width, height, (JSAMPLE*) rgbbuf2);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG)
 					{
-						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
+						IndexFilename(filename2, fractParam.file_destination, "png", index);
 						SavePNG(filename2, 100, width, height, (png_byte*) rgbbuf2);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16)
 					{
-						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
+						IndexFilename(filename2, fractParam.file_destination, "png", index);
 						SavePNG16(filename2, 100, width, height, &mainImage);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
 					{
-						IndexFilename(filename2, fractParam.file_destination, (char*) "png", index);
+						IndexFilename(filename2, fractParam.file_destination, "png", index);
 						SavePNG16Alpha(filename2, 100, width, height, &mainImage);
 					}
 					printf("Image saved: %s\n", filename2);
@@ -1968,7 +1968,7 @@ void MainRender(void)
 	isRendering = false;
 }
 
-void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode)
+void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode)
 {
 	printf("Rendering keyframe preview: %s\n", settingsFile);
 

@@ -49,7 +49,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea);
 void InitMainParameters(sParamRender *fractParam);
 void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
 bool LoadTextures(sParamRender *params);
-void ThumbnailRender(char *settingsFile, cImage *miniImage, int mode);
+void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode);
 void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage);
 
 #endif /* RENDER3D_H_ */
