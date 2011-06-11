@@ -676,9 +676,22 @@ void *MainThread(void *ptr)
 							for(int i=numberOfReflections; i>=0; i--)
 							{
 								sShaderOutput reflectTemp;
-								reflectTemp.R = shadeBuff[i].R * shadowBuff[i].R * colorBuff[i].R + specularBuff[i].R * shadowBuff[i].R + ambientBuff[i].R + auxLightsBuff[i].R * colorBuff[i].R + auxSpecBuff[i].R;
-								reflectTemp.G = shadeBuff[i].R * shadowBuff[i].G * colorBuff[i].G + specularBuff[i].G * shadowBuff[i].G + ambientBuff[i].R + auxLightsBuff[i].G * colorBuff[i].G + auxSpecBuff[i].G;
-								reflectTemp.B = shadeBuff[i].R * shadowBuff[i].B * colorBuff[i].B + specularBuff[i].B * shadowBuff[i].B + ambientBuff[i].R + auxLightsBuff[i].B * colorBuff[i].B + auxSpecBuff[i].B;
+								double mainIntensity = param.doubles.imageAdjustments.mainLightIntensity * param.doubles.imageAdjustments.directLight;
+								reflectTemp.R = shadeBuff[i].R * shadowBuff[i].R * colorBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity
+										+ specularBuff[i].R * shadowBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity
+										+ ambientBuff[i].R
+										+ auxLightsBuff[i].R * colorBuff[i].R
+										+ auxSpecBuff[i].R;
+								reflectTemp.G = shadeBuff[i].R * shadowBuff[i].G * colorBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity
+										+ specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity
+										+ ambientBuff[i].R
+										+ auxLightsBuff[i].G * colorBuff[i].G
+										+ auxSpecBuff[i].G;
+								reflectTemp.B = shadeBuff[i].R * shadowBuff[i].B * colorBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity
+										+ specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity
+										+ ambientBuff[i].R
+										+ auxLightsBuff[i].B * colorBuff[i].B
+										+ auxSpecBuff[i].B;
 
 								if(param.imageSwitches.fogEnabled)
 								{
