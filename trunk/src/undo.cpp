@@ -10,6 +10,8 @@
 #include "files.h"
 #include "interface.h"
 
+using namespace std;
+
 CParamsUndo undoBuffer;
 
 CParamsUndo::CParamsUndo(void)
@@ -22,10 +24,8 @@ CParamsUndo::CParamsUndo(void)
 
 void CParamsUndo::SaveUndo(sParamRender *params)
 {
-	const char *filename1 = "undo/undo";
-	char filename2[1000];
-	IndexFilename(filename2, filename1, "fract", level % max);
-	SaveSettings(filename2, *params);
+        string filename2=IndexFilename("undo/undo","fract",level%max);
+	SaveSettings(filename2.c_str(), *params);
 	printf("Undo information saved (index = %d)\n", level % max);
 	level++;
 	last = level;
@@ -39,26 +39,23 @@ bool CParamsUndo::GetUndo(sParamRender *params)
 	bool result = false;
 	if (count > 0)
 	{
-		const char *filename1 = "undo/undo";
-		char filename2[1000];
-
 		ReadInterface(params);
-		IndexFilename(filename2, filename1, "fract", level % max);
-		SaveSettings(filename2, *params);
+                string filename2=IndexFilename("undo/undo","fract",level%max);
+		SaveSettings(filename2.c_str(), *params);
 
 		count--;
 		level--;
 		if (level < 0) level = 0;
 
-		IndexFilename(filename2, filename1, "fract", level % max);
-		if (FileIfExist(filename2))
+                filename2=IndexFilename("undo/undo","fract",level%max);
+		if (FileIfExist(filename2.c_str()))
 		{
-			LoadSettings(filename2, *params);
+			LoadSettings(filename2.c_str(), *params);
 			result = true;
 		}
 		else
 		{
-			printf("Unfo file not found (index = %d)\n", level % max);
+			printf("Undo file not found (index = %d)\n", level % max);
 			result = false;
 		}
 	}
@@ -79,12 +76,10 @@ bool CParamsUndo::GetRedo(sParamRender *params)
 		level++;
 		count++;
 		if (count > max - 2) count = max - 2;
-		const char *filename1 = "undo/undo";
-		char filename2[1000];
-		IndexFilename(filename2, filename1, "fract", level % max);
-		if (FileIfExist(filename2))
+		string filename2=IndexFilename("undo/undo", "fract", level % max);
+		if (FileIfExist(filename2.c_str()))
 		{
-			LoadSettings(filename2, *params);
+			LoadSettings(filename2.c_str(), *params);
 			result = true;
 		}
 		else

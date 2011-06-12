@@ -38,7 +38,7 @@ void cDatabase::ClearDatabase()
 }
 
 //put data into database
-errorCode cDatabase::SetRecord(int index, char *record, int recordSize)
+errorCode cDatabase::SetRecord(int index, const char *record, int recordSize)
 {
 	errorCode err;
 	if (index < recordCount)
@@ -48,7 +48,7 @@ errorCode cDatabase::SetRecord(int index, char *record, int recordSize)
 
 		//przepisanie danych do rekordu
 		char *data = new char[recordSize];
-		char *dataInput = (char*) record;
+		const char *dataInput = record;
 		for (int i = 0; i < recordSize; i++)
 		{
 			data[i] = dataInput[i];
@@ -96,7 +96,7 @@ errorCode cDatabase::GetRecord(int index, char *record)
 }
 
 //add new record into the end of database
-int cDatabase::AddRecord(char *record, int recordSize)
+int cDatabase::AddRecord(const char *record, int recordSize)
 {
 	recordCount++;
 	//database resize
@@ -121,7 +121,7 @@ int cDatabase::AddRecord(char *record, int recordSize)
 }
 
 //inserting new record
-int cDatabase::InsertRecord(int index, char *record, int recordSize)
+int cDatabase::InsertRecord(int index, const char *record, int recordSize)
 {
 	recordCount++;
 	//database resize

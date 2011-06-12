@@ -30,10 +30,10 @@ class cDatabase
   public:
 	cDatabase(int size = 1);
 	~cDatabase() {ClearDatabase();};
-	errorCode SetRecord(int index, char *record, int recordSize);
+	errorCode SetRecord(int index, const char *record, int recordSize);
 	errorCode GetRecord(int index, char *record);
-	int AddRecord(char *record, int size);
-	int InsertRecord(int index, char *record, int recordSize);
+	int AddRecord(const char *record, int size);
+	int InsertRecord(int index, const char *record, int recordSize);
 	errorCode DeleteRecord(int index);
 	int Count();
 	bool IsFilled(int index);

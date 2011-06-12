@@ -16,7 +16,7 @@ cimage.cpp     files.cpp        interface.cpp  Render3D.cpp   texture.cpp
 
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mtune=native -Wall -fmessage-length=0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mtune=native -Wall -fmessage-length=0  -Wall -Wextra -Wstrict-aliasing=2 -Wundef -Wwrite-strings -Wredundant-decls -Woverloaded-virtual -Wcast-qual -Wcast-align -Wpointer-arith -Wno-unknown-pragmas -Wno-unused-parameter -Wfatal-errors")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -mfpmath=both -ffast-math -fno-math-errno -ffinite-math-only -fno-trapping-math -fno-signed-zeros")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -pg")
 
