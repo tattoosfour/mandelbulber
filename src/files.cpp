@@ -19,7 +19,9 @@
 //#include <jpeglib.h>
 #include "files.h"
 
-char logfileName[1000];
+using namespace std;
+
+string logfileName;
 
 //***************************** Index filename *************************
 //funkcja numerująca pliki
@@ -28,11 +30,12 @@ char logfileName[1000];
 //		number - numer do dodania
 //wy:	fullname - nazwa pliku z numerem i rozszerzeniem
 //		return - ilość znaków
-int IndexFilename(char* fullname, const char* filename, const char* extension, int number)
+
+std::string IndexFilename(const char* filename, const char* extension, int number)
 {
-	int strLength;
-	strLength = sprintf(fullname, "%s%.5i.%s", filename, number, extension);
-	return strLength;
+        char tmp[10];
+        sprintf(tmp,"%.5i",number);
+        return std::string(filename)+tmp+"."+extension;
 }
 
 METHODDEF(void) my_error_exit(j_common_ptr cinfo)
@@ -48,7 +51,7 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
 	longjmp(myerr->setjmp_buffer, 1);
 }
 
-int LoadJPEG(char *filename, JSAMPLE *image)
+int LoadJPEG(const char *filename, JSAMPLE *image)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_error_mgr jerr;
@@ -107,7 +110,7 @@ int LoadJPEG(char *filename, JSAMPLE *image)
 }
 
 //************************** CheckJPEGsize *******************************
-bool CheckJPEGsize(char *filename, int *width, int *height)
+bool CheckJPEGsize(const char *filename, int *width, int *height)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_error_mgr jerr;
@@ -146,7 +149,7 @@ bool CheckJPEGsize(char *filename, int *width, int *height)
 }
 
 //************************** Save JPEG ***********************************
-void SaveJPEG(char *filename, int quality, int width, int height, JSAMPLE *image)
+void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE *image)
 {
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -187,7 +190,7 @@ void SaveJPEG(char *filename, int quality, int width, int height, JSAMPLE *image
 	jpeg_destroy_compress(&cinfo);
 }
 
-void SavePNG(char *filename, int quality, int width, int height, png_byte *image)
+void SavePNG(const char *filename, int /*quality*/, int width, int height, png_byte *image)
 {
 	/* create file */
 	FILE *fp = fopen(filename, "wb");
@@ -253,7 +256,7 @@ void SavePNG(char *filename, int quality, int width, int height, png_byte *image
 	fclose(fp);
 }
 
-void SavePNG16(char *filename, int quality, int width, int height, cImage *image)
+void SavePNG16(const char *filename, int /*quality*/, int width, int height, cImage *image)
 {
 	/* create file */
 	FILE *fp = fopen(filename, "wb");
@@ -322,7 +325,7 @@ void SavePNG16(char *filename, int quality, int width, int height, cImage *image
 	fclose(fp);
 }
 
-void SavePNG16Alpha(char *filename, int quality, int width, int height, cImage *image)
+void SavePNG16Alpha(const char *filename, int /*quality*/, int width, int height, cImage *image)
 {
 	/* create file */
 	FILE *fp = fopen(filename, "wb");
@@ -419,14 +422,14 @@ bool FileIfExist(const char *filename)
 
 void WriteLog(const char *text)
 {
-	FILE *logfile = fopen(logfileName, "a");
+	FILE *logfile = fopen(logfileName.c_str(), "a");
 	fprintf(logfile, "%ld: %s\n", (unsigned long int) clock(), text);
 	fclose(logfile);
 }
 
 void WriteLogDouble(const char *text, double value)
 {
-	FILE *logfile = fopen(logfileName, "a");
+	FILE *logfile = fopen(logfileName.c_str(), "a");
 	fprintf(logfile, "%ld: %s, value = %g\n", (unsigned long int) clock(), text, value);
 	fclose(logfile);
 }

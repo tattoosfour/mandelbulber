@@ -25,6 +25,8 @@
 #include "loadsound.hpp"
 #include "timeline.hpp"
 
+using namespace std;
+
 double last_navigator_step;
 CVector3 last_keyframe_position;
 bool renderRequest = false;
@@ -490,17 +492,15 @@ void PressedLoadSettings(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		sParamRender fractParamLoaded;
 		LoadSettings(filename, fractParamLoaded);
 		Params2InterfaceData(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
 		strcpy(lastFilenameSettings, filename);
-		char windowTitle[1000];
-		sprintf(windowTitle, "Mandelbulber (%s)", filename);
-		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle);
+		string windowTitle= string("Mandelbulber (")+filename+")";
+		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle.c_str());
 
 		timeline->Reset();
 	}
@@ -519,16 +519,14 @@ void PressedSaveSettings(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		sParamRender fractParamToSave;
 		ReadInterface(&fractParamToSave);
 		SaveSettings(filename, fractParamToSave);
 
 		strcpy(lastFilenameSettings, filename);
-		char windowTitle[1000];
-		sprintf(windowTitle, "Mandelbulber (%s)", filename);
-		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle);
+		string windowTitle= string("Mandelbulber (")+filename+")";
+		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle.c_str());
 	}
 	gtk_widget_destroy(dialog);
 
@@ -545,8 +543,7 @@ void PressedSaveImage(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		SaveJPEG(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), (JSAMPLE*) mainImage.ConvertTo8bit());
 		strcpy(lastFilenameImage, filename);
 	}
@@ -564,8 +561,7 @@ void PressedSaveImagePNG(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		SavePNG(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), (JSAMPLE*) mainImage.ConvertTo8bit());
 		strcpy(lastFilenameImage, filename);
 	}
@@ -583,8 +579,7 @@ void PressedSaveImagePNG16(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		SavePNG16(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), &mainImage);
 		strcpy(lastFilenameImage, filename);
 	}
@@ -602,8 +597,7 @@ void PressedSaveImagePNG16Alpha(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		SavePNG16Alpha(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), &mainImage);
 		strcpy(lastFilenameImage, filename);
 	}
@@ -1123,16 +1117,16 @@ void PressedIFSNormalizeVectors(GtkWidget *widget, gpointer data)
 
 void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 {
-	char filename2[1000];
+	string filename2;
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
+	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
-	SaveSettings(filename2, fractParamToSave);
+	SaveSettings(filename2.c_str(), fractParamToSave);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
-	timeline->RecordKeyframe(index, filename2, false);
+	timeline->RecordKeyframe(index, filename2.c_str(), false);
 
 	gtk_widget_queue_draw(timelineInterface.table);
 
@@ -1140,11 +1134,11 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	//loading next keyframe if exists
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2))
+	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
+	if (FileIfExist(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, true);
+		LoadSettings(filename2.c_str(), fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
@@ -1163,8 +1157,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 
 void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 {
-	char filename1[1000];
-	char filename2[1000];
+	string filename1,filename2;
 
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber))) + 1;
 	int maxIndex = timeline->CheckNumberOfKeyframes(Interface_data.file_keyframes) - 1;
@@ -1174,19 +1167,19 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 
 	for (int i = maxIndex; i >= index; i--)
 	{
-		IndexFilename(filename1, Interface_data.file_keyframes, "fract", i);
-		IndexFilename(filename2, Interface_data.file_keyframes, "fract", i + 1);
-		rename(filename1, filename2);
+		filename1=IndexFilename(Interface_data.file_keyframes, "fract", i);
+		filename2=IndexFilename(Interface_data.file_keyframes, "fract", i + 1);
+		rename(filename1.c_str(), filename2.c_str());
 	}
 
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
+	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
-	SaveSettings(filename2, fractParamToSave);
+	SaveSettings(filename2.c_str(), fractParamToSave);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
-	timeline->RecordKeyframe(index, filename2, true);
+	timeline->RecordKeyframe(index, filename2.c_str(), true);
 
 	gtk_widget_queue_draw(timelineInterface.table);
 
@@ -1194,11 +1187,11 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
 	//loading next keyframe if exists
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2))
+	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
+	if (FileIfExist(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, true);
+		LoadSettings(filename2.c_str(), fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
@@ -1234,13 +1227,13 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 	index++;
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
-	char filename2[1000];
+	string filename2;
 
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2))
+	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
+	if (FileIfExist(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, true);
+		LoadSettings(filename2.c_str(), fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
@@ -1259,7 +1252,7 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 	}
 	else
 	{
-		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2);
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2.c_str());
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 		index--;
@@ -1273,13 +1266,12 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 	index--;
 	gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 
-	char filename2[1000];
-	IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
+	string filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
 
-	if (FileIfExist(filename2))
+	if (FileIfExist(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
-		LoadSettings(filename2, fractParamLoaded, true);
+		LoadSettings(filename2.c_str(), fractParamLoaded, true);
 		KeepOtherSettings(&fractParamLoaded);
 		last_keyframe_position = fractParamLoaded.doubles.vp;
 		WriteInterface(&fractParamLoaded);
@@ -1298,7 +1290,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 	}
 	else
 	{
-		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2);
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2.c_str());
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 
@@ -1375,8 +1367,7 @@ void PressedSelectDestination(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_destination), filename);
@@ -1400,8 +1391,7 @@ void PressedSelectBackground(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_background), filename);
@@ -1425,8 +1415,7 @@ void PressedSelectEnvmap(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_envmap), filename);
@@ -1450,8 +1439,7 @@ void PressedSelectLightmap(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_lightmap), filename);
@@ -1470,8 +1458,7 @@ void PressedSelectFlightPath(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_path), filename);
@@ -1490,8 +1477,7 @@ void PressedSelectKeyframes(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		if (FileIfExist(filename))
 		{
 			filename[strlen(filename) - 11] = 0;
@@ -1515,8 +1501,7 @@ void PressedSelectSound(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 		sDialogFiles *dialogFiles = (sDialogFiles*) data;
 		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_sound), filename);
@@ -1597,8 +1582,7 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		printf("filename: %s\n", filename);
 
 		cTexture paletteImage(filename);
@@ -1671,15 +1655,14 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 	GtkWidget *checkBox = gtk_file_chooser_get_extra_widget(file_chooser);
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkBox)))
 	{
-		char *filename;
-		filename = gtk_file_chooser_get_preview_filename(file_chooser);
+		const char *filename = gtk_file_chooser_get_preview_filename(file_chooser);
 
 		char string[12];
 
 		FILE *fileSettings = fopen(filename, "r");
 		if (fileSettings)
 		{
-			char *result = fgets(string, 12, fileSettings);
+			const char *result = fgets(string, 12, fileSettings);
 			printf("%sX\n", string);
 			(void) result;
 			if (!strcmp(string, "locale_test"))
@@ -1706,8 +1689,7 @@ void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data)
 
 	int size = 256;
 
-	char *filename;
-	filename = gtk_file_chooser_get_preview_filename(file_chooser);
+	const char *filename = gtk_file_chooser_get_preview_filename(file_chooser);
 
 	if (FileIfExist(filename))
 	{

@@ -34,6 +34,8 @@
 #include "undo.hpp"
 #include "callbacks.h"
 
+using namespace std;
+
 bool noGUI = false;
 
 int NR_THREADS;
@@ -1181,7 +1183,7 @@ int get_cpu_count()
 int main(int argc, char *argv[])
 {
 	//read $home env variable
-	char *homedir;
+	const char *homedir;
 	char data_directory[1000];
 
 	setlocale(LC_ALL, "");
@@ -1194,14 +1196,14 @@ int main(int argc, char *argv[])
 
 	//logfile
 #ifdef WIN32 /* WINDOWS */
-	sprintf(logfileName, "log.txt");
+	logfileName="log.txt";
 #else
-	sprintf(logfileName, "%s/.mandelbulber_log.txt", homedir);
+	logfileName=string(homedir)+ "/.mandelbulber_log.txt";
 #endif
-	FILE *logfile = fopen(logfileName, "w");
+	FILE *logfile = fopen(logfileName.c_str(), "w");
 	fclose(logfile);
 
-	printf("Log file: %s\n", logfileName);
+	printf("Log file: %s\n", logfileName.c_str());
 	WriteLog("Log file created");
 
 	//initialising GTK+
@@ -1547,7 +1549,7 @@ void MainRender(void)
 	}
 
 	//auxiliary arrays
-	char filename2[1000];
+	string filename2;
 	double distance = 0;
 	char label_text[1000];
 
@@ -1564,9 +1566,9 @@ void MainRender(void)
 	{
 		do
 		{
-			IndexFilename(filename2, fractParam.file_keyframes, "fract", maxKeyNumber);
+			filename2=IndexFilename(fractParam.file_keyframes, "fract", maxKeyNumber);
 			maxKeyNumber++;
-		} while (FileIfExist(filename2));
+		} while (FileIfExist(filename2.c_str()));
 		WriteLog("Keyframes counted");
 	}
 	else
@@ -1592,10 +1594,10 @@ void MainRender(void)
 	{
 		for (int keyNumber = 0; keyNumber < maxKeyNumber; keyNumber++)
 		{
-			IndexFilename(filename2, fractParam.file_keyframes, "fract", keyNumber);
+			filename2=IndexFilename(fractParam.file_keyframes, "fract", keyNumber);
 
 			sParamRender fractParamLoaded;
-			LoadSettings(filename2, fractParamLoaded, true);
+			LoadSettings(filename2.c_str(), fractParamLoaded, true);
 			WriteLogDouble("Keyframe loaded", keyNumber);
 
 			morphParamRender.AddData(keyNumber, (double*) &fractParamLoaded.doubles);
@@ -1815,14 +1817,14 @@ void MainRender(void)
 
 		if (Interface_data.imageFormat == imgFormatJPG)
 		{
-			IndexFilename(filename2, fractParam.file_destination, "jpg", index);
+			filename2=IndexFilename(fractParam.file_destination, "jpg", index);
 		}
 		else
 		{
-			IndexFilename(filename2, fractParam.file_destination, "png", index);
+			filename2=IndexFilename(fractParam.file_destination, "png", index);
 		}
 		FILE *testFile;
-		testFile = fopen(filename2, "r");
+		testFile = fopen(filename2.c_str(), "r");
 		if ((testFile != NULL && !fractParam.recordMode && (autoSaveImage || fractParam.animMode)) || (!foundLastFrame && fractParam.continueRecord))
 		{
 			if (!fractParam.animMode)
@@ -1901,13 +1903,13 @@ void MainRender(void)
 					MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
 					WriteLog("Stereo image made");
 					if (!noGUI) StereoPreview(&mainImage,stereoImage);
-					IndexFilename(filename2, fractParam.file_destination, "jpg", index);
-					SaveJPEG(filename2, 100, width * 2, height, (JSAMPLE*) stereoImage);
+					filename2=IndexFilename(fractParam.file_destination, "jpg", index);
+					SaveJPEG(filename2.c_str(), 100, width * 2, height, (JSAMPLE*) stereoImage);
 					WriteLog("Stereo image saved");
 					if (!noGUI)
 					{
 						char progressText[1000];
-						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2);
+						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2.c_str());
 						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 						StereoPreview(&mainImage, stereoImage);
 					}
@@ -1919,27 +1921,27 @@ void MainRender(void)
 					unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
 					if (Interface_data.imageFormat == imgFormatJPG)
 					{
-						IndexFilename(filename2, fractParam.file_destination, "jpg", index);
-						SaveJPEG(filename2, 100, width, height, (JSAMPLE*) rgbbuf2);
+						filename2=IndexFilename(fractParam.file_destination, "jpg", index);
+						SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG)
 					{
-						IndexFilename(filename2, fractParam.file_destination, "png", index);
-						SavePNG(filename2, 100, width, height, (png_byte*) rgbbuf2);
+						filename2=IndexFilename(fractParam.file_destination, "png", index);
+						SavePNG(filename2.c_str(), 100, width, height, (png_byte*) rgbbuf2);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16)
 					{
-						IndexFilename(filename2, fractParam.file_destination, "png", index);
-						SavePNG16(filename2, 100, width, height, &mainImage);
+						filename2=IndexFilename(fractParam.file_destination, "png", index);
+						SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
 					}
 					else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
 					{
-						IndexFilename(filename2, fractParam.file_destination, "png", index);
-						SavePNG16Alpha(filename2, 100, width, height, &mainImage);
+						filename2=IndexFilename(fractParam.file_destination, "png", index);
+						SavePNG16Alpha(filename2.c_str(), 100, width, height, &mainImage);
 					}
-					printf("Image saved: %s\n", filename2);
+					printf("Image saved: %s\n", filename2.c_str());
 					WriteLog("Image saved");
-					WriteLog(filename2);
+					WriteLog(filename2.c_str());
 				}
 
 			}

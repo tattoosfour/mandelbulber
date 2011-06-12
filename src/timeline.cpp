@@ -13,6 +13,8 @@
 #include "settings.h"
 #include "callbacks.h"
 
+using namespace std;
+
 smart_ptr<cTimeline> timeline;
 
 cTimeline::cTimeline()
@@ -40,7 +42,6 @@ int cTimeline::Initialize(const char *keyframesPath)
 	gtk_widget_set_sensitive(timelineInterface.buAnimationInsertKeyframe, false);
 	gtk_widget_set_sensitive(timelineInterface.buAnimationRecordKey2, false);
 
-	char filename2[1000];
 	smart_ptr<sTimelineRecord> record(new sTimelineRecord);
 
 	for (int i = 0; i < numberOfKeyframes; i++)
@@ -48,8 +49,8 @@ int cTimeline::Initialize(const char *keyframesPath)
 		if (!database->IsFilled(i))
 		{
 			thumbnail.reset(new cImage(128, 128));
-			IndexFilename(filename2, keyframesPath, "fract", i);
-			ThumbnailRender(filename2, thumbnail.ptr(), 1);
+			string filename2=IndexFilename(keyframesPath, "fract", i);
+			ThumbnailRender(filename2.c_str(), thumbnail.ptr(), 1);
 			thumbnail->CreatePreview(1.0);
 			thumbnail->ConvertTo8bit();
 			thumbnail->UpdatePreview();
@@ -91,13 +92,13 @@ int cTimeline::Initialize(const char *keyframesPath)
 
 int cTimeline::CheckNumberOfKeyframes(const char *keyframesPath)
 {
-	char filename2[1000];
+	string filename2;
 	int maxKeyNumber = 0;
 	do
 	{
-		IndexFilename(filename2, keyframesPath, "fract", maxKeyNumber);
+		filename2=IndexFilename(keyframesPath, "fract", maxKeyNumber);
 		maxKeyNumber++;
-	} while (FileIfExist(filename2));
+	} while (FileIfExist(filename2.c_str()));
 	maxKeyNumber--;
 	return maxKeyNumber;
 }
@@ -270,10 +271,9 @@ void cTimeline::RecordKeyframe(int index, const char *keyframeFile, bool modeIns
 
 void cTimeline::DeleteKeyframe(int index, const char *keyframesPath)
 {
-	char filename[1000];
-	char filename2[1000];
-	IndexFilename(filename, keyframesPath, "fract", index);
-	if (remove(filename) != 0)
+	string filename, filename2;
+	filename=IndexFilename(keyframesPath, "fract", index);
+	if (remove(filename.c_str()) != 0)
 	{
 		fprintf(stderr, "Error! Cannot delete keyframe file\n");
 	}
@@ -281,9 +281,9 @@ void cTimeline::DeleteKeyframe(int index, const char *keyframesPath)
 	{
 		for (int i = index; i < keyframeCount - 1; i++)
 		{
-			IndexFilename(filename, keyframesPath, "fract", i);
-			IndexFilename(filename2, keyframesPath, "fract", i + 1);
-			rename(filename2, filename);
+			filename=IndexFilename(keyframesPath, "fract", i);
+			filename2=IndexFilename(keyframesPath, "fract", i + 1);
+			rename(filename2.c_str(), filename.c_str());
 		}
 		database->DeleteRecord(index);
 		Resize(keyframeCount - 1);
@@ -387,13 +387,11 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 
 	if (event->type == GDK_2BUTTON_PRESS)
 	{
-		char filename2[1000];
-
-		IndexFilename(filename2, Interface_data.file_keyframes, "fract", index);
-		if (FileIfExist(filename2))
+		string filename2 = IndexFilename(Interface_data.file_keyframes, "fract", index);
+		if (FileIfExist(filename2.c_str()))
 		{
 			sParamRender fractParamLoaded;
-			LoadSettings(filename2, fractParamLoaded, true);
+			LoadSettings(filename2.c_str(), fractParamLoaded, true);
 			KeepOtherSettings(&fractParamLoaded);
 			WriteInterface(&fractParamLoaded);
 			last_keyframe_position = fractParamLoaded.doubles.vp;
@@ -411,7 +409,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		else
 		{
 			GtkWidget *dialog =
-					gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2);
+					gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error! Keyframe does not exist: %s", filename2.c_str());
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));

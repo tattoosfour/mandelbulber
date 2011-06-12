@@ -13,7 +13,7 @@
 class cTexture
 {
 public:
-	cTexture(char *filename);
+	cTexture(const char *filename);
 	~cTexture(void);
 	int Height(void) {return height;}
 	int Width(void) {return width;}

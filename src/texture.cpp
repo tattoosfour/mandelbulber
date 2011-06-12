@@ -9,7 +9,7 @@
 #include "files.h"
 
 //constructor
-cTexture::cTexture(char *filename)
+cTexture::cTexture(const char *filename)
 {
 	if (CheckJPEGsize(filename, &width, &height))
 	{

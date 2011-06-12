@@ -104,7 +104,7 @@ void cImage::ClearImage(void)
 		zBuffer[i] = 1e20;
 }
 
-sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront)
+sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront)
 {
 	double mLightR = ecol.mainLightColour.R / 65536.0;
 	double mLightG = ecol.mainLightColour.G / 65536.0;
@@ -183,7 +183,7 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha, float
 	newPixel16.R = gammaTable[col.R];
 	newPixel16.G = gammaTable[col.G];
 	newPixel16.B = gammaTable[col.B];
-	alpha = alpha2;
+	alpha_ = alpha2;
 
 	return newPixel16;
 }

@@ -15,6 +15,7 @@ extern "C"
 #include <jpeglib.h>
 }
 
+#include <string>
 #include "cimage.hpp"
 
 struct my_error_mgr
@@ -33,16 +34,16 @@ struct sImageRGBA16
 	unsigned short A;
 };
 
-extern char logfileName[1000];
+extern std::string logfileName;
 
-int IndexFilename(char* fullname, const char* filename, const char* extension, int number);
+std::string IndexFilename(const char* filename, const char* extension, int number);
 //METHODDEF(void) my_error_exit(j_common_ptr cinfo);
-int LoadJPEG(char *filename, JSAMPLE *image);
-bool CheckJPEGsize(char *filename, int *width, int *height);
-void SaveJPEG(char *filename, int quality, int width, int height, JSAMPLE *image);
-void SavePNG(char *filename, int quality, int width, int height, png_byte *image);
-void SavePNG16(char *filename, int quality, int width, int height, cImage *image);
-void SavePNG16Alpha(char *filename, int quality, int width, int height, cImage *image);
+int LoadJPEG(const char *filename, JSAMPLE *image);
+bool CheckJPEGsize(const char *filename, int *width, int *height);
+void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE *image);
+void SavePNG(const char *filename, int quality, int width, int height, png_byte *image);
+void SavePNG16(const char *filename, int quality, int width, int height, cImage *image);
+void SavePNG16Alpha(const char *filename, int quality, int width, int height, cImage *image);
 bool FileIfExist(const char *filename);
 void WriteLog(const char *text);
 void WriteLogDouble(const char *text, double value);
