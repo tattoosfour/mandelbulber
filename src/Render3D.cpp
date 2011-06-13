@@ -113,11 +113,6 @@ void *MainThread(void *ptr)
 	bool fastGlobalIllumination = param.fastGlobalIllumination;
 	int AO_quality = param.globalIlumQuality;
 
-	sRGB glow_color1 = param.effectColours.glow_color1;
-	sRGB glow_color2 = param.effectColours.glow_color2;
-	sRGB background_color1 = param.background_color1;
-	sRGB background_color2 = param.background_color2;
-
 	bool fractColor = param.imageSwitches.coloringEnabled;
 	cTexture *envmap_texture = param.envmapTexture;
 	cTexture *lightmap_texture = param.lightmapTexture;
