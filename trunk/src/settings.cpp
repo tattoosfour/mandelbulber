@@ -427,69 +427,68 @@ bool LoadSettings(const char *filename, sParamRender &params, bool disableMessag
 bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bool disableMessages)
 {
 	char str3[100];
-	int c;
 
 	//IFS params
 	bool IFSresult = false;
 	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 	{
-		c = sprintf(str3, "IFS_%d_x", i);
+		sprintf(str3, "IFS_%d_x", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.direction[i].x = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_y", i);
+		sprintf(str3, "IFS_%d_y", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.direction[i].y = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_z", i);
+		sprintf(str3, "IFS_%d_z", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.direction[i].z = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_alfa", i);
+		sprintf(str3, "IFS_%d_alfa", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.alfa[i] = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_beta", i);
+		sprintf(str3, "IFS_%d_beta", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.beta[i] = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_gamma", i);
+		sprintf(str3, "IFS_%d_gamma", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.gamma[i] = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_distance", i);
+		sprintf(str3, "IFS_%d_distance", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.distance[i] = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_intensity", i);
+		sprintf(str3, "IFS_%d_intensity", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.doubles.intensity[i] = atof2(str2);
 			IFSresult = true;
 			break;
 		}
-		c = sprintf(str3, "IFS_%d_enabled", i);
+		sprintf(str3, "IFS_%d_enabled", i);
 		if (!strcmp(str1, str3))
 		{
 			params.fractal.IFS.enabled[i] = atoi(str2);

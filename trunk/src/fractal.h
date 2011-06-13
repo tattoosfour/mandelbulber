@@ -11,6 +11,7 @@
 #include <vector>
 #include "common_math.h"
 #include "fractparams.h"
+#include <stddef.h>
 
 const int IFS_VECTOR_COUNT = 9;
 const int HYBRID_COUNT = 5;
