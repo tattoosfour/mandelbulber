@@ -1987,3 +1987,23 @@ void ChangedConstantDEThreshold(GtkWidget *widget, gpointer data)
 		gtk_label_set_text(GTK_LABEL(Interface.label_DE_threshold),"Detail level:");
 	}
 }
+
+void ChangedImageProportion(GtkWidget *widget, gpointer data)
+{
+	int selection = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboImageProportion));
+
+	if (selection > 0)
+	{
+		gtk_widget_set_sensitive(Interface.edit_imageWidth, false);
+		int imageHeight = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight)));
+		if(selection == 1) gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(imageHeight));
+		else if(selection == 2) gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(imageHeight*5/4));
+		else if(selection == 3) gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(imageHeight*4/3));
+		else if(selection == 4) gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(imageHeight*16/10));
+		else if(selection == 5) gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(imageHeight*16/9));
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_imageWidth, true);
+	}
+}

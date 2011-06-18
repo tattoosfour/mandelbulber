@@ -456,6 +456,7 @@ struct sInterface
 	GtkWidget *comboHybridFormula[HYBRID_COUNT];
 	GtkWidget *comboHybridDEMethod;
 	GtkWidget *comboPerspectiveType;
+	GtkWidget *comboImageProportion;
 
 	GtkWidget *progressBar;
 
