@@ -1421,6 +1421,16 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Equirectangular projection");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), 0);
 
+	Interface.comboImageProportion = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "Free");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "1:1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "5:4");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "4:3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "16:10");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "16:9");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboImageProportion), 0);
+
+
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
 
@@ -1608,6 +1618,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStep, PressedAutoDEStep);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
 	CONNECT_SIGNAL_CLICKED(Interface.checkConstantDEThreshold, ChangedConstantDEThreshold);
+	CONNECT_SIGNAL(Interface.comboImageProportion, ChangedImageProportion, "changed");
+	CONNECT_SIGNAL(Interface.edit_imageHeight, ChangedImageProportion, "activate");
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -1775,8 +1787,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frImage), Interface.boxImage);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxImage), Interface.boxImageRes, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "image width:", 5, Interface.edit_imageWidth), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "image height:", 5, Interface.edit_imageHeight), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "Image width:", 5, Interface.edit_imageWidth), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "Image height:", 5, Interface.edit_imageHeight), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", Interface.comboImageProportion), false, false, 1);
 
 	//frame Stereoscopic
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frStereo, false, false, 1);
