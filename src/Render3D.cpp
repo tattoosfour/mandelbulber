@@ -330,6 +330,7 @@ void *MainThread(void *ptr)
 
 								calcParam.doubles.detailSize = dist_thresh;
 								dist = CalculateDistance(point, calcParam, &max_iter);
+								dist = dist * (1.0 - Random(1000)/10000.0);
 
 								//it is for situation when DE is calculated with very big error
 								if (!param.fractal.dynamicDEcorrection && dist > 5.0 / DE_factor)
@@ -804,6 +805,7 @@ void *MainThread(void *ptr)
 							double wsp_perspTemp = 1.0 + scan * persp;
 							double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
 							tempDist = CalculateDistance(pointTemp, calcParam, &max_iter) * DE_factor / param.doubles.volumetricLightQuality + dist_threshTemp;
+							tempDist = tempDist * (1.0 - Random(1000)/2000.0);
 
 							for(int i=0; i<5; i++)
 							{
