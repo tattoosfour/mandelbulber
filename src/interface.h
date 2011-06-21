@@ -428,6 +428,7 @@ struct sInterface
 	GtkWidget *edit_mandelboxVaryFold;
 	GtkWidget *edit_mandelboxVaryMinR;
 	GtkWidget *edit_mandelboxVaryWAdd;
+	GtkWidget *edit_cadd;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

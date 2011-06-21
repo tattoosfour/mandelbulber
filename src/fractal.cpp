@@ -31,6 +31,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double distance = 0;
 
 	double w = 0;
+	double constantw = 0;
 
 	CVector3 dz(1.0, 0.0, 0.0);
 	CVector3 one(1.0, 0.0, 0.0);
@@ -634,20 +635,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case mandelboxVaryScale4D:
 			{
-				/*Scale = Scale + Scale_vary*(abs(Scale)-1)
-				x = abs(x+Fold) - abs(x-Fold) - x
-				y = abs(y+Fold) - abs(y-Fold) - y
-				z = abs(z+Fold) - abs(z-Fold) - z
-				w = abs(w+Fold) - abs(w-Fold) - w
-				rr = pow(x*x + y*y + z*z + w*w, R_power)
-				if rr < sqr(Min_R) then m = Scale/sqr(Min_R) else
-				if rr < 1 then m = Scale/rr else m = Scale
-				x = x * m + Cx
-				y = y * m + Cy
-				z = z * m + Cz
-				w = w * m + W_add + Cw
-				*/
-
 				scale = scale + par.mandelbox.doubles.vary4D.scaleVary * (fabs(scale) - 1.0);
 				z.x = fabs(z.x + par.mandelbox.doubles.vary4D.fold) - fabs(z.x - par.mandelbox.doubles.vary4D.fold) - z.x;
 				z.y = fabs(z.y + par.mandelbox.doubles.vary4D.fold) - fabs(z.y - par.mandelbox.doubles.vary4D.fold) - z.y;
@@ -660,6 +647,55 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z = z * m + constant;
 				w = w * m + par.mandelbox.doubles.vary4D.wadd;
 				tgladDE = tgladDE * fabs(m) + 1.0;
+				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
+				break;
+			}
+			case aexion:
+			{
+				/*
+				if FirstIt = 0 {
+				inc(FirstIt)
+				Cx = abs(Cx  + Cy + Cz) + C_add
+				Cy = abs(-Cx - Cy + Cz) + C_add
+				Cz = abs(-Cx + Cy - Cz) + C_add
+				Cw = abs(Cx  - Cy - Cz) + C_add
+				x = abs(x  + y + z) + C_add
+				y = abs(-x - y + z) + C_add
+				z = abs(-x + y - z) + C_add
+				w = abs(x  - y - z) + C_add
+				}
+				x' = x*x - y*y + 2*w*z + Cx
+				y' = y*y - x*x + 2*w*z + Cy
+				z' = z*z - w*w + 2*x*y + Cz
+				w' = w*w - z*z + 2*x*y + Cw
+				*/
+				if(L == 0)
+				{
+					double cx = fabs(constant.x + constant.y + constant.z) + par.doubles.cadd;
+					double cy = fabs(-constant.x - constant.y + constant.z) + par.doubles.cadd;
+					double cz = fabs(-constant.x + constant.y - constant.z) + par.doubles.cadd;
+					double cw = fabs(constant.x - constant.y - constant.z) + par.doubles.cadd;
+					constant.x = cx;
+					constant.y = cy;
+					constant.z = cz;
+					constantw = cw;
+					double tempx = fabs(z.x + z.y + z.z) + par.doubles.cadd;
+					double tempy = fabs(-z.x - z.y + z.z) + par.doubles.cadd;
+					double tempz = fabs(-z.x + z.y - z.z) + par.doubles.cadd;
+					double tempw = fabs(z.x - z.y - z.z) + par.doubles.cadd;
+					z.x = tempx;
+					z.y = tempy;
+					z.z = tempz;
+					w = tempw;
+				}
+				double tempx = z.x * z.x - z.y * z.y + 2.0 * w * z.z + constant.x;
+				double tempy = z.y * z.y - z.x * z.x + 2.0 * w * z.z + constant.y;
+				double tempz = z.z * z.z - w * w + 2.0 * z.x * z.y + constant.z;
+				double tempw = w * w - z.z * z.z + 2.0 * z.x * z.y + constantw;
+				z.x = tempx;
+				z.y = tempy;
+				z.z = tempz;
+				w = tempw;
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
 				break;
 			}

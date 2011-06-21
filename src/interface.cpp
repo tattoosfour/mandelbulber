@@ -187,6 +187,8 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 12) formula2 = mandelbulb4;
 	if (formula == 13) formula2 = foldingIntPow2;
 	if (formula == 14) formula2 = smoothMandelbox;
+	if (formula == 15) formula2 = mandelboxVaryScale4D;
+	if (formula == 16) formula2 = aexion;
 	return formula2;
 }
 
@@ -208,6 +210,9 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == mandelbulb4) formula2 = 12;
 	if (formula == foldingIntPow2) formula2 = 13;
 	if (formula == smoothMandelbox) formula2 = 14;
+	if (formula == mandelboxVaryScale4D) formula2 = 15;
+	if (formula == aexion) formula2 = 16;
+
 	return formula2;
 }
 
@@ -416,6 +421,8 @@ void ReadInterface(sParamRender *params)
 		params->fractal.mandelbox.doubles.vary4D.scaleVary = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryScale)));
 		params->fractal.mandelbox.doubles.vary4D.wadd = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryWAdd)));
 
+		params->fractal.doubles.cadd = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cadd)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1.R = color.red;
@@ -484,7 +491,8 @@ void ReadInterface(sParamRender *params)
 		if (formula == 13) params->fractal.formula = foldingIntPow2;
 		if (formula == 14) params->fractal.formula = smoothMandelbox;
 		if (formula == 15) params->fractal.formula = mandelboxVaryScale4D;
-		if (formula == 16) params->fractal.formula = hybrid;
+		if (formula == 16) params->fractal.formula = aexion;
+		if (formula == 17) params->fractal.formula = hybrid;
 
 		CheckPrameters(params);
 
@@ -716,6 +724,14 @@ void WriteInterface(sParamRender *params)
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_reflectionsMax), IntToString(params->reflectionsMax));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxVaryFold), DoubleToString(params->fractal.mandelbox.doubles.vary4D.fold));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxVaryMinR), DoubleToString(params->fractal.mandelbox.doubles.vary4D.minR));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxVaryRPower), DoubleToString(params->fractal.mandelbox.doubles.vary4D.rPower));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxVaryScale), DoubleToString(params->fractal.mandelbox.doubles.vary4D.scaleVary));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxVaryWAdd), DoubleToString(params->fractal.mandelbox.doubles.vary4D.wadd));
+
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cadd), DoubleToString(params->fractal.doubles.cadd));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -793,7 +809,8 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == foldingIntPow2) formula = 13;
 	if (params->fractal.formula == smoothMandelbox) formula = 14;
 	if (params->fractal.formula == mandelboxVaryScale4D) formula = 15;
-	if (params->fractal.formula == hybrid) formula = 16;
+	if (params->fractal.formula == aexion) formula = 16;
+	if (params->fractal.formula == hybrid) formula = 17;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -872,6 +889,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "FoldingIntPow2");
 	gtk_combo_box_append_text(combo, "Smooth Mandelbox");
 	gtk_combo_box_append_text(combo, "Mandelbox vary scale 4D");
+	gtk_combo_box_append_text(combo, "Aexion");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1398,6 +1416,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxVaryScale = gtk_entry_new();
 	Interface.edit_mandelboxVaryWAdd = gtk_entry_new();
 
+	Interface.edit_cadd = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1417,6 +1437,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Smooth Mandelbox");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbox vary scale 4D");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Aexion");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 
@@ -1741,6 +1762,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxFractalPower, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("8,0", "power:", 5, Interface.edit_power), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("1,0", "Fractal constant factor:", 5, Interface.edit_FractalConstantFactor), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("0,0", "c add:", 5, Interface.edit_cadd), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractal), Interface.frFractalFoldingIntPow, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frFractalFoldingIntPow), Interface.boxFractalFoldingIntPow);
