@@ -632,6 +632,37 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 				break;
 			}
+			case mandelboxVaryScale4D:
+			{
+				/*Scale = Scale + Scale_vary*(abs(Scale)-1)
+				x = abs(x+Fold) - abs(x-Fold) - x
+				y = abs(y+Fold) - abs(y-Fold) - y
+				z = abs(z+Fold) - abs(z-Fold) - z
+				w = abs(w+Fold) - abs(w-Fold) - w
+				rr = pow(x*x + y*y + z*z + w*w, R_power)
+				if rr < sqr(Min_R) then m = Scale/sqr(Min_R) else
+				if rr < 1 then m = Scale/rr else m = Scale
+				x = x * m + Cx
+				y = y * m + Cy
+				z = z * m + Cz
+				w = w * m + W_add + Cw
+				*/
+
+				scale = scale + par.mandelbox.doubles.vary4D.scaleVary * (fabs(scale) - 1.0);
+				z.x = fabs(z.x + par.mandelbox.doubles.vary4D.fold) - fabs(z.x - par.mandelbox.doubles.vary4D.fold) - z.x;
+				z.y = fabs(z.y + par.mandelbox.doubles.vary4D.fold) - fabs(z.y - par.mandelbox.doubles.vary4D.fold) - z.y;
+				z.z = fabs(z.z + par.mandelbox.doubles.vary4D.fold) - fabs(z.z - par.mandelbox.doubles.vary4D.fold) - z.z;
+				w = fabs(w + par.mandelbox.doubles.vary4D.fold) - fabs(w - par.mandelbox.doubles.vary4D.fold) - w;
+				double rr = pow(z.x * z.x + z.y * z.y + z.z * z.z + w * w, par.mandelbox.doubles.vary4D.rPower);
+				double m = scale;
+				if (rr < par.mandelbox.doubles.vary4D.minR*par.mandelbox.doubles.vary4D.minR) m = scale / (par.mandelbox.doubles.vary4D.minR * par.mandelbox.doubles.vary4D.minR);
+				else if (rr < 1.0) m = scale / rr;
+				z = z * m + constant;
+				w = w * m + par.mandelbox.doubles.vary4D.wadd;
+				tgladDE = tgladDE * fabs(m) + 1.0;
+				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
+				break;
+			}
 			case hybrid:
 				break;
 			case none:
@@ -658,7 +689,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 		}
-		else if (actualFormula == tglad || actualFormula == smoothMandelbox)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D)
 		{
 			if (r > 1024)
 			{

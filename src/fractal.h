@@ -35,7 +35,8 @@ enum enumFractalFormula
 	mandelbulb3 = 14,
 	mandelbulb4 = 15,
 	foldingIntPow2 = 16,
-	smoothMandelbox = 17
+	smoothMandelbox = 17,
+	mandelboxVaryScale4D = 18
 };
 
 enum enumCalculationMode
@@ -69,6 +70,15 @@ struct sFractalIFS
 	CRotationMatrix rot[IFS_VECTOR_COUNT];
 };
 
+struct sFractalMandelboxVary4D
+{
+	double fold;
+	double minR;
+	double scaleVary;
+	double wadd;
+	double rPower;
+};
+
 struct sFractalMandelboxD
 {
 	double rotationMain[3];
@@ -85,6 +95,7 @@ struct sFractalMandelboxD
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
 	double sharpness;
+	sFractalMandelboxVary4D vary4D;
 };
 
 struct sFractalMandelbox

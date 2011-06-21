@@ -851,7 +851,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
 	}
 
-	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == tglad || formula == smoothMandelbox || formula == hybrid);
+	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == tglad || formula == smoothMandelbox || formula == mandelboxVaryScale4D || formula == hybrid);
 	gtk_widget_set_sensitive(Interface.tab_box_IFS, formula == kaleidoscopic || params.fractal.IFS.foldingMode || formula == hybrid);
 	gtk_widget_set_sensitive(Interface.edit_power, formula == trig_DE || formula == trig_optim || formula == xenodreambuie || formula == mandelbulb4);
 	gtk_widget_set_sensitive(Interface.tab_box_hybrid, formula == hybrid);
