@@ -410,6 +410,12 @@ void ReadInterface(sParamRender *params)
 		params->reflectionsMax = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_reflectionsMax)));
 		params->imageSwitches.raytracedReflections = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkRaytracedReflections));
 
+		params->fractal.mandelbox.doubles.vary4D.fold = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryFold)));
+		params->fractal.mandelbox.doubles.vary4D.minR = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryMinR)));
+		params->fractal.mandelbox.doubles.vary4D.rPower = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryRPower)));
+		params->fractal.mandelbox.doubles.vary4D.scaleVary = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryScale)));
+		params->fractal.mandelbox.doubles.vary4D.wadd = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxVaryWAdd)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1.R = color.red;
@@ -477,7 +483,8 @@ void ReadInterface(sParamRender *params)
 		if (formula == 12) params->fractal.formula = mandelbulb4;
 		if (formula == 13) params->fractal.formula = foldingIntPow2;
 		if (formula == 14) params->fractal.formula = smoothMandelbox;
-		if (formula == 15) params->fractal.formula = hybrid;
+		if (formula == 15) params->fractal.formula = mandelboxVaryScale4D;
+		if (formula == 16) params->fractal.formula = hybrid;
 
 		CheckPrameters(params);
 
@@ -534,7 +541,7 @@ void ReadInterface(sParamRender *params)
 	}
 
 	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
-			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox) params->fractal.analitycDE = true;
+			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox || params->fractal.formula == mandelboxVaryScale4D) params->fractal.analitycDE = true;
 	else params->fractal.analitycDE = false;
 
 	params->doubles.resolution = 1.0 / params->image_width;
@@ -785,7 +792,8 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == mandelbulb4) formula = 12;
 	if (params->fractal.formula == foldingIntPow2) formula = 13;
 	if (params->fractal.formula == smoothMandelbox) formula = 14;
-	if (params->fractal.formula == hybrid) formula = 15;
+	if (params->fractal.formula == mandelboxVaryScale4D) formula = 15;
+	if (params->fractal.formula == hybrid) formula = 16;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -863,6 +871,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Modified Mandelbulb 3");
 	gtk_combo_box_append_text(combo, "FoldingIntPow2");
 	gtk_combo_box_append_text(combo, "Smooth Mandelbox");
+	gtk_combo_box_append_text(combo, "Mandelbox vary scale 4D");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1120,6 +1129,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxVolumetricLightGeneral = gtk_hbox_new(FALSE, 1);
 	Interface.boxVolumetricLightMain = gtk_hbox_new(FALSE, 1);
 	Interface.boxVolumetricLightAux = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxVary = gtk_hbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1167,6 +1177,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMandelboxRotations = gtk_frame_new("Rotation of Mandelbox folding planes");
 	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
 	Interface.frVolumetricLight = gtk_frame_new("Volumetric light");
+	Interface.frMandelboxVary = gtk_frame_new("Mandelbox vary scale 4D");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1381,6 +1392,12 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_reflectionsMax = gtk_entry_new();
 
+	Interface.edit_mandelboxVaryFold = gtk_entry_new();
+	Interface.edit_mandelboxVaryMinR = gtk_entry_new();
+	Interface.edit_mandelboxVaryRPower = gtk_entry_new();
+	Interface.edit_mandelboxVaryScale = gtk_entry_new();
+	Interface.edit_mandelboxVaryWAdd = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1399,6 +1416,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 3");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Smooth Mandelbox");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbox vary scale 4D");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 
@@ -2174,6 +2192,14 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.tableMandelboxRotations, false, false, 1);
 
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxVary, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxVary), Interface.boxMandelboxVary);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,1", "Vary scale", 6, Interface.edit_mandelboxVaryScale), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "Fold", 6, Interface.edit_mandelboxVaryFold), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,5", "min R", 6, Interface.edit_mandelboxVaryMinR), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "R power", 6, Interface.edit_mandelboxVaryRPower), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0", "w add", 6, Interface.edit_mandelboxVaryWAdd), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxColoring, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxColoring), Interface.boxMandelboxColoring);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor1, false, false, 1);
@@ -2187,6 +2213,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor3, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
+
 
 	//tab sound
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_sound), Interface.frSound, false, false, 1);

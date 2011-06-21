@@ -184,6 +184,7 @@ struct sInterface
 	GtkWidget *boxVolumetricLightGeneral;
 	GtkWidget *boxVolumetricLightMain;
 	GtkWidget *boxVolumetricLightAux;
+	GtkWidget *boxMandelboxVary;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -229,6 +230,7 @@ struct sInterface
 	GtkWidget *frFractalRayMarching;
 	GtkWidget *frFractalFoldingIntPow;
 	GtkWidget *frVolumetricLight;
+	GtkWidget *frMandelboxVary;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -421,6 +423,11 @@ struct sInterface
 	GtkWidget *edit_volumetricLightAux3Intensity;
 	GtkWidget *edit_volumetricLightAux4Intensity;
 	GtkWidget *edit_reflectionsMax;
+	GtkWidget *edit_mandelboxVaryScale;
+	GtkWidget *edit_mandelboxVaryRPower;
+	GtkWidget *edit_mandelboxVaryFold;
+	GtkWidget *edit_mandelboxVaryMinR;
+	GtkWidget *edit_mandelboxVaryWAdd;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
