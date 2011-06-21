@@ -36,7 +36,8 @@ enum enumFractalFormula
 	mandelbulb4 = 15,
 	foldingIntPow2 = 16,
 	smoothMandelbox = 17,
-	mandelboxVaryScale4D = 18
+	mandelboxVaryScale4D = 18,
+	aexion = 19
 };
 
 enum enumCalculationMode
@@ -125,6 +126,7 @@ struct sFractalD
 	double foldingSphericalFixed;
 	double detailSize;
 	double power;		 //power of fractal formula
+	double cadd;
 	double hybridPower[HYBRID_COUNT];
 	CVector3 julia; // Julia constant
 };

@@ -1227,7 +1227,10 @@ int main(int argc, char *argv[])
 
 	//detecting number of CPU cores
 	NR_THREADS = get_cpu_count();
+
+#ifdef ONETHREAD //for debbuging
 	NR_THREADS = 1;
+#endif
 
 	//NR_THREADS = 1;
 

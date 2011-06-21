@@ -342,6 +342,8 @@ void SaveSettings(const char *filename, const sParamRender& params)
 	fprintfDot(fileSettings, "mandelbox_vary_rpower", params.fractal.mandelbox.doubles.vary4D.rPower);
 	fprintfDot(fileSettings, "mandelbox_vary_wadd", params.fractal.mandelbox.doubles.vary4D.wadd);
 
+	fprintfDot(fileSettings, "c_add", params.fractal.doubles.cadd);
+
 	fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
 	fprintf(fileSettings, "file_background %s;\n", params.file_background);
 	fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
@@ -410,9 +412,9 @@ bool LoadSettings(const char *filename, sParamRender &params, bool disableMessag
 		LoadSettingsPost(params);
 
 		//checking number of lines in loaded file
-		if (lineCounter != 322)
+		if (lineCounter != 323)
 		{
-			printf("number of lines in settings file (should be 322): %d\n", lineCounter);
+			printf("number of lines in settings file (should be 323): %d\n", lineCounter);
 			if (!noGUI && !disableMessages)
 			{
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
@@ -702,6 +704,8 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "mandelbox_vary_minr")) params.fractal.mandelbox.doubles.vary4D.minR = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_vary_rpower")) params.fractal.mandelbox.doubles.vary4D.rPower = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_vary_wadd")) params.fractal.mandelbox.doubles.vary4D.wadd = atof2(str2);
+
+	else if (!strcmp(str1, "c_add")) params.fractal.doubles.cadd = atof2(str2);
 
 	else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 	else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
@@ -1030,6 +1034,8 @@ void DefaultValues(sParamRender &params)
 	params.fractal.mandelbox.doubles.vary4D.rPower = 1.0;
 	params.fractal.mandelbox.doubles.vary4D.scaleVary = 0.0;
 	params.fractal.mandelbox.doubles.vary4D.wadd = 0.0;
+
+	params.fractal.doubles.cadd = 0.0;
 
 	params.quiet = false;
 
