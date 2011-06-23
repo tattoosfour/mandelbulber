@@ -1292,6 +1292,9 @@ int main(int argc, char *argv[])
 	//set program home directory
 	if (!chdir(data_directory))
 	{
+		//create reference file with defaults
+		SaveSettings("settings/.defaults", fractParamDefault, false);
+
 		//loading undo buffer status
 		undoBuffer.LoadStatus();
 		WriteLog("Undo buffer status loaded");

@@ -131,6 +131,8 @@ struct sParamRender
 	cTexture *lightmapTexture;
 	std::vector<enumFractalFormula> formulaSequence;
 	std::vector<double> hybridPowerSequence;
+
+	double settingsVersion;
 };
 
 #endif /* FRACTPARAMS_H_ */

@@ -10,6 +10,9 @@
 
 #include "fractparams.h"
 
+#define MANDELBULBER_VERSION 1.04
+#define MANDELBULBER_VERSION_STR "1.04"
+
 enum enumImageFormat
 {
 	imgFormatJPG = 0,
