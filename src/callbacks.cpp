@@ -522,7 +522,7 @@ void PressedSaveSettings(GtkWidget *widget, gpointer data)
 		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		sParamRender fractParamToSave;
 		ReadInterface(&fractParamToSave);
-		SaveSettings(filename, fractParamToSave);
+		SaveSettings(filename, fractParamToSave, true);
 
 		strcpy(lastFilenameSettings, filename);
 		string windowTitle= string("Mandelbulber (")+filename+")";
@@ -1124,7 +1124,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
-	SaveSettings(filename2.c_str(), fractParamToSave);
+	SaveSettings(filename2.c_str(), fractParamToSave, true);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
 	timeline->RecordKeyframe(index, filename2.c_str(), false);
@@ -1177,7 +1177,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 
 	sParamRender fractParamToSave;
 	ReadInterface(&fractParamToSave);
-	SaveSettings(filename2.c_str(), fractParamToSave);
+	SaveSettings(filename2.c_str(), fractParamToSave, true);
 	last_keyframe_position = fractParamToSave.doubles.vp;
 
 	timeline->RecordKeyframe(index, filename2.c_str(), true);

@@ -25,7 +25,7 @@ CParamsUndo::CParamsUndo(void)
 void CParamsUndo::SaveUndo(sParamRender *params)
 {
         string filename2=IndexFilename("undo/undo","fract",level%max);
-	SaveSettings(filename2.c_str(), *params);
+	SaveSettings(filename2.c_str(), *params, true);
 	printf("Undo information saved (index = %d)\n", level % max);
 	level++;
 	last = level;
@@ -41,7 +41,7 @@ bool CParamsUndo::GetUndo(sParamRender *params)
 	{
 		ReadInterface(params);
                 string filename2=IndexFilename("undo/undo","fract",level%max);
-		SaveSettings(filename2.c_str(), *params);
+		SaveSettings(filename2.c_str(), *params, true);
 
 		count--;
 		level--;
