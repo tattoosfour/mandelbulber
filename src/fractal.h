@@ -38,7 +38,8 @@ enum enumFractalFormula
 	smoothMandelbox = 17,
 	mandelboxVaryScale4D = 18,
 	aexion = 19,
-	benesi = 20
+	benesi = 20,
+	bristorbrot = 21
 };
 
 enum enumCalculationMode
