@@ -334,6 +334,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z.y = newy + constant.y;
 				z.z = newz + constant.z;
 				r = z.Length();
+				break;
 			}
 			case hypercomplex:
 			{
@@ -696,6 +697,29 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z.z = tempz;
 				w = tempw;
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
+				break;
+			}
+			case benesi:
+			{
+				double r1 = z.y*z.y + z.z*z.z;
+				double newx = 0;
+				if(constant.x < 0 || z.x < sqrt(r1))
+				{
+					newx = z.x*z.x - r1;
+				}
+				else
+				{
+					newx = -z.x*z.x + r1;
+				}
+				r1 = - 1.0/sqrt(r1) * 2.0 * fabs(z.x);
+				double newy = r1 * (z.y*z.y - z.z*z.z);
+				double newz = r1 * 2.0 * z.y * z.z;
+
+				z.x = newx + constant.x;
+				z.y = newy + constant.y;
+				z.z = newz + constant.z;
+
+				r = z.Length();
 				break;
 			}
 			case hybrid:

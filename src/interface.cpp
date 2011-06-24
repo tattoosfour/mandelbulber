@@ -189,6 +189,7 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 14) formula2 = smoothMandelbox;
 	if (formula == 15) formula2 = mandelboxVaryScale4D;
 	if (formula == 16) formula2 = aexion;
+	if (formula == 17) formula2 = benesi;
 	return formula2;
 }
 
@@ -212,6 +213,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == smoothMandelbox) formula2 = 14;
 	if (formula == mandelboxVaryScale4D) formula2 = 15;
 	if (formula == aexion) formula2 = 16;
+	if (formula == benesi) formula2 = 17;
 
 	return formula2;
 }
@@ -495,7 +497,8 @@ void ReadInterface(sParamRender *params)
 		if (formula == 14) params->fractal.formula = smoothMandelbox;
 		if (formula == 15) params->fractal.formula = mandelboxVaryScale4D;
 		if (formula == 16) params->fractal.formula = aexion;
-		if (formula == 17) params->fractal.formula = hybrid;
+		if (formula == 17) params->fractal.formula = benesi;
+		if (formula == 18) params->fractal.formula = hybrid;
 
 		CheckPrameters(params);
 
@@ -816,7 +819,8 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == smoothMandelbox) formula = 14;
 	if (params->fractal.formula == mandelboxVaryScale4D) formula = 15;
 	if (params->fractal.formula == aexion) formula = 16;
-	if (params->fractal.formula == hybrid) formula = 17;
+	if (params->fractal.formula == benesi) formula = 17;
+	if (params->fractal.formula == hybrid) formula = 18;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -896,6 +900,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Smooth Mandelbox");
 	gtk_combo_box_append_text(combo, "Mandelbox vary scale 4D");
 	gtk_combo_box_append_text(combo, "Aexion");
+	gtk_combo_box_append_text(combo, "Benesi");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1449,6 +1454,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Smooth Mandelbox");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbox vary scale 4D");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Aexion");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Benesi");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 
