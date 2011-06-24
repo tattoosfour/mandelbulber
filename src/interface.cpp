@@ -392,6 +392,9 @@ void ReadInterface(sParamRender *params)
 		params->fractal.mandelbox.doubles.colorFactorSp1 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp1)));
 		params->fractal.mandelbox.doubles.colorFactorSp2 = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxColorFactorSp2)));
 		params->fractal.mandelbox.doubles.scale = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxScale)));
+		params->fractal.mandelbox.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetX)));
+		params->fractal.mandelbox.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetY)));
+		params->fractal.mandelbox.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetZ)));
 
 		params->image_width = (params->image_width/8)*8;
 		params->image_height = (params->image_height/8)*8;
@@ -696,6 +699,9 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingFixedRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalFixed));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSpFoldingMinRadius), DoubleToString(params->fractal.mandelbox.doubles.foldingSphericalMin));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSharpness), DoubleToString(params->fractal.mandelbox.doubles.sharpness));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetX), DoubleToString(params->fractal.mandelbox.doubles.offset.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetY), DoubleToString(params->fractal.mandelbox.doubles.offset.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetZ), DoubleToString(params->fractal.mandelbox.doubles.offset.z));
 
 	for (int component = 0; component < 3; ++component)
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMain[component]), DoubleToString(
@@ -1142,6 +1148,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxMandelboxColor1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxColor3 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMandelboxOffset = gtk_hbox_new(FALSE, 1);
 	Interface.boxViewDistance = gtk_hbox_new(FALSE, 1);
 	Interface.boxVolumetricLight = gtk_vbox_new(FALSE, 1);
 	Interface.boxVolumetricLightGeneral = gtk_hbox_new(FALSE, 1);
@@ -1379,6 +1386,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxSpFoldingFixedRadius = gtk_entry_new();
 	Interface.edit_mandelboxSpFoldingMinRadius = gtk_entry_new();
 	Interface.edit_mandelboxSharpness = gtk_entry_new();
+	Interface.edit_mandelboxOffsetX= gtk_entry_new();
+	Interface.edit_mandelboxOffsetY= gtk_entry_new();
+	Interface.edit_mandelboxOffsetZ= gtk_entry_new();
 
 	for (int component = 0; component < 3; ++component)
 		Interface.edit_mandelboxRotationMain[component] = gtk_entry_new();
@@ -2185,6 +2195,11 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, Interface.edit_mandelboxSpFoldingMinRadius), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("3,0", "Sharpness", 6, Interface.edit_mandelboxSharpness), false, false, 1);
 
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxOffset, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Spherical folding offset X", 6, Interface.edit_mandelboxOffsetX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Y", 6, Interface.edit_mandelboxOffsetY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Z", 6, Interface.edit_mandelboxOffsetZ), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.boxMandelboxRotationMain, false, false, 1);
@@ -2235,7 +2250,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor3, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
-
 
 	//tab sound
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_sound), Interface.frSound, false, false, 1);

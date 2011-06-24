@@ -181,6 +181,7 @@ struct sInterface
 	GtkWidget *boxMandelboxColor1;
 	GtkWidget *boxMandelboxColor2;
 	GtkWidget *boxMandelboxColor3;
+	GtkWidget *boxMandelboxOffset;
 	GtkWidget *boxViewDistance;
 	GtkWidget *boxIFSDefaults;
 	GtkWidget *boxVolumetricLight;
@@ -412,6 +413,9 @@ struct sInterface
 	GtkWidget *edit_mandelboxColorFactorSp1;
 	GtkWidget *edit_mandelboxColorFactorSp2;
 	GtkWidget *edit_mandelboxSharpness;
+	GtkWidget *edit_mandelboxOffsetX;
+	GtkWidget *edit_mandelboxOffsetY;
+	GtkWidget *edit_mandelboxOffsetZ;
 	GtkWidget *edit_viewMinDistance;
 	GtkWidget *edit_viewMaxDistance;
 	GtkWidget *edit_FractalConstantFactor;

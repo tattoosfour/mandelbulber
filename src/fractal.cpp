@@ -488,6 +488,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				double r2 = r * r;
 
+				z += par.mandelbox.doubles.offset;
+
 				if (r2 < mR2)
 				{
 					z *= tglad_factor1;
@@ -501,6 +503,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					tgladDE *= tglad_factor2;
 					tgladColor += par.mandelbox.doubles.colorFactorSp2;
 				}
+
+				z -= par.mandelbox.doubles.offset;
 
 				z = par.mandelbox.mainRot.RotateVector(z);
 
