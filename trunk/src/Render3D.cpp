@@ -1181,7 +1181,6 @@ int main(int argc, char *argv[])
 {
 	//read $home env variable
 	const char *homedir;
-	char data_directory[1000];
 
 	setlocale(LC_ALL, "");
 
@@ -1268,16 +1267,6 @@ int main(int argc, char *argv[])
 	sParamRender fractParamDefault;
 	WriteLog("allocated memory for default parameters");
 
-	bool noGUIsettingsLoaded = false;
-	if (noGUI)
-	{
-		if (LoadSettings(noGUIdata.settingsFile, noGUIdata.fractparams))
-		{
-			noGUIsettingsLoaded = true;
-			WriteLog("Parameters loaded in noGUI mode");
-		}
-	}
-
 #ifdef WIN32 /* WINDOWS */
 	sprintf(data_directory, "%s/mandelbulber", homedir);
 #else
@@ -1289,10 +1278,20 @@ int main(int argc, char *argv[])
 	strcpy(lastFilenameImage, "images/image.jpg");
 	strcpy(lastFilenamePalette, "textures/palette.jpg");
 
+	bool noGUIsettingsLoaded = false;
+	if (noGUI)
+	{
+		if (LoadSettings(noGUIdata.settingsFile, noGUIdata.fractparams))
+		{
+			noGUIsettingsLoaded = true;
+			WriteLog("Parameters loaded in noGUI mode");
+		}
+	}
+
 	//set program home directory
 	if (!chdir(data_directory))
 	{
-		//create reference file with defaults
+		//update of reference file with defaults
 		SaveSettings("settings/.defaults", fractParamDefault, false);
 
 		//loading undo buffer status
