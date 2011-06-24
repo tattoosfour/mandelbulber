@@ -396,28 +396,29 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 
 	fprintfDot(fileSettings, "c_add", params.fractal.doubles.cadd, -1.3, compare);
 
-	if(!compare)
+	if(strcmp(filename,"settings/.clipboard"))
 	{
-		fprintf(fileSettings, "file_destination %s;\n", "images/iamge");
-		fprintf(fileSettings, "file_background %s;\n", "textures/background.jpg");
-		fprintf(fileSettings, "file_envmap %s;\n", "textures/envmap.jpg");
-		fprintf(fileSettings, "file_lightmap %s;\n", "textures/lightmap.jpg");
-		fprintf(fileSettings, "file_animation_path %s;\n", "paths/path.txt");
-		fprintf(fileSettings, "file_keyframes %s;\n", "keyframes/keyframe");
+		if(!compare)
+		{
+			fprintf(fileSettings, "file_destination %s;\n", "images/iamge");
+			fprintf(fileSettings, "file_background %s;\n", "textures/background.jpg");
+			fprintf(fileSettings, "file_envmap %s;\n", "textures/envmap.jpg");
+			fprintf(fileSettings, "file_lightmap %s;\n", "textures/lightmap.jpg");
+			fprintf(fileSettings, "file_animation_path %s;\n", "paths/path.txt");
+			fprintf(fileSettings, "file_keyframes %s;\n", "keyframes/keyframe");
+		}
+		else
+		{
+			fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
+			fprintf(fileSettings, "file_background %s;\n", params.file_background);
+			fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
+			fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
+			fprintf(fileSettings, "file_animation_path %s;\n", params.file_path);
+			fprintf(fileSettings, "file_keyframes %s;\n", params.file_keyframes);
+			fprintf(fileSettings, "file_sound %s;\n", params.file_sound);
+		}
+		fprintf(fileSettings, "palette %s;\n", paletteString);
 	}
-	else
-	{
-		fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
-		fprintf(fileSettings, "file_background %s;\n", params.file_background);
-		fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
-		fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
-		fprintf(fileSettings, "file_animation_path %s;\n", params.file_path);
-		fprintf(fileSettings, "file_keyframes %s;\n", params.file_keyframes);
-		fprintf(fileSettings, "file_sound %s;\n", params.file_sound);
-	}
-
-	fprintf(fileSettings, "palette %s;\n", paletteString);
-
 	fclose(fileSettings);
 
 	delete[] paletteString;

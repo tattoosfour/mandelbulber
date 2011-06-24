@@ -296,6 +296,8 @@ struct sInterface
 	GtkWidget *buIFSDefaultOcta;
 	GtkWidget *buAutoDEStep;
 	GtkWidget *buAutoDEStepHQ;
+	GtkWidget *buCopyToClipboard;
+	GtkWidget *buGetFromClipboard;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -675,6 +677,8 @@ extern char lastFilenameSettings[1000];
 extern char lastFilenamePalette[1000];
 
 extern GtkWidget *timeLineWindow;
+
+extern GtkClipboard *clipboard;
 
 //functions
 char* DoubleToString(double value);

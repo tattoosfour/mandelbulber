@@ -2009,3 +2009,77 @@ void ChangedImageProportion(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(Interface.edit_imageWidth, true);
 	}
 }
+
+void PressedCopyToClipboard(GtkWidget *widget, gpointer data)
+{
+	sParamRender fractParamToSave;
+	ReadInterface(&fractParamToSave);
+	SaveSettings("settings/.clipboard", fractParamToSave, true);
+
+	FILE * pFile;
+	pFile = fopen("settings/.clipboard", "r");
+	if (pFile != NULL)
+	{
+		// obtain file size:
+		fseek(pFile, 0, SEEK_END);
+		unsigned int lSize = ftell(pFile);
+		rewind(pFile);
+
+		char *buffer = new char[lSize];
+
+		// copy the file into the buffer:
+		size_t result = fread(buffer, 1, lSize, pFile);
+		if (result != lSize)
+		{
+			printf("Reading error of clipboard temporary file");
+			return;
+		}
+
+		gtk_clipboard_set_text(clipboard, buffer, lSize);
+
+		fclose(pFile);
+		delete buffer;
+		remove("settings/.clipboard");
+	}
+}
+
+void PressedPasteFromClipboard(GtkWidget *widget, gpointer data)
+{
+	char *buffer = gtk_clipboard_wait_for_text(clipboard);
+	unsigned int len = strlen(buffer);
+	if (len < 15)
+	{
+		printf("text in clipboard is to short\n");
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+				"Error! Text in clipboard is too short");
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		return;
+	}
+
+	if(strncmp(buffer, "Mandelbulber", 12))
+	{
+		printf("text in clipboard doesn't contain settings for Mandelbulber\n");
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+				"Error! Text in clipboard doesn't contain settings for Mandelbulber\n");
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		return;
+	}
+
+	FILE * pFile;
+	pFile = fopen("settings/.clipboard", "w");
+	if (pFile != NULL)
+	{
+		fwrite(buffer, 1, len, pFile);
+		fclose(pFile);
+
+		sParamRender fractParamLoaded;
+		LoadSettings("settings/.clipboard", fractParamLoaded);
+		Params2InterfaceData(&fractParamLoaded);
+		WriteInterface(&fractParamLoaded);
+
+		delete buffer;
+		remove("settings/.clipboard");
+	}
+}

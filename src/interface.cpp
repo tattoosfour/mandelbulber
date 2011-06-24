@@ -28,7 +28,7 @@ sNoGUIdata noGUIdata;
 GtkWidget *window_histogram, *window_interface;
 GtkWidget *darea2, *darea3;
 GtkWidget *dareaPalette;
-
+GtkClipboard *clipboard;
 
 sTimelineInterface timelineInterface;
 GtkWidget *timeLineWindow = 0;
@@ -1274,7 +1274,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buIFSDefaultOcta = gtk_button_new_with_label("Octahedron");
 	Interface.buAutoDEStep = gtk_button_new_with_label("LQ");
 	Interface.buAutoDEStepHQ = gtk_button_new_with_label("HQ");
-
+	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
+	Interface.buGetFromClipboard = gtk_button_new_with_label("Paste from clipboard");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1669,6 +1670,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkConstantDEThreshold, ChangedConstantDEThreshold);
 	CONNECT_SIGNAL(Interface.comboImageProportion, ChangedImageProportion, "changed");
 	CONNECT_SIGNAL(Interface.edit_imageHeight, ChangedImageProportion, "activate");
+	CONNECT_SIGNAL_CLICKED(Interface.buCopyToClipboard, PressedCopyToClipboard);
+	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -2298,6 +2301,8 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadSettings, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buSaveSettings, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buCopyToClipboard, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buGetFromClipboard, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buUndo, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buRedo, false, false, 1);
 
@@ -2344,6 +2349,8 @@ void CreateInterface(sParamRender *default_settings)
 
   g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
   g_timeout_add (100,(GSourceFunc)CallerTimerLoopWindowRefresh,NULL);
+
+  clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
 	gdk_threads_enter();
 	gtk_main();
