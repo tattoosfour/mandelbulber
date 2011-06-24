@@ -35,7 +35,7 @@ bool paletteLoadedFromSettingsFile = false;
 void fprintfDot(FILE *file, const char *string, double value, double defaultVal, bool compare)
 {
 	bool theSame = true;
-	if(value > 0 && (value < defaultVal*0.9999999999 || value > defaultVal*1.0000000001)) theSame = false;
+	if(value >= 0 && (value < defaultVal*0.9999999999 || value > defaultVal*1.0000000001)) theSame = false;
 	if(value < 0 && (value > defaultVal*0.9999999999 || value < defaultVal*1.0000000001)) theSame = false;
 
 	if (compare && !theSame)
