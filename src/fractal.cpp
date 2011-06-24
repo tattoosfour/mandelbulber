@@ -636,14 +636,26 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			case mandelboxVaryScale4D:
 			{
 				scale = scale + par.mandelbox.doubles.vary4D.scaleVary * (fabs(scale) - 1.0);
+				CVector3 oldz = z;
 				z.x = fabs(z.x + par.mandelbox.doubles.vary4D.fold) - fabs(z.x - par.mandelbox.doubles.vary4D.fold) - z.x;
 				z.y = fabs(z.y + par.mandelbox.doubles.vary4D.fold) - fabs(z.y - par.mandelbox.doubles.vary4D.fold) - z.y;
 				z.z = fabs(z.z + par.mandelbox.doubles.vary4D.fold) - fabs(z.z - par.mandelbox.doubles.vary4D.fold) - z.z;
 				w = fabs(w + par.mandelbox.doubles.vary4D.fold) - fabs(w - par.mandelbox.doubles.vary4D.fold) - w;
+				if(z.x != oldz.x) tgladColor += par.mandelbox.doubles.colorFactorX;
+				if(z.y != oldz.y) tgladColor += par.mandelbox.doubles.colorFactorY;
+				if(z.z != oldz.z) tgladColor += par.mandelbox.doubles.colorFactorZ;
 				double rr = pow(z.x * z.x + z.y * z.y + z.z * z.z + w * w, par.mandelbox.doubles.vary4D.rPower);
 				double m = scale;
-				if (rr < par.mandelbox.doubles.vary4D.minR*par.mandelbox.doubles.vary4D.minR) m = scale / (par.mandelbox.doubles.vary4D.minR * par.mandelbox.doubles.vary4D.minR);
-				else if (rr < 1.0) m = scale / rr;
+				if (rr < par.mandelbox.doubles.vary4D.minR * par.mandelbox.doubles.vary4D.minR)
+				{
+					m = scale / (par.mandelbox.doubles.vary4D.minR * par.mandelbox.doubles.vary4D.minR);
+					tgladColor += par.mandelbox.doubles.colorFactorSp1;
+				}
+				else if (rr < 1.0)
+				{
+					m = scale / rr;
+					tgladColor += par.mandelbox.doubles.colorFactorSp2;
+				}
 				z = z * m + constant;
 				w = w * m + par.mandelbox.doubles.vary4D.wadd;
 				tgladDE = tgladDE * fabs(m) + 1.0;
@@ -652,23 +664,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case aexion:
 			{
-				/*
-				if FirstIt = 0 {
-				inc(FirstIt)
-				Cx = abs(Cx  + Cy + Cz) + C_add
-				Cy = abs(-Cx - Cy + Cz) + C_add
-				Cz = abs(-Cx + Cy - Cz) + C_add
-				Cw = abs(Cx  - Cy - Cz) + C_add
-				x = abs(x  + y + z) + C_add
-				y = abs(-x - y + z) + C_add
-				z = abs(-x + y - z) + C_add
-				w = abs(x  - y - z) + C_add
-				}
-				x' = x*x - y*y + 2*w*z + Cx
-				y' = y*y - x*x + 2*w*z + Cy
-				z' = z*z - w*w + 2*x*y + Cz
-				w' = w*w - z*z + 2*x*y + Cw
-				*/
 				if(L == 0)
 				{
 					double cx = fabs(constant.x + constant.y + constant.z) + par.doubles.cadd;
@@ -803,7 +798,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
 		} 
-		else if (actualFormula == tglad || actualFormula == smoothMandelbox)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D)
 			return tgladColor * 100.0 + z.Length()*par.mandelbox.doubles.colorFactorR;
 		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 			return min * 1000.0;

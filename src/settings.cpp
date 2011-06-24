@@ -31,7 +31,6 @@ const char* axis_names[] = {"X", "Y", "Z"};
 const char* component_names[] = {"alfa", "beta", "gamma"};
 
 bool paletteLoadedFromSettingsFile = false;
-bool newMandelboxParametersLoaded = false;
 
 void fprintfDot(FILE *file, const char *string, double value, double defaultVal, bool compare)
 {
@@ -441,7 +440,6 @@ bool LoadSettings(const char *filename, sParamRender &params, bool disableMessag
 bool LoadSettings2(const char *filename, sParamRender &params, bool disableMessages)
 {
 	paletteLoadedFromSettingsFile = false;
-	newMandelboxParametersLoaded = false;
 
 	char str1[100];
 	char str2[2000];
@@ -762,7 +760,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "stereo_enabled")) params.stereoEnabled = atoi(str2);
 	else if (!strcmp(str1, "stereo_eye_distance")) params.doubles.stereoEyeDistance = atof2(str2);
 
-	else if (!strcmp(str1, "mandelbox_scale")) {params.fractal.mandelbox.doubles.scale = atof2(str2); newMandelboxParametersLoaded = true;}
+	else if (!strcmp(str1, "mandelbox_scale")) params.fractal.mandelbox.doubles.scale = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_folding_limit")) params.fractal.mandelbox.doubles.foldingLimit = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_folding_value")) params.fractal.mandelbox.doubles.foldingValue = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.fractal.mandelbox.doubles.foldingSphericalMin = atof2(str2);
@@ -894,16 +892,6 @@ void LoadSettingsPost(sParamRender &params)
 		printf("Palette not found in settings file. Generating random palette\n");
 		srand(params.coloring_seed);
 		NowaPaleta(params.palette, 1.0);
-	}
-
-	if(!newMandelboxParametersLoaded)
-	{
-		params.fractal.mandelbox.doubles.scale = params.fractal.doubles.power;
-		params.fractal.mandelbox.doubles.foldingLimit = params.fractal.doubles.foldingLimit;
-		params.fractal.mandelbox.doubles.foldingValue = params.fractal.doubles.foldingValue;
-		params.fractal.mandelbox.doubles.foldingSphericalFixed = params.fractal.doubles.foldingSphericalFixed;
-		params.fractal.mandelbox.doubles.foldingSphericalMin = params.fractal.doubles.foldingSphericalMin;
-		if(params.fractal.formula == tglad) params.fractal.tgladFoldingMode = false;
 	}
 
 	lightsPlaced = 0;
