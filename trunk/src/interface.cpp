@@ -190,6 +190,7 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 15) formula2 = mandelboxVaryScale4D;
 	if (formula == 16) formula2 = aexion;
 	if (formula == 17) formula2 = benesi;
+	if (formula == 18) formula2 = bristorbrot;
 	return formula2;
 }
 
@@ -214,6 +215,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == mandelboxVaryScale4D) formula2 = 15;
 	if (formula == aexion) formula2 = 16;
 	if (formula == benesi) formula2 = 17;
+	if (formula == bristorbrot) formula2 = 18;
 
 	return formula2;
 }
@@ -498,7 +500,8 @@ void ReadInterface(sParamRender *params)
 		if (formula == 15) params->fractal.formula = mandelboxVaryScale4D;
 		if (formula == 16) params->fractal.formula = aexion;
 		if (formula == 17) params->fractal.formula = benesi;
-		if (formula == 18) params->fractal.formula = hybrid;
+		if (formula == 18) params->fractal.formula = bristorbrot;
+		if (formula == 19) params->fractal.formula = hybrid;
 
 		CheckPrameters(params);
 
@@ -820,7 +823,8 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == mandelboxVaryScale4D) formula = 15;
 	if (params->fractal.formula == aexion) formula = 16;
 	if (params->fractal.formula == benesi) formula = 17;
-	if (params->fractal.formula == hybrid) formula = 18;
+	if (params->fractal.formula == bristorbrot) formula = 18;
+	if (params->fractal.formula == hybrid) formula = 19;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -901,6 +905,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Mandelbox vary scale 4D");
 	gtk_combo_box_append_text(combo, "Aexion");
 	gtk_combo_box_append_text(combo, "Benesi");
+	gtk_combo_box_append_text(combo, "Bristorbrot");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1455,6 +1460,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbox vary scale 4D");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Aexion");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Benesi");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Bristorbrot");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 

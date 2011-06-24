@@ -722,6 +722,19 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
+			case bristorbrot:
+			{
+				double newx = z.x*z.x - z.y*z.y - z.z*z.z;
+				double newy = z.y * (2.0 * z.x - z.z);
+				double newz = z.z * (2.0 * z.x + z.y);
+
+				z.x = newx + constant.x;
+				z.y = newy + constant.y;
+				z.z = newz + constant.z;
+
+				r = z.Length();
+				break;
+			}
 			case hybrid:
 				break;
 			case none:
