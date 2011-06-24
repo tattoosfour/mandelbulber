@@ -330,7 +330,6 @@ void *MainThread(void *ptr)
 
 								calcParam.doubles.detailSize = dist_thresh;
 								dist = CalculateDistance(point, calcParam, &max_iter);
-								dist = dist * (1.0 - Random(1000)/10000.0);
 
 								//it is for situation when DE is calculated with very big error
 								if (!param.fractal.dynamicDEcorrection && dist > 5.0 / DE_factor)
@@ -388,6 +387,8 @@ void *MainThread(void *ptr)
 								{
 									if (perspectiveType == fishEye || perspectiveType == equirectangular) stepYpersp = dist * DE_factor;
 									else stepYpersp = (dist - 0.5 * dist_thresh) / zoom * DE_factor;
+
+									stepYpersp = stepYpersp * (1.0 - Random(1000)/10000.0);
 								}
 
 								//step in binary searching mode
