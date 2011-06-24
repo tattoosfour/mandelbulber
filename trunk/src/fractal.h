@@ -37,7 +37,8 @@ enum enumFractalFormula
 	foldingIntPow2 = 16,
 	smoothMandelbox = 17,
 	mandelboxVaryScale4D = 18,
-	aexion = 19
+	aexion = 19,
+	benesi = 20
 };
 
 enum enumCalculationMode
