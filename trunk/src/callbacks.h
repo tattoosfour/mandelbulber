@@ -96,6 +96,8 @@ void PressedAutoDEStep(GtkWidget *widget, gpointer widget_pointer);
 void PressedAutoDEStepHQ(GtkWidget *widget, gpointer widget_pointer);
 void ChangedConstantDEThreshold(GtkWidget *widget, gpointer data);
 void ChangedImageProportion(GtkWidget *widget, gpointer data);
+void PressedCopyToClipboard(GtkWidget *widget, gpointer data);
+void PressedPasteFromClipboard(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);
