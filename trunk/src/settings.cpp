@@ -339,6 +339,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "mandelbox_folding_min_radius", params.fractal.mandelbox.doubles.foldingSphericalMin, 0.5, compare);
 		fprintfDot(fileSettings, "mandelbox_folding_fixed_radius", params.fractal.mandelbox.doubles.foldingSphericalFixed, 1.0, compare);
 		fprintfDot(fileSettings, "mandelbox_sharpness", params.fractal.mandelbox.doubles.sharpness, 3.0, compare);
+		fprintfDot(fileSettings, "mandelbox_offset_X", params.fractal.mandelbox.doubles.offset.x, 0.0, compare);
+		fprintfDot(fileSettings, "mandelbox_offset_Y", params.fractal.mandelbox.doubles.offset.y, 0.0, compare);
+		fprintfDot(fileSettings, "mandelbox_offset_Z", params.fractal.mandelbox.doubles.offset.z, 0.0, compare);
 
 		for (int component = 0; component < 3; ++component)
 		{
@@ -766,6 +769,9 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "mandelbox_folding_min_radius")) params.fractal.mandelbox.doubles.foldingSphericalMin = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_folding_fixed_radius")) params.fractal.mandelbox.doubles.foldingSphericalFixed = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_sharpness")) params.fractal.mandelbox.doubles.sharpness = atof2(str2);
+	else if (!strcmp(str1, "mandelbox_offset_X")) params.fractal.mandelbox.doubles.offset.x = atof2(str2);
+	else if (!strcmp(str1, "mandelbox_offset_Y")) params.fractal.mandelbox.doubles.offset.y = atof2(str2);
+	else if (!strcmp(str1, "mandelbox_offset_Z")) params.fractal.mandelbox.doubles.offset.z = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_color_R")) params.fractal.mandelbox.doubles.colorFactorR = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_color_X")) params.fractal.mandelbox.doubles.colorFactorX = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_color_Y")) params.fractal.mandelbox.doubles.colorFactorY = atof2(str2);

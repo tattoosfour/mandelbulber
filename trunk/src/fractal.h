@@ -96,6 +96,7 @@ struct sFractalMandelboxD
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
 	double sharpness;
+	CVector3 offset;
 	sFractalMandelboxVary4D vary4D;
 };
 
