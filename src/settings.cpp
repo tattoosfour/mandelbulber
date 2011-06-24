@@ -25,6 +25,8 @@
 
 using namespace std;
 
+char data_directory[1000];
+
 const char* axis_names[] = {"X", "Y", "Z"};
 const char* component_names[] = {"alfa", "beta", "gamma"};
 
@@ -421,13 +423,16 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 
 bool LoadSettings(const char *filename, sParamRender &params, bool disableMessages)
 {
-	if(FileIfExist("settings/.defaults"))
+	string defaultsFilename = string(data_directory);
+	defaultsFilename+="/settings/.defaults";
+
+	if(FileIfExist(defaultsFilename.c_str()))
 	{
-		LoadSettings2("settings/.defaults", params, true);
+		LoadSettings2(defaultsFilename.c_str(), params, true);
 	}
 	else
 	{
-		printf("ERROR! Missed reference file with defaults: USER/.mandelbulber/.defaults\n");
+		printf("ERROR! Missed reference file with defaults: %s\n", defaultsFilename.c_str());
 		abort();
 	}
 	return LoadSettings2(filename, params, disableMessages);

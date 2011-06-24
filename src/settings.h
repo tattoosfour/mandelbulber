@@ -10,6 +10,8 @@
 
 #include "Render3D.h"
 
+extern char data_directory[1000];
+
 void fprintfDot(FILE *file, const char *string, double value, double defaultVal, bool compare);
 void fprintfInt(FILE *file, const char *string, int value, int defaultVal, bool compare);
 double atof2(const char *str, bool locale_dot);
