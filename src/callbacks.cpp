@@ -1663,10 +1663,10 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 		FILE *fileSettings = fopen(filename, "r");
 		if (fileSettings)
 		{
-			const char *result = fgets(string, 12, fileSettings);
-			printf("%sX\n", string);
+			const char *result = fgets(string, 13, fileSettings);
+			//printf("%s*\n", string);
 			(void) result;
-			if (!strcmp(string, "locale_test"))
+			if (!strcmp(string, "Mandelbulber") || !strcmp(string, "locale_test "))
 			{
 				smart_ptr<cImage> thumbnail;
 				thumbnail.reset(new cImage(128, 128));
