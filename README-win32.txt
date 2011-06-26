@@ -1,7 +1,7 @@
-MANDELBULBER 1.03 - win32
+MANDELBULBER 1.04 - win32
 
 project leader: Krzysztof Marczak
-project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler
+project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
 
 contact: buddhi1980@gmail.com
 www: http://sites.google.com/site/mandelbulber/
@@ -15,7 +15,7 @@ Licence: GNU GPL v3.0
 1. REQUIREMENTS
 
 - very fast CPU (recomended 2GHz, 4 cores)
-- 1GB RAM
+- 2GB RAM
 
 
 2. INSTALATION
@@ -33,7 +33,7 @@ Please run mandelbulber.exe file
 
 - Windows XP SP3
 - Windows Vista x64 SP2
-(there is also available Linux version)
+(there is also available Linux and Mac version)
 
 5. USAGE
 

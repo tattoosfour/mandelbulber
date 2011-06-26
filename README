@@ -1,7 +1,7 @@
-MANDELBULBER 1.03
+MANDELBULBER 1.04
 
 project leader: Krzysztof Marczak
-project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler
+project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
 
 contact: buddhi1980@gmail.com
 www: http://sites.google.com/site/mandelbulber/
@@ -14,7 +14,7 @@ LICENCE: GNU GPL v3.0
 
 - Linux OS with installed GTK+2.0 libraries (version >2.20), libjpeg
 - very fast CPU (recomended 2GHz, 4 cores)
-- 1GB RAM
+- 2GB RAM
 
 2. COMPILING
 
@@ -39,8 +39,9 @@ please type:
 - Ubuntu 10.10 x64
 - Ubuntu 10.10 x86
 - Debian Wheeze x64
+(there is also available Windows and Mac version)
 
-- gcc 4.5.3-1
+- gcc 4.6.0-10
 
 5. USAGE
 
