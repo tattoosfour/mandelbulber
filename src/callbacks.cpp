@@ -2017,7 +2017,7 @@ void PressedCopyToClipboard(GtkWidget *widget, gpointer data)
 	SaveSettings("settings/.clipboard", fractParamToSave, true);
 
 	FILE * pFile;
-	pFile = fopen("settings/.clipboard", "r");
+	pFile = fopen("settings/.clipboard", "rb");
 	if (pFile != NULL)
 	{
 		// obtain file size:
@@ -2068,7 +2068,7 @@ void PressedPasteFromClipboard(GtkWidget *widget, gpointer data)
 	}
 
 	FILE * pFile;
-	pFile = fopen("settings/.clipboard", "w");
+	pFile = fopen("settings/.clipboard", "wb");
 	if (pFile != NULL)
 	{
 		fwrite(buffer, 1, len, pFile);
