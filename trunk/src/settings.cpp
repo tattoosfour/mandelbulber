@@ -401,9 +401,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		if(!compare)
 		{
 			fprintf(fileSettings, "file_destination %s;\n", "images/iamge");
-			fprintf(fileSettings, "file_background %s;\n", "textures/background.jpg");
-			fprintf(fileSettings, "file_envmap %s;\n", "textures/envmap.jpg");
-			fprintf(fileSettings, "file_lightmap %s;\n", "textures/lightmap.jpg");
+			fprintf(fileSettings, "file_background %s;\n", SHARED_DIR"textures/background.jpg");
+			fprintf(fileSettings, "file_envmap %s;\n", SHARED_DIR"textures/envmap.jpg");
+			fprintf(fileSettings, "file_lightmap %s;\n", SHARED_DIR"textures/lightmap.jpg");
 			fprintf(fileSettings, "file_animation_path %s;\n", "paths/path.txt");
 			fprintf(fileSettings, "file_keyframes %s;\n", "keyframes/keyframe");
 		}
@@ -415,7 +415,6 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 			fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
 			fprintf(fileSettings, "file_animation_path %s;\n", params.file_path);
 			fprintf(fileSettings, "file_keyframes %s;\n", params.file_keyframes);
-			fprintf(fileSettings, "file_sound %s;\n", params.file_sound);
 		}
 		fprintf(fileSettings, "palette %s;\n", paletteString);
 	}
@@ -427,9 +426,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 bool LoadSettings(const char *filename, sParamRender &params, bool disableMessages)
 {
 	string defaultsFilename = string(data_directory);
-	defaultsFilename+="/settings/.defaults";
+	defaultsFilename+="/.defaults";
 
-	if(FileIfExist(defaultsFilename.c_str()))
+	if(FileIfExists(defaultsFilename.c_str()))
 	{
 		LoadSettings2(defaultsFilename.c_str(), params, true);
 	}

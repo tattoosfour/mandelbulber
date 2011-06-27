@@ -98,7 +98,7 @@ int cTimeline::CheckNumberOfKeyframes(const char *keyframesPath)
 	{
 		filename2=IndexFilename(keyframesPath, "fract", maxKeyNumber);
 		maxKeyNumber++;
-	} while (FileIfExist(filename2.c_str()));
+	} while (FileIfExists(filename2.c_str()));
 	maxKeyNumber--;
 	return maxKeyNumber;
 }
@@ -388,7 +388,7 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 	if (event->type == GDK_2BUTTON_PRESS)
 	{
 		string filename2 = IndexFilename(Interface_data.file_keyframes, "fract", index);
-		if (FileIfExist(filename2.c_str()))
+		if (FileIfExists(filename2.c_str()))
 		{
 			sParamRender fractParamLoaded;
 			LoadSettings(filename2.c_str(), fractParamLoaded, true);

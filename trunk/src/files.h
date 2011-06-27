@@ -44,8 +44,8 @@ void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE 
 void SavePNG(const char *filename, int quality, int width, int height, png_byte *image);
 void SavePNG16(const char *filename, int quality, int width, int height, cImage *image);
 void SavePNG16Alpha(const char *filename, int quality, int width, int height, cImage *image);
-bool FileIfExist(const char *filename);
+bool FileIfExists(const char *filename);
 void WriteLog(const char *text);
 void WriteLogDouble(const char *text, double value);
-
+int fcopy(const char *source, const char *dest);
 #endif /* FILES_H_ */

@@ -22,6 +22,8 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <locale.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "Render3D.h"
 #include "files.h"
@@ -1268,6 +1270,7 @@ int main(int argc, char *argv[])
 	sParamRender fractParamDefault;
 	WriteLog("allocated memory for default parameters");
 
+	//data directory location
 #ifdef WIN32 /* WINDOWS */
 	sprintf(data_directory, "%s/mandelbulber", homedir);
 #else
@@ -1275,9 +1278,58 @@ int main(int argc, char *argv[])
 #endif
 	printf("Default data directory: %s\n", data_directory);
 
+	//create data directory if not exists
+	DIR *dir;
+	dir = opendir(data_directory);
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(data_directory, (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Data directory");
+
+	//create settings directory if not exists
+	string settingsDir = string(data_directory) + "/settings";
+	dir = opendir(settingsDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(settingsDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Settings directory");
+
+	//create settings directory if not exists
+	string imagesDir = string(data_directory) + "/images";
+	dir = opendir(imagesDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(imagesDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Images directory");
+
+	//create keyframes directory if not exists
+	string keyframesDir = string(data_directory) + "/keyframes";
+	dir = opendir(keyframesDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(keyframesDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Keyframes directory");
+
+	//create paths directory if not exists
+	string pathsDir = string(data_directory) + "/paths";
+	dir = opendir(pathsDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(pathsDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Paths directory");
+
+	//create undo directory if not exists
+	string undoDir = string(data_directory) + "/undo";
+	dir = opendir(undoDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+	else mkdir(undoDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+	WriteLog("Undo directory");
+
+	string defaults = string(data_directory) + "/.defaults";
+	if(!FileIfExists(defaults.c_str()))
+	{
+		fcopy(SHARED_DIR"defaults",defaults.c_str());
+		WriteLog("Defaults copied");
+	}
+
 	strcpy(lastFilenameSettings, "settings/default.fract");
 	strcpy(lastFilenameImage, "images/image.jpg");
-	strcpy(lastFilenamePalette, "textures/palette.jpg");
+	strcpy(lastFilenamePalette, SHARED_DIR"textures/colour palette.jpg");
 
 	bool noGUIsettingsLoaded = false;
 	if (noGUI)
@@ -1293,7 +1345,8 @@ int main(int argc, char *argv[])
 	if (!chdir(data_directory))
 	{
 		//update of reference file with defaults
-		SaveSettings("settings/.defaults", fractParamDefault, false);
+		SaveSettings(".defaults", fractParamDefault, false);
+		WriteLog("Defaults regenerated");
 
 		//loading undo buffer status
 		undoBuffer.LoadStatus();
@@ -1302,22 +1355,22 @@ int main(int argc, char *argv[])
 		//reading default configuration in GUI mode
 		if (!noGUI)
 		{
-			if (LoadSettings("settings/default.fract", fractParamDefault))
+			if (LoadSettings(SHARED_DIR"examples/default.fract", fractParamDefault))
 			{
 				WriteLog("Default settings loaded");
-				printf("Default settings loaded successfully (settings/default.fract)\n");
+				printf("Default settings loaded successfully ("SHARED_DIR"examples/default.fract)\n");
 				//creating GTK+ GUI
 				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
 			}
 			else
 			{
-				printf("Can't open default settings file: %s/settings/default.fract\n", data_directory);
+				printf("Can't open default settings file: "SHARED_DIR"/settings/default.fract\n");
 				WriteLog("Can't open default settings file");
 				WriteLog(data_directory);
 
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-						"Error! Can't open default settings file\n%s/settings/default.fract\nPlease run install script before first program start", data_directory);
+						"Error! Can't open default settings file\n"SHARED_DIR"/settings/default.fract");
 				gtk_dialog_run(GTK_DIALOG(dialog));
 				gtk_widget_destroy(dialog);
 			}
@@ -1572,7 +1625,7 @@ void MainRender(void)
 		{
 			filename2=IndexFilename(fractParam.file_keyframes, "fract", maxKeyNumber);
 			maxKeyNumber++;
-		} while (FileIfExist(filename2.c_str()));
+		} while (FileIfExists(filename2.c_str()));
 		WriteLog("Keyframes counted");
 	}
 	else
@@ -1991,7 +2044,7 @@ void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode)
 {
 	printf("Rendering keyframe preview: %s\n", settingsFile);
 
-	if (FileIfExist(settingsFile))
+	if (FileIfExists(settingsFile))
 	{
 		sParamRender fractParamLoaded;
 		LoadSettings(settingsFile, fractParamLoaded, true);
