@@ -408,7 +408,7 @@ void SavePNG16Alpha(const char *filename, int /*quality*/, int width, int height
 	fclose(fp);
 }
 
-bool FileIfExist(const char *filename)
+bool FileIfExists(const char *filename)
 {
 	FILE *file;
 	file = fopen(filename, "r");
@@ -432,4 +432,52 @@ void WriteLogDouble(const char *text, double value)
 	FILE *logfile = fopen(logfileName.c_str(), "a");
 	fprintf(logfile, "%ld: %s, value = %g\n", (unsigned long int) clock(), text, value);
 	fclose(logfile);
+}
+
+int fcopy(const char *source, const char *dest)
+{
+	// ------ file reading
+
+	FILE * pFile;
+	unsigned long lSize;
+	char *buffer;
+	size_t result;
+
+	pFile = fopen(source, "rb");
+	if (pFile == NULL)
+	{
+		printf("Can't open source file for copying: %s\n", source);
+		return 1;
+	}
+
+	// obtain file size:
+	fseek(pFile, 0, SEEK_END);
+	lSize = ftell(pFile);
+	rewind(pFile);
+
+	// allocate memory to contain the whole file:
+	buffer = new char[lSize];
+
+	// copy the file into the buffer:
+	result = fread(buffer, 1, lSize, pFile);
+	if (result != lSize)
+	{
+		printf("Can't read source file for copying: %s\n", source);
+		return 2;
+	}
+	fclose(pFile);
+
+	// ----- file writing
+
+	pFile = fopen(dest, "wb");
+	if (pFile == NULL)
+	{
+		printf("Can't open destination file for copying: %s\n", dest);
+		return 3;
+	}
+	fwrite(buffer, 1, lSize, pFile);
+	fclose(pFile);
+
+	delete buffer;
+	return 0;
 }

@@ -48,7 +48,7 @@ bool CParamsUndo::GetUndo(sParamRender *params)
 		if (level < 0) level = 0;
 
                 filename2=IndexFilename("undo/undo","fract",level%max);
-		if (FileIfExist(filename2.c_str()))
+		if (FileIfExists(filename2.c_str()))
 		{
 			LoadSettings(filename2.c_str(), *params);
 			result = true;
@@ -77,7 +77,7 @@ bool CParamsUndo::GetRedo(sParamRender *params)
 		count++;
 		if (count > max - 2) count = max - 2;
 		string filename2=IndexFilename("undo/undo", "fract", level % max);
-		if (FileIfExist(filename2.c_str()))
+		if (FileIfExists(filename2.c_str()))
 		{
 			LoadSettings(filename2.c_str(), *params);
 			result = true;

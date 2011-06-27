@@ -980,6 +980,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #3");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #4");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of centre for random lights");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set Julia constant");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 1);
 	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.comboMouseClickMode, false, false, 1);
 
@@ -1541,14 +1542,14 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkRaytracedReflections = gtk_check_button_new_with_label("Ray-traced reflections");
 
 	//pixamps
-	Interface.pixmap_up = gtk_image_new_from_file("icons/go-up.png");
-	Interface.pixmap_down = gtk_image_new_from_file("icons/go-down.png");
-	Interface.pixmap_left = gtk_image_new_from_file("icons/go-previous.png");
-	Interface.pixmap_right = gtk_image_new_from_file("icons/go-next.png");
-	Interface.pixmap_move_up = gtk_image_new_from_file("icons/go-up.png");
-	Interface.pixmap_move_down = gtk_image_new_from_file("icons/go-down.png");
-	Interface.pixmap_move_left = gtk_image_new_from_file("icons/go-previous.png");
-	Interface.pixmap_move_right = gtk_image_new_from_file("icons/go-next.png");
+	Interface.pixmap_up = gtk_image_new_from_file(SHARED_DIR"icons/go-up.png");
+	Interface.pixmap_down = gtk_image_new_from_file(SHARED_DIR"icons/go-down.png");
+	Interface.pixmap_left = gtk_image_new_from_file(SHARED_DIR"icons/go-previous.png");
+	Interface.pixmap_right = gtk_image_new_from_file(SHARED_DIR"icons/go-next.png");
+	Interface.pixmap_move_up = gtk_image_new_from_file(SHARED_DIR"icons/go-up.png");
+	Interface.pixmap_move_down = gtk_image_new_from_file(SHARED_DIR"icons/go-down.png");
+	Interface.pixmap_move_left = gtk_image_new_from_file(SHARED_DIR"icons/go-previous.png");
+	Interface.pixmap_move_right = gtk_image_new_from_file(SHARED_DIR"icons/go-next.png");
 
 	//labels
 	Interface.label_animationFrame = gtk_label_new("Frame:");

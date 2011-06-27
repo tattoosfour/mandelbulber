@@ -185,12 +185,13 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 							x2 *= perspFactor1/perspFactor2;
 							z2 *= perspFactor1/perspFactor2;
 						}
-						else if (clickMode >= 5) y2 = y - lightPlacementDistance/params.doubles.zoom;
+						else if (clickMode >= 5 && clickMode < 10) y2 = y - lightPlacementDistance/params.doubles.zoom; //lights placement
+						else if (clickMode == 10) y2 = y; //julia constant
 					}
 
 					CVector3 point = Projection3D(CVector3(x2, y2, z2), params.doubles.vp, mRot, perspectiveType, params.doubles.persp, params.doubles.zoom);
 
-					if(clickMode == 1)
+					if(clickMode == 1) //move the camera
 					{
 					  params.doubles.vp = point;
 						params.doubles.zoom /= closeUpRatio;
@@ -237,6 +238,10 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						if (clickMode == 9)
 						{
 							params.doubles.auxLightRandomCenter = point;
+						}
+						if (clickMode == 10)
+						{
+							params.fractal.doubles.julia = point;
 						}
 						WriteInterface(&params);
 						PlaceRandomLights(&params, false);
@@ -1136,7 +1141,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 
 	//loading next keyframe if exists
 	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2.c_str()))
+	if (FileIfExists(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
 		LoadSettings(filename2.c_str(), fractParamLoaded, true);
@@ -1189,7 +1194,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 
 	//loading next keyframe if exists
 	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2.c_str()))
+	if (FileIfExists(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
 		LoadSettings(filename2.c_str(), fractParamLoaded, true);
@@ -1231,7 +1236,7 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 	string filename2;
 
 	filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
-	if (FileIfExist(filename2.c_str()))
+	if (FileIfExists(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
 		LoadSettings(filename2.c_str(), fractParamLoaded, true);
@@ -1269,7 +1274,7 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 
 	string filename2=IndexFilename(Interface_data.file_keyframes, "fract", index);
 
-	if (FileIfExist(filename2.c_str()))
+	if (FileIfExists(filename2.c_str()))
 	{
 		sParamRender fractParamLoaded;
 		LoadSettings(filename2.c_str(), fractParamLoaded, true);
@@ -1479,7 +1484,7 @@ void PressedSelectKeyframes(GtkWidget *widget, gpointer data)
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		if (FileIfExist(filename))
+		if (FileIfExists(filename))
 		{
 			filename[strlen(filename) - 11] = 0;
 		}
@@ -1692,7 +1697,7 @@ void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data)
 
 	const char *filename = gtk_file_chooser_get_preview_filename(file_chooser);
 
-	if (FileIfExist(filename))
+	if (FileIfExists(filename))
 	{
 		cTexture *image = new cTexture(filename);
 
