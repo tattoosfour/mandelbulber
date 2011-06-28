@@ -1472,72 +1472,93 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 bool LoadTextures(sParamRender *params)
 {
 	//loading texture for environment mapping
-	params->envmapTexture = new cTexture(params->file_envmap);
-	if (params->envmapTexture->IsLoaded())
+	if(params->doubles.imageAdjustments.reflect > 0 && !params->imageSwitches.raytracedReflections)
 	{
-		printf("Environment map texture loaded\n");
-		WriteLog("Environment map texture loaded");
+		params->envmapTexture = new cTexture(params->file_envmap);
+		if (params->envmapTexture->IsLoaded())
+		{
+			printf("Environment map texture loaded\n");
+			WriteLog("Environment map texture loaded");
+		}
+		else
+		{
+			printf("Error! Can't open envmap texture: %s\n", params->file_envmap);
+			WriteLog("Error! Can't open envmap texture");
+			WriteLog(params->file_envmap);
+			if (!noGUI)
+			{
+				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error loading envmap texture file: %s",
+						params->file_envmap);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
+			}
+			//isRendering = false;
+			//return false;
+		}
 	}
 	else
 	{
-		printf("Error! Can't open envmap texture: %s\n", params->file_envmap);
-		WriteLog("Error! Can't open envmap texture");
-		WriteLog(params->file_envmap);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error loading envmap texture file: %s",
-					params->file_envmap);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		//isRendering = false;
-		//return false;
+		params->envmapTexture = new cTexture;
 	}
 
 	//loading texture for ambient occlusion light map
-	params->lightmapTexture = new cTexture(params->file_lightmap);
-	if (params->lightmapTexture->IsLoaded())
+	if(params->globalIlumQuality && !params->fastGlobalIllumination)
 	{
-		printf("Ambient occlusion light map texture loaded\n");
-		WriteLog("Ambient occlusion light map texture loaded");
+		params->lightmapTexture = new cTexture(params->file_lightmap);
+		if (params->lightmapTexture->IsLoaded())
+		{
+			printf("Ambient occlusion light map texture loaded\n");
+			WriteLog("Ambient occlusion light map texture loaded");
+		}
+		else
+		{
+			printf("Error! Can't open ambient occlusion light map texture:%s\n", params->file_lightmap);
+			WriteLog("Error! Can't open ambient occlusion light map texture");
+			WriteLog(params->file_lightmap);
+			if (!noGUI)
+			{
+				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+						"Error! Can't open ambient occlusion light map texture:\n%s", params->file_lightmap);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
+			}
+			//isRendering = false;
+			//return false;
+		}
 	}
 	else
 	{
-		printf("Error! Can't open ambient occlusion light map texture:%s\n", params->file_lightmap);
-		WriteLog("Error! Can't open ambient occlusion light map texture");
-		WriteLog(params->file_lightmap);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-					"Error! Can't open ambient occlusion light map texture:\n%s", params->file_lightmap);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		//isRendering = false;
-		//return false;
+		params->lightmapTexture = new cTexture;
 	}
 
 	//reading background texture
-	params->backgroundTexture = new cTexture(params->file_background);
-	if (params->backgroundTexture->IsLoaded())
+	if(params->textured_background)
 	{
-		printf("Background texture loaded\n");
-		WriteLog("Background texture loaded");
+		params->backgroundTexture = new cTexture(params->file_background);
+		if (params->backgroundTexture->IsLoaded())
+		{
+			printf("Background texture loaded\n");
+			WriteLog("Background texture loaded");
+		}
+		else
+		{
+			printf("Error! Can't open background texture:%s\n", params->file_background);
+			WriteLog("Error! Can't open background texture");
+			WriteLog(params->file_background);
+			if (!noGUI)
+			{
+				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+						"Error! Can't open background texture:\n%s", params->file_background);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
+			}
+			//isRendering = false;
+			//return false;
+		}
 	}
 	else
 	{
-		printf("Error! Can't open background texture:%s\n", params->file_background);
-		WriteLog("Error! Can't open background texture");
-		WriteLog(params->file_background);
-		if (!noGUI)
-		{
-			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-					"Error! Can't open background texture:\n%s", params->file_background);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
-		//isRendering = false;
-		//return false;
+		params->backgroundTexture = new cTexture;
 	}
 	return true;
 }
