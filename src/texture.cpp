@@ -57,6 +57,15 @@ cTexture::cTexture(const char *filename)
 	}
 }
 
+cTexture::cTexture(void)
+{
+	width = 100;
+	height = 100;
+	loaded = false;
+	bitmap = new sRGB8[100 * 100];
+	memset(bitmap,255,sizeof(sRGB8)*100*100);
+}
+
 //destructor
 cTexture::~cTexture(void)
 {
