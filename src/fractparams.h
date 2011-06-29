@@ -110,6 +110,7 @@ struct sParamRender
 
 	sRGB background_color1; //background colour
 	sRGB background_color2;
+	sRGB background_color3;
 	sRGB auxLightPre1Colour;
 	sRGB auxLightPre2Colour;
 	sRGB auxLightPre3Colour;

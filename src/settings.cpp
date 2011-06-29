@@ -192,6 +192,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "background_color_2_R", params.background_color2.R, 65535, compare);
 	fprintfInt(fileSettings, "background_color_2_G", params.background_color2.G, 65535, compare);
 	fprintfInt(fileSettings, "background_color_2_B", params.background_color2.B, 65535, compare);
+	fprintfInt(fileSettings, "background_color_3_R", params.background_color3.R, 0, compare);
+	fprintfInt(fileSettings, "background_color_3_G", params.background_color3.G, 10000, compare);
+	fprintfInt(fileSettings, "background_color_3_B", params.background_color3.B, 500, compare);
 	fprintfInt(fileSettings, "textured_background", params.textured_background, false, compare);
 	fprintfInt(fileSettings, "shadows_enabled", params.shadow, true, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_enabled", params.global_ilumination, false, compare);
@@ -661,6 +664,9 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "background_color_2_R")) params.background_color2.R = atoi(str2);
 	else if (!strcmp(str1, "background_color_2_G")) params.background_color2.G = atoi(str2);
 	else if (!strcmp(str1, "background_color_2_B")) params.background_color2.B = atoi(str2);
+	else if (!strcmp(str1, "background_color_3_R")) params.background_color3.R = atoi(str2);
+	else if (!strcmp(str1, "background_color_3_G")) params.background_color3.G = atoi(str2);
+	else if (!strcmp(str1, "background_color_3_B")) params.background_color3.B = atoi(str2);
 	else if (!strcmp(str1, "textured_background")) params.textured_background = atoi(str2);
 	else if (!strcmp(str1, "shadows_enabled")) params.shadow = atoi(str2);
 	else if (!strcmp(str1, "ambient_occlusion_enabled")) params.global_ilumination = atoi(str2);
