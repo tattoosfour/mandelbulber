@@ -1502,7 +1502,7 @@ bool LoadTextures(sParamRender *params)
 	}
 
 	//loading texture for ambient occlusion light map
-	if(params->globalIlumQuality && !params->fastGlobalIllumination)
+	if(params->global_ilumination && !params->fastGlobalIllumination)
 	{
 		params->lightmapTexture = new cTexture(params->file_lightmap);
 		if (params->lightmapTexture->IsLoaded())
