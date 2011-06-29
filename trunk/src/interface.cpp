@@ -451,6 +451,11 @@ void ReadInterface(sParamRender *params)
 		params->background_color2.G = color.green;
 		params->background_color2.B = color.blue;
 
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud3), &color);
+		params->background_color3.R = color.red;
+		params->background_color3.G = color.green;
+		params->background_color3.B = color.blue;
+
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
 		params->effectColours.fogColor.R = color.red;
 		params->effectColours.fogColor.G = color.green;
@@ -852,6 +857,11 @@ void WriteInterface(sParamRender *params)
 	color.blue = params->background_color2.B;
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), &color);
 
+	color.red = params->background_color3.R;
+	color.green = params->background_color3.G;
+	color.blue = params->background_color3.B;
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud3), &color);
+
 	color.red = params->effectColours.fogColor.R;
 	color.green = params->effectColours.fogColor.G;
 	color.blue = params->effectColours.fogColor.B;
@@ -1234,8 +1244,10 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow2), "Glow colour 2");
 	Interface.buColorBackgroud1 = gtk_color_button_new();
 	Interface.buColorBackgroud2 = gtk_color_button_new();
+	Interface.buColorBackgroud3 = gtk_color_button_new();
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud1), "Background colour 1");
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background colour 2");
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background colour 3");
 	Interface.buLoadSettings = gtk_button_new_with_label("Load Settings");
 	Interface.buSaveSettings = gtk_button_new_with_label("Save Settings");
 	Interface.buUp = gtk_button_new();
@@ -1932,9 +1944,11 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow colour 1:", Interface.buColorGlow1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow colour 2:", Interface.buColorGlow2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorGlow2), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background colour 1:", Interface.buColorBackgroud1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background colour 2:", Interface.buColorBackgroud2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorBackgroud2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorBackgroud3), false, false, 1);
+
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.buApplyBrighness, false, false, 1);
 

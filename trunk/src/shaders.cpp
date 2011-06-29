@@ -280,12 +280,23 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 	{
 		CVector3 vector(0.5, 0.5, -0.5);
 		vector.Normalize();
-		double grad = (viewVector.Dot(vector)+1.0)/2.0;
-		double Ngrad = 1.0 - grad;
+		double grad = (viewVector.Dot(vector)+1.0);
 		sRGB16 pixel;
-		pixel.R = (param->background_color1.R * Ngrad + param->background_color2.R * grad);
-		pixel.G = (param->background_color1.G * Ngrad + param->background_color2.G * grad);
-		pixel.B = (param->background_color1.B * Ngrad + param->background_color2.B * grad);
+		if(grad < 1)
+		{
+			double Ngrad = 1.0 - grad;
+			pixel.R = (param->background_color3.R * Ngrad + param->background_color2.R * grad);
+			pixel.G = (param->background_color3.G * Ngrad + param->background_color2.G * grad);
+			pixel.B = (param->background_color3.B * Ngrad + param->background_color2.B * grad);
+		}
+		else
+		{
+			grad = grad - 1;
+			double Ngrad = 1.0 - grad;
+			pixel.R = (param->background_color2.R * Ngrad + param->background_color1.R * grad);
+			pixel.G = (param->background_color2.G * Ngrad + param->background_color1.G * grad);
+			pixel.B = (param->background_color2.B * Ngrad + param->background_color1.B * grad);
+		}
 
 		pixel2 = (sShaderOutput){ pixel.R/65536.0, pixel.G/65536.0, pixel.B/65536.0};
 	}

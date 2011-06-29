@@ -256,6 +256,7 @@ struct sInterface
 	GtkWidget *buColorGlow2;
 	GtkWidget *buColorBackgroud1;
 	GtkWidget *buColorBackgroud2;
+	GtkWidget *buColorBackgroud3;
 	GtkWidget *buApplyBrighness;
 	GtkWidget *buSaveImage;
 	GtkWidget *buSavePNG;
