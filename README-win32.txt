@@ -1,4 +1,4 @@
-MANDELBULBER 1.04 - win32
+MANDELBULBER 1.05 - win32
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
@@ -17,17 +17,10 @@ Licence: GNU GPL v3.0
 - very fast CPU (recomended 2GHz, 4 cores)
 - 2GB RAM
 
-
 2. INSTALATION
 
 Please run:
-install.bat
-
-Additonal files will be automaticaly copied to %USERPROFILE%\.mandelbulber directory
-
-3. STARTING
-
-Please run mandelbulber.exe file
+Mandelbulber-Setup.exe
 
 3. TESTED ON:
 
@@ -37,7 +30,7 @@ Please run mandelbulber.exe file
 
 5. USAGE
 
-Please download user manual: http://sourceforge.net/projects/mandelbulber/files/Mandelbulber%20user%20guide.pdf/downloa
+Please visit: http://sites.google.com/site/mandelbulber/user-manual
 
 command-line mode:
 

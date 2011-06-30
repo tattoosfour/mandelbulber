@@ -1,5 +1,13 @@
 Version history
 
+v1.05
+- Created Windows installer
+- Changed file structure. Now example and other files are located in (on Linux) /usr/share/mandelbulber directory or (on Windows) C:\Program files\mandelbulber. 
+  User data is stored in ".mandelbulber" directory located in $HOME folder
+- textures are loaded when necessary
+- backgrond gradient is defined using 3 colours
+- added "Load Example" button
+
 v1.04
 - Setting files consists only parameters different than default. Files are much shorter and easier to paste on internet forums.
 - Settings can be pasted/copied using clipboard from/to text editor or internet browser
