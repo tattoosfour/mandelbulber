@@ -2088,3 +2088,50 @@ void PressedPasteFromClipboard(GtkWidget *widget, gpointer data)
 		remove("settings/.clipboard");
 	}
 }
+
+void PressedLoadExample(GtkWidget *widget, gpointer data)
+{
+	GtkWidget *dialog;
+	dialog = gtk_file_chooser_dialog_new("Load fractal settings", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN,
+			GTK_RESPONSE_ACCEPT, NULL);
+
+	GtkWidget *preview;
+	GtkWidget *checkBox = gtk_check_button_new_with_label("Render preview of settings file");
+	preview = gtk_drawing_area_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), preview);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), checkBox);
+
+	gtk_widget_set_size_request(preview, 128, 128);
+	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewSettingsDialog), preview);
+
+	string exampleFile = string(SHARED_DIR) + "examples/default.fract";
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), exampleFile.c_str());
+
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+	{
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		sParamRender fractParamLoaded;
+		LoadSettings(filename, fractParamLoaded);
+		Params2InterfaceData(&fractParamLoaded);
+		WriteInterface(&fractParamLoaded);
+
+		string file = string(filename);
+		int length = file.length();
+
+#ifdef WINDOWS
+		int start = file.rfind("\\");
+#else
+		int start = file.rfind("/");
+#endif
+		string onlyFile(file, start+1, length);
+		string fileWithPath = "settings/" + onlyFile;
+
+		strcpy(lastFilenameSettings, fileWithPath.c_str());
+		string windowTitle = string("Mandelbulber (") + fileWithPath.c_str() + ")";
+		gtk_window_set_title(GTK_WINDOW(window_interface), windowTitle.c_str());
+
+		timeline->Reset();
+	}
+	gtk_widget_destroy(dialog);
+
+}

@@ -307,6 +307,7 @@ struct sInterface
 	GtkWidget *buAutoDEStepHQ;
 	GtkWidget *buCopyToClipboard;
 	GtkWidget *buGetFromClipboard;
+	GtkWidget *buLoadExample;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
