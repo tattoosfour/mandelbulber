@@ -1299,6 +1299,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buAutoDEStepHQ = gtk_button_new_with_label("HQ");
 	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
 	Interface.buGetFromClipboard = gtk_button_new_with_label("Paste from clipboard");
+	Interface.buLoadExample = gtk_button_new_with_label("Load example");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1697,6 +1698,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL(Interface.edit_imageHeight, ChangedImageProportion, "activate");
 	CONNECT_SIGNAL_CLICKED(Interface.buCopyToClipboard, PressedCopyToClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
+	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
@@ -2328,6 +2330,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadSettings, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buSaveSettings, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadExample, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buCopyToClipboard, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buGetFromClipboard, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buUndo, false, false, 1);
