@@ -52,18 +52,19 @@
 </folderInfo>
 <folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1197544619.2108502084" name="/" resourcePath="src">
 <toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1337824873" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.400560318" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.554731093"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1588547066" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1654833105">
-<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.680850709" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.536207200" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-<option id="gnu.cpp.compiler.option.preprocessor.def.1886354071" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.680850709" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.536207200" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.1886354071" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="ONETHREAD"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1916829991" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.696270137" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1497891766">
-<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1282524028" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
-<option id="gnu.c.compiler.exe.debug.option.debugging.level.1296576213" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1282524028" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
+<option id="gnu.c.compiler.exe.debug.option.debugging.level.1296576213" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1644272464" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.243785824" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.664470546"/>
@@ -164,7 +165,7 @@
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.2002119831;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1122851308;cdt.managedbuild.tool.gnu.c.compiler.input.33613441">
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957;cdt.managedbuild.tool.gnu.c.compiler.input.1910366752">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -247,7 +248,7 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957;cdt.managedbuild.tool.gnu.c.compiler.input.1910366752">
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.2002119831;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1122851308;cdt.managedbuild.tool.gnu.c.compiler.input.33613441">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -687,6 +688,9 @@
 <option id="gnu.cpp.compiler.exe.release.option.debugging.level.1873139707" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.optimization.flags.1541106182" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-march=native -mfpmath=387,sse -ffast-math" valueType="string"/>
 <option id="gnu.cpp.compiler.option.other.other.34279500" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags gtk+-2.0 gthread-2.0;`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.700495440" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="SHARED_DIR=/usr/share/mandelbulber/"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.577778248" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
@@ -714,16 +718,17 @@
 </folderInfo>
 <folderInfo id="cdt.managedbuild.config.gnu.exe.release.683470869.2002119831" name="/" resourcePath="src">
 <toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.533141858" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release" unusedChildren="">
+<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.240348366" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1257493781"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1091308804" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1810903300">
-<option id="gnu.cpp.compiler.exe.release.option.optimization.level.1003979556" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-<option id="gnu.cpp.compiler.exe.release.option.debugging.level.115220213" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-<option id="gnu.cpp.compiler.option.preprocessor.def.1016275963" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols"/>
+<option id="gnu.cpp.compiler.exe.release.option.optimization.level.1003979556" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.exe.release.option.debugging.level.115220213" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.option.preprocessor.def.1016275963" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.544490336" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1122851308" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957">
-<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.1184595412" superClass="gnu.c.compiler.exe.release.option.optimization.level" valueType="enumerated"/>
-<option id="gnu.c.compiler.exe.release.option.debugging.level.1574983984" superClass="gnu.c.compiler.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.1184595412" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" valueType="enumerated"/>
+<option id="gnu.c.compiler.exe.release.option.debugging.level.1574983984" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.33613441" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1015305336" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release.558616235"/>
@@ -820,7 +825,7 @@
 <parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.2002119831;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1122851308;cdt.managedbuild.tool.gnu.c.compiler.input.33613441">
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957;cdt.managedbuild.tool.gnu.c.compiler.input.1910366752">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
@@ -903,7 +908,7 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.545123957;cdt.managedbuild.tool.gnu.c.compiler.input.1910366752">
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.683470869;cdt.managedbuild.config.gnu.exe.release.683470869.2002119831;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1122851308;cdt.managedbuild.tool.gnu.c.compiler.input.33613441">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
