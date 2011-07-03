@@ -13,8 +13,11 @@
  *      Author: krzysztof
  */
 
-#include <cstdlib>
+
 #include <string.h>
+#include <string>
+#include <cstdlib>
+
 #include "interface.h"
 #include "callbacks.h"
 
@@ -42,6 +45,10 @@ int y_mouse = 0;
 bool programClosed = false;
 bool interfaceCreated = false;
 bool paletteViewCreated = false;
+
+char *sharedDir;
+
+using namespace std;
 
 GtkWidget* CreateEdit(const gchar *text, const gchar *txt_label, int size, GtkWidget *edit)
 {
@@ -1555,14 +1562,14 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkRaytracedReflections = gtk_check_button_new_with_label("Ray-traced reflections");
 
 	//pixamps
-	Interface.pixmap_up = gtk_image_new_from_file(SHARED_DIR"icons/go-up.png");
-	Interface.pixmap_down = gtk_image_new_from_file(SHARED_DIR"icons/go-down.png");
-	Interface.pixmap_left = gtk_image_new_from_file(SHARED_DIR"icons/go-previous.png");
-	Interface.pixmap_right = gtk_image_new_from_file(SHARED_DIR"icons/go-next.png");
-	Interface.pixmap_move_up = gtk_image_new_from_file(SHARED_DIR"icons/go-up.png");
-	Interface.pixmap_move_down = gtk_image_new_from_file(SHARED_DIR"icons/go-down.png");
-	Interface.pixmap_move_left = gtk_image_new_from_file(SHARED_DIR"icons/go-previous.png");
-	Interface.pixmap_move_right = gtk_image_new_from_file(SHARED_DIR"icons/go-next.png");
+	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
+	Interface.pixmap_down = gtk_image_new_from_file((string(sharedDir)+"icons/go-down.png").c_str());
+	Interface.pixmap_left = gtk_image_new_from_file((string(sharedDir)+"icons/go-previous.png").c_str());
+	Interface.pixmap_right = gtk_image_new_from_file((string(sharedDir)+"icons/go-next.png").c_str());
+	Interface.pixmap_move_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
+	Interface.pixmap_move_down = gtk_image_new_from_file((string(sharedDir)+"icons/go-down.png").c_str());
+	Interface.pixmap_move_left = gtk_image_new_from_file((string(sharedDir)+"icons/go-previous.png").c_str());
+	Interface.pixmap_move_right = gtk_image_new_from_file((string(sharedDir)+"icons/go-next.png").c_str());
 
 	//labels
 	Interface.label_animationFrame = gtk_label_new("Frame:");

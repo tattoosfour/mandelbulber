@@ -14,12 +14,12 @@
 #define MANDELBULBER_VERSION_STR "1.05"
 
 #ifndef SHARED_DIR
-	#ifdef WINDOWS
-		#define SHARED_DIR ""
-	#else
-		#define SHARED_DIR "/usr/share/mandelbulber/"
+	#ifndef WIN32
+		#define SHARED_DIR "/usr/share/mandelbulber"
 	#endif
 #endif
+
+extern char *sharedDir;
 
 enum enumImageFormat
 {

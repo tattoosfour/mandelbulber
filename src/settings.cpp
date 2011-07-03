@@ -404,18 +404,18 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		if(!compare)
 		{
 			fprintf(fileSettings, "file_destination %s;\n", "images/iamge");
-			fprintf(fileSettings, "file_background %s;\n", SHARED_DIR"textures/background.jpg");
-			fprintf(fileSettings, "file_envmap %s;\n", SHARED_DIR"textures/envmap.jpg");
-			fprintf(fileSettings, "file_lightmap %s;\n", SHARED_DIR"textures/lightmap.jpg");
+			fprintf(fileSettings, "file_background %s;\n", (string(sharedDir)+"textures/background.jpg").c_str());
+			fprintf(fileSettings, "file_envmap %s;\n", (string(sharedDir)+"textures/envmap.jpg").c_str());
+			fprintf(fileSettings, "file_lightmap %s;\n", (string(sharedDir)+"textures/lightmap.jpg").c_str());
 			fprintf(fileSettings, "file_animation_path %s;\n", "paths/path.txt");
 			fprintf(fileSettings, "file_keyframes %s;\n", "keyframes/keyframe");
 		}
 		else
 		{
 			fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
-			fprintf(fileSettings, "file_background %s;\n", params.file_background);
-			fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
-			fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
+			if(params.textured_background) fprintf(fileSettings, "file_background %s;\n", params.file_background);
+			if(params.doubles.imageAdjustments.reflect > 0 && !params.imageSwitches.raytracedReflections) fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
+			if(params.global_ilumination && !params.fastGlobalIllumination) fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
 			fprintf(fileSettings, "file_animation_path %s;\n", params.file_path);
 			fprintf(fileSettings, "file_keyframes %s;\n", params.file_keyframes);
 		}
@@ -495,30 +495,15 @@ bool LoadSettings2(const char *filename, sParamRender &params, bool disableMessa
 
 		LoadSettingsPost(params);
 
-		//checking number of lines in loaded file
-		if (params.settingsVersion != MANDELBULBER_VERSION)
+		if (params.settingsVersion > MANDELBULBER_VERSION)
 		{
-			if(params.settingsVersion > 0)
+			printf("Settings file was created in newer version of Mandelbulber (v. %f)\n", params.settingsVersion);
+			if (!noGUI && !disableMessages)
 			{
-				printf("Settings file was created in other version of Mandelbulber (v. %f)\n", params.settingsVersion);
-				if (!noGUI && !disableMessages)
-				{
-					GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
-							"Warning! Settings file was created in other version of Mandelbulber\nfile: %s\nversion: %f", filename, params.settingsVersion);
-					gtk_dialog_run(GTK_DIALOG(dialog));
-					gtk_widget_destroy(dialog);
-				}
-			}
-			else
-			{
-				printf("Settings file was created in other version of Mandelbulber (version < 1.04)\n");
-				if (!noGUI && !disableMessages)
-				{
-					GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
-							"Warning! Settings file was created in other version of Mandelbulber\nfile: %s\nversion < 1.04", filename);
-					gtk_dialog_run(GTK_DIALOG(dialog));
-					gtk_widget_destroy(dialog);
-				}
+				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+						"Warning! Settings file was created in newer version of Mandelbulber\nfile: %s\nversion: %f", filename, params.settingsVersion);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
 			}
 		}
 		return true;
