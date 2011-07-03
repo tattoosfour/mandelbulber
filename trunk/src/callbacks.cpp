@@ -1668,9 +1668,8 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 		FILE *fileSettings = fopen(filename, "r");
 		if (fileSettings)
 		{
-			const char *result = fgets(string, 13, fileSettings);
+			fgets(string, 13, fileSettings);
 			//printf("%s*\n", string);
-			(void) result;
 			if (!strcmp(string, "Mandelbulber") || !strcmp(string, "locale_test "))
 			{
 				smart_ptr<cImage> thumbnail;
@@ -2104,7 +2103,7 @@ void PressedLoadExample(GtkWidget *widget, gpointer data)
 	gtk_widget_set_size_request(preview, 128, 128);
 	g_signal_connect(dialog, "update-preview", G_CALLBACK(UpdatePreviewSettingsDialog), preview);
 
-	string exampleFile = string(SHARED_DIR) + "examples/default.fract";
+	string exampleFile = string(sharedDir) + "examples/default.fract";
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), exampleFile.c_str());
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
@@ -2118,7 +2117,7 @@ void PressedLoadExample(GtkWidget *widget, gpointer data)
 		string file = string(filename);
 		int length = file.length();
 
-#ifdef WINDOWS
+#ifdef WIN32
 		int start = file.rfind("\\");
 #else
 		int start = file.rfind("/");

@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <string.h>
+#include <string>
 #include <cstdlib>
 #include <unistd.h>
 #include <locale.h>
@@ -1193,6 +1194,16 @@ int main(int argc, char *argv[])
 	homedir = getenv("HOME");
 #endif  /* WINDOWS */
 
+#ifdef WIN32 /* WINDOWS */
+  sharedDir = new char[MAXPATHLEN];
+  char pathCWD[MAXPATHLEN];
+  getcwd(pathCWD, MAXPATHLEN);
+  strcpy(sharedDir, (string(pathCWD)+"/").c_str());
+#else               /*other unix - try sysconf*/
+	sharedDir = new char[1000];
+	strcpy(sharedDir, (string(SHARED_DIR)+"/").c_str());
+#endif  /* WINDOWS */
+
 	//logfile
 #ifdef WIN32 /* WINDOWS */
 	logfileName="log.txt";
@@ -1282,54 +1293,78 @@ int main(int argc, char *argv[])
 	DIR *dir;
 	dir = opendir(data_directory);
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(data_directory);
+#else
 	else mkdir(data_directory, (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Data directory");
 
 	//create settings directory if not exists
 	string settingsDir = string(data_directory) + "/settings";
 	dir = opendir(settingsDir.c_str());
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(settingsDir.c_str());
+#else
 	else mkdir(settingsDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Settings directory");
 
 	//create settings directory if not exists
 	string imagesDir = string(data_directory) + "/images";
 	dir = opendir(imagesDir.c_str());
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(imagesDir.c_str());
+#else
 	else mkdir(imagesDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Images directory");
 
 	//create keyframes directory if not exists
 	string keyframesDir = string(data_directory) + "/keyframes";
 	dir = opendir(keyframesDir.c_str());
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(keyframesDir.c_str());
+#else
 	else mkdir(keyframesDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Keyframes directory");
 
 	//create paths directory if not exists
 	string pathsDir = string(data_directory) + "/paths";
 	dir = opendir(pathsDir.c_str());
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(pathsDir.c_str());
+#else
 	else mkdir(pathsDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Paths directory");
 
 	//create undo directory if not exists
 	string undoDir = string(data_directory) + "/undo";
 	dir = opendir(undoDir.c_str());
 	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(undoDir.c_str());
+#else
 	else mkdir(undoDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
 	WriteLog("Undo directory");
 
 	string defaults = string(data_directory) + "/.defaults";
 	if(!FileIfExists(defaults.c_str()))
 	{
-		fcopy(SHARED_DIR"defaults",defaults.c_str());
+		fcopy((string(sharedDir)+"defaults").c_str(),defaults.c_str());
 		WriteLog("Defaults copied");
 	}
 
 	strcpy(lastFilenameSettings, "settings/default.fract");
 	strcpy(lastFilenameImage, "images/image.jpg");
-	strcpy(lastFilenamePalette, SHARED_DIR"textures/colour palette.jpg");
+	strcpy(lastFilenamePalette, (string(sharedDir)+"textures/colour palette.jpg").c_str());
 
 	bool noGUIsettingsLoaded = false;
 	if (noGUI)
@@ -1355,22 +1390,22 @@ int main(int argc, char *argv[])
 		//reading default configuration in GUI mode
 		if (!noGUI)
 		{
-			if (LoadSettings(SHARED_DIR"examples/default.fract", fractParamDefault))
+			if (LoadSettings((string(sharedDir)+"examples/default.fract").c_str(), fractParamDefault))
 			{
 				WriteLog("Default settings loaded");
-				printf("Default settings loaded successfully ("SHARED_DIR"examples/default.fract)\n");
+				printf("Default settings loaded successfully (%s)\n",(string(sharedDir)+"examples/default.fract").c_str());
 				//creating GTK+ GUI
 				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
 			}
 			else
 			{
-				printf("Can't open default settings file: "SHARED_DIR"/settings/default.fract\n");
+				printf("Can't open default settings file: %s\n",(string(sharedDir)+"examples/default.fract").c_str());
 				WriteLog("Can't open default settings file");
 				WriteLog(data_directory);
 
 				GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
-						"Error! Can't open default settings file\n"SHARED_DIR"/settings/default.fract");
+						"Error! Can't open default settings file\n%s",(string(sharedDir)+"examples/default.fract").c_str());
 				gtk_dialog_run(GTK_DIALOG(dialog));
 				gtk_widget_destroy(dialog);
 			}
