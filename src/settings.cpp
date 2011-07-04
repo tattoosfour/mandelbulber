@@ -403,7 +403,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	{
 		if(!compare)
 		{
-			fprintf(fileSettings, "file_destination %s;\n", "images/iamge");
+			fprintf(fileSettings, "file_destination %s;\n", "images/image");
 			fprintf(fileSettings, "file_background %s;\n", (string(sharedDir)+"textures/background.jpg").c_str());
 			fprintf(fileSettings, "file_envmap %s;\n", (string(sharedDir)+"textures/envmap.jpg").c_str());
 			fprintf(fileSettings, "file_lightmap %s;\n", (string(sharedDir)+"textures/lightmap.jpg").c_str());
