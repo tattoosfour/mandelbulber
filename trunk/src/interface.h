@@ -162,6 +162,7 @@ struct sInterface
 	GtkWidget *boxIFSMainEdit2;
 	GtkWidget *boxIFSParams;
 	GtkWidget *boxIFSButtons;
+	GtkWidget *boxIFSEdge;
 	GtkWidget *boxKeyframeAnimation;
 	GtkWidget *boxKeyframeAnimationButtons;
 	GtkWidget *boxKeyframeAnimationButtons2;
@@ -303,6 +304,7 @@ struct sInterface
 	GtkWidget *buIFSDefaultDodeca;
 	GtkWidget *buIFSDefaultIcosa;
 	GtkWidget *buIFSDefaultOcta;
+	GtkWidget *buIFSDefaultMengerSponge;
 	GtkWidget *buAutoDEStep;
 	GtkWidget *buAutoDEStepHQ;
 	GtkWidget *buCopyToClipboard;
@@ -395,6 +397,9 @@ struct sInterface
 	GtkWidget *edit_IFSOffsetX;
 	GtkWidget *edit_IFSOffsetY;
 	GtkWidget *edit_IFSOffsetZ;
+	GtkWidget *edit_IFSEdgeX;
+	GtkWidget *edit_IFSEdgeY;
+	GtkWidget *edit_IFSEdgeZ;
 	GtkWidget *edit_animationFramesPerKey;
 	GtkWidget *edit_animationStartFrame;
 	GtkWidget *edit_animationEndFrame;
@@ -511,6 +516,7 @@ struct sInterface
 	GtkWidget *checkIFSAbsX;
 	GtkWidget *checkIFSAbsY;
 	GtkWidget *checkIFSAbsZ;
+	GtkWidget *checkIFSMengerSponge;
 	GtkWidget *checkAutoSaveImage;
 	GtkWidget *checkSoundEnabled;
 	GtkWidget *checkHybridCyclic;
