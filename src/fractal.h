@@ -60,6 +60,7 @@ struct sFractalIFSD
 	double intensity[IFS_VECTOR_COUNT];
 	CVector3 offset;
 	CVector3 direction[IFS_VECTOR_COUNT];
+	CVector3 edge;
 };
 
 struct sFractalIFS
@@ -68,6 +69,7 @@ struct sFractalIFS
 	bool absX, absY, absZ;
 	bool foldingMode; // Kaleidoscopic IFS folding mode
 	bool enabled[IFS_VECTOR_COUNT];
+	bool mengerSpongeMode;
 	int foldingCount;
 	CRotationMatrix mainRot;
 	CRotationMatrix rot[IFS_VECTOR_COUNT];

@@ -92,6 +92,7 @@ void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data);
 void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer);
 void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer);
+void PressedIFSDefaultMengerSponge(GtkWidget *widget, gpointer widget_pointer);
 void PressedAutoDEStep(GtkWidget *widget, gpointer widget_pointer);
 void PressedAutoDEStepHQ(GtkWidget *widget, gpointer widget_pointer);
 void ChangedConstantDEThreshold(GtkWidget *widget, gpointer data);

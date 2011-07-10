@@ -346,9 +346,14 @@ void ReadInterface(sParamRender *params)
 		params->fractal.IFS.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetX)));
 		params->fractal.IFS.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetY)));
 		params->fractal.IFS.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSOffsetZ)));
+		params->fractal.IFS.doubles.edge.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSEdgeX)));
+		params->fractal.IFS.doubles.edge.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSEdgeY)));
+		params->fractal.IFS.doubles.edge.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_IFSEdgeZ)));
 		params->fractal.IFS.absX = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsX));
 		params->fractal.IFS.absY = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsY));
 		params->fractal.IFS.absZ = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ));
+		params->fractal.IFS.mengerSpongeMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSMengerSponge));
+
 		params->startFrame = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationStartFrame)));
 		params->endFrame = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationEndFrame)));
 		params->framesPerKeyframe = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationFramesPerKey)));
@@ -689,6 +694,9 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetX), DoubleToString(params->fractal.IFS.doubles.offset.x));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetY), DoubleToString(params->fractal.IFS.doubles.offset.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSOffsetZ), DoubleToString(params->fractal.IFS.doubles.offset.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSEdgeX), DoubleToString(params->fractal.IFS.doubles.edge.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSEdgeY), DoubleToString(params->fractal.IFS.doubles.edge.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_IFSEdgeZ), DoubleToString(params->fractal.IFS.doubles.edge.z));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationStartFrame), IntToString(params->startFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationEndFrame), IntToString(params->endFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationFramesPerKey), IntToString(params->framesPerKeyframe));
@@ -778,6 +786,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsX), params->fractal.IFS.absX);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsY), params->fractal.IFS.absY);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ), params->fractal.IFS.absZ);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSMengerSponge), params->fractal.IFS.mengerSpongeMode);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSoundEnabled), params->soundEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic), params->fractal.hybridCyclic);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
@@ -1149,6 +1158,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxIFSParams = gtk_vbox_new(FALSE, 1);
 	Interface.boxIFSButtons = gtk_hbox_new(FALSE, 1);
 	Interface.boxIFSDefaults = gtk_hbox_new(FALSE, 1);
+	Interface.boxIFSEdge = gtk_hbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimation = gtk_vbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimationButtons = gtk_hbox_new(FALSE, 1);
 	Interface.boxKeyframeAnimationButtons2 = gtk_hbox_new(FALSE, 1);
@@ -1302,6 +1312,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buIFSDefaultDodeca = gtk_button_new_with_label("Dodecahedron");
 	Interface.buIFSDefaultIcosa = gtk_button_new_with_label("Icosahedron");
 	Interface.buIFSDefaultOcta = gtk_button_new_with_label("Octahedron");
+	Interface.buIFSDefaultMengerSponge = gtk_button_new_with_label("Menger sponge");
 	Interface.buAutoDEStep = gtk_button_new_with_label("LQ");
 	Interface.buAutoDEStepHQ = gtk_button_new_with_label("HQ");
 	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
@@ -1392,6 +1403,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_IFSOffsetX = gtk_entry_new();
 	Interface.edit_IFSOffsetY = gtk_entry_new();
 	Interface.edit_IFSOffsetZ = gtk_entry_new();
+	Interface.edit_IFSEdgeX = gtk_entry_new();
+	Interface.edit_IFSEdgeY = gtk_entry_new();
+	Interface.edit_IFSEdgeZ = gtk_entry_new();
 	Interface.edit_animationFramesPerKey = gtk_entry_new();
 	Interface.edit_animationStartFrame = gtk_entry_new();
 	Interface.edit_animationEndFrame = gtk_entry_new();
@@ -1541,6 +1555,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkIFSAbsX = gtk_check_button_new_with_label("abs(x)");
 	Interface.checkIFSAbsY = gtk_check_button_new_with_label("abs(y)");
 	Interface.checkIFSAbsZ = gtk_check_button_new_with_label("abs(z)");
+	Interface.checkIFSMengerSponge = gtk_check_button_new_with_label("Menger Sponge");
 	Interface.checkAutoSaveImage = gtk_check_button_new_with_label("Auto-save");
 	Interface.checkSoundEnabled = gtk_check_button_new_with_label("Enable animation by sound");
 	Interface.checkHybridCyclic = gtk_check_button_new_with_label("Cyclic loop");
@@ -1689,6 +1704,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultDodeca, PressedIFSDefaultDodeca);
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultIcosa, PressedIFSDefaultIcosa);
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultOcta, PressedIFSDefaultOcta);
+	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultMengerSponge, PressedIFSDefaultMengerSponge);
 
 	CONNECT_SIGNAL(renderWindow.comboImageScale, ChangedComboScale, "changed");
 	CONNECT_SIGNAL(Interface.comboFractType, ChangedComboFormula, "changed");
@@ -2147,6 +2163,12 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsX, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsY, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsZ, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSMengerSponge, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSEdge, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge x:", 6, Interface.edit_IFSEdgeX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge y:", 6, Interface.edit_IFSEdgeY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge z:", 6, Interface.edit_IFSEdgeZ), false, false, 1);
 
 	//frame: IFS params
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSParams, false, false, 1);
@@ -2202,6 +2224,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultDodeca, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultIcosa, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultOcta, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultMengerSponge, false, false, 1);
 
 	//tab hybrid formula
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_hybrid), Interface.frHybrid, false, false, 1);

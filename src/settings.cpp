@@ -276,9 +276,13 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "IFS_offsetX", params.fractal.IFS.doubles.offset.x, 1, compare);
 		fprintfDot(fileSettings, "IFS_offsetY", params.fractal.IFS.doubles.offset.y, 0, compare);
 		fprintfDot(fileSettings, "IFS_offsetZ", params.fractal.IFS.doubles.offset.z, 0, compare);
+		fprintfDot(fileSettings, "IFS_edgeX", params.fractal.IFS.doubles.edge.x, 0, compare);
+		fprintfDot(fileSettings, "IFS_edgeY", params.fractal.IFS.doubles.edge.y, 0, compare);
+		fprintfDot(fileSettings, "IFS_edgeZ", params.fractal.IFS.doubles.edge.z, 0, compare);
 		fprintfInt(fileSettings, "IFS_absX", params.fractal.IFS.absX, false, compare);
 		fprintfInt(fileSettings, "IFS_absY", params.fractal.IFS.absY, false, compare);
 		fprintfInt(fileSettings, "IFS_absZ", params.fractal.IFS.absZ, false, compare);
+		fprintfInt(fileSettings, "IFS_menger_sponge_mode", params.fractal.IFS.mengerSpongeMode, false, compare);
 
 		for (int i = 0; i < IFS_VECTOR_COUNT; i++)
 		{
@@ -728,9 +732,13 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "IFS_offsetX")) params.fractal.IFS.doubles.offset.x = atof2(str2);
 	else if (!strcmp(str1, "IFS_offsetY")) params.fractal.IFS.doubles.offset.y = atof2(str2);
 	else if (!strcmp(str1, "IFS_offsetZ")) params.fractal.IFS.doubles.offset.z = atof2(str2);
+	else if (!strcmp(str1, "IFS_edgeX")) params.fractal.IFS.doubles.edge.x = atof2(str2);
+	else if (!strcmp(str1, "IFS_edgeY")) params.fractal.IFS.doubles.edge.y = atof2(str2);
+	else if (!strcmp(str1, "IFS_edgeZ")) params.fractal.IFS.doubles.edge.z = atof2(str2);
 	else if (!strcmp(str1, "IFS_absX")) params.fractal.IFS.absX = atof(str2);
 	else if (!strcmp(str1, "IFS_absY")) params.fractal.IFS.absY = atof(str2);
 	else if (!strcmp(str1, "IFS_absZ")) params.fractal.IFS.absZ = atof(str2);
+	else if (!strcmp(str1, "IFS_menger_sponge_mode")) params.fractal.IFS.mengerSpongeMode = atof(str2);
 
 	else if (!strcmp(str1, "start_frame")) params.startFrame = atoi(str2);
 	else if (!strcmp(str1, "end_frame")) params.endFrame = atoi(str2);

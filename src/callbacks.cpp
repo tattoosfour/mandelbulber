@@ -1767,6 +1767,8 @@ void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer)
 
 	params.fractal.IFS.doubles.scale = phi*phi;
 
+	params.fractal.IFS.mengerSpongeMode = false;
+
 	WriteInterface(&params);
 }
 
@@ -1797,6 +1799,8 @@ void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer)
 	params.fractal.IFS.absZ = true;
 
 	params.fractal.IFS.doubles.scale = 2.0;
+
+	params.fractal.IFS.mengerSpongeMode = false;
 
 	WriteInterface(&params);
 }
@@ -1832,6 +1836,45 @@ void PressedIFSDefaultOcta(GtkWidget *widget, gpointer widget_pointer)
 	params.fractal.IFS.absZ = true;
 
 	params.fractal.IFS.doubles.scale = 2.0;
+
+	params.fractal.IFS.mengerSpongeMode = false;
+
+	WriteInterface(&params);
+}
+
+void PressedIFSDefaultMengerSponge(GtkWidget *widget, gpointer widget_pointer)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	params.fractal.IFS.doubles.direction[5].x = 1.0;
+	params.fractal.IFS.doubles.direction[5].y = -1.0;
+	params.fractal.IFS.doubles.direction[5].z = 0;
+
+	params.fractal.IFS.doubles.direction[6].x = 1.0;
+	params.fractal.IFS.doubles.direction[6].y = 0;
+	params.fractal.IFS.doubles.direction[6].z = -1.0;
+
+	params.fractal.IFS.doubles.direction[7].x = 0;
+	params.fractal.IFS.doubles.direction[7].y = 1.0;
+	params.fractal.IFS.doubles.direction[7].z = -1.0;
+
+	params.fractal.IFS.enabled[5] = true;
+	params.fractal.IFS.enabled[6] = true;
+	params.fractal.IFS.enabled[7] = true;
+
+	params.fractal.IFS.doubles.offset.x = 1.0;
+	params.fractal.IFS.doubles.offset.y = 1.0;
+	params.fractal.IFS.doubles.offset.z = 1.0;
+
+	params.fractal.IFS.absX = true;
+	params.fractal.IFS.absY = true;
+	params.fractal.IFS.absZ = true;
+
+	params.fractal.IFS.doubles.scale = 3.0;
+
+	params.fractal.IFS.mengerSpongeMode = true;
 
 	WriteInterface(&params);
 }

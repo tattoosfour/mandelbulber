@@ -604,6 +604,34 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			case kaleidoscopic:
 			{
 
+				/*
+				 Menger3(x,y,z){
+   r=x*x+y*y+z*z;
+   for(i=0;i<MI && r<bailout;i++){
+      rotate1(x,y,z);
+
+      x=abs(x);y=abs(y);z=abs(z);
+      if(x-y<0){x1=y;y=x;x=x1;}
+      if(x-z<0){x1=z;z=x;x=x1;}
+      if(y-z<0){y1=z;z=y;y=y1;}
+
+      rotate2(x,y,z);
+      if(edgex>0) x=edgex-abs(edgex-x) // Thanks Syntopia for the exact formula!
+       // By default use edgex=1 and all other = 0
+       if(edgey>0) y=edgey-abs(edgey-y)
+       if(edgez>0) z=edgez-abs(edgez-z) // edgez is not implemented in MB3D jet!
+      // By default use scalex=1 - scaley=0 - scalez=1/3
+      x=scale*x-CX*(scale-1);
+      y=scale*y-CY*(scale-1);
+      z=scale*z;
+      if(z>0.5*CZ*(scale-1)) z-=CZ*(scale-1);
+
+      r=x*x+y*y+z*z;
+   }
+   return (sqrt(x*x+y*y+z*z)-2)*scale^(-i);
+}
+				 */
+
 				if (par.IFS.absX) z.x = fabs(z.x);
 				if (par.IFS.absY) z.y = fabs(z.y);
 				if (par.IFS.absZ) z.z = fabs(z.z);
@@ -624,6 +652,10 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				}
 				z = par.IFS.mainRot.RotateVector(z - par.IFS.doubles.offset) + par.IFS.doubles.offset;
 
+				if(par.IFS.doubles.edge.x > 0) z.x = par.IFS.doubles.edge.x - fabs(par.IFS.doubles.edge.x - z.x);
+				if(par.IFS.doubles.edge.y > 0) z.y = par.IFS.doubles.edge.y - fabs(par.IFS.doubles.edge.y - z.y);
+				if(par.IFS.doubles.edge.z > 0) z.z = par.IFS.doubles.edge.z - fabs(par.IFS.doubles.edge.z - z.z);
+
 				if (Mode == colouring)
 				{
 					double length2 = z.Length();
@@ -631,7 +663,16 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				}
 
 				z *= par.IFS.doubles.scale;
-				z -= par.IFS.doubles.offset * (par.IFS.doubles.scale - 1.0);
+				if(par.IFS.mengerSpongeMode)
+				{
+					z.x -= par.IFS.doubles.offset.x * (par.IFS.doubles.scale - 1.0);
+					z.y -= par.IFS.doubles.offset.y * (par.IFS.doubles.scale - 1.0);
+					if (z.z > 0.5 * par.IFS.doubles.offset.z * (par.IFS.doubles.scale - 1.0)) z.z -= par.IFS.doubles.offset.z * (par.IFS.doubles.scale - 1.0);
+				}
+				else
+				{
+					z -= par.IFS.doubles.offset * (par.IFS.doubles.scale - 1.0);
+				}
 
 				tgladDE *= par.IFS.doubles.scale;
 				r = z.Length();
