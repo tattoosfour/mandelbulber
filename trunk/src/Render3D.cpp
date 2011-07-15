@@ -606,6 +606,7 @@ void *MainThread(void *ptr)
 							double glowBuff1 = 0.0;
 							int numberOfReflections = -1;
 							int maxReflections = param.reflectionsMax;
+							double totalFog = 0;
 							for(int i=0; i<maxReflections; i++)
 							{
 								viewTemp = viewTemp - vnTemp * viewTemp.Dot(vnTemp)*2.0;
@@ -646,7 +647,8 @@ void *MainThread(void *ptr)
 										}
 										colorBuff[i] = (sShaderOutput){color.R/256.0,color.G/256.0,color.B/256.0};
 
-										fogBuff[i] = scan;
+										totalFog += scan;
+										fogBuff[i] = totalFog;;
 
 										numberOfReflections = i;
 										break;
@@ -660,8 +662,11 @@ void *MainThread(void *ptr)
 								}
 							}
 							double reflect = param.doubles.imageAdjustments.reflect;
+
+							bool wasMaxReflections = true;
 							if(numberOfReflections<maxReflections-1)
 							{
+								wasMaxReflections = false;
 								if(param.imageSwitches.fogEnabled)
 								{
 									envMapping.R = param.effectColours.fogColor.R / 65536.0 * reflect;
@@ -675,6 +680,7 @@ void *MainThread(void *ptr)
 									envMapping.B = finishBackgroud.B * reflect;
 								}
 							}
+
 							for(int i=numberOfReflections; i>=0; i--)
 							{
 								sShaderOutput reflectTemp;
@@ -689,6 +695,7 @@ void *MainThread(void *ptr)
 										+ ambientBuff[i].R
 										+ auxLightsBuff[i].B * colorBuff[i].B;
 
+								double fogTransparency = 1.0;
 								if(param.imageSwitches.fogEnabled)
 								{
 									double fog = fogBuff[i] / fog_visibility;
@@ -699,16 +706,21 @@ void *MainThread(void *ptr)
 									reflectTemp.R = (reflectTemp.R * aN + param.effectColours.fogColor.R / 65536.0 * a);
 									reflectTemp.G = (reflectTemp.G * aN + param.effectColours.fogColor.G / 65536.0 * a);
 									reflectTemp.B = (reflectTemp.B * aN + param.effectColours.fogColor.B / 65536.0 * a);
+									fogTransparency = aN;
+								}
+
+								if(wasMaxReflections && i == numberOfReflections)
+								{
+									envMapping = reflectTemp;
 								}
 
 								envMapping.R = (1.0-reflect)*reflectTemp.R + (reflect)*envMapping.R
-										+ (specularBuff[i].R * shadowBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity + auxSpecBuff[i].R)*reflect;
+										+ (specularBuff[i].R * shadowBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity + auxSpecBuff[i].R)*reflect*fogTransparency;
 								envMapping.G = (1.0-reflect)*reflectTemp.G + (reflect)*envMapping.G
-										+ (specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity + auxSpecBuff[i].G)*reflect;
+										+ (specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity + auxSpecBuff[i].G)*reflect*fogTransparency;
 								envMapping.B = (1.0-reflect)*reflectTemp.B + (reflect)*envMapping.B
-										+ (specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity + auxSpecBuff[i].B)*reflect;
+										+ (specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity + auxSpecBuff[i].B)*reflect*fogTransparency;
 							}
-
 							double glow = glowBuff1 * param.doubles.imageAdjustments.glow_intensity / 512.0;
 							double glowN = 1.0 - glow;
 							if (glowN < 0.0) glowN = 0.0;
