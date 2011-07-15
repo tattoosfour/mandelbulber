@@ -194,7 +194,15 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 			}
 		}
 	}
-	normal.Normalize();
+
+	if(normal.x == 0 && normal.y == 0 && normal.z == 0)
+	{
+		normal.x = 1;
+	}
+	else
+	{
+		normal.Normalize();
+	}
 
 	return normal;
 }
@@ -328,7 +336,7 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	double shade2 = normal.Dot(half);
 	if (shade2 < 0.0) shade2 = 0.0;
 	shade2 = pow(shade2, 30.0) * 1.0;
-	shade2 *= intensity;
+	shade2 *= intensity * fractParams->doubles.imageAdjustments.specular;
 	if (shade2 > 15.0) shade2 = 15.0;
 
 	//calculate shadow
