@@ -39,7 +39,22 @@ enum enumFractalFormula
 	mandelboxVaryScale4D = 18,
 	aexion = 19,
 	benesi = 20,
-	bristorbrot = 21
+	bristorbrot = 21,
+	invertX = 22,
+	invertY = 23,
+	invertZ = 24,
+	invertR = 25,
+	sphericalFold = 26,
+	powXYZ = 27,
+	scaleX = 28,
+	scaleY = 29,
+	scaleZ = 30,
+	offsetX = 31,
+	offsetY = 32,
+	offsetZ = 33,
+	angleMultiplyX = 34,
+	angleMultiplyY = 35,
+	angleMultiplyZ = 36
 };
 
 enum enumCalculationMode
