@@ -198,6 +198,21 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 16) formula2 = aexion;
 	if (formula == 17) formula2 = benesi;
 	if (formula == 18) formula2 = bristorbrot;
+	if (formula == 19) formula2 = invertX;
+	if (formula == 20) formula2 = invertY;
+	if (formula == 21) formula2 = invertZ;
+	if (formula == 22) formula2 = invertR;
+	if (formula == 23) formula2 = sphericalFold;
+	if (formula == 24) formula2 = powXYZ;
+	if (formula == 25) formula2 = scaleX;
+	if (formula == 26) formula2 = scaleY;
+	if (formula == 27) formula2 = scaleZ;
+	if (formula == 28) formula2 = offsetX;
+	if (formula == 29) formula2 = offsetY;
+	if (formula == 30) formula2 = offsetZ;
+	if (formula == 31) formula2 = angleMultiplyX;
+	if (formula == 32) formula2 = angleMultiplyY;
+	if (formula == 33) formula2 = angleMultiplyZ;
 	return formula2;
 }
 
@@ -223,7 +238,21 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == aexion) formula2 = 16;
 	if (formula == benesi) formula2 = 17;
 	if (formula == bristorbrot) formula2 = 18;
-
+	if (formula == invertX) formula2 = 19;
+	if (formula == invertY) formula2 = 20;
+	if (formula == invertZ) formula2 = 21;
+	if (formula == invertR) formula2 = 22;
+	if (formula == sphericalFold) formula2 = 23;
+	if (formula == powXYZ) formula2 = 24;
+	if (formula == scaleX) formula2 = 25;
+	if (formula == scaleY) formula2 = 26;
+	if (formula == scaleZ) formula2 = 27;
+	if (formula == offsetX) formula2 = 28;
+	if (formula == offsetY) formula2 = 29;
+	if (formula == offsetZ) formula2 = 30;
+	if (formula == angleMultiplyX) formula2 = 31;
+	if (formula == angleMultiplyY) formula2 = 32;
+	if (formula == angleMultiplyZ) formula2 = 33;
 	return formula2;
 }
 
@@ -932,6 +961,21 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Aexion");
 	gtk_combo_box_append_text(combo, "Benesi");
 	gtk_combo_box_append_text(combo, "Bristorbrot");
+	gtk_combo_box_append_text(combo, "x^2/(x + p)");
+	gtk_combo_box_append_text(combo, "y^2/(y + p)");
+	gtk_combo_box_append_text(combo, "z^2/(z + p)");
+	gtk_combo_box_append_text(combo, "r^2/(r + p)");
+	gtk_combo_box_append_text(combo, "spherical fold (radius = p)");
+	gtk_combo_box_append_text(combo, "x^p, y^p, z^p");
+	gtk_combo_box_append_text(combo, "x * p");
+	gtk_combo_box_append_text(combo, "y * p");
+	gtk_combo_box_append_text(combo, "z * p");
+	gtk_combo_box_append_text(combo, "x + p");
+	gtk_combo_box_append_text(combo, "y + p");
+	gtk_combo_box_append_text(combo, "z + p");
+	gtk_combo_box_append_text(combo, "axis X angle multiply by p");
+	gtk_combo_box_append_text(combo, "axis Y angle multiply by p");
+	gtk_combo_box_append_text(combo, "axis Z angle multiply by p");
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -2240,7 +2284,7 @@ void CreateInterface(sParamRender *default_settings)
 	for (int i = 0; i < HYBRID_COUNT; ++i)
 		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("3", "  iterations:", 6, Interface.edit_hybridIter[i]), 2, 3, i, i + 1);
 	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("2", "power/scale:", 6, Interface.edit_hybridPower[i]), 3, 4, i, i + 1);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("2", "power / scale / p:", 6, Interface.edit_hybridPower[i]), 3, 4, i, i + 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.checkHybridCyclic, false, false, 1);
 

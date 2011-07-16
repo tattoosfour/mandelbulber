@@ -75,8 +75,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double min = 1e200;
 	for (L = 0; L < par.N; L++)
 	{
-		//buddhabrot[L].point = z;
-
 		if (hybridEnabled)
 		{
 			int tempL = L;
@@ -603,35 +601,6 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case kaleidoscopic:
 			{
-
-				/*
-				 Menger3(x,y,z){
-   r=x*x+y*y+z*z;
-   for(i=0;i<MI && r<bailout;i++){
-      rotate1(x,y,z);
-
-      x=abs(x);y=abs(y);z=abs(z);
-      if(x-y<0){x1=y;y=x;x=x1;}
-      if(x-z<0){x1=z;z=x;x=x1;}
-      if(y-z<0){y1=z;z=y;y=y1;}
-
-      rotate2(x,y,z);
-      if(edgex>0) x=edgex-abs(edgex-x) // Thanks Syntopia for the exact formula!
-       // By default use edgex=1 and all other = 0
-       if(edgey>0) y=edgey-abs(edgey-y)
-       if(edgez>0) z=edgez-abs(edgez-z) // edgez is not implemented in MB3D jet!
-      // By default use scalex=1 - scaley=0 - scalez=1/3
-      x=scale*x-CX*(scale-1);
-      y=scale*y-CY*(scale-1);
-      z=scale*z;
-      if(z>0.5*CZ*(scale-1)) z-=CZ*(scale-1);
-
-      r=x*x+y*y+z*z;
-   }
-   return (sqrt(x*x+y*y+z*z)-2)*scale^(-i);
-}
-				 */
-
 				if (par.IFS.absX) z.x = fabs(z.x);
 				if (par.IFS.absY) z.y = fabs(z.y);
 				if (par.IFS.absZ) z.z = fabs(z.z);
@@ -773,6 +742,123 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				z.y = newy + constant.y;
 				z.z = newz + constant.z;
 
+				r = z.Length();
+				break;
+			}
+			case invertX:
+			{
+				z.x = z.x >= 0.0 ? z.x*z.x/(fabs(z.x) + p) : -z.x*z.x/(fabs(z.x) + p);
+				r = z.Length();
+				break;
+			}
+			case invertY:
+			{
+				z.y = z.y >= 0.0 ? z.y*z.y/(fabs(z.y) + p) : -z.y*z.y/(fabs(z.y) + p);
+				r = z.Length();
+				break;
+			}
+			case invertZ:
+			{
+				z.z = z.z >= 0.0 ? z.z*z.z/(fabs(z.z) + p) : -z.z*z.z/(fabs(z.z) + p);
+				r = z.Length();
+				break;
+			}
+			case invertR:
+			{
+				double rInv = r*r/(r + p);
+				z.x = z.x / r * rInv;
+				z.y = z.y / r * rInv;
+				z.z = z.z / r * rInv;
+				r = z.Length();
+				break;
+			}
+			case sphericalFold:
+			{
+				double rr = r*r;
+				double pp = p*p;
+				if (rr < pp)
+				{
+					z.x = 1.0 / pp;
+					z.y = 1.0 / pp;
+					z.z = 1.0 / pp;
+				}
+				else if (rr < pp*4.0)
+				{
+					z.x = 1.0 / rr;
+					z.y = 1.0 / rr;
+					z.z = 1.0 / rr;
+				}
+				r = z.Length();
+				break;
+			}
+			case powXYZ:
+			{
+				z.x = z.x >= 0 ? pow(z.x,p) : -pow(-z.x,p);
+				z.y = z.y >= 0 ? pow(z.y,p) : -pow(-z.y,p);
+				z.z = z.z >= 0 ? pow(z.z,p) : -pow(-z.z,p);
+				r = z.Length();
+				break;
+			}
+			case scaleX:
+			{
+				z.x = z.x * p;
+				r = z.Length();
+				break;
+			}
+			case scaleY:
+			{
+				z.y = z.y * p;
+				r = z.Length();
+				break;
+			}
+			case scaleZ:
+			{
+				z.z = z.z * p;
+				r = z.Length();
+				break;
+			}
+			case offsetX:
+			{
+				z.x = z.x + p;
+				r = z.Length();
+				break;
+			}
+			case offsetY:
+			{
+				z.y = z.y + p;
+				r = z.Length();
+				break;
+			}
+			case offsetZ:
+			{
+				z.z = z.z + p;
+				r = z.Length();
+				break;
+			}
+			case angleMultiplyX:
+			{
+				double angle = atan2(z.z,z.y)*p;
+				double tempR = sqrt(z.z*z.z + z.y*z.y);
+				z.y = tempR * cos(angle);
+				z.z = tempR * sin(angle);
+				r = z.Length();
+				break;
+			}
+			case angleMultiplyY:
+			{
+				double angle = atan2(z.z,z.x)*p;
+				double tempR = sqrt(z.z*z.z + z.x*z.x);
+				z.x = tempR * cos(angle);
+				z.z = tempR * sin(angle);
+				r = z.Length();
+				break;
+			}
+			case angleMultiplyZ:
+			{
+				double angle = atan2(z.y,z.x)*p;
+				double tempR = sqrt(z.x*z.x + z.y*z.y);
+				z.x = tempR * cos(angle);
+				z.y = tempR * sin(angle);
 				r = z.Length();
 				break;
 			}
