@@ -1663,7 +1663,7 @@ void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)
 	{
 		const char *filename = gtk_file_chooser_get_preview_filename(file_chooser);
 
-		char string[12];
+		char string[13];
 
 		FILE *fileSettings = fopen(filename, "r");
 		if (fileSettings)
