@@ -44,7 +44,7 @@ aux_light_predefined_1_colour_R 65535;
 aux_light_predefined_1_colour_G 58498;
 aux_light_predefined_1_colour_B 17367;
 aux_light_visibility 0.29999999999999999;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/envmap.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

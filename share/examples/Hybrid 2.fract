@@ -34,7 +34,7 @@ hybrid_formula_1 3;
 hybrid_formula_5 10;
 hybrid_iterations_1 3;
 linear_DE_mode 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

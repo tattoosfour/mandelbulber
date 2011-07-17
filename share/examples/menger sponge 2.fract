@@ -44,7 +44,7 @@ post_DOF_focus 19.199999999999999;
 main_light_colour_R 58718;
 main_light_colour_G 51414;
 main_light_colour_B 21994;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

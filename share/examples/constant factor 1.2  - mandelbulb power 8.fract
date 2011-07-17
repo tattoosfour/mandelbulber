@@ -26,7 +26,7 @@ background_color_2_B 12800;
 coloring_random_seed 23423;
 coloring_speed 0.5;
 coloring_palette_offset 75.799999999999997;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

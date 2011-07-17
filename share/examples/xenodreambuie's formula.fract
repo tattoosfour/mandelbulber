@@ -31,7 +31,7 @@ coloring_palette_offset 151.59999999999999;
 post_SSAO_quality 35;
 main_light_alfa 0.69813170079773179;
 main_light_beta 0.3490658503988659;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

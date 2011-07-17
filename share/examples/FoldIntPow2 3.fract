@@ -53,7 +53,7 @@ mandelbox_rotation_main_alfa 3.0000000000000004;
 mandelbox_rotation_main_beta -8;
 mandelbox_rotation_main_gamma 9;
 linear_DE_mode 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

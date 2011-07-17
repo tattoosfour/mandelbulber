@@ -46,7 +46,7 @@ aux_light_visibility 2000;
 aux_light_random_center_X -0.3358005606991285;
 aux_light_random_center_Y 0.3339731075076377;
 aux_light_random_center_Z 2.7518134000260522e-06;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

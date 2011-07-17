@@ -66,7 +66,7 @@ volumetric_light_enabled_2 1;
 volumetric_light_intensity_3 1;
 volumetric_light_enabled_3 1;
 volumetric_light_intensity_4 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

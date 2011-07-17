@@ -23,7 +23,7 @@ limits_enabled 1;
 mandelbox_color_Sp1 1;
 mandelbox_color_Sp2 1;
 interior_mode 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;
