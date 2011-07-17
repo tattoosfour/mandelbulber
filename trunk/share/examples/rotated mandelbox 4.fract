@@ -56,7 +56,7 @@ mandelbox_color_X 0.02;
 mandelbox_color_Y 0.02;
 mandelbox_color_Z 0.020000000000000011;
 mandelbox_rotation_enabled 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

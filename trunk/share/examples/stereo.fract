@@ -34,7 +34,7 @@ hybrid_power_5 8;
 hybrid_cyclic 1;
 stereo_eye_distance 0.01;
 stereo_enabled 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

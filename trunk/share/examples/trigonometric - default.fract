@@ -17,7 +17,7 @@ ambient_occlusion_enabled 1;
 fast_ambient_occlusion_mode 1;
 coloring_random_seed 3210;
 post_SSAO_enabled 0;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

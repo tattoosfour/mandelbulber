@@ -18,7 +18,7 @@ coloring_speed 0.20000000000000001;
 coloring_palette_offset 68.700000000000003;
 limits_enabled 1;
 interior_mode 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

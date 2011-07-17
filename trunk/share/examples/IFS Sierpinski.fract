@@ -37,7 +37,7 @@ IFS_4_z -0.70710678118654757;
 IFS_5_x 0;
 IFS_5_y 0.70710678118654757;
 IFS_5_z -0.70710678118654757;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

@@ -24,7 +24,7 @@ fractal_color 0;
 coloring_random_seed 453;
 coloring_speed 0.20000000000000001;
 mandelbox_scale -2;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

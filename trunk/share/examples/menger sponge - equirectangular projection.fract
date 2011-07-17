@@ -23,7 +23,7 @@ post_SSAO_enabled 0;
 main_light_alfa -0.52359877559829882;
 main_light_beta 0.6108652381980153;
 fish_eye 2;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

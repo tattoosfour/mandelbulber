@@ -9,7 +9,7 @@ background_color_2_G 57812;
 background_color_2_B 59901;
 coloring_speed 30;
 coloring_palette_offset 88.299999999999997;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

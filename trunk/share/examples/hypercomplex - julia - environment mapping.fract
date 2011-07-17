@@ -23,7 +23,7 @@ glow_intensity 0;
 textured_background 1;
 fractal_color 0;
 slow_shading 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/envmap.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

@@ -29,7 +29,7 @@ background_color_3_B 229;
 coloring_speed 0.02;
 post_DOF_enabled 1;
 post_DOF_focus 22.199999999999999;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;

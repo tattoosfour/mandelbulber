@@ -33,7 +33,7 @@ mandelbox_scale -1.3;
 mandelbox_folding_min_radius 0.10000000000000001;
 mandelbox_color_Sp1 3;
 mandelbox_color_Sp2 1;
-file_destination images/iamge;
+file_destination images/image;
 file_background /usr/share/mandelbulber/textures/background.jpg;
 file_envmap /usr/share/mandelbulber/textures/envmap.jpg;
 file_lightmap /usr/share/mandelbulber/textures/lightmap.jpg;
