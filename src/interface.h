@@ -10,8 +10,8 @@
 
 #include "fractparams.h"
 
-#define MANDELBULBER_VERSION 1.05
-#define MANDELBULBER_VERSION_STR "1.05"
+#define MANDELBULBER_VERSION 1.06
+#define MANDELBULBER_VERSION_STR "1.06"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
