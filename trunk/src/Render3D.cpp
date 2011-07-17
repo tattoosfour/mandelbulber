@@ -613,12 +613,15 @@ void *MainThread(void *ptr)
 								double distTemp = dist_thresh;
 								bool surfaceFound = false;
 								double glowBuff2 = 0.0;
-								for(double scan = dist_thresh*2.0; scan<100.0; scan+=(distTemp-0.5*dist_thresh)*DE_factor)
+								bool binary = false;
+								double step = dist_thresh;
+								int binarySearchCount = 0;
+								for(double scan = dist_thresh*2.0; scan<100.0; scan += step)
 								{
 									glowBuff2++;
 									CVector3 pointScan = pointTemp + viewTemp * scan;
 									distTemp = CalculateDistance(pointScan, calcParam, &maxIterTemp);
-									if(distTemp < dist_thresh)
+									if((distTemp < dist_thresh && distTemp > dist_thresh * search_limit) || binarySearchCount > 20)
 									{
 										surfaceFound = true;
 										pointTemp = pointScan;
@@ -652,6 +655,19 @@ void *MainThread(void *ptr)
 
 										numberOfReflections = i;
 										break;
+									}
+
+									if(distTemp < dist_thresh * search_limit)
+									{
+										binary = true;
+										scan-=step;
+									}
+									if(!binary)
+										step = (distTemp-0.5*dist_thresh)*DE_factor;
+									else
+									{
+										step = step * 0.5;
+										binarySearchCount++;
 									}
 								}
 								glowBuff1 += glowBuff2 * pow(param.doubles.imageAdjustments.reflect, i + 1.0);
