@@ -1,5 +1,14 @@
 Version history
 
+v1.06
+- Added possibility to render MengerKoch formula. It is added as an option for IFS formula (Menger Sponge mode; edge x,y,z)
+- Corrected ray-tracing algorithm. Fog and specular highlights weren't calculated properly in reflections.
+- Fixed problem in CalculateNormals() function. Sometimes when all deltas were zero, it produced NaN value. It caused white dots in raytraced reflections.
+- Added many simple formulas for hybryd sequence: x^2/(x + p); y^2/(y + p); z^2/(z + p); r^2/(r + p); 
+	spherical fold; x^p, y^p, z^p; x * p; y * p; z * p; x + p; y + p; z + p; 
+	axis X angle multiply by p; axis Y angle multiply by p; axis Z angle multiply by p
+- Improved quality of raytraced reflections by adding binary searching in DE algorithm
+
 v1.05
 - Created Windows installer
 - Changed file structure. Now example and other files are located in (on Linux) /usr/share/mandelbulber directory or (on Windows) C:\Program files\mandelbulber. 
