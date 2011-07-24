@@ -537,7 +537,8 @@ void *MainThread(void *ptr)
 						//initial values
 						sShaderOutput shadowOutput = { 1.0, 1.0, 1.0 };
 						sShaderOutput AO;
-						sRGB16 oldAO = image->GetPixelAmbient(x, z);
+						sRGB16 oldAO;
+						if(!image->IsLowMemMode()) oldAO = image->GetPixelAmbient(x, z);
 						AO.R = oldAO.R / 4096.0;
 						AO.G = oldAO.G / 4096.0;
 						AO.B = oldAO.B / 4096.0;
@@ -795,6 +796,7 @@ void *MainThread(void *ptr)
 						background = TexturedBackground(&param, viewVector);
 
 						sRGB16 background16 = { background.R * 65536.0, background.G * 65536.0, background.B * 65536.0 };
+						pixelData.backgroundBuf16 = background16;
 
 						if (!image->IsLowMemMode())
 						{
@@ -870,8 +872,10 @@ void *MainThread(void *ptr)
 					pixelData.volumetricFog.R = volFog.R;
 					pixelData.volumetricFog.G = volFog.G;
 					pixelData.volumetricFog.B = volFog.B;
-					//printf("volfog = %g\n", volFog);
-					image->PutPixelVolumetricFog(x, z, pixelData.volumetricFog);
+					if(!image->IsLowMemMode())
+					{
+						image->PutPixelVolumetricFog(x, z, pixelData.volumetricFog);
+					}
 
 					if(image->IsLowMemMode())
 					{
