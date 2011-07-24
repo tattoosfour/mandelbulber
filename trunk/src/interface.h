@@ -74,7 +74,6 @@ struct sInterface
 	GtkWidget *tab_label_IFS;
 	GtkWidget *tab_label_about;
 	GtkWidget *tab_label_shaders;
-	GtkWidget *tab_label_sound;
 	GtkWidget *tab_label_hybrid;
 	GtkWidget *tab_label_mandelbox;
 
@@ -87,7 +86,6 @@ struct sInterface
 	GtkWidget *tab_box_IFS;
 	GtkWidget *tab_box_about;
 	GtkWidget *tab_box_shaders;
-	GtkWidget *tab_box_sound;
 	GtkWidget *tab_box_hybrid;
 	GtkWidget *tab_box_mandelbox;
 
@@ -172,12 +170,6 @@ struct sInterface
 	GtkWidget *boxPaletteOffset;
 	GtkWidget *boxImageSaving;
 	GtkWidget *boxImageAutoSave;
-	GtkWidget *boxSound;
-	GtkWidget *boxSoundMisc;
-	GtkWidget *boxSoundBand1;
-	GtkWidget *boxSoundBand2;
-	GtkWidget *boxSoundBand3;
-	GtkWidget *boxSoundBand4;
 	GtkWidget *boxHybrid;
 	GtkWidget *boxStereoscopic;
 	GtkWidget *boxStereoParams;
@@ -232,7 +224,6 @@ struct sInterface
 	GtkWidget *frKeyframeAnimation2;
 	GtkWidget *frPalette;
 	GtkWidget *frImageSaving;
-	GtkWidget *frSound;
 	GtkWidget *frHybrid;
 	GtkWidget *frStereo;
 	GtkWidget *frMandelboxMainParams;
@@ -298,7 +289,6 @@ struct sInterface
 	GtkWidget *buRedo;
 	GtkWidget *buBuddhabrot;
 	GtkWidget *buRandomPalette;
-	GtkWidget *buLoadSound;
 	GtkWidget *buGetPaletteFromImage;
 	GtkWidget *buTimeline;
 	GtkWidget *buIFSDefaultDodeca;
@@ -403,15 +393,6 @@ struct sInterface
 	GtkWidget *edit_animationFramesPerKey;
 	GtkWidget *edit_animationStartFrame;
 	GtkWidget *edit_animationEndFrame;
-	GtkWidget *edit_sound1FreqMin;
-	GtkWidget *edit_sound1FreqMax;
-	GtkWidget *edit_sound2FreqMin;
-	GtkWidget *edit_sound2FreqMax;
-	GtkWidget *edit_sound3FreqMin;
-	GtkWidget *edit_sound3FreqMax;
-	GtkWidget *edit_sound4FreqMin;
-	GtkWidget *edit_sound4FreqMax;
-	GtkWidget *edit_soundFPS;
 	GtkWidget *edit_hybridIter[HYBRID_COUNT];
 	GtkWidget *edit_hybridPower[HYBRID_COUNT];
 	GtkWidget *edit_NavigatorAbsoluteDistance;
@@ -478,7 +459,6 @@ struct sInterface
 	GtkWidget *label_IFSenabled;
 	GtkWidget *label_keyframeInfo;
 	GtkWidget *label_paletteOffset;
-	GtkWidget *label_soundEnvelope;
 	GtkWidget *label_HybridFormula[HYBRID_COUNT];
 	GtkWidget *label_NavigatorEstimatedDistance;
 	GtkWidget *label_DE_threshold;
@@ -518,7 +498,6 @@ struct sInterface
 	GtkWidget *checkIFSAbsZ;
 	GtkWidget *checkIFSMengerSponge;
 	GtkWidget *checkAutoSaveImage;
-	GtkWidget *checkSoundEnabled;
 	GtkWidget *checkHybridCyclic;
 	GtkWidget *checkNavigatorAbsoluteDistance;
 	GtkWidget *checkNavigatorGoToSurface;
@@ -563,12 +542,6 @@ struct sInterface
 	GtkObject *adjustmentDOFRadius;
 	GtkObject *adjustmentPaletteOffset;
 
-	GtkWidget *dareaSound0;
-	GtkWidget *dareaSoundA;
-	GtkWidget *dareaSoundB;
-	GtkWidget *dareaSoundC;
-	GtkWidget *dareaSoundD;
-
 	sInterfaceIFS IFSParams[IFS_VECTOR_COUNT];
 };
 
@@ -584,7 +557,6 @@ struct sDialogFiles
 	GtkWidget *boxFileEnvMap;
 	GtkWidget *boxFileAmbient;
 	GtkWidget *boxFileKeyframes;
-	//GtkWidget *boxFileSound;
 
 	GtkWidget *table_edits;
 	GtkWidget *label_destination;
@@ -593,7 +565,6 @@ struct sDialogFiles
 	GtkWidget *label_background;
 	GtkWidget *label_path;
 	GtkWidget *label_keyframes;
-	//GtkWidget *label_fileSound;
 
 	GtkWidget *edit_destination;
 	GtkWidget *edit_envmap;
@@ -601,7 +572,6 @@ struct sDialogFiles
 	GtkWidget *edit_background;
 	GtkWidget *edit_path;
 	GtkWidget *edit_keyframes;
-	GtkWidget *edit_sound;
 	GtkWidget *bu_ok;
 	GtkWidget *bu_cancel;
 	GtkWidget *bu_select_destination;
@@ -610,7 +580,6 @@ struct sDialogFiles
 	GtkWidget *bu_select_background;
 	GtkWidget *bu_select_path;
 	GtkWidget *bu_select_keyframes;
-	//GtkWidget *bu_select_sound;
 };
 
 struct sTimelineInterface
@@ -656,7 +625,6 @@ struct sInterface_data
 	char file_lightmap[1000];
 	char file_path[1000];
 	char file_keyframes[1000];
-	char file_sound[1000];
 };
 
 struct sNoGUIdata

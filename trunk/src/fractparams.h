@@ -11,11 +11,6 @@
 #include "fractal.h"
 #include "texture.hpp"
 
-enum dataMode
-{
-	soundNone = 0, soundEnvelope = 1, soundA = 2, soundB = 3, soundC = 4, soundD = 5
-};
-
 struct sParamRenderD
 {
 	CVector3 vp; //view point
@@ -49,7 +44,6 @@ struct sParamRenderD
 	double auxLightPre2intensity;
 	double auxLightPre3intensity;
 	double auxLightPre4intensity;
-	double soundFPS;
 	double stereoEyeDistance;
 	double viewDistanceMin;
 	double viewDistanceMax;
@@ -76,14 +70,7 @@ struct sParamRender
 	int endFrame;
 	int framesPerKeyframe;
 	int imageFormat;
-	int soundBand1Min;
-	int soundBand1Max;
-	int soundBand2Min;
-	int soundBand2Max;
-	int soundBand3Min;
-	int soundBand3Max;
-	int soundBand4Min;
-	int soundBand4Max;
+
 	enumPerspectiveType perspectiveType;
 
 	bool shadow; //enable shadows
@@ -103,7 +90,6 @@ struct sParamRender
 	bool auxLightPre4Enabled;
 	bool volumetricLightEnabled[5];
 	bool penetratingLights;
-	bool soundEnabled;
 	bool stereoEnabled;
 	bool quiet;
 	sImageSwitches imageSwitches;
@@ -125,7 +111,6 @@ struct sParamRender
 	char file_lightmap[1000];
 	char file_path[1000];
 	char file_keyframes[1000];
-	char file_sound[1000];
 
 	cTexture *backgroundTexture;
 	cTexture *envmapTexture;

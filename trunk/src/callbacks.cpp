@@ -22,7 +22,6 @@
 #include "shaders.h"
 #include "files.h"
 #include "undo.hpp"
-#include "loadsound.hpp"
 #include "timeline.hpp"
 
 using namespace std;
@@ -325,50 +324,6 @@ gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpoint
 	return TRUE;
 }
 
-/*
-gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
-{
-	char *userdata = (char*) user_data;
-	double w = 640;
-	double h = 40;
-	if (sound.IsLoaded())
-	{
-		double colWidth = sound.animframes / w;
-		GdkGC *GC = gdk_gc_new(widget->window);
-		//GdkColor gdk_color_red = { 0, 65535, 0, 0 };
-		GdkColor gdk_color_white = { 0, 65535, 65535, 65535 };
-		GdkColor gdk_color_black = { 0, 0, 0, 0 };
-
-		gdk_gc_set_rgb_fg_color(GC, &gdk_color_black);
-		gdk_draw_line(widget->window, GC, 0, 0, w, 0);
-
-		double seconds = sound.GetLength();
-
-		for (int i = 0; i < seconds; i++)
-		{
-			double x = w / seconds * i;
-			gdk_gc_set_rgb_fg_color(GC, &gdk_color_white);
-			gdk_draw_line(widget->window, GC, x, 0, x, h);
-		}
-
-		for (int i = 0; i < w; i++)
-		{
-			double value = 0;
-			if (userdata[0] == '0') value = sound.GetEnvelope(i * colWidth);
-			else if (userdata[0] == 'A') value = sound.GetSpectrumA(i * colWidth);
-			else if (userdata[0] == 'B') value = sound.GetSpectrumB(i * colWidth);
-			else if (userdata[0] == 'C') value = sound.GetSpectrumC(i * colWidth);
-			else if (userdata[0] == 'D') value = sound.GetSpectrumD(i * colWidth);
-
-			GdkColor gdk_color = { 0, value * 0, value * 65535, value * 0 };
-			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
-			gdk_draw_line(widget->window, GC, i, h - value * h, i, h);
-		}
-	}
-	return true;
-}
-*/
-
 void StartRendering(GtkWidget *widget, gpointer data)
 {
 	sParamRender params;
@@ -399,7 +354,7 @@ void PressedAnimationRecord(GtkWidget *widget, gpointer data)
 		ReadInterface(&params);
 		undoBuffer.SaveUndo(&params);
 
-		Interface_data .animMode = true;
+		Interface_data.animMode = true;
 		Interface_data.playMode = false;
 		Interface_data.recordMode = true;
 		Interface_data.continueRecord = false;
@@ -620,7 +575,6 @@ void PressedOkDialogFiles(GtkWidget *widget, gpointer data)
 	strcpy(Interface_data.file_lightmap, gtk_entry_get_text(GTK_ENTRY(dialog->edit_lightmap)));
 	strcpy(Interface_data.file_path, gtk_entry_get_text(GTK_ENTRY(dialog->edit_path)));
 	strcpy(Interface_data.file_keyframes, gtk_entry_get_text(GTK_ENTRY(dialog->edit_keyframes)));
-	//strcpy(Interface_data.file_sound, gtk_entry_get_text(GTK_ENTRY(dialog->edit_sound)));
 
 	gtk_widget_destroy(dialog->window_files);
 	delete dialog;
@@ -1497,25 +1451,6 @@ void PressedSelectKeyframes(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(dialog);
 }
 
-void PressedSelectSound(GtkWidget *widget, gpointer data)
-{
-	GtkWidget *dialog;
-	dialog = gtk_file_chooser_dialog_new("Select sound file (*.wav)...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-
-	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), Interface_data.file_sound);
-
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
-	{
-		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		printf("filename: %s\n", filename);
-		sDialogFiles *dialogFiles = (sDialogFiles*) data;
-		gtk_entry_set_text(GTK_ENTRY(dialogFiles->edit_sound), filename);
-	}
-
-	gtk_widget_destroy(dialog);
-}
-
 void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 {
 	if (!interfaceCreated) return;
@@ -1549,28 +1484,6 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 			gtk_main_iteration();
 	}
 }
-
-/*
-void PressedLoadSound(GtkWidget *widget, gpointer data)
-{
-	sParamRender params;
-	ReadInterface(&params);
-
-	sound.Load(Interface_data.file_sound);
-	sound.SetFPS(params.doubles.soundFPS);
-	sound.CreateEnvelope();
-	int bandMin[4] = { params.soundBand1Min, params.soundBand2Min, params.soundBand3Min, params.soundBand4Min };
-	int bandMax[4] = { params.soundBand1Max, params.soundBand2Max, params.soundBand3Max, params.soundBand4Max };
-
-	sound.DoFFT(bandMin, bandMax);
-	gtk_widget_queue_draw(Interface.dareaSound0);
-	gtk_widget_queue_draw(Interface.dareaSoundA);
-	gtk_widget_queue_draw(Interface.dareaSoundB);
-	gtk_widget_queue_draw(Interface.dareaSoundC);
-	gtk_widget_queue_draw(Interface.dareaSoundD);
-
-}
-*/
 
 void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 {

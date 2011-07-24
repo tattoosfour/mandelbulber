@@ -89,7 +89,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	dialog->label_lightmap = gtk_label_new("Ambient occlusion color map");
 	dialog->label_path = gtk_label_new("Animation path");
 	dialog->label_keyframes = gtk_label_new("Keyframe sequence");
-	//dialog->label_fileSound = gtk_label_new("Sound file (*.wav)");
 
 	dialog->edit_destination = gtk_entry_new();
 	dialog->edit_background = gtk_entry_new();
@@ -97,7 +96,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	dialog->edit_lightmap = gtk_entry_new();
 	dialog->edit_path = gtk_entry_new();
 	dialog->edit_keyframes = gtk_entry_new();
-	//dialog->edit_sound = gtk_entry_new();
 
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_destination), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_background), 100);
@@ -105,7 +103,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_lightmap), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_path), 100);
 	gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_keyframes), 100);
-	//gtk_entry_set_width_chars(GTK_ENTRY(dialog->edit_sound), 100);
 
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_destination), Interface_data.file_destination);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_background), Interface_data.file_background);
@@ -113,7 +110,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_lightmap), Interface_data.file_lightmap);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_path), Interface_data.file_path);
 	gtk_entry_set_text(GTK_ENTRY(dialog->edit_keyframes), Interface_data.file_keyframes);
-	//gtk_entry_set_text(GTK_ENTRY(dialog->edit_sound), Interface_data.file_sound);
 
 	dialog->bu_cancel = gtk_button_new_with_label("Cancel");
 	dialog->bu_ok = gtk_button_new_with_label("OK");
@@ -123,7 +119,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	dialog->bu_select_lightmap = gtk_button_new_with_label("Select");
 	dialog->bu_select_path = gtk_button_new_with_label("Select");
 	dialog->bu_select_keyframes = gtk_button_new_with_label("Select");
-	//dialog->bu_select_sound = gtk_button_new_with_label("Select");
 
 	g_signal_connect(G_OBJECT(dialog->bu_ok), "clicked", G_CALLBACK(PressedOkDialogFiles), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_cancel), "clicked", G_CALLBACK(PressedCancelDialogFiles), dialog);
@@ -133,7 +128,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	g_signal_connect(G_OBJECT(dialog->bu_select_lightmap), "clicked", G_CALLBACK(PressedSelectLightmap), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_select_path), "clicked", G_CALLBACK(PressedSelectFlightPath), dialog);
 	g_signal_connect(G_OBJECT(dialog->bu_select_keyframes), "clicked", G_CALLBACK(PressedSelectKeyframes), dialog);
-	//g_signal_connect(G_OBJECT(dialog->bu_select_sound), "clicked", G_CALLBACK(PressedSelectSound), dialog);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_destination, 0, 1, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_background, 0, 1, 1, 2);
@@ -141,7 +135,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_lightmap, 0, 1, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_path, 0, 1, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_keyframes, 0, 1, 5, 6);
-	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->label_fileSound, 0, 1, 6, 7);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_destination, 1, 2, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_background, 1, 2, 1, 2);
@@ -149,7 +142,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_lightmap, 1, 2, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_path, 1, 2, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_keyframes, 1, 2, 5, 6);
-	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->edit_sound, 1, 2, 6, 7);
 
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_destination, 2, 3, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_background, 2, 3, 1, 2);
@@ -157,7 +149,6 @@ void CreateFilesDialog(GtkWidget *widget, gpointer data)
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_lightmap, 2, 3, 3, 4);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_path, 2, 3, 4, 5);
 	gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_keyframes, 2, 3, 5, 6);
-	//gtk_table_attach_defaults(GTK_TABLE(dialog->table_edits), dialog->bu_select_sound, 2, 3, 6, 7);
 
 	gtk_box_pack_start(GTK_BOX(dialog->box_main), dialog->table_edits, false, false, 1);
 
@@ -387,16 +378,6 @@ void ReadInterface(sParamRender *params)
 		params->endFrame = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationEndFrame)));
 		params->framesPerKeyframe = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationFramesPerKey)));
 		params->doubles.imageAdjustments.paletteOffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
-		params->soundBand1Min = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound1FreqMin)));
-		params->soundBand1Max = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound1FreqMax)));
-		params->soundBand2Min = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound2FreqMin)));
-		params->soundBand2Max = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound2FreqMax)));
-		params->soundBand3Min = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound3FreqMin)));
-		params->soundBand3Max = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound3FreqMax)));
-		params->soundBand4Min = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound4FreqMin)));
-		params->soundBand4Max = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_sound4FreqMax)));
-		params->soundEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSoundEnabled));
-		params->doubles.soundFPS = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_soundFPS)));
 		for (int i = 0; i < HYBRID_COUNT; ++i) {
 			params->fractal.hybridIters[i] = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridIter[i])));
 			params->fractal.doubles.hybridPower[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_hybridPower[i])));
@@ -729,15 +710,6 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationStartFrame), IntToString(params->startFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationEndFrame), IntToString(params->endFrame));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_animationFramesPerKey), IntToString(params->framesPerKeyframe));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_soundFPS), DoubleToString(params->doubles.soundFPS));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound1FreqMin), IntToString(params->soundBand1Min));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound1FreqMax), IntToString(params->soundBand1Max));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound2FreqMin), IntToString(params->soundBand2Min));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound2FreqMax), IntToString(params->soundBand2Max));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound3FreqMin), IntToString(params->soundBand3Min));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound3FreqMax), IntToString(params->soundBand3Max));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound4FreqMin), IntToString(params->soundBand4Min));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_sound4FreqMax), IntToString(params->soundBand4Max));
 	for (int i = 0; i < HYBRID_COUNT; ++i) {
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridIter[i]), IntToString(params->fractal.hybridIters[i]));
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_hybridPower[i]), DoubleToString(params->fractal.doubles.hybridPower[i]));
@@ -816,7 +788,6 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsY), params->fractal.IFS.absY);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSAbsZ), params->fractal.IFS.absZ);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIFSMengerSponge), params->fractal.IFS.mengerSpongeMode);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSoundEnabled), params->soundEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic), params->fractal.hybridCyclic);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled), params->stereoEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable), params->fractal.mandelbox.rotationsEnabled);
@@ -1102,7 +1073,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_label_posteffects = gtk_label_new("Post effects");
 	Interface.tab_label_lights = gtk_label_new("Lights");
 	Interface.tab_label_IFS = gtk_label_new("IFS");
-	Interface.tab_label_sound = gtk_label_new("Sound");
 	Interface.tab_label_about = gtk_label_new("About...");
 
 	Interface.tab_box_view = gtk_vbox_new(FALSE, 1);
@@ -1113,7 +1083,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_box_posteffects = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_about = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_lights = gtk_vbox_new(FALSE, 1);
-	Interface.tab_box_sound = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_IFS = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_hybrid = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_mandelbox = gtk_vbox_new(FALSE, 1);
@@ -1126,7 +1095,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_posteffects), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_lights), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_IFS), 5);
-	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_sound), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_about), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_hybrid), 5);
 
@@ -1212,12 +1180,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxPaletteOffset = gtk_hbox_new(FALSE, 1);
 	Interface.boxImageSaving = gtk_vbox_new(FALSE, 1);
 	Interface.boxImageAutoSave = gtk_hbox_new(FALSE, 1);
-	Interface.boxSound = gtk_vbox_new(FALSE, 1);
-	Interface.boxSoundBand1 = gtk_hbox_new(FALSE, 1);
-	Interface.boxSoundBand2 = gtk_hbox_new(FALSE, 1);
-	Interface.boxSoundBand3 = gtk_hbox_new(FALSE, 1);
-	Interface.boxSoundBand4 = gtk_hbox_new(FALSE, 1);
-	Interface.boxSoundMisc = gtk_hbox_new(FALSE, 1);
 	Interface.boxHybrid = gtk_vbox_new(FALSE, 1);
 	Interface.boxStereoscopic = gtk_vbox_new(FALSE, 1);
 	Interface.boxStereoParams = gtk_hbox_new(FALSE, 1);
@@ -1277,7 +1239,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frKeyframeAnimation2 = gtk_frame_new("Key-frames");
 	Interface.frPalette = gtk_frame_new("Colour palette");
 	Interface.frImageSaving = gtk_frame_new("Image saving");
-	Interface.frSound = gtk_frame_new("Animation by sound");
 	Interface.frHybrid = gtk_frame_new("Hybrid formula");
 	Interface.frStereo = gtk_frame_new("Stereoscopic rendering");
 	Interface.frMandelboxMainParams = gtk_frame_new("Main Mandelbox parameters");
@@ -1350,7 +1311,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buRedo = gtk_button_new_with_label("Redo");
 	Interface.buBuddhabrot = gtk_button_new_with_label("Render Buddhabrot");
 	Interface.buRandomPalette = gtk_button_new_with_label("Random palette");
-	Interface.buLoadSound = gtk_button_new_with_label("Load sound");
 	Interface.buGetPaletteFromImage = gtk_button_new_with_label("Get palette from image");
 	Interface.buTimeline = gtk_button_new_with_label("Timeline");
 	Interface.buIFSDefaultDodeca = gtk_button_new_with_label("Dodecahedron");
@@ -1453,15 +1413,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_animationFramesPerKey = gtk_entry_new();
 	Interface.edit_animationStartFrame = gtk_entry_new();
 	Interface.edit_animationEndFrame = gtk_entry_new();
-	Interface.edit_sound1FreqMin = gtk_entry_new();
-	Interface.edit_sound1FreqMax = gtk_entry_new();
-	Interface.edit_sound2FreqMin = gtk_entry_new();
-	Interface.edit_sound2FreqMax = gtk_entry_new();
-	Interface.edit_sound3FreqMin = gtk_entry_new();
-	Interface.edit_sound3FreqMax = gtk_entry_new();
-	Interface.edit_sound4FreqMin = gtk_entry_new();
-	Interface.edit_sound4FreqMax = gtk_entry_new();
-	Interface.edit_soundFPS = gtk_entry_new();
 
 	for (int i = 0; i < HYBRID_COUNT; ++i) {
 		Interface.edit_hybridIter[i] = gtk_entry_new();
@@ -1601,7 +1552,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkIFSAbsZ = gtk_check_button_new_with_label("abs(z)");
 	Interface.checkIFSMengerSponge = gtk_check_button_new_with_label("Menger Sponge");
 	Interface.checkAutoSaveImage = gtk_check_button_new_with_label("Auto-save");
-	Interface.checkSoundEnabled = gtk_check_button_new_with_label("Enable animation by sound");
 	Interface.checkHybridCyclic = gtk_check_button_new_with_label("Cyclic loop");
 	Interface.checkNavigatorAbsoluteDistance = gtk_check_button_new_with_label("Absolute distance mode");
 	Interface.checkNavigatorGoToSurface = gtk_check_button_new_with_label("Go close to indicated surface");
@@ -1654,9 +1604,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_IFSintensity = gtk_label_new("intensity");
 	Interface.label_IFSenabled = gtk_label_new("enabled");
 	Interface.label_paletteOffset = gtk_label_new("offset:");
-	Interface.label_soundEnvelope = gtk_label_new("sound envelope");
 	Interface.label_DE_threshold = gtk_label_new("Detail level:");
-	gtk_misc_set_alignment(GTK_MISC(Interface.label_soundEnvelope), 0, 0);
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
 		Interface.label_HybridFormula[i-1] = gtk_label_new(g_strdup_printf("Formula #%d:", i));
@@ -1687,18 +1635,6 @@ void CreateInterface(sParamRender *default_settings)
 	//colour palette
 	dareaPalette = gtk_drawing_area_new();
 	gtk_widget_set_size_request(dareaPalette, 640, 30);
-
-	//sound
-	Interface.dareaSound0 = gtk_drawing_area_new();
-	gtk_widget_set_size_request(Interface.dareaSound0, 640, 40);
-	Interface.dareaSoundA = gtk_drawing_area_new();
-	gtk_widget_set_size_request(Interface.dareaSoundA, 640, 40);
-	Interface.dareaSoundB = gtk_drawing_area_new();
-	gtk_widget_set_size_request(Interface.dareaSoundB, 640, 40);
-	Interface.dareaSoundC = gtk_drawing_area_new();
-	gtk_widget_set_size_request(Interface.dareaSoundC, 640, 40);
-	Interface.dareaSoundD = gtk_drawing_area_new();
-	gtk_widget_set_size_request(Interface.dareaSoundD, 640, 40);
 
 	//connected signals
 	CONNECT_SIGNAL_CLICKED(Interface.buRender, StartRendering);
@@ -1742,7 +1678,6 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buBuddhabrot, PressedBuddhabrot);
 	CONNECT_SIGNAL(Interface.adjustmentPaletteOffset, ChangedSliderPaletteOffset, "value-changed");
 	CONNECT_SIGNAL_CLICKED(Interface.buRandomPalette, PressedRandomPalette);
-	//CONNECT_SIGNAL_CLICKED(Interface.buLoadSound, PressedLoadSound);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetPaletteFromImage, PressedGetPaletteFromImage);
 	CONNECT_SIGNAL_CLICKED(Interface.buTimeline, PressedTimeline);
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultDodeca, PressedIFSDefaultDodeca);
@@ -1768,11 +1703,6 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
-	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSound0), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "0");
-	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundA), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "A");
-	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundB), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "B");
-	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundC), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "C");
-	//gtk_signal_connect(GTK_OBJECT(Interface.dareaSoundD), "expose-event", GTK_SIGNAL_FUNC(on_dareaSound_expose), (void*) "D");
 
 	//----------------------- main box -----------------------
 
@@ -2357,38 +2287,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
 
-	//tab sound
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_sound), Interface.frSound, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frSound), Interface.boxSound);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.boxSoundMisc, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundMisc), Interface.buLoadSound, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundMisc), CreateEdit("25", "Animation FPS", 6, Interface.edit_soundFPS), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundMisc), Interface.checkSoundEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.label_soundEnvelope, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.dareaSound0, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.boxSoundBand1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand1), CreateEdit("1", "Band 1: min freq [Hz]", 6, Interface.edit_sound1FreqMin), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand1), CreateEdit("100", "max freq [Hz]", 6, Interface.edit_sound1FreqMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.dareaSoundA, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.boxSoundBand2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand2), CreateEdit("100", "Band 2: min freq [Hz]", 6, Interface.edit_sound2FreqMin), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand2), CreateEdit("500", "max freq [Hz]", 6, Interface.edit_sound2FreqMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.dareaSoundB, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.boxSoundBand3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand3), CreateEdit("500", "Band 3: min freq [Hz]", 6, Interface.edit_sound3FreqMin), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand3), CreateEdit("2000", "max freq [Hz]", 6, Interface.edit_sound3FreqMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.dareaSoundC, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.boxSoundBand4, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand4), CreateEdit("2000", "Band 4: min freq [Hz]", 6, Interface.edit_sound4FreqMin), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSoundBand4), CreateEdit("20000", "max freq [Hz]", 6, Interface.edit_sound4FreqMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSound), Interface.dareaSoundD, false, false, 1);
-
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
 
@@ -2429,7 +2327,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
-	//gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_sound, Interface.tab_label_sound);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 
 	//main window pack
@@ -2531,14 +2428,6 @@ void CreateTooltips(void)
 		"All keyframes are stored in keyframes/keyframeXXXXX.fract files\n"
 		"Keyframe files are settings files and can be also loaded and saved using Load Settings and Save Settings\n"
 		"Most of the floating point parameters are interpolated using Catmull-Rom Splines");
-	gtk_widget_set_tooltip_text(Interface.frSound, "A sound file can be used for control of some fractal or shader parameters.\n"
-		"After loading the sound file, the sound is divided into 5 channels:\n"
-		"s0 - sound envelope (absolute value of sound amplitude)\n"
-		"sa, sb, sc, sd - selected frequency bands of sound\n"
-		"To animate a given parameter you have to use the following string instead of a parameter value:\n"
-		"sx amp - where sx is channel name, amp is a gain for channel\n"
-		"for example, in the IFS parameters you can put: rotation alfa = s0 1.0, rotation beta = sc -0.3\n"
-		"Animation must be rendered in key-frame mode");
 	gtk_widget_set_tooltip_text(Interface.checkTgladMode, "Additional formula modifier. Cubic folding from Mandelbox formula");
 	gtk_widget_set_tooltip_text(Interface.checkSphericalFoldingMode, "Additional formula modifier. Spherical folding from Mandelbox formula");
 
@@ -2776,7 +2665,6 @@ void Params2InterfaceData(sParamRender *source)
 	strcpy(Interface_data.file_lightmap, source->file_lightmap);
 	strcpy(Interface_data.file_path, source->file_path);
 	strcpy(Interface_data.file_keyframes, source->file_keyframes);
-	strcpy(Interface_data.file_sound, source->file_sound);
 }
 
 void InterfaceData2Params(sParamRender *dest)
@@ -2787,7 +2675,6 @@ void InterfaceData2Params(sParamRender *dest)
 	strcpy(dest->file_lightmap, Interface_data.file_lightmap);
 	strcpy(dest->file_path, Interface_data.file_path);
 	strcpy(dest->file_keyframes, Interface_data.file_keyframes);
-	strcpy(dest->file_sound, Interface_data.file_sound);
 }
 
 void CheckPrameters(sParamRender *params)
