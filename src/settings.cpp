@@ -744,17 +744,6 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "end_frame")) params.endFrame = atoi(str2);
 	else if (!strcmp(str1, "frames_per_keyframe")) params.framesPerKeyframe = atoi(str2);
 
-	else if (!strcmp(str1, "sound_animation_enabled")) params.soundEnabled = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_FPS")) params.doubles.soundFPS = atof2(str2);
-	else if (!strcmp(str1, "sound_animation_band1_min")) params.soundBand1Min = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band1_max")) params.soundBand1Max = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band2_min")) params.soundBand2Min = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band2_max")) params.soundBand2Max = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band3_min")) params.soundBand3Min = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band3_max")) params.soundBand3Max = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band4_min")) params.soundBand4Min = atoi(str2);
-	else if (!strcmp(str1, "sound_animation_band4_max")) params.soundBand4Max = atoi(str2);
-
   else if (!strcmp(str1, "hybrid_cyclic")) params.fractal.hybridCyclic = atoi(str2);
 
 	else if (!strcmp(str1, "fish_eye")) params.perspectiveType = (enumPerspectiveType)atoi(str2);
@@ -810,7 +799,6 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "file_lightmap")) strcpy(params.file_lightmap, str2);
 	else if (!strcmp(str1, "file_animation_path")) strcpy(params.file_path, str2);
 	else if (!strcmp(str1, "file_keyframes")) strcpy(params.file_keyframes, str2);
-	else if (!strcmp(str1, "file_sound")) strcpy(params.file_sound, str2);
 	else if (!strcmp(str1, "palette")) GetPaletteFromString(params.palette, str2);
 	else
 	{

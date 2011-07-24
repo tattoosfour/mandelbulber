@@ -5,7 +5,7 @@ include(FindPkgConfig)
 
 # dependencies for mandelbulber executable
 set(MANDELBULBER_SRCS
-algebra.cpp    common_math.cpp  fractal.cpp    loadsound.cpp  settings.cpp  timeline.cpp
+algebra.cpp    common_math.cpp  fractal.cpp    settings.cpp  timeline.cpp
 callbacks.cpp  database.cpp     image.cpp      morph.cpp      shaders.cpp   undo.cpp
 cimage.cpp     files.cpp        interface.cpp  Render3D.cpp   texture.cpp
 )

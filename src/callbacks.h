@@ -22,7 +22,6 @@ gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data);
 gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
-gboolean on_dareaSound_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 void StartRendering(GtkWidget *widget, gpointer data);
 void StopRendering(GtkWidget *widget, gpointer data);
 void PressedApplyBrigtness(GtkWidget *widget, gpointer data);
@@ -78,10 +77,8 @@ void PressedSelectEnvmap(GtkWidget *widget, gpointer data);
 void PressedSelectLightmap(GtkWidget *widget, gpointer data);
 void PressedSelectFlightPath(GtkWidget *widget, gpointer data);
 void PressedSelectKeyframes(GtkWidget *widget, gpointer data);
-void PressedSelectSound(GtkWidget *widget, gpointer data);
 void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data);
 void PressedRandomPalette(GtkWidget *widget, gpointer data);
-void PressedLoadSound(GtkWidget *widget, gpointer data);
 void CreateFormulaSequence(sFractal &fractal);
 void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data);
 void PressedTimeline(GtkWidget *widget, gpointer data);

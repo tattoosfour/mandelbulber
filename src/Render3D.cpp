@@ -33,7 +33,6 @@
 #include "timeline.hpp"
 #include "morph.hpp"
 #include "settings.h"
-#include "loadsound.hpp"
 #include "undo.hpp"
 #include "callbacks.h"
 
@@ -1308,6 +1307,7 @@ int main(int argc, char *argv[])
 	WriteLog("g_thread initialised");
 
 	sParamRender fractParamDefault;
+	memset(&fractParamDefault, 0, sizeof(sParamRender));
 	WriteLog("allocated memory for default parameters");
 
 	//data directory location
@@ -1662,22 +1662,6 @@ void MainRender(void)
 	}
 	printf("Lights placed\n");
 
-	//loading sound
-	/*
-	if (fractParam.soundEnabled)
-	{
-		sound.Load(fractParam.file_sound);
-		WriteLog("Sound file loaded");
-		sound.SetFPS(25.0);
-		sound.CreateEnvelope();
-		WriteLog("Sound envelope calculated");
-		int bandMin[4] = { fractParam.soundBand1Min, fractParam.soundBand2Min, fractParam.soundBand3Min, fractParam.soundBand4Min };
-		int bandMax[4] = { fractParam.soundBand1Max, fractParam.soundBand2Max, fractParam.soundBand3Max, fractParam.soundBand4Max };
-		sound.DoFFT(bandMin, bandMax);
-		WriteLog("Sound FFT calculated");
-	}
-	*/
-
 	FILE *pFile_coordinates = NULL;
 	//erasing file with animation path in path record mode
 	if (fractParam.animMode && !Interface_data.keyframeMode)
@@ -1915,33 +1899,6 @@ void MainRender(void)
 			WriteLog("Calculated additional data for splines");
 		}
 
-		//animation by sound
-		/*
-		if (fractParam.soundEnabled)
-		{
-			sAddData *addData;
-			double *paramToAdd;
-			addData = (sAddData*) &fractSpecial;
-			paramToAdd = (double*) &fractParam;
-			for (unsigned int i = 0; i < sizeof(sParamRenderD); i++)
-			{
-				if (addData->mode == soundEnvelope) *paramToAdd += sound.GetEnvelope(index) * addData->amp;
-				else if (addData->mode == soundA) *paramToAdd += sound.GetSpectrumA(index) * addData->amp;
-				else if (addData->mode == soundB) *paramToAdd += sound.GetSpectrumB(index) * addData->amp;
-				else if (addData->mode == soundC) *paramToAdd += sound.GetSpectrumC(index) * addData->amp;
-				else if (addData->mode == soundD) *paramToAdd += sound.GetSpectrumD(index) * addData->amp;
-
-				fractParam.doubles.max_y = 20.0 / fractParam.doubles.zoom;
-				fractParam.doubles.resolution = 1.0 / fractParam.image_width;
-				sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
-				mainImage.SetImageAdjustments(imageAdjustments);
-
-				addData++;
-				paramToAdd++;
-			}
-			WriteLog("Sound animation calculated");
-		}
-		*/
 		RecalculateIFSParams(fractParam.fractal);
 		WriteLog("IFS params recalculated");
 
