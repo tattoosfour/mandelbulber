@@ -536,7 +536,7 @@ void *MainThread(void *ptr)
 						//initial values
 						sShaderOutput shadowOutput = { 1.0, 1.0, 1.0 };
 						sShaderOutput AO;
-						sRGB16 oldAO;
+						sRGB16 oldAO = {0,0,0};
 						if(!image->IsLowMemMode()) oldAO = image->GetPixelAmbient(x, z);
 						AO.R = oldAO.R / 4096.0;
 						AO.G = oldAO.G / 4096.0;

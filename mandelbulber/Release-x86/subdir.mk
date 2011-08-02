@@ -14,7 +14,6 @@ CPP_SRCS += \
 ../src/fractal.cpp \
 ../src/image.cpp \
 ../src/interface.cpp \
-../src/loadsound.cpp \
 ../src/morph.cpp \
 ../src/settings.cpp \
 ../src/shaders.cpp \
@@ -33,7 +32,6 @@ OBJS += \
 ./src/fractal.o \
 ./src/image.o \
 ./src/interface.o \
-./src/loadsound.o \
 ./src/morph.o \
 ./src/settings.o \
 ./src/shaders.o \
@@ -52,7 +50,6 @@ CPP_DEPS += \
 ./src/fractal.d \
 ./src/image.d \
 ./src/interface.d \
-./src/loadsound.d \
 ./src/morph.d \
 ./src/settings.d \
 ./src/shaders.d \
