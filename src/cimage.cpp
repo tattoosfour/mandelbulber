@@ -151,6 +151,15 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 	}
 
+	sRGB col = { R, G, B };
+	if (sw.fogEnabled)
+	{
+		col = PostRendering_Fog(zBuf, fogVisFront, fogVisBack + fogVisFront, ecol.fogColor, col);
+	}
+	R = col.R;
+	G = col.G;
+	B = col.B;
+
 	double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;
 	double glowN = 1.0 - glow;
 	if (glowN < 0.0) glowN = 0.0;
@@ -172,17 +181,10 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	if (B > 65535) B = 65535;
 	if (B < 0) B = 0;
 
-	sRGB col = { R, G, B };
-
-	if (sw.fogEnabled)
-	{
-		col = PostRendering_Fog(zBuf, fogVisFront, fogVisBack + fogVisFront, ecol.fogColor, col);
-	}
-
 	sRGB16 newPixel16;
-	newPixel16.R = gammaTable[col.R];
-	newPixel16.G = gammaTable[col.G];
-	newPixel16.B = gammaTable[col.B];
+	newPixel16.R = gammaTable[(unsigned int)R];
+	newPixel16.G = gammaTable[(unsigned int)G];
+	newPixel16.B = gammaTable[(unsigned int)B];
 	alpha_ = alpha2;
 
 	return newPixel16;
