@@ -310,23 +310,23 @@ sRGB cImage::IndexToColour(int index)
 
 int cImage::GetUsedMB(void)
 {
-	int mb = 0;
+	long int mb = 0;
 	if (lowMem)
 	{
-		long int zBufferSize = width * height * sizeof(float);
-		long int alphaSize = width * height * sizeof(unsigned short);
-		long int image16Size = width * height * sizeof(sRGB16);
-		long int colorSize = width * height * sizeof(unsigned short);
+		long int zBufferSize = (long int)width * height * sizeof(float);
+		long int alphaSize = (long int)width * height * sizeof(unsigned short);
+		long int image16Size = (long int)width * height * sizeof(sRGB16);
+		long int colorSize = (long int)width * height * sizeof(unsigned short);
 		mb = (zBufferSize + alphaSize + image16Size + colorSize) / 1024 / 1024;
 	}
 	else
 	{
-		long int zBufferSize = width * height * sizeof(float);
-		long int alphaSize = width * height * sizeof(unsigned short);
-		long int image16Size = width * height * sizeof(sRGB16);
-		long int complexSize = width * height * sizeof(sComplexImage);
-		long int colorSize = width * height * sizeof(unsigned short);
-		mb = (zBufferSize + alphaSize + image16Size + complexSize + colorSize) / 1024 / 1024;
+		long int zBufferSize = (long int)width * height * sizeof(float);
+		long int alphaSize = (long int)width * height * sizeof(unsigned short);
+		long int image16Size = (long int)width * height * sizeof(sRGB16);
+		long int complexSize = (long int)width * height * sizeof(sComplexImage);
+		long int colorSize = (long int)width * height * sizeof(unsigned short);
+		mb = (long int)(zBufferSize + alphaSize + image16Size + complexSize + colorSize) / 1024 / 1024;
 	}
 	return mb;
 }
