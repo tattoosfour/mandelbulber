@@ -79,6 +79,7 @@ struct sImageSwitches
 	bool coloringEnabled;
 	bool fogEnabled;
 	bool raytracedReflections;
+	bool volumetricLightEnabled;
 };
 
 class cImage
