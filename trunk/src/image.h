@@ -32,7 +32,7 @@ extern double buddhabrotAutoBright;
 extern guint64 histogram[256];
 extern unsigned int histogram2[1000];
 
-void NowaPaleta(sRGB *p, double nasycenie);
+void NewPalette(sRGB *p, double nasycenie);
 void DrawHistogram(void);
 void DrawHistogram2(void);
 void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet);

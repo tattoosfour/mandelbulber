@@ -27,16 +27,16 @@ guint64 histogram[256];
 unsigned int histogram2[1000];
 
 //******************* Nowa paleta kolorow ****************
-void NowaPaleta(sRGB *p, double nasycenie)
+void NewPalette(sRGB *p, double saturation)
 {
 	int R, G, B, Y;
 
 	for (int i = 0; i < 255; i++)
 	{
-		Y = (Random(255) - 128) / (1.0 + nasycenie);
-		p[i].R = R = Y + 128 + (Random(255) - 128) * nasycenie;
-		p[i].G = G = Y + 128 + (Random(255) - 128) * nasycenie;
-		p[i].B = B = Y + 128 + (Random(255) - 128) * nasycenie;
+		Y = (Random(255) - 128) / (1.0 + saturation);
+		p[i].R = R = Y + 128 + (Random(255) - 128) * saturation;
+		p[i].G = G = Y + 128 + (Random(255) - 128) * saturation;
+		p[i].B = B = Y + 128 + (Random(255) - 128) * saturation;
 		if (R < 0) p[i].R = 0;
 		if (G < 0) p[i].G = 0;
 		if (B < 0) p[i].B = 0;

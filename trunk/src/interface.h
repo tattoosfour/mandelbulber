@@ -350,6 +350,7 @@ struct sInterface
 	GtkWidget *edit_mouse_click_distance;
 	GtkWidget *edit_animationDESpeed;
 	GtkWidget *edit_color_seed;
+	GtkWidget *edit_colour_saturation;
 	GtkWidget *edit_tglad_folding_1;
 	GtkWidget *edit_tglad_folding_2;
 	GtkWidget *edit_spherical_folding_1;

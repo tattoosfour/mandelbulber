@@ -298,6 +298,7 @@ void ReadInterface(sParamRender *params)
 		params->imageSwitches.coloringEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkColoring));
 		params->coloring_seed = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_seed)));
 		params->doubles.imageAdjustments.coloring_speed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_color_speed)));
+		params->doubles.colourSaturation = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_colour_saturation)));
 		params->fractal.tgladFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode));
 		params->fractal.sphericalFoldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSphericalFoldingMode));
 		params->fractal.IFS.foldingMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIFSFoldingMode));
@@ -685,6 +686,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cmax), DoubleToString(params->fractal.doubles.cmax));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(params->coloring_seed));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_speed), DoubleToString(params->doubles.imageAdjustments.coloring_speed));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_colour_saturation), DoubleToString(params->doubles.colourSaturation));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_1), DoubleToString(params->fractal.doubles.foldingLimit));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tglad_folding_2), DoubleToString(params->fractal.doubles.foldingValue));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_spherical_folding_1), DoubleToString(params->fractal.doubles.foldingSphericalFixed));
@@ -1351,8 +1353,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buUndo = gtk_button_new_with_label("Undo");
 	Interface.buRedo = gtk_button_new_with_label("Redo");
 	Interface.buBuddhabrot = gtk_button_new_with_label("Render Buddhabrot");
-	Interface.buRandomPalette = gtk_button_new_with_label("Random palette");
-	Interface.buGetPaletteFromImage = gtk_button_new_with_label("Get palette from image");
+	Interface.buRandomPalette = gtk_button_new_with_label("Random");
+	Interface.buGetPaletteFromImage = gtk_button_new_with_label("Get palette from JPG");
 	Interface.buTimeline = gtk_button_new_with_label("Timeline");
 	Interface.buIFSDefaultDodeca = gtk_button_new_with_label("Dodecahedron");
 	Interface.buIFSDefaultIcosa = gtk_button_new_with_label("Icosahedron");
@@ -1415,6 +1417,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_animationDESpeed = gtk_entry_new();
 	Interface.edit_color_seed = gtk_entry_new();
 	Interface.edit_color_speed = gtk_entry_new();
+	Interface.edit_colour_saturation = gtk_entry_new();
 	Interface.edit_tglad_folding_1 = gtk_entry_new();
 	Interface.edit_tglad_folding_2 = gtk_entry_new();
 	Interface.edit_spherical_folding_1 = gtk_entry_new();
@@ -1987,6 +1990,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.checkColoring, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.vSeparator1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("123456", "Random seed:", 6, Interface.edit_color_seed), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Saturation:", 6, Interface.edit_colour_saturation), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Colour speed:", 6, Interface.edit_color_speed), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buRandomPalette, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buGetPaletteFromImage, false, false, 1);

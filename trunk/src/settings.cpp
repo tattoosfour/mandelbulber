@@ -212,6 +212,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "fast_ambient_occlusion_mode", params.fastGlobalIllumination, false, compare);
 	fprintfInt(fileSettings, "fractal_color", params.imageSwitches.coloringEnabled, true, compare);
 	fprintfInt(fileSettings, "coloring_random_seed", params.coloring_seed, 123456, compare);
+	fprintfDot(fileSettings, "coloring_saturation", params.doubles.colourSaturation, 1.0, compare);
 	fprintfDot(fileSettings, "coloring_speed", params.doubles.imageAdjustments.coloring_speed, 1.0, compare);
 	fprintfDot(fileSettings, "coloring_palette_offset", params.doubles.imageAdjustments.paletteOffset, 0.0, compare);
 	fprintfInt(fileSettings, "slow_shading", params.slowShading, false, compare);
@@ -687,6 +688,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fast_ambient_occlusion_mode")) params.fastGlobalIllumination = atoi(str2);
 	else if (!strcmp(str1, "fractal_color")) params.imageSwitches.coloringEnabled = atoi(str2);
 	else if (!strcmp(str1, "coloring_random_seed")) params.coloring_seed = atoi(str2);
+	else if (!strcmp(str1, "coloring_saturation")) params.doubles.colourSaturation = atof2(str2);
 	else if (!strcmp(str1, "coloring_speed")) params.doubles.imageAdjustments.coloring_speed = atof2(str2);
 	else if (!strcmp(str1, "coloring_palette_offset")) params.doubles.imageAdjustments.paletteOffset = atof2(str2);
 	else if (!strcmp(str1, "slow_shading")) params.slowShading = atoi(str2);
@@ -914,7 +916,7 @@ void LoadSettingsPost(sParamRender &params)
 	{
 		printf("Palette not found in settings file. Generating random palette\n");
 		srand(params.coloring_seed);
-		NowaPaleta(params.palette, 1.0);
+		NewPalette(params.palette, params.doubles.colourSaturation);
 	}
 
 	lightsPlaced = 0;
