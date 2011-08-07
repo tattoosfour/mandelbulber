@@ -195,6 +195,17 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "background_color_3_R", params.background_color3.R, 0, compare);
 	fprintfInt(fileSettings, "background_color_3_G", params.background_color3.G, 10000, compare);
 	fprintfInt(fileSettings, "background_color_3_B", params.background_color3.B, 500, compare);
+	fprintfInt(fileSettings, "fog_colour_1_R", params.fogColour1.R, 0, compare);
+	fprintfInt(fileSettings, "fog_colour_1_G", params.fogColour1.G, 0, compare);
+	fprintfInt(fileSettings, "fog_colour_1_B", params.fogColour1.B, 0, compare);
+	fprintfInt(fileSettings, "fog_colour_2_R", params.fogColour2.R, 0, compare);
+	fprintfInt(fileSettings, "fog_colour_2_G", params.fogColour2.G, 30000, compare);
+	fprintfInt(fileSettings, "fog_colour_2_B", params.fogColour2.B, 65535, compare);
+	fprintfInt(fileSettings, "fog_colour_3_R", params.fogColour3.R, 65535, compare);
+	fprintfInt(fileSettings, "fog_colour_3_G", params.fogColour3.G, 65535, compare);
+	fprintfInt(fileSettings, "fog_colour_3_B", params.fogColour3.B, 65535, compare);
+	fprintfInt(fileSettings, "background_color_1_G", params.background_color1.G, 38306, compare);
+	fprintfInt(fileSettings, "background_color_1_B", params.background_color1.B, 65535, compare);
 	fprintfInt(fileSettings, "textured_background", params.textured_background, false, compare);
 	fprintfInt(fileSettings, "shadows_enabled", params.shadow, true, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_enabled", params.global_ilumination, false, compare);
@@ -402,6 +413,11 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "mandelbox_vary_wadd", params.fractal.mandelbox.doubles.vary4D.wadd, 0, compare);
 
 	fprintfDot(fileSettings, "c_add", params.fractal.doubles.cadd, -1.3, compare);
+
+	fprintfDot(fileSettings, "volumetric_fog_density", params.doubles.fogDensity, 0.0, compare);
+	fprintfDot(fileSettings, "volumetric_fog_colour_1_distance", params.doubles.fogColour1Distance, 1.0, compare);
+	fprintfDot(fileSettings, "volumetric_fog_colour_2_distance", params.doubles.fogColour2Distance, 2.0, compare);
+	fprintfDot(fileSettings, "volumetric_fog_distance_factor", params.doubles.fogDistanceFactor, 1.0, compare);
 
 	if(strcmp(filename,"settings/.clipboard"))
 	{
@@ -656,6 +672,15 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "background_color_3_R")) params.background_color3.R = atoi(str2);
 	else if (!strcmp(str1, "background_color_3_G")) params.background_color3.G = atoi(str2);
 	else if (!strcmp(str1, "background_color_3_B")) params.background_color3.B = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_1_R")) params.fogColour1.R = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_1_G")) params.fogColour1.G = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_1_B")) params.fogColour1.B = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_2_R")) params.fogColour2.R = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_2_G")) params.fogColour2.G = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_2_B")) params.fogColour2.B = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_3_R")) params.fogColour3.R = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_3_G")) params.fogColour3.G = atoi(str2);
+	else if (!strcmp(str1, "fog_colour_3_B")) params.fogColour3.B = atoi(str2);
 	else if (!strcmp(str1, "textured_background")) params.textured_background = atoi(str2);
 	else if (!strcmp(str1, "shadows_enabled")) params.shadow = atoi(str2);
 	else if (!strcmp(str1, "ambient_occlusion_enabled")) params.global_ilumination = atoi(str2);
@@ -792,6 +817,11 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "mandelbox_vary_wadd")) params.fractal.mandelbox.doubles.vary4D.wadd = atof2(str2);
 
 	else if (!strcmp(str1, "c_add")) params.fractal.doubles.cadd = atof2(str2);
+
+	else if (!strcmp(str1, "volumetric_fog_density")) params.doubles.fogDensity = atof2(str2);
+	else if (!strcmp(str1, "volumetric_fog_colour_1_distance")) params.doubles.fogColour1Distance = atof2(str2);
+	else if (!strcmp(str1, "volumetric_fog_colour_2_distance")) params.doubles.fogColour2Distance = atof2(str2);
+	else if (!strcmp(str1, "volumetric_fog_distance_factor")) params.doubles.fogDistanceFactor = atof2(str2);
 
 	else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 	else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);

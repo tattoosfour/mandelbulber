@@ -190,6 +190,7 @@ struct sInterface
 	GtkWidget *boxVolumetricLightMain;
 	GtkWidget *boxVolumetricLightAux;
 	GtkWidget *boxMandelboxVary;
+	GtkWidget *boxVolumetricFog;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -249,6 +250,9 @@ struct sInterface
 	GtkWidget *buColorBackgroud1;
 	GtkWidget *buColorBackgroud2;
 	GtkWidget *buColorBackgroud3;
+	GtkWidget *buColorFog1;
+	GtkWidget *buColorFog2;
+	GtkWidget *buColorFog3;
 	GtkWidget *buApplyBrighness;
 	GtkWidget *buSaveImage;
 	GtkWidget *buSavePNG;
@@ -434,6 +438,10 @@ struct sInterface
 	GtkWidget *edit_mandelboxVaryMinR;
 	GtkWidget *edit_mandelboxVaryWAdd;
 	GtkWidget *edit_cadd;
+	GtkWidget *edit_volumetricFogDensity;
+	GtkWidget *edit_volumetricFogColorDistance;
+	GtkWidget *edit_volumetricFogColorDistance2;
+	GtkWidget *edit_volumetricFogDistanceFact;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

@@ -160,6 +160,15 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	G = col.G;
 	B = col.B;
 
+	//volumetric fog
+	double fogDensity = pixel.fogDensity16 / 65535.0;
+	double fogN = 1.0 - fogDensity;
+
+	R = R * fogN + pixel.volumetricLight.R * fogDensity;
+	G = G * fogN + pixel.volumetricLight.G * fogDensity;
+	B = B * fogN + pixel.volumetricLight.B * fogDensity;
+
+	//glow
 	double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;
 	double glowN = 1.0 - glow;
 	if (glowN < 0.0) glowN = 0.0;
@@ -168,9 +177,14 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	double glowG = (ecol.glow_color1.G * glowN + ecol.glow_color2.G * glow);
 	double glowB = (ecol.glow_color1.B * glowN + ecol.glow_color2.B * glow);
 
-	R = R * glowN + glowR * glow + pixel.volumetricFog.R * 16.0 * adj.volumetricLightIntensity;
-	G = G * glowN + glowG * glow + pixel.volumetricFog.G * 16.0 * adj.volumetricLightIntensity;
-	B = B * glowN + glowB * glow + pixel.volumetricFog.B * 16.0 * adj.volumetricLightIntensity;
+	//volumetric light
+	//R = R * glowN + glowR * glow + pixel.volumetricLight.R * 16.0 * adj.volumetricLightIntensity;
+	//G = G * glowN + glowG * glow + pixel.volumetricLight.G * 16.0 * adj.volumetricLightIntensity;
+	//B = B * glowN + glowB * glow + pixel.volumetricLight.B * 16.0 * adj.volumetricLightIntensity;
+	R = R * glowN + glowR * glow;
+	G = G * glowN + glowG * glow;
+	B = B * glowN + glowB * glow;
+
 	alpha2 += 65535.0 * glow;
 	if (alpha2 > 65535) alpha2 = 65535;
 

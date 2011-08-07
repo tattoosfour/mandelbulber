@@ -49,6 +49,10 @@ struct sParamRenderD
 	double viewDistanceMax;
 	double volumetricLightQuality;
 	double volumetricLightIntensity[5];
+	double fogDensity;
+	double fogColour1Distance;
+	double fogColour2Distance;
+	double fogDistanceFactor;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -101,6 +105,9 @@ struct sParamRender
 	sRGB auxLightPre2Colour;
 	sRGB auxLightPre3Colour;
 	sRGB auxLightPre4Colour;
+	sRGB fogColour1;
+	sRGB fogColour2;
+	sRGB fogColour3;
 	sEffectColours effectColours;
 
 	sRGB palette[256];

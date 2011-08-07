@@ -43,7 +43,8 @@ struct sComplexImage
 	sRGB16 reflectBuf16;
 	sRGB16 ambientBuf16;
 	sRGB16 backgroundBuf16;
-	sRGB16 volumetricFog;
+	sRGB16 volumetricLight;
+	unsigned short fogDensity16;
 };
 
 struct sImageAdjustments
@@ -101,7 +102,8 @@ public:
 	inline void PutPixelColor(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) colorIndexBuf16[x + y * width] = pixel;}
 	inline void PutPixelBackground(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].backgroundBuf16 = pixel;}
 	inline void PutPixelAlpha(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) alpha[x + y * width] = pixel;}
-	inline void PutPixelVolumetricFog(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].volumetricFog = pixel;}
+	inline void PutPixelVolumetricFog(int x, int y, sRGB16 pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].volumetricLight = pixel;}
+	inline void PutPixelFogDensity(int x, int y, unsigned short pixel) {if (x >= 0 && x < width && y >= 0 && y < height) complexImage[x + y * width].fogDensity16 = pixel;}
   inline sRGB16 GetPixelImage(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return image16[x + y * width]; else return Black16();}
   inline short int GetPixelAlpha(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return alpha[x + y * width]; else return 0;}
   inline short int GetPixelColor(int x, int y)  {if (x >= 0 && x < width && y >= 0 && y < height) return colorIndexBuf16[x + y * width]; else return 0;}

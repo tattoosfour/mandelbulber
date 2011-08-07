@@ -145,6 +145,11 @@ void *MainThread(void *ptr)
 	double stepY = resolution;
 	double delta = resolution * zoom;
 
+	//distance buffer
+	double *distanceBuff = new double[10002];
+	double *stepBuff = new double[10002];
+	int buffCount = 0;
+
 	//calculating vectors for AmbientOcclusion
 	sVectorsAround *vectorsAround = new sVectorsAround[10000];
 	int vectorsCount;
@@ -264,6 +269,7 @@ void *MainThread(void *ptr)
 					counter = 0;
 					int binary_step = 0;
 					bool binary = false;
+					buffCount = 0;
 
 					CVector3 viewVectorStart(0, 0, 0);
 					CVector3 viewVectorEnd(0, 0, 0);
@@ -333,6 +339,8 @@ void *MainThread(void *ptr)
 								calcParam.doubles.detailSize = dist_thresh;
 								dist = CalculateDistance(point, calcParam, &max_iter);
 
+								distanceBuff[buffCount]=dist;
+
 								//it is for situation when DE is calculated with very big error
 								if (!param.fractal.dynamicDEcorrection && dist > 5.0 / DE_factor)
 								{
@@ -391,6 +399,9 @@ void *MainThread(void *ptr)
 									else stepYpersp = (dist - 0.5 * dist_thresh) / zoom * DE_factor;
 
 									stepYpersp = stepYpersp * (1.0 - Random(1000)/10000.0);
+
+									stepBuff[buffCount] = stepYpersp * zoom;
+									buffCount++;
 								}
 
 								//step in binary searching mode
@@ -505,8 +516,6 @@ void *MainThread(void *ptr)
 					memset(&pixelData,0,sizeof(sComplexImage));
 
 					CVector3 lightVector = vDelta;
-
-
 
 					double y = y_start;
 					CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
@@ -829,6 +838,7 @@ void *MainThread(void *ptr)
 
 					if (volFogEnabled)
 					{
+						//volumetric light
 						for (double scan = y; scan > min_y; scan -= tempDist / zoom)
 						{
 							CVector3 pointTemp = Projection3D(CVector3(x2, scan, z2), vp, mRot, perspectiveType, fov, zoom);
@@ -864,16 +874,64 @@ void *MainThread(void *ptr)
 							}
 						}
 					}
+					else
+					{
+						//volumetric fog
+						double density = 0;
+						double fogR = param.fogColour1.R;
+						double fogG = param.fogColour1.G;
+						double fogB = param.fogColour1.B;
+						double colourThresh = param.doubles.fogColour1Distance;
+						double colourThresh2 = param.doubles.fogColour2Distance;
+						double fogReduce = param.doubles.fogDistanceFactor;
+						double fogIntensity = param.doubles.fogDensity;
+						for(int i=buffCount-1; i>=0; i--)
+						{
+							double densityTemp = (stepBuff[i]*fogReduce)/ (distanceBuff[i]*distanceBuff[i] + fogReduce*fogReduce);
+
+							double k = distanceBuff[i] / colourThresh;
+							if (k > 1) k = 1.0;
+							double kn = 1.0 - k;
+							double fogRtemp = (param.fogColour1.R * kn + param.fogColour2.R * k);
+							double fogGtemp = (param.fogColour1.G * kn + param.fogColour2.G * k);
+							double fogBtemp = (param.fogColour1.B * kn + param.fogColour2.B * k);
+
+							double k2 = distanceBuff[i] / colourThresh2 * k;
+							if (k2 > 1) k2 = 1.0;
+							kn = 1.0 - k2;
+							fogRtemp = (fogRtemp * kn + param.fogColour3.R * k2);
+							fogGtemp = (fogGtemp * kn + param.fogColour3.G * k2);
+							fogBtemp = (fogBtemp * kn + param.fogColour3.B * k2);
+
+							double d1 = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
+							double d2 = 1.0 - d1;
+							fogR = fogR * d2 + fogRtemp * d1;
+							fogG = fogG * d2 + fogGtemp * d1;
+							fogB = fogB * d2 + fogBtemp * d1;
+
+							density += densityTemp;
+						}
+
+						density *= fogIntensity;
+
+						volFog.R = fogR;
+						volFog.G = fogG;
+						volFog.B = fogB;
+						int density16 = 65535 * density / (1.0 + density);
+
+						if(!image->IsLowMemMode()) image->PutPixelFogDensity(x, z, density16);
+						pixelData.fogDensity16 = density16;
+					}
 					if(volFog.R>65535.0) volFog.R = 65535.0;
 					if(volFog.G>65535.0) volFog.G = 65535.0;
 					if(volFog.B>65535.0) volFog.B = 65535.0;
 
-					pixelData.volumetricFog.R = volFog.R;
-					pixelData.volumetricFog.G = volFog.G;
-					pixelData.volumetricFog.B = volFog.B;
+					pixelData.volumetricLight.R = volFog.R;
+					pixelData.volumetricLight.G = volFog.G;
+					pixelData.volumetricLight.B = volFog.B;
 					if(!image->IsLowMemMode())
 					{
-						image->PutPixelVolumetricFog(x, z, pixelData.volumetricFog);
+						image->PutPixelVolumetricFog(x, z, pixelData.volumetricLight);
 					}
 
 					if(image->IsLowMemMode())
@@ -938,6 +996,9 @@ void *MainThread(void *ptr)
 	}// next pass
 	WriteLogDouble("Thread finished", thread_number);
 	delete[] vectorsAround;
+	delete[] distanceBuff;
+	delete[] stepBuff;
+
 	return 0;
 }
 
@@ -1520,7 +1581,7 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 	WriteLog("rgbbuf allocated");
 
 	//waiting for refresh window
-	g_usleep(100000);
+	//g_usleep(100000);
 	if (!noGUI)
 	{
 		for (int i = 0; i < 10; i++)
