@@ -452,6 +452,11 @@ void ReadInterface(sParamRender *params)
 
 		params->fractal.doubles.cadd = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_cadd)));
 
+		params->doubles.fogColour1Distance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogColorDistance)));
+		params->doubles.fogColour2Distance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogColorDistance2)));
+		params->doubles.fogDensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogDensity)));
+		params->doubles.fogDistanceFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogDistanceFact)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1.R = color.red;
@@ -477,6 +482,21 @@ void ReadInterface(sParamRender *params)
 		params->background_color3.R = color.red;
 		params->background_color3.G = color.green;
 		params->background_color3.B = color.blue;
+
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog1), &color);
+		params->fogColour1.R = color.red;
+		params->fogColour1.G = color.green;
+		params->fogColour1.B = color.blue;
+
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog2), &color);
+		params->fogColour2.R = color.red;
+		params->fogColour2.G = color.green;
+		params->fogColour2.B = color.blue;
+
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog3), &color);
+		params->fogColour3.R = color.red;
+		params->fogColour3.G = color.green;
+		params->fogColour3.B = color.blue;
 
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
 		params->effectColours.fogColor.R = color.red;
@@ -765,6 +785,11 @@ void WriteInterface(sParamRender *params)
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_cadd), DoubleToString(params->fractal.doubles.cadd));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogColorDistance), DoubleToString(params->doubles.fogColour1Distance));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogColorDistance2), DoubleToString(params->doubles.fogColour2Distance));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogDensity), DoubleToString(params->doubles.fogDensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogDistanceFact), DoubleToString(params->doubles.fogDistanceFactor));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -877,6 +902,21 @@ void WriteInterface(sParamRender *params)
 	color.green = params->background_color3.G;
 	color.blue = params->background_color3.B;
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud3), &color);
+
+	color.red = params->fogColour1.R;
+	color.green = params->fogColour1.G;
+	color.blue = params->fogColour1.B;
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog1), &color);
+
+	color.red = params->fogColour2.R;
+	color.green = params->fogColour2.G;
+	color.blue = params->fogColour2.B;
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog2), &color);
+
+	color.red = params->fogColour3.R;
+	color.green = params->fogColour3.G;
+	color.blue = params->fogColour3.B;
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog3), &color);
 
 	color.red = params->effectColours.fogColor.R;
 	color.green = params->effectColours.fogColor.G;
@@ -1199,6 +1239,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxVolumetricLightMain = gtk_hbox_new(FALSE, 1);
 	Interface.boxVolumetricLightAux = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxVary = gtk_hbox_new(FALSE, 1);
+	Interface.boxVolumetricFog = gtk_hbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1322,6 +1363,13 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
 	Interface.buGetFromClipboard = gtk_button_new_with_label("Paste from clipboard");
 	Interface.buLoadExample = gtk_button_new_with_label("Load example");
+	Interface.buColorFog1 = gtk_color_button_new();
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog1), "Fog colour 1");
+	Interface.buColorFog2 = gtk_color_button_new();
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog2), "Fog colour 2");
+	Interface.buColorFog3 = gtk_color_button_new();
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog3), "Fog colour 3");
+
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1468,6 +1516,11 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxVaryWAdd = gtk_entry_new();
 
 	Interface.edit_cadd = gtk_entry_new();
+
+	Interface.edit_volumetricFogDensity = gtk_entry_new();
+	Interface.edit_volumetricFogColorDistance = gtk_entry_new();
+	Interface.edit_volumetricFogColorDistance2 = gtk_entry_new();
+	Interface.edit_volumetricFogDistanceFact = gtk_entry_new();
 
 	//combo
 	//		fract type
@@ -1921,6 +1974,12 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkBitmapBackground, false, false, 1);
 
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxVolumetricFog, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog density:", 5, Interface.edit_volumetricFogDensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog colour 1 distance:", 5, Interface.edit_volumetricFogColorDistance), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog colour 2 distance:", 5, Interface.edit_volumetricFogColorDistance2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog distance factor:", 5, Interface.edit_volumetricFogDistanceFact), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frPalette, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frPalette), Interface.boxPalette);
 
@@ -1942,11 +2001,14 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frColors), Interface.boxColors);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow colour 1:", Interface.buColorGlow1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow 1:", Interface.buColorGlow1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorGlow2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background colour 1:", Interface.buColorBackgroud1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background 1:", Interface.buColorBackgroud1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorBackgroud2), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorBackgroud3), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Fog 1:", Interface.buColorFog1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorFog2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorFog3), false, false, 1);
 
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.buApplyBrighness, false, false, 1);
