@@ -830,13 +830,7 @@ void *MainThread(void *ptr)
 					double tempDist = last_distance;
 					sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
 
-					bool volFogEnabled = false;
-					for (int i = 0; i < 5; i++)
-					{
-						if (param.volumetricLightEnabled[i]) volFogEnabled = true;
-					}
-
-					if (volFogEnabled)
+					if (param.imageSwitches.volumetricLightEnabled)
 					{
 						//volumetric light
 						for (double scan = y; scan > min_y; scan -= tempDist / zoom)

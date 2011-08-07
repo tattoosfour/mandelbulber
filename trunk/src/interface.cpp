@@ -611,6 +611,13 @@ void ReadInterface(sParamRender *params)
 
 	params->doubles.resolution = 1.0 / params->image_width;
 
+	bool volLightEnabled = false;
+	for (int i = 0; i < 5; i++)
+	{
+		if (params->volumetricLightEnabled[i]) volLightEnabled = true;
+	}
+	params->imageSwitches.volumetricLightEnabled = volLightEnabled;
+
 	params->quiet = false;
 
 	InterfaceData2Params(params);
