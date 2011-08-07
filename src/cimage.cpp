@@ -134,20 +134,20 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 
 	if(sw.raytracedReflections)
 	{
-		R = (double)pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR
+		R = (double)pixel.backgroundBuf16.R + (adj.reflect * pixel.reflectBuf16.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR
 				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		G = (double)pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG
+		G = (double)pixel.backgroundBuf16.G + (adj.reflect * pixel.reflectBuf16.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG
 				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		B = (double)pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB
+		B = (double)pixel.backgroundBuf16.B + (adj.reflect * pixel.reflectBuf16.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB
 				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 	}
 	else
 	{
-		R = (double)pixel.backgroundBuf16.R + adj.brightness * (adj.reflect * pixel.reflectBuf16.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
+		R = (double)pixel.backgroundBuf16.R + (adj.reflect * pixel.reflectBuf16.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
 				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		G = (double)pixel.backgroundBuf16.G + adj.brightness * (adj.reflect * pixel.reflectBuf16.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
+		G = (double)pixel.backgroundBuf16.G + (adj.reflect * pixel.reflectBuf16.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
 				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		B = (double)pixel.backgroundBuf16.B + adj.brightness * (adj.reflect * pixel.reflectBuf16.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
+		B = (double)pixel.backgroundBuf16.B + (adj.reflect * pixel.reflectBuf16.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
 				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
 	}
 
@@ -184,6 +184,10 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	R = R * glowN + glowR * glow;
 	G = G * glowN + glowG * glow;
 	B = B * glowN + glowB * glow;
+
+	R *= adj.brightness;
+	G *= adj.brightness;
+	B *= adj.brightness;
 
 	alpha2 += 65535.0 * glow;
 	if (alpha2 > 65535) alpha2 = 65535;
