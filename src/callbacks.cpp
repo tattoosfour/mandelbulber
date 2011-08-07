@@ -1470,9 +1470,11 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
 	int coloring_seed = Random(999999);
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_color_seed), IntToString(coloring_seed));
-
 	srand(coloring_seed);
-	NowaPaleta(mainImage.GetPalettePtr(), 1.0);
+
+	double saturation = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_colour_saturation)));
+
+	NewPalette(mainImage.GetPalettePtr(), saturation);
 	DrawPalette(mainImage.GetPalettePtr());
 	if (!isRendering && !Interface_data.disableInitRefresh)
 	{
