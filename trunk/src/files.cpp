@@ -155,7 +155,7 @@ void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE 
 	struct jpeg_error_mgr jerr;
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
-	int row_stride;
+	long int row_stride;
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
@@ -181,7 +181,7 @@ void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE 
 
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
-		row_pointer[0] = &image[cinfo.next_scanline * row_stride];
+		row_pointer[0] = &image[(long int)row_stride * cinfo.next_scanline];
 		(void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
 
@@ -371,13 +371,13 @@ void SavePNG16Alpha(const char *filename, int /*quality*/, int width, int height
 	}
 
 	png_bytep *row_pointers = new png_bytep[height];
-	sImageRGBA16 *image16 = new sImageRGBA16[width * height];
+	sImageRGBA16 *image16 = new sImageRGBA16[(unsigned long int)width * height];
 
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			int ptr = x+y*width;
+			unsigned long int ptr = x+y*width;
 			sRGB16 pixel = image->GetPixelImage(x,y);
 			image16[ptr].R = pixel.R;
 			image16[ptr].G = pixel.G;

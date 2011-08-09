@@ -92,15 +92,15 @@ void cImage::ChangeSize(int w, int h)
 
 void cImage::ClearImage(void)
 {
-	memset(image16, 0, sizeof(sRGB16) * width * height);
-	memset(image8, 0, sizeof(sRGB8) * width * height);
-	memset(alpha, 0, sizeof(unsigned short) * width * height);
-	memset(colorIndexBuf16, 0, sizeof(unsigned short) * width * height);
+	memset(image16, 0, (unsigned long int)sizeof(sRGB16) * width * height);
+	memset(image8, 0, (unsigned long int)sizeof(sRGB8) * width * height);
+	memset(alpha, 0, (unsigned long int)sizeof(unsigned short) * width * height);
+	memset(colorIndexBuf16, 0, (unsigned long int)sizeof(unsigned short) * width * height);
 
 	if (!lowMem)
-		memset(complexImage, 0, sizeof(sComplexImage) * width * height);
+		memset(complexImage, 0, (unsigned long int)sizeof(sComplexImage) * width * height);
 
-	for (int i = 0; i < width * height; ++i)
+	for (long int i = 0; i < width * height; ++i)
 		zBuffer[i] = 1e20;
 }
 
@@ -259,7 +259,7 @@ void cImage::CompileImage(void)
 		{
 			for (int x = 0; x < width; x += progressiveFactor)
 			{
-				int address = x + y * width;
+				unsigned long int address = x + y * width;
 				sComplexImage pixel = complexImage[address];
 				unsigned short alpha2 = alpha[address];
 				float zBuf = zBuffer[address];
@@ -364,7 +364,7 @@ void cImage::SetImageParameters(sImageAdjustments adjustments, sEffectColours ef
 
 unsigned char* cImage::ConvertTo8bit(void)
 {
-	for (int i = 0; i < width * height; i++)
+	for (long int i = 0; i < width * height; i++)
 	{
 		image8[i].R = image16[i].R / 256;
 		image8[i].G = image16[i].G / 256;
@@ -400,7 +400,7 @@ unsigned char* cImage::CreatePreview(double scale)
 	int h = height * scale;
 	if (previewAllocated) delete[] preview;
 	preview = new sRGB8[w * h];
-	memset(preview, 0, sizeof(sRGB8) * (w * h));
+	memset(preview, 0, (unsigned long int)sizeof(sRGB8) * (w * h));
 	previewAllocated = true;
 	previewWidth = w;
 	previewHeight = h;
