@@ -1762,6 +1762,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkSphericalFoldingMode, ChangedSphericalFoldingMode);
 	CONNECT_SIGNAL_CLICKED(Interface.checkIFSFoldingMode, ChangedIFSFoldingMode);
 	CONNECT_SIGNAL_CLICKED(Interface.checkLimits, ChangedLimits);
+	CONNECT_SIGNAL_CLICKED(Interface.checkAmbientOcclusion, ChangedAmbientOcclusion);
+	CONNECT_SIGNAL_CLICKED(Interface.checkFastAmbientOcclusion, ChangedFastAmbientOcclusion);
 	CONNECT_SIGNAL_CLICKED(Interface.checkMandelboxRotationsEnable, ChangedMandelboxRotations);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStep, PressedAutoDEStep);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
@@ -2424,6 +2426,8 @@ void CreateInterface(sParamRender *default_settings)
 	ChangedSphericalFoldingMode(NULL, NULL);
 	ChangedLimits(NULL, NULL);
 	ChangedMandelboxRotations(NULL, NULL);
+	ChangedAmbientOcclusion(NULL, NULL);
+	ChangedFastAmbientOcclusion(NULL, NULL);
 
 	//Writing default settings
 	WriteInterface(default_settings);
