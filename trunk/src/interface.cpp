@@ -1367,6 +1367,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buIFSDefaultIcosa = gtk_button_new_with_label("Icosahedron");
 	Interface.buIFSDefaultOcta = gtk_button_new_with_label("Octahedron");
 	Interface.buIFSDefaultMengerSponge = gtk_button_new_with_label("Menger sponge");
+	Interface.buIFSReset = gtk_button_new_with_label("Reset vectors");
 	Interface.buAutoDEStep = gtk_button_new_with_label("LQ");
 	Interface.buAutoDEStepHQ = gtk_button_new_with_label("HQ");
 	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
@@ -1747,6 +1748,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultIcosa, PressedIFSDefaultIcosa);
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultOcta, PressedIFSDefaultOcta);
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSDefaultMengerSponge, PressedIFSDefaultMengerSponge);
+	CONNECT_SIGNAL_CLICKED(Interface.buIFSReset, PressedIFSReset);
 
 	CONNECT_SIGNAL(renderWindow.comboImageScale, ChangedComboScale, "changed");
 	CONNECT_SIGNAL(Interface.comboFractType, ChangedComboFormula, "changed");
@@ -2265,6 +2267,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.boxIFSButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeOffset, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeVectors, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSReset, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSDefaults, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frIFSDefaults), Interface.boxIFSDefaults);

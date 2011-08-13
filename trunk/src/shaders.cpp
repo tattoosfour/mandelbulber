@@ -427,6 +427,106 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 	return light;
 }
 
+sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom, CVector3 lightVector)
+{
+	//volumetric light
+	double tempDist = last_distance;
+	sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+	enumPerspectiveType perspectiveType = param->perspectiveType;
+	double fov = param->doubles.persp;
+	double quality = param->doubles.quality;
+	CVector3 vp = param->doubles.vp;
+	CRotationMatrix mRot;
+	mRot.RotateZ(param->doubles.alfa);
+	mRot.RotateX(param->doubles.beta);
+	mRot.RotateY(param->doubles.gamma);
+	bool max_iter;
+	double DE_factor = param->doubles.DE_factor;
+	double resolution = param->doubles.resolution;
+
+	for (double scan = yStart; scan > min_y; scan -= tempDist / zoom)
+	{
+		CVector3 pointTemp = Projection3D(CVector3(point.x, scan, point.z), vp, mRot, perspectiveType, fov, zoom);
+		double wsp_perspTemp = 1.0 + scan * fov;
+		double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
+		tempDist = CalculateDistance(pointTemp, *calcParam, &max_iter) * DE_factor / param->doubles.volumetricLightQuality + dist_threshTemp;
+		tempDist = tempDist * (1.0 - Random(1000) / 2000.0);
+
+		for (int i = 0; i < 5; i++)
+		{
+			if (i == 0 && param->volumetricLightEnabled[0])
+			{
+				sShaderOutput shadowOutputTemp = MainShadow(param, calcParam, pointTemp, lightVector, wsp_perspTemp, dist_threshTemp);
+				volFog.R += 100.0 * shadowOutputTemp.R * tempDist * param->doubles.volumetricLightIntensity[0] * param->effectColours.mainLightColour.R / 65536.0;
+				volFog.G += 100.0 * shadowOutputTemp.G * tempDist * param->doubles.volumetricLightIntensity[0] * param->effectColours.mainLightColour.G / 65536.0;
+				volFog.B += 100.0 * shadowOutputTemp.B * tempDist * param->doubles.volumetricLightIntensity[0] * param->effectColours.mainLightColour.B / 65536.0;
+			}
+			if (i > 0)
+			{
+				if (Lights[i - 1].enabled && param->volumetricLightEnabled[i])
+				{
+					CVector3 d = Lights[i - 1].position - pointTemp;
+					double distance = d.Length();
+					double distance2 = distance * distance;
+					CVector3 lightVectorTemp = d;
+					lightVectorTemp.Normalize();
+					double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
+					volFog.R += 1000.0 * light * Lights[i - 1].colour.R / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+					volFog.G += 1000.0 * light * Lights[i - 1].colour.G / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+					volFog.B += 1000.0 * light * Lights[i - 1].colour.B / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+				}
+			}
+		}
+	}
+	return volFog;
+}
+
+sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distanceBuff, double *stepBuff, double *densityOut)
+{
+	sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+	double density = 0;
+	double fogR = param->fogColour1.R;
+	double fogG = param->fogColour1.G;
+	double fogB = param->fogColour1.B;
+	double colourThresh = param->doubles.fogColour1Distance;
+	double colourThresh2 = param->doubles.fogColour2Distance;
+	double fogReduce = param->doubles.fogDistanceFactor;
+	double fogIntensity = param->doubles.fogDensity;
+	for (int i = buffCount - 1; i >= 0; i--)
+	{
+		double densityTemp = (stepBuff[i] * fogReduce) / (distanceBuff[i] * distanceBuff[i] + fogReduce * fogReduce);
+
+		double k = distanceBuff[i] / colourThresh;
+		if (k > 1) k = 1.0;
+		double kn = 1.0 - k;
+		double fogRtemp = (param->fogColour1.R * kn + param->fogColour2.R * k);
+		double fogGtemp = (param->fogColour1.G * kn + param->fogColour2.G * k);
+		double fogBtemp = (param->fogColour1.B * kn + param->fogColour2.B * k);
+
+		double k2 = distanceBuff[i] / colourThresh2 * k;
+		if (k2 > 1) k2 = 1.0;
+		kn = 1.0 - k2;
+		fogRtemp = (fogRtemp * kn + param->fogColour3.R * k2);
+		fogGtemp = (fogGtemp * kn + param->fogColour3.G * k2);
+		fogBtemp = (fogBtemp * kn + param->fogColour3.B * k2);
+
+		double d1 = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
+		double d2 = 1.0 - d1;
+		fogR = fogR * d2 + fogRtemp * d1;
+		fogG = fogG * d2 + fogGtemp * d1;
+		fogB = fogB * d2 + fogBtemp * d1;
+
+		density += densityTemp;
+	}
+	density *= fogIntensity;
+	volFog.R = fogR;
+	volFog.G = fogG;
+	volFog.B = fogB;
+
+	*densityOut = density;
+	return volFog;
+}
+
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined)
 {
 	srand(fractParams->auxLightRandomSeed);
@@ -673,6 +773,7 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 		}
 	}
 }
+
 
 /*
 void RenderBuddhabrot(sParamRender *fractParam)

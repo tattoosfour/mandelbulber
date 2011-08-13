@@ -287,6 +287,7 @@ struct sInterface
 	GtkWidget *buDistributeLights;
 	GtkWidget *buIFSNormalizeOffset;
 	GtkWidget *buIFSNormalizeVectors;
+	GtkWidget *buIFSReset;
 	GtkWidget *buAnimationRecordKey;
 	GtkWidget *buAnimationRenderFromKeys;
 	GtkWidget *buUndo;
