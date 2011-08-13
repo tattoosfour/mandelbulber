@@ -444,6 +444,7 @@ struct sInterface
 	GtkWidget *edit_volumetricFogColorDistance;
 	GtkWidget *edit_volumetricFogColorDistance2;
 	GtkWidget *edit_volumetricFogDistanceFact;
+	GtkWidget *edit_fastAoTune;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

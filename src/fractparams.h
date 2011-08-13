@@ -54,6 +54,7 @@ struct sParamRenderD
 	double fogColour2Distance;
 	double fogDistanceFactor;
 	double colourSaturation;
+	double fastAoTune;
 
 	sImageAdjustments imageAdjustments;
 };

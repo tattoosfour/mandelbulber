@@ -800,6 +800,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 	ReadInterface(&params);
 	enumFractalFormula formula = params.fractal.formula;
 
+	/*
 	if (formula == trig_DE || formula == trig_optim)
 	{
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, true);
@@ -809,6 +810,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), false);
 		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
 	}
+	*/
 
 	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == tglad || formula == smoothMandelbox || formula == mandelboxVaryScale4D || formula == hybrid);
 	gtk_widget_set_sensitive(Interface.tab_box_IFS, formula == kaleidoscopic || params.fractal.IFS.foldingMode || formula == hybrid);
