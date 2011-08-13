@@ -1794,6 +1794,33 @@ void PressedIFSDefaultMengerSponge(GtkWidget *widget, gpointer widget_pointer)
 	WriteInterface(&params);
 }
 
+void PressedIFSReset(GtkWidget *widget, gpointer data)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	for(int i=0; i<=8; i++)
+	{
+		params.fractal.IFS.doubles.direction[i].x = 1.0;
+		params.fractal.IFS.doubles.direction[i].y = 0;
+		params.fractal.IFS.doubles.direction[i].z = 0;
+		params.fractal.IFS.enabled[i] = false;
+		params.fractal.IFS.doubles.distance[i] = 0;
+		params.fractal.IFS.doubles.alfa[i] = 0;
+		params.fractal.IFS.doubles.beta[i] = 0;
+		params.fractal.IFS.doubles.gamma[i] = 0;
+		params.fractal.IFS.doubles.intensity[i] = 0;
+	}
+
+	params.fractal.IFS.absX = false;
+	params.fractal.IFS.absY = false;
+	params.fractal.IFS.absZ = false;
+	params.fractal.IFS.mengerSpongeMode = false;
+
+	WriteInterface(&params);
+}
+
 double ScanFractal(sParamRender *params, CVector3 direction)
 {
 

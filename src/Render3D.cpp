@@ -826,95 +826,17 @@ void *MainThread(void *ptr)
 					if(!image->IsLowMemMode()) image->PutPixelGlow(x, z, counter);
 					pixelData.glowBuf16 = counter;
 
-					//************* volumetric fog
-					double tempDist = last_distance;
+					//************* volumetric fog / light
 					sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
-
 					if (param.imageSwitches.volumetricLightEnabled)
 					{
-						//volumetric light
-						for (double scan = y; scan > min_y; scan -= tempDist / zoom)
-						{
-							CVector3 pointTemp = Projection3D(CVector3(x2, scan, z2), vp, mRot, perspectiveType, fov, zoom);
-							double wsp_perspTemp = 1.0 + scan * persp;
-							double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
-							tempDist = CalculateDistance(pointTemp, calcParam, &max_iter) * DE_factor / param.doubles.volumetricLightQuality + dist_threshTemp;
-							tempDist = tempDist * (1.0 - Random(1000)/2000.0);
-
-							for(int i=0; i<5; i++)
-							{
-								if (i == 0 &&  param.volumetricLightEnabled[0])
-								{
-									sShaderOutput shadowOutputTemp = MainShadow(&param, &calcParam, pointTemp, lightVector, wsp_perspTemp, dist_threshTemp);
-									volFog.R += 100.0 * shadowOutputTemp.R * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.R / 65536.0;
-									volFog.G += 100.0 * shadowOutputTemp.G * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.G / 65536.0;
-									volFog.B += 100.0 * shadowOutputTemp.B * tempDist * param.doubles.volumetricLightIntensity[0] * param.effectColours.mainLightColour.B / 65536.0;
-								}
-								if(i>0)
-								{
-									if(Lights[i-1].enabled && param.volumetricLightEnabled[i])
-									{
-										CVector3 d = Lights[i-1].position - pointTemp;
-										double distance = d.Length();
-										double distance2 = distance * distance;
-										CVector3 lightVectorTemp = d;
-										lightVectorTemp.Normalize();
-										double light = AuxShadow(&param, &calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param.penetratingLights);
-										volFog.R += 1000.0 * light * Lights[i-1].colour.R/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
-										volFog.G += 1000.0 * light * Lights[i-1].colour.G/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
-										volFog.B += 1000.0 * light * Lights[i-1].colour.B/65536.0 * param.doubles.volumetricLightIntensity[i]* tempDist / distance2;
-									}
-								}
-							}
-						}
+						volFog = VolumetricLight(&param, &calcParam, CVector3(x2,y,z2), y, min_y, last_distance, zoom, lightVector);
 					}
 					else
 					{
-						//volumetric fog
-						double density = 0;
-						double fogR = param.fogColour1.R;
-						double fogG = param.fogColour1.G;
-						double fogB = param.fogColour1.B;
-						double colourThresh = param.doubles.fogColour1Distance;
-						double colourThresh2 = param.doubles.fogColour2Distance;
-						double fogReduce = param.doubles.fogDistanceFactor;
-						double fogIntensity = param.doubles.fogDensity;
-						for(int i=buffCount-1; i>=0; i--)
-						{
-							double densityTemp = (stepBuff[i]*fogReduce)/ (distanceBuff[i]*distanceBuff[i] + fogReduce*fogReduce);
-
-							double k = distanceBuff[i] / colourThresh;
-							if (k > 1) k = 1.0;
-							double kn = 1.0 - k;
-							double fogRtemp = (param.fogColour1.R * kn + param.fogColour2.R * k);
-							double fogGtemp = (param.fogColour1.G * kn + param.fogColour2.G * k);
-							double fogBtemp = (param.fogColour1.B * kn + param.fogColour2.B * k);
-
-							double k2 = distanceBuff[i] / colourThresh2 * k;
-							if (k2 > 1) k2 = 1.0;
-							kn = 1.0 - k2;
-							fogRtemp = (fogRtemp * kn + param.fogColour3.R * k2);
-							fogGtemp = (fogGtemp * kn + param.fogColour3.G * k2);
-							fogBtemp = (fogBtemp * kn + param.fogColour3.B * k2);
-
-							double d1 = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
-							double d2 = 1.0 - d1;
-							fogR = fogR * d2 + fogRtemp * d1;
-							fogG = fogG * d2 + fogGtemp * d1;
-							fogB = fogB * d2 + fogBtemp * d1;
-
-							density += densityTemp;
-						}
-
-						density *= fogIntensity;
-
-						volFog.R = fogR;
-						volFog.G = fogG;
-						volFog.B = fogB;
-						int density16 = 65535 * density / (1.0 + density);
-
-						if(!image->IsLowMemMode()) image->PutPixelFogDensity(x, z, density16);
-						pixelData.fogDensity16 = density16;
+						double density;
+						volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
+						pixelData.fogDensity16 = 65535 * density / (1.0 + density);
 					}
 					if(volFog.R>65535.0) volFog.R = 65535.0;
 					if(volFog.G>65535.0) volFog.G = 65535.0;
@@ -926,6 +848,7 @@ void *MainThread(void *ptr)
 					if(!image->IsLowMemMode())
 					{
 						image->PutPixelVolumetricFog(x, z, pixelData.volumetricLight);
+						image->PutPixelFogDensity(x, z, pixelData.fogDensity16);
 					}
 
 					if(image->IsLowMemMode())

@@ -43,6 +43,8 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double wsp_persp, double dist_thresh,
 		sShaderOutput *specularAuxOut);
 double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector, bool linear);
+sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom, CVector3 lightVector);
+sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distanceBuff, double *stepBuff, double *densityOut);
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
 void PostRenderingLights(cImage *image, sParamRender *fractParam);
 void RenderBuddhabrot(sParamRender *fractParam);
