@@ -899,6 +899,32 @@ void ChangedLimits(GtkWidget *widget, gpointer data)
 	}
 }
 
+void ChangedAmbientOcclusion(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_AmbientOcclusionQuality, true);
+		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_AmbientOcclusionQuality, false);
+		gtk_widget_set_sensitive(Interface.checkFastAmbientOcclusion, false);
+	}
+}
+
+void ChangedFastAmbientOcclusion(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion)))
+	{
+		gtk_widget_set_sensitive(Interface.edit_fastAoTune, true);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(Interface.edit_fastAoTune, false);
+	}
+}
+
 void ChangedMandelboxRotations(GtkWidget *widget, gpointer data)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkMandelboxRotationsEnable)))

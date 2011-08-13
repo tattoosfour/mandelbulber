@@ -53,6 +53,8 @@ void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data);
 void ChangedJulia(GtkWidget *widget, gpointer data);
 void ChangedSphericalFoldingMode(GtkWidget *widget, gpointer data);
 void ChangedLimits(GtkWidget *widget, gpointer data);
+void ChangedAmbientOcclusion(GtkWidget *widget, gpointer data);
+void ChangedFastAmbientOcclusion(GtkWidget *widget, gpointer data);
 void ChangedMandelboxRotations(GtkWidget *widget, gpointer data);
 void ChangedIFSFoldingMode(GtkWidget *widget, gpointer data);
 void ChangedSliderFog(GtkWidget *widget, gpointer data);
