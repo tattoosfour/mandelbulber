@@ -66,6 +66,25 @@ sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point)
 	return output;
 }
 
+sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality)
+{
+	double delta = dist_thresh;
+	double aoTemp = 0;
+	for(int i=1; i<quality*quality; i++)
+	{
+		double scan = i*i*delta;
+		CVector3 pointTemp = point + normal * scan;
+		bool max_iter;
+		double dist = CalculateDistance(pointTemp, *calcParam, &max_iter);
+		aoTemp += 1.0/(pow(2.0,i)) * (scan - tune*dist)/dist_thresh;
+		//if(dist < 0.5*dist_thresh) break;
+	}
+	double ao = 1.0 - 0.2*aoTemp;
+	if(ao < 0) ao = 0;
+	sShaderOutput output = {ao,ao,ao};
+	return output;
+}
+
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount, CVector3 normal)
 {

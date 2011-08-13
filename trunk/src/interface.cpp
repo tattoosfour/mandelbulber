@@ -279,6 +279,7 @@ void ReadInterface(sParamRender *params)
 		params->doubles.imageAdjustments.specular = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_specular)));
 		params->global_ilumination = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion));
 		params->fastGlobalIllumination = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion));
+		params->doubles.fastAoTune = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fastAoTune)));
 		params->globalIlumQuality = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_AmbientOcclusionQuality)));
 		params->shadow = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkShadow));
 		params->fractal.iterThresh = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterThresh));
@@ -798,6 +799,8 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogColorDistance2), DoubleToString(params->doubles.fogColour2Distance));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogDensity), DoubleToString(params->doubles.fogDensity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_volumetricFogDistanceFact), DoubleToString(params->doubles.fogDistanceFactor));
+
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fastAoTune), DoubleToString(params->doubles.fastAoTune));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -1533,6 +1536,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_volumetricFogColorDistance2 = gtk_entry_new();
 	Interface.edit_volumetricFogDistanceFact = gtk_entry_new();
 
+	Interface.edit_fastAoTune = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1593,7 +1598,7 @@ void CreateInterface(sParamRender *default_settings)
 	//checkboxes
 	Interface.checkShadow = gtk_check_button_new_with_label("Shadows");
 	Interface.checkAmbientOcclusion = gtk_check_button_new_with_label("Ambient occlusion");
-	Interface.checkFastAmbientOcclusion = gtk_check_button_new_with_label("Ambient occlusion fast mode");
+	Interface.checkFastAmbientOcclusion = gtk_check_button_new_with_label("AO fast mode");
 	Interface.checkIterThresh = gtk_check_button_new_with_label("Maxiter threshold mode");
 	Interface.checkJulia = gtk_check_button_new_with_label("Julia mode");
 	Interface.checkSlowShading = gtk_check_button_new_with_label("Not DE Shading mode (slow)");
@@ -1973,15 +1978,16 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxShading2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("1,0", "glow:", 5, Interface.edit_glow), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("0,0", "reflection:", 5, Interface.edit_reflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), Interface.checkRaytracedReflections, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("5", "reflections depth:", 5, Interface.edit_reflectionsMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("4", "ambient occlusion quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("4", "AO quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("1,0", "Fast AO tune:", 5, Interface.edit_fastAoTune), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkShadow, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkAmbientOcclusion, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkFastAmbientOcclusion, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkSlowShading, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkRaytracedReflections, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkBitmapBackground, false, false, 1);

@@ -32,6 +32,7 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount, CVector3 normal);
 sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point);
+sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality);
 CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh);
 sShaderOutput MainShading(CVector3 normal, CVector3 lightVector);
 sShaderOutput MainSpecular(CVector3 normal, CVector3 lightVector, CVector3 viewVector);

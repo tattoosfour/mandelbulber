@@ -177,6 +177,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "shadows_intensity", params.doubles.imageAdjustments.directLight, 0.7, compare);
 	fprintfDot(fileSettings, "ambient_occlusion", params.doubles.imageAdjustments.globalIlum, 1.0, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_quality", params.globalIlumQuality, 4, compare);
+	fprintfDot(fileSettings, "ambient_occlusion_fast_tune", params.doubles.fastAoTune, 1.0, compare);
 	fprintfDot(fileSettings, "shading", params.doubles.imageAdjustments.shading, 1.0, compare);
 	fprintfDot(fileSettings, "specular", params.doubles.imageAdjustments.specular, 1.0, compare);
 	fprintfDot(fileSettings, "glow_intensity", params.doubles.imageAdjustments.glow_intensity, 1.0, compare);
@@ -655,6 +656,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "shadows_intensity")) params.doubles.imageAdjustments.directLight = atof2(str2);
 	else if (!strcmp(str1, "ambient_occlusion")) params.doubles.imageAdjustments.globalIlum = atof2(str2);
 	else if (!strcmp(str1, "ambient_occlusion_quality")) params.globalIlumQuality = atoi(str2);
+	else if (!strcmp(str1, "ambient_occlusion_fast_tune")) params.doubles.fastAoTune = atof2(str2);
 	else if (!strcmp(str1, "shading")) params.doubles.imageAdjustments.shading = atof2(str2);
 	else if (!strcmp(str1, "specular")) params.doubles.imageAdjustments.specular = atof2(str2);
 	else if (!strcmp(str1, "glow_intensity")) params.doubles.imageAdjustments.glow_intensity = atof2(str2);

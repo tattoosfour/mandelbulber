@@ -148,6 +148,8 @@ void *MainThread(void *ptr)
 	//distance buffer
 	double *distanceBuff = new double[10002];
 	double *stepBuff = new double[10002];
+	double *distanceBuffRefl = new double[10002];
+	double *stepBuffRefl = new double[10002];
 	int buffCount = 0;
 
 	//calculating vectors for AmbientOcclusion
@@ -176,7 +178,9 @@ void *MainThread(void *ptr)
 			{
 				counter++;
 			}
+			if(counter>=10000) break;
 		}
+		if(counter>=10000) break;
 	}
 	if (counter == 0)
 	{
@@ -568,7 +572,8 @@ void *MainThread(void *ptr)
 							//ambient occlusion based on orbit traps
 							if (fastGlobalIllumination)
 							{
-								AO = FastAmbientOcclusion(&calcParam, point);
+								//AO = FastAmbientOcclusion(&calcParam, point);
+								AO = FastAmbientOcclusion2(&calcParam, point, vn, dist_thresh, param.doubles.fastAoTune, param.globalIlumQuality);
 							}
 							//ambient occlusion based on many rays in spherical directions
 							else
@@ -610,6 +615,8 @@ void *MainThread(void *ptr)
 							sShaderOutput ambientBuff[10];
 							sShaderOutput auxLightsBuff[10];
 							sShaderOutput auxSpecBuff[10];
+							sShaderOutput volFogBuff[10];
+							double fogDensityBuff[10];
 							double fogBuff[10];
 							sShaderOutput finishBackgroud;
 							double glowBuff1 = 0.0;
@@ -625,11 +632,19 @@ void *MainThread(void *ptr)
 								bool binary = false;
 								double step = dist_thresh;
 								int binarySearchCount = 0;
+								int buffCountRefl = 0;
 								for(double scan = dist_thresh*2.0; scan<100.0; scan += step)
 								{
 									glowBuff2++;
 									CVector3 pointScan = pointTemp + viewTemp * scan;
 									distTemp = CalculateDistance(pointScan, calcParam, &maxIterTemp);
+									if(!binary)
+									{
+										distanceBuffRefl[buffCountRefl] = distTemp;
+										stepBuffRefl[buffCountRefl] = step;
+										buffCountRefl++;
+										if(buffCountRefl>=10000) break;
+									}
 									if((distTemp < dist_thresh && distTemp > dist_thresh * search_limit) || binarySearchCount > 20)
 									{
 										surfaceFound = true;
@@ -680,12 +695,18 @@ void *MainThread(void *ptr)
 									}
 								}
 								glowBuff1 += glowBuff2 * pow(param.doubles.imageAdjustments.reflect, i + 1.0);
+
+								double density = 0;
+								volFogBuff[i] = VolumetricFog(&param, buffCountRefl, distanceBuffRefl, stepBuffRefl, &density);
+								fogDensityBuff[i] = density / (1.0 + density);
+
 								if(!surfaceFound)
 								{
 									finishBackgroud = TexturedBackground(&param, viewTemp);
 									break;
 								}
 							}
+
 							double reflect = param.doubles.imageAdjustments.reflect;
 
 							bool wasMaxReflections = true;
@@ -704,6 +725,12 @@ void *MainThread(void *ptr)
 									envMapping.G = finishBackgroud.G * reflect;
 									envMapping.B = finishBackgroud.B * reflect;
 								}
+
+								double fogN = 1.0 - fogDensityBuff[0];
+								if(fogN<0) fogN = 0;
+								envMapping.R = envMapping.R * fogN + volFogBuff[0].R/65536.0 * fogDensityBuff[0];
+								envMapping.G = envMapping.G * fogN + volFogBuff[0].G/65536.0 * fogDensityBuff[0];
+								envMapping.B = envMapping.B * fogN + volFogBuff[0].B/65536.0 * fogDensityBuff[0];
 							}
 
 							for(int i=numberOfReflections; i>=0; i--)
@@ -745,6 +772,12 @@ void *MainThread(void *ptr)
 										+ (specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity + auxSpecBuff[i].G)*reflect*fogTransparency;
 								envMapping.B = (1.0-reflect)*reflectTemp.B + (reflect)*envMapping.B
 										+ (specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity + auxSpecBuff[i].B)*reflect*fogTransparency;
+
+								double fogN = 1.0 - fogDensityBuff[i];
+								if(fogN<0) fogN = 0;
+								envMapping.R = envMapping.R * fogN + volFogBuff[i].R/65536.0 * fogDensityBuff[i];
+								envMapping.G = envMapping.G * fogN + volFogBuff[i].G/65536.0 * fogDensityBuff[i];
+								envMapping.B = envMapping.B * fogN + volFogBuff[i].B/65536.0 * fogDensityBuff[i];
 							}
 							double glow = glowBuff1 * param.doubles.imageAdjustments.glow_intensity / 512.0;
 							double glowN = 1.0 - glow;
@@ -915,6 +948,8 @@ void *MainThread(void *ptr)
 	delete[] vectorsAround;
 	delete[] distanceBuff;
 	delete[] stepBuff;
+	delete[] distanceBuffRefl;
+	delete[] stepBuffRefl;
 
 	return 0;
 }
