@@ -37,6 +37,18 @@ double dMax(double a, double b, double c)
 	return c;
 }
 
+double dMin(double a, double b, double c)
+{
+	if(a < b) {
+		if (a < c)
+			return a;
+		return c;
+	}
+	if (b < c)
+		return b;
+	return c;
+}
+
 void QuickSortZBuffer(sSortZ *dane, int l, int p)
 {
   int i,j; //robocze indeksy

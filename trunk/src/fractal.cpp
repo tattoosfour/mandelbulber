@@ -15,6 +15,7 @@
 
 #include "Render3D.h"
 #include "interface.h"
+#include "primitives.h"
 
 /**
  * Compute the fractal at the point, in one of the various modes
@@ -977,10 +978,12 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 //******************* Calculate distance *******************8
 
-double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
+double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 {
 	int L;
 	double distance;
+	params.specialColour = 0;
+
 	if (params.limits_enabled)
 	{
 		bool limit = false;
@@ -1053,11 +1056,6 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 					*max_iter = false;
 			}
 		}
-
-		if (distance < 0)
-			distance = 0;
-
-		return distance;
 	}
 	else
 	{
@@ -1116,12 +1114,60 @@ double CalculateDistance(CVector3 point, const sFractal &params, bool *max_iter)
 					*max_iter = false;
 			}
 		}
-
-		if (distance < 0) 
-			distance = 0;
-
-		return distance;
 	}
+
+	//plane
+	if (params.primitives.planeEnable)
+	{
+		double planeDistance = PrimitivePlane(point, params.doubles.primitives.planeCentre, params.doubles.primitives.planeNormal);
+		if(planeDistance < distance) 	params.specialColour = 253;
+		distance = (planeDistance < distance) ? planeDistance : distance;
+
+	}
+
+	//box
+	if (params.primitives.boxEnable)
+	{
+		double boxDistance = PrimitiveBox(point, params.doubles.primitives.boxCentre, params.doubles.primitives.boxSize);
+		if(boxDistance < distance) 	params.specialColour = 252;
+		distance = (boxDistance < distance) ? boxDistance : distance;
+	}
+
+	//inverted box
+	if (params.primitives.invertedBoxEnable)
+	{
+		double boxDistance = PrimitiveInvertedBox(point, params.doubles.primitives.invertedBoxCentre, params.doubles.primitives.invertedBoxSize);
+		if(boxDistance < distance) 	params.specialColour = 251;
+		distance = (boxDistance < distance) ? boxDistance : distance;
+	}
+
+	//sphere
+	if (params.primitives.sphereEnable)
+	{
+		double sphereDistance = PrimitiveSphere(point, params.doubles.primitives.sphereCentre, params.doubles.primitives.sphereRadius);
+		if(sphereDistance < distance) 	params.specialColour = 250;
+		distance = (sphereDistance < distance) ? sphereDistance : distance;
+	}
+
+	//invertedSphere
+	if (params.primitives.invertedSphereEnable)
+	{
+		double sphereDistance = PrimitiveInvertedSphere(point, params.doubles.primitives.invertedSphereCentre, params.doubles.primitives.invertedSphereRadius);
+		if(sphereDistance < distance) 	params.specialColour = 249;
+		distance = (sphereDistance < distance) ? sphereDistance : distance;
+	}
+
+	//water
+	if (params.primitives.waterEnable)
+	{
+		double waterDistance = PrimitiveWater(point, params.doubles.primitives.waterHeight, params.doubles.primitives.waterAmplitude, params.doubles.primitives.waterLength, params.primitives.waterIterations);
+		if(waterDistance < distance) 	params.specialColour = 248;
+		distance = (waterDistance < distance) ? waterDistance : distance;
+	}
+
+	if (distance < 0) distance = 0;
+
+	return distance;
 }
 
 // force template instantiation

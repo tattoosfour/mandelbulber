@@ -291,6 +291,9 @@ void *MainThread(void *ptr)
 					bool firstLoop = true;
 					double lastDist = 0;
 
+					calcParam.specialColour = 0;
+					int specialColour = 0;
+
 					//main loop for y values (depth)
 					for (double y = min_y; y < max_y; y += stepYpersp)
 					{
@@ -516,6 +519,8 @@ void *MainThread(void *ptr)
 					if (counter2 < 256) histogram2[counter2]++;
 					else histogram2[255]++;
 
+					if(calcParam.specialColour != 0) specialColour = calcParam.specialColour;
+
 					sComplexImage pixelData;
 					memset(&pixelData,0,sizeof(sComplexImage));
 
@@ -596,6 +601,7 @@ void *MainThread(void *ptr)
 
 						//coloured surface of fractal
 						if (fractColor)	colorIndex = SurfaceColour(&calcParam, point);
+						if (specialColour != 0) colorIndex = specialColour*256;
 
 						//--------------- raytraced reflection
 						if(param.imageSwitches.raytracedReflections)
@@ -638,6 +644,7 @@ void *MainThread(void *ptr)
 									glowBuff2++;
 									CVector3 pointScan = pointTemp + viewTemp * scan;
 									distTemp = CalculateDistance(pointScan, calcParam, &maxIterTemp);
+									specialColour = calcParam.specialColour;
 									if(!binary)
 									{
 										distanceBuffRefl[buffCountRefl] = distTemp;
@@ -658,7 +665,9 @@ void *MainThread(void *ptr)
 										if (global_ilumination)
 										{
 											if (fastGlobalIllumination)
-												ambientBuff[i] = FastAmbientOcclusion(&calcParam, pointTemp);
+											{
+												ambientBuff[i] = FastAmbientOcclusion2(&calcParam, pointTemp, vnTemp, dist_thresh, param.doubles.fastAoTune, param.globalIlumQuality);
+											}
 											else
 												ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vnTemp);
 										}
@@ -666,6 +675,7 @@ void *MainThread(void *ptr)
 										auxLightsBuff[i] = AuxLightsShader(&param, &calcParam, pointTemp, vnTemp, viewTemp, wsp_persp, dist_thresh, &auxSpecBuff[i]);
 
 										int colorIndexTemp = SurfaceColour(&calcParam, pointTemp);
+										if (specialColour != 0) colorIndexTemp = specialColour*256;
 										sRGB color = { 256, 256, 256 };
 										if (param.imageSwitches.coloringEnabled)
 										{
@@ -738,14 +748,11 @@ void *MainThread(void *ptr)
 								sShaderOutput reflectTemp;
 								double mainIntensity = param.doubles.imageAdjustments.mainLightIntensity * param.doubles.imageAdjustments.directLight;
 								reflectTemp.R = shadeBuff[i].R * shadowBuff[i].R * colorBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity
-										+ ambientBuff[i].R
-										+ auxLightsBuff[i].R * colorBuff[i].R;
+										+ (ambientBuff[i].R + auxLightsBuff[i].R) * colorBuff[i].R;
 								reflectTemp.G = shadeBuff[i].R * shadowBuff[i].G * colorBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity
-										+ ambientBuff[i].R
-										+ auxLightsBuff[i].G * colorBuff[i].G;
+										+ (ambientBuff[i].G + auxLightsBuff[i].G) * colorBuff[i].G;
 								reflectTemp.B = shadeBuff[i].R * shadowBuff[i].B * colorBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity
-										+ ambientBuff[i].R
-										+ auxLightsBuff[i].B * colorBuff[i].B;
+										+ (ambientBuff[i].B + auxLightsBuff[i].B) * colorBuff[i].B;
 
 								double fogTransparency = 1.0;
 								if(param.imageSwitches.fogEnabled)
@@ -766,12 +773,13 @@ void *MainThread(void *ptr)
 									envMapping = reflectTemp;
 								}
 
-								envMapping.R = (1.0-reflect)*reflectTemp.R + (reflect)*envMapping.R
+								envMapping.R = reflectTemp.R + (reflect)*envMapping.R
 										+ (specularBuff[i].R * shadowBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity + auxSpecBuff[i].R)*reflect*fogTransparency;
-								envMapping.G = (1.0-reflect)*reflectTemp.G + (reflect)*envMapping.G
+								envMapping.G = reflectTemp.G + (reflect)*envMapping.G
 										+ (specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity + auxSpecBuff[i].G)*reflect*fogTransparency;
-								envMapping.B = (1.0-reflect)*reflectTemp.B + (reflect)*envMapping.B
+								envMapping.B = reflectTemp.B + (reflect)*envMapping.B
 										+ (specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity + auxSpecBuff[i].B)*reflect*fogTransparency;
+
 
 								double fogN = 1.0 - fogDensityBuff[i];
 								if(fogN<0) fogN = 0;

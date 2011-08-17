@@ -47,6 +47,13 @@ void NewPalette(sRGB *p, double saturation)
 	p[255].R = 255;
 	p[255].G = 255;
 	p[255].B = 255;
+	p[254].R = 0;
+	p[254].G = 0;
+	p[254].B = 0;
+	p[253].R = 0;
+	p[253].G = 20;
+	p[253].B = 40;
+
 }
 
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)

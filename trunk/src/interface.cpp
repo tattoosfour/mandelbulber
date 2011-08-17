@@ -459,6 +459,44 @@ void ReadInterface(sParamRender *params)
 		params->doubles.fogDensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogDensity)));
 		params->doubles.fogDistanceFactor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_volumetricFogDistanceFact)));
 
+		params->fractal.doubles.primitives.planeCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreX)));
+		params->fractal.doubles.primitives.planeCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreY)));
+		params->fractal.doubles.primitives.planeCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreZ)));
+		params->fractal.doubles.primitives.planeNormal.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalX)));
+		params->fractal.doubles.primitives.planeNormal.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalY)));
+		params->fractal.doubles.primitives.planeNormal.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalZ)));
+		params->fractal.primitives.planeEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitivePlaneEnabled));
+		params->fractal.doubles.primitives.boxCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreX)));
+		params->fractal.doubles.primitives.boxCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreY)));
+		params->fractal.doubles.primitives.boxCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreZ)));
+		params->fractal.doubles.primitives.boxSize.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeX)));
+		params->fractal.doubles.primitives.boxSize.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeY)));
+		params->fractal.doubles.primitives.boxSize.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeZ)));
+		params->fractal.primitives.boxEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveBoxEnabled));
+		params->fractal.doubles.primitives.invertedBoxCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreX)));
+		params->fractal.doubles.primitives.invertedBoxCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreY)));
+		params->fractal.doubles.primitives.invertedBoxCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreZ)));
+		params->fractal.doubles.primitives.invertedBoxSize.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeX)));
+		params->fractal.doubles.primitives.invertedBoxSize.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeY)));
+		params->fractal.doubles.primitives.invertedBoxSize.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeZ)));
+		params->fractal.primitives.invertedBoxEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedBoxEnabled));
+		params->fractal.doubles.primitives.sphereCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreX)));
+		params->fractal.doubles.primitives.sphereCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreY)));
+		params->fractal.doubles.primitives.sphereCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreZ)));
+		params->fractal.doubles.primitives.sphereRadius = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveSphereRadius)));
+		params->fractal.primitives.sphereEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveSphereEnabled));
+		params->fractal.doubles.primitives.invertedSphereCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreX)));
+		params->fractal.doubles.primitives.invertedSphereCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreY)));
+		params->fractal.doubles.primitives.invertedSphereCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreZ)));
+		params->fractal.doubles.primitives.invertedSphereRadius = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereRadius)));
+		params->fractal.primitives.invertedSphereEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedSphereEnabled));
+		params->fractal.doubles.primitives.waterHeight = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterHeight)));
+		params->fractal.doubles.primitives.waterAmplitude = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterAmplitude)));
+		params->fractal.doubles.primitives.waterLength = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterLength)));
+		params->fractal.primitives.waterIterations = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations)));
+		params->fractal.primitives.waterEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled));
+
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1.R = color.red;
@@ -1116,6 +1154,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tabs = gtk_notebook_new();
 
 	Interface.tab_label_view = gtk_label_new("View");
+	Interface.tab_label_engine = gtk_label_new("Engine");
 	Interface.tab_label_fractal = gtk_label_new("Fractal");
 	Interface.tab_label_hybrid = gtk_label_new("Hybrid");
 	Interface.tab_label_mandelbox = gtk_label_new("Mandelbox");
@@ -1128,6 +1167,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_label_about = gtk_label_new("About...");
 
 	Interface.tab_box_view = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_engine = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_fractal = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_shaders = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_image = gtk_vbox_new(FALSE, 1);
@@ -1140,6 +1180,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_box_mandelbox = gtk_vbox_new(FALSE, 1);
 
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_view), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_engine), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_fractal), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_shaders), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_image), 5);
@@ -1149,6 +1190,19 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_IFS), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_about), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_hybrid), 5);
+
+	Interface.tabsPrimitives = gtk_notebook_new();
+	Interface.tab_label_primitivePlane = gtk_label_new("Plane");
+	Interface.tab_label_primitiveBox = gtk_label_new("Box");
+	Interface.tab_label_primitiveSphere = gtk_label_new("Sphere");
+
+	Interface.tab_box_primitivePlane = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_primitiveBox = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_primitiveSphere = gtk_vbox_new(FALSE, 1);
+
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_primitivePlane), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_primitiveBox), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_primitiveSphere), 5);
 
 	//boxes
 	Interface.boxMain = gtk_vbox_new(FALSE, 1);
@@ -1252,6 +1306,25 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxVolumetricLightAux = gtk_hbox_new(FALSE, 1);
 	Interface.boxMandelboxVary = gtk_hbox_new(FALSE, 1);
 	Interface.boxVolumetricFog = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitives = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitivePlane = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitivePlane1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitivePlane2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveBox = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitiveBox1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveBox2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedBox = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedBox1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedBox2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveSphere = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitiveSphere1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveSphere2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedSphere = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedSphere1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveInvertedSphere2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveWater = gtk_vbox_new(FALSE, 1);
+	Interface.boxPrimitiveWater1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxPrimitiveWater2 = gtk_hbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1299,6 +1372,13 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMandelboxColoring = gtk_frame_new("Mandelbox colouring parameters");
 	Interface.frVolumetricLight = gtk_frame_new("Volumetric light");
 	Interface.frMandelboxVary = gtk_frame_new("Mandelbox vary scale 4D");
+	Interface.frPrimitives = gtk_frame_new("Primitive shapes");
+	Interface.frPrimitivePlane = gtk_frame_new("Plane");
+	Interface.frPrimitiveBox = gtk_frame_new("Box");
+	Interface.frPrimitiveInvertedBox = gtk_frame_new("Inverted box");
+	Interface.frPrimitiveSphere = gtk_frame_new("Sphere");
+	Interface.frPrimitiveInvertedSphere = gtk_frame_new("Inverted sphere");
+	Interface.frPrimitiveWater = gtk_frame_new("Water");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1538,6 +1618,37 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_fastAoTune = gtk_entry_new();
 
+	Interface.edit_primitivePlaneCentreX = gtk_entry_new();
+	Interface.edit_primitivePlaneCentreY = gtk_entry_new();
+	Interface.edit_primitivePlaneCentreZ = gtk_entry_new();
+	Interface.edit_primitivePlaneNormalX = gtk_entry_new();
+	Interface.edit_primitivePlaneNormalY = gtk_entry_new();
+	Interface.edit_primitivePlaneNormalZ = gtk_entry_new();
+	Interface.edit_primitiveBoxCentreX = gtk_entry_new();
+	Interface.edit_primitiveBoxCentreY = gtk_entry_new();
+	Interface.edit_primitiveBoxCentreZ = gtk_entry_new();
+	Interface.edit_primitiveBoxSizeX = gtk_entry_new();
+	Interface.edit_primitiveBoxSizeY = gtk_entry_new();
+	Interface.edit_primitiveBoxSizeZ = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxCentreX = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxCentreY = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxCentreZ = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxSizeX = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxSizeY = gtk_entry_new();
+	Interface.edit_primitiveInvertedBoxSizeZ = gtk_entry_new();
+	Interface.edit_primitiveSphereCentreX = gtk_entry_new();
+	Interface.edit_primitiveSphereCentreY = gtk_entry_new();
+	Interface.edit_primitiveSphereCentreZ = gtk_entry_new();
+	Interface.edit_primitiveSphereRadius = gtk_entry_new();
+	Interface.edit_primitiveInvertedSphereCentreX = gtk_entry_new();
+	Interface.edit_primitiveInvertedSphereCentreY = gtk_entry_new();
+	Interface.edit_primitiveInvertedSphereCentreZ = gtk_entry_new();
+	Interface.edit_primitiveInvertedSphereRadius = gtk_entry_new();
+	Interface.edit_primitiveWaterHeight = gtk_entry_new();
+	Interface.edit_primitiveWaterAmplitude = gtk_entry_new();
+	Interface.edit_primitiveWaterLength = gtk_entry_new();
+	Interface.edit_primitiveWaterIterations = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1638,6 +1749,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkVolumetricLightAux4Enabled = gtk_check_button_new_with_label("");
 	Interface.checkPenetratingLights = gtk_check_button_new_with_label("Penetrating lights");
 	Interface.checkRaytracedReflections = gtk_check_button_new_with_label("Ray-traced reflections");
+	Interface.checkPrimitivePlaneEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveBoxEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveInvertedBoxEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveSphereEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -1893,7 +2010,8 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.checkIFSFoldingMode, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalRayMarching, false, false, 1);
+	//tab --- engine
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frFractalRayMarching, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frFractalRayMarching), Interface.boxFractalRayMarching);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxQuality, false, false, 1);
@@ -1920,7 +2038,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, Interface.edit_viewMinDistance), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("20", "Maximum render distance:", 10, Interface.edit_viewMaxDistance), false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frLimits, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frLimits, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLimits), Interface.boxLimits);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.tableLimits, false, false, 1);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "x min:", 20, Interface.edit_amin), 0, 1, 0, 1);
@@ -1930,6 +2048,79 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "y max:", 20, Interface.edit_bmax), 1, 2, 1, 2);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "z max:", 20, Interface.edit_cmax), 2, 3, 1, 2);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.checkLimits, false, false, 1);
+
+	//primitives
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frPrimitives, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitives), Interface.boxPrimitives);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitives), Interface.tabsPrimitives, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitivePlane), Interface.frPrimitivePlane, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitivePlane), Interface.boxPrimitivePlane);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitivePlaneCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 10, Interface.edit_primitivePlaneCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "z:", 10, Interface.edit_primitivePlaneCentreZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Normal x:", 5, Interface.edit_primitivePlaneNormalX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 5, Interface.edit_primitivePlaneNormalY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("-1,0", "z:", 5, Interface.edit_primitivePlaneNormalZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitivePlaneEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitivePlane), Interface.frPrimitiveWater, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveWater), Interface.boxPrimitiveWater);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.0", "Level:", 10, Interface.edit_primitiveWaterHeight), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.1", "Wave amplitude:", 10, Interface.edit_primitiveWaterAmplitude), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("1.0", "Wave length:", 10, Interface.edit_primitiveWaterLength), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 10, Interface.edit_primitiveWaterIterations), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.checkPrimitiveWaterEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBox), Interface.frPrimitiveBox, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveBox), Interface.boxPrimitiveBox);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveBoxCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveBoxCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveBoxCentreZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "Size x:", 10, Interface.edit_primitiveBoxSizeX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "y:", 10, Interface.edit_primitiveBoxSizeY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "z:", 10, Interface.edit_primitiveBoxSizeZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.checkPrimitiveBoxEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBox), Interface.frPrimitiveInvertedBox, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveInvertedBoxCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveInvertedBoxCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveInvertedBoxCentreZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "Size x:", 10, Interface.edit_primitiveInvertedBoxSizeX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "y:", 10, Interface.edit_primitiveInvertedBoxSizeY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "z:", 10, Interface.edit_primitiveInvertedBoxSizeZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.checkPrimitiveInvertedBoxEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphere), Interface.frPrimitiveSphere, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveSphere), Interface.boxPrimitiveSphere);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveSphereCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveSphereCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveSphereCentreZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("2.0", "z:", 10, Interface.edit_primitiveSphereRadius), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.checkPrimitiveSphereEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphere), Interface.frPrimitiveInvertedSphere, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveInvertedSphereCentreX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveInvertedSphereCentreY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveInvertedSphereCentreZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("2.0", "z:", 10, Interface.edit_primitiveInvertedSphereRadius), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.checkPrimitiveInvertedSphereEnabled, false, false, 1);
+
 
 	//frame image
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImage, false, false, 1);
@@ -2401,17 +2592,22 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.progressBar, false, false, 1);
 
 	//tabs
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_view, Interface.tab_label_view);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_engine, Interface.tab_label_engine);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_fractal, Interface.tab_label_fractal);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_IFS, Interface.tab_label_IFS);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_hybrid, Interface.tab_label_hybrid);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_mandelbox, Interface.tab_label_mandelbox);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_view, Interface.tab_label_view);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders, Interface.tab_label_shaders);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBox, Interface.tab_label_primitiveBox);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphere, Interface.tab_label_primitiveSphere);
 
 	//main window pack
 	gtk_container_add(GTK_CONTAINER(window_interface), Interface.boxMain);
