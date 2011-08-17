@@ -10,8 +10,8 @@
 
 #include "fractparams.h"
 
-#define MANDELBULBER_VERSION 1.07
-#define MANDELBULBER_VERSION_STR "1.07"
+#define MANDELBULBER_VERSION 1.08
+#define MANDELBULBER_VERSION_STR "1.08"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -76,6 +76,11 @@ struct sInterface
 	GtkWidget *tab_label_shaders;
 	GtkWidget *tab_label_hybrid;
 	GtkWidget *tab_label_mandelbox;
+	GtkWidget *tab_label_engine;
+	GtkWidget *tabsPrimitives;
+	GtkWidget *tab_label_primitivePlane;
+	GtkWidget *tab_label_primitiveBox;
+	GtkWidget *tab_label_primitiveSphere;
 
 	GtkWidget *tab_box_view;
 	GtkWidget *tab_box_fractal;
@@ -88,6 +93,10 @@ struct sInterface
 	GtkWidget *tab_box_shaders;
 	GtkWidget *tab_box_hybrid;
 	GtkWidget *tab_box_mandelbox;
+	GtkWidget *tab_box_engine;
+	GtkWidget *tab_box_primitivePlane;
+	GtkWidget *tab_box_primitiveBox;
+	GtkWidget *tab_box_primitiveSphere;
 
 	GtkWidget *boxMain;
 	GtkWidget *boxButtons;
@@ -191,6 +200,25 @@ struct sInterface
 	GtkWidget *boxVolumetricLightAux;
 	GtkWidget *boxMandelboxVary;
 	GtkWidget *boxVolumetricFog;
+	GtkWidget *boxPrimitives;
+	GtkWidget *boxPrimitivePlane;
+	GtkWidget *boxPrimitivePlane1;
+	GtkWidget *boxPrimitivePlane2;
+	GtkWidget *boxPrimitiveBox;
+	GtkWidget *boxPrimitiveBox1;
+	GtkWidget *boxPrimitiveBox2;
+	GtkWidget *boxPrimitiveInvertedBox;
+	GtkWidget *boxPrimitiveInvertedBox1;
+	GtkWidget *boxPrimitiveInvertedBox2;
+	GtkWidget *boxPrimitiveSphere;
+	GtkWidget *boxPrimitiveSphere1;
+	GtkWidget *boxPrimitiveSphere2;
+	GtkWidget *boxPrimitiveInvertedSphere;
+	GtkWidget *boxPrimitiveInvertedSphere1;
+	GtkWidget *boxPrimitiveInvertedSphere2;
+	GtkWidget *boxPrimitiveWater;
+	GtkWidget *boxPrimitiveWater1;
+	GtkWidget *boxPrimitiveWater2;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -236,6 +264,13 @@ struct sInterface
 	GtkWidget *frFractalFoldingIntPow;
 	GtkWidget *frVolumetricLight;
 	GtkWidget *frMandelboxVary;
+	GtkWidget *frPrimitives;
+	GtkWidget *frPrimitivePlane;
+	GtkWidget *frPrimitiveBox;
+	GtkWidget *frPrimitiveInvertedBox;
+	GtkWidget *frPrimitiveSphere;
+	GtkWidget *frPrimitiveInvertedSphere;
+	GtkWidget *frPrimitiveWater;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -445,6 +480,36 @@ struct sInterface
 	GtkWidget *edit_volumetricFogColorDistance2;
 	GtkWidget *edit_volumetricFogDistanceFact;
 	GtkWidget *edit_fastAoTune;
+	GtkWidget *edit_primitivePlaneCentreX;
+	GtkWidget *edit_primitivePlaneCentreY;
+	GtkWidget *edit_primitivePlaneCentreZ;
+	GtkWidget *edit_primitivePlaneNormalX;
+	GtkWidget *edit_primitivePlaneNormalY;
+	GtkWidget *edit_primitivePlaneNormalZ;
+	GtkWidget *edit_primitiveBoxCentreX;
+	GtkWidget *edit_primitiveBoxCentreY;
+	GtkWidget *edit_primitiveBoxCentreZ;
+	GtkWidget *edit_primitiveBoxSizeX;
+	GtkWidget *edit_primitiveBoxSizeY;
+	GtkWidget *edit_primitiveBoxSizeZ;
+	GtkWidget *edit_primitiveInvertedBoxCentreX;
+	GtkWidget *edit_primitiveInvertedBoxCentreY;
+	GtkWidget *edit_primitiveInvertedBoxCentreZ;
+	GtkWidget *edit_primitiveInvertedBoxSizeX;
+	GtkWidget *edit_primitiveInvertedBoxSizeY;
+	GtkWidget *edit_primitiveInvertedBoxSizeZ;
+	GtkWidget *edit_primitiveSphereCentreX;
+	GtkWidget *edit_primitiveSphereCentreY;
+	GtkWidget *edit_primitiveSphereCentreZ;
+	GtkWidget *edit_primitiveSphereRadius;
+	GtkWidget *edit_primitiveInvertedSphereCentreX;
+	GtkWidget *edit_primitiveInvertedSphereCentreY;
+	GtkWidget *edit_primitiveInvertedSphereCentreZ;
+	GtkWidget *edit_primitiveInvertedSphereRadius;
+	GtkWidget *edit_primitiveWaterHeight;
+	GtkWidget *edit_primitiveWaterAmplitude;
+	GtkWidget *edit_primitiveWaterLength;
+	GtkWidget *edit_primitiveWaterIterations;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -526,6 +591,12 @@ struct sInterface
 	GtkWidget *checkVolumetricLightAux4Enabled;
 	GtkWidget *checkPenetratingLights;
 	GtkWidget *checkRaytracedReflections;
+	GtkWidget *checkPrimitivePlaneEnabled;
+	GtkWidget *checkPrimitiveBoxEnabled;
+	GtkWidget *checkPrimitiveInvertedBoxEnabled;
+	GtkWidget *checkPrimitiveSphereEnabled;
+	GtkWidget *checkPrimitiveInvertedSphereEnabled;
+	GtkWidget *checkPrimitiveWaterEnabled;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

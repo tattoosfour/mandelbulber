@@ -68,6 +68,8 @@ sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point)
 
 sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality)
 {
+	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
+
 	double delta = dist_thresh;
 	double aoTemp = 0;
 	for(int i=1; i<quality*quality; i++)

@@ -128,6 +128,33 @@ struct sFractalMandelbox
 	CRotationMatrix rotinv[MANDELBOX_FOLDS][3];
 };
 
+struct sFractalPrimitivesD
+{
+	CVector3 planeCentre;
+	CVector3 planeNormal;
+	CVector3 boxCentre;
+	CVector3 boxSize;
+	CVector3 invertedBoxCentre;
+	CVector3 invertedBoxSize;
+	CVector3 sphereCentre;
+	double sphereRadius;
+	CVector3 invertedSphereCentre;
+	double invertedSphereRadius;
+	double waterHeight;
+	double waterAmplitude;
+	double waterLength;
+};
+
+struct sFractalPrimitives
+{
+	bool planeEnable;
+	bool boxEnable;
+	bool invertedBoxEnable;
+	bool sphereEnable;
+	bool invertedSphereEnable;
+	bool waterEnable;
+	int waterIterations;
+};
 
 struct sFractalD
 {
@@ -149,6 +176,7 @@ struct sFractalD
 	double cadd;
 	double hybridPower[HYBRID_COUNT];
 	CVector3 julia; // Julia constant
+	sFractalPrimitivesD primitives;
 };
 
 struct sFractal
@@ -180,11 +208,14 @@ struct sFractal
 
 	sFractalIFS IFS;
 	sFractalMandelbox mandelbox;
+	sFractalPrimitives primitives;
+
+	int specialColour;
 };
 
 template <int Mode>
 
 double Compute(CVector3 z, const sFractal &par, int *iter_count = NULL);
-double CalculateDistance(CVector3 point, const sFractal &par, bool *max_iter = NULL);
+double CalculateDistance(CVector3 point, sFractal &par, bool *max_iter = NULL);
 
 #endif /* FRACTAL_H_ */

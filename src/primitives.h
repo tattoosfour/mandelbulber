@@ -11,9 +11,10 @@
 #include "algebra.hpp"
 
 double PrimitivePlane(CVector3 point, CVector3 centre, CVector3 normal);
-double PrimitiveInverseBox(CVector3 point, CVector3 corner1, CVector3 corner2);
-double PrimitiveBox(CVector3 point, CVector3 corner1, CVector3 corner2);
+double PrimitiveInvertedBox(CVector3 point, CVector3 center, CVector3 size);
+double PrimitiveBox(CVector3 point, CVector3 center, CVector3 size);
 double PrimitiveSphere(CVector3 point, CVector3 center, double radius);
-double PrimitiveInverseSphere(CVector3 point, CVector3 center, double radius);
+double PrimitiveInvertedSphere(CVector3 point, CVector3 center, double radius);
+double PrimitiveWater(CVector3 point, double height, double amplitude, double length, int iterations);
 
 #endif /* PRIMITIVES_HPP_ */
