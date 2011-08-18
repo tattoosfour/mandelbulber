@@ -340,6 +340,12 @@ struct sInterface
 	GtkWidget *buCopyToClipboard;
 	GtkWidget *buGetFromClipboard;
 	GtkWidget *buLoadExample;
+	GtkWidget *buColorPrimitivePlane;
+	GtkWidget *buColorPrimitiveBox;
+	GtkWidget *buColorPrimitiveInvertedBox;
+	GtkWidget *buColorPrimitiveSphere;
+	GtkWidget *buColorPrimitiveInvertedSphere;
+	GtkWidget *buColorPrimitiveWater;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -764,5 +770,7 @@ int FormulaNumberData2GUI(enumFractalFormula formula);
 void Params2InterfaceData(sParamRender *source);
 void InterfaceData2Params(sParamRender *dest);
 void CheckPrameters(sParamRender *params);
+sRGB GdkColor2sRGB(GdkColor color);
+sRGB sRGBDiv256(sRGB color);
 
 #endif /* INTERFACE_H_ */

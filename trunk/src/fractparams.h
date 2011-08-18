@@ -110,6 +110,12 @@ struct sParamRender
 	sRGB fogColour1;
 	sRGB fogColour2;
 	sRGB fogColour3;
+	sRGB primitivePlaneColour;
+	sRGB primitiveBoxColour;
+	sRGB primitiveInvertedBoxColour;
+	sRGB primitiveSphereColour;
+	sRGB primitiveInvertedSphereColour;
+	sRGB primitiveWaterColour;
 	sEffectColours effectColours;
 
 	sRGB palette[256];
