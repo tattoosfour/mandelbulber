@@ -679,7 +679,15 @@ void *MainThread(void *ptr)
 										sRGB color = { 256, 256, 256 };
 										if (param.imageSwitches.coloringEnabled)
 										{
-											int color_number = (int) (colorIndexTemp * param.doubles.imageAdjustments.coloring_speed + 256 * param.doubles.imageAdjustments.paletteOffset) % 65536;
+											int color_number;
+											if(colorIndexTemp>=248*256)
+											{
+												color_number = colorIndexTemp;
+											}
+											else
+											{
+												color_number = (int) (colorIndexTemp * param.doubles.imageAdjustments.coloring_speed + 256 * param.doubles.imageAdjustments.paletteOffset) % 65536;
+											}
 											color = image->IndexToColour(color_number);
 										}
 										colorBuff[i] = (sShaderOutput){color.R/256.0,color.G/256.0,color.B/256.0};

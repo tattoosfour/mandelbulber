@@ -120,7 +120,15 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	sRGB color = { 256, 256, 256 };
 	if (sw.coloringEnabled)
 	{
-		int color_number = (int) (colorIndex * adj.coloring_speed + 256 * adj.paletteOffset) % 65536;
+		int color_number;
+		if(colorIndex>=248*256)
+		{
+			color_number = colorIndex;
+		}
+		else
+		{
+			color_number = (int) (colorIndex * adj.coloring_speed + 256 * adj.paletteOffset) % 65536;
+		}
 		color = IndexToColour(color_number);
 	}
 	//double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
