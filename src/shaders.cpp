@@ -22,6 +22,7 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 
 	bool max_iter;
 	double factor = 1.0 * param->doubles.zoom * wsp_persp;
+	if(!param->penetratingLights) factor = param->doubles.viewDistanceMax;
 	double dist = dist_thresh;
 
 	double start = dist_thresh;
@@ -43,6 +44,7 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 		if (dist < dist_thresh || max_iter)
 		{
 			double shadowing = i / factor;
+			if(!param->penetratingLights) shadowing = 0;
 			shadow.R = shadowing;
 			shadow.G = shadowing;
 			shadow.B = shadowing;

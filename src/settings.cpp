@@ -404,7 +404,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		sprintf(parameterName, "volumetric_light_enabled_%d", i);
 		fprintfInt(fileSettings, parameterName, params.volumetricLightEnabled[i], false, compare);
 	}
-	fprintfInt(fileSettings, "penetrating_lights", params.penetratingLights, false, compare);
+	fprintfInt(fileSettings, "penetrating_lights", params.penetratingLights, true, compare);
 	fprintfInt(fileSettings, "raytraced_reflections", params.imageSwitches.raytracedReflections, false, compare);
 	fprintfInt(fileSettings, "reflections_max", params.reflectionsMax, 5, compare);
 
