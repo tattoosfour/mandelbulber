@@ -1946,7 +1946,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(0.1), "Absolute movement distance:", 10, Interface.edit_NavigatorAbsoluteDistance), false, false,
 			1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(10.0), "Rotation step in degrees", 5, Interface.edit_step_rotation), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(5.0), "Mouse click close-up ratio", 5, Interface.edit_mouse_click_distance), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(3.0), "Mouse click close-up ratio", 5, Interface.edit_mouse_click_distance), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationZooming, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkZoomClickEnable, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkNavigatorGoToSurface, false, false, 1);
