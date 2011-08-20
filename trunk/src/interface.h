@@ -771,6 +771,7 @@ void Params2InterfaceData(sParamRender *source);
 void InterfaceData2Params(sParamRender *dest);
 void CheckPrameters(sParamRender *params);
 sRGB GdkColor2sRGB(GdkColor color);
+GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
 
 #endif /* INTERFACE_H_ */

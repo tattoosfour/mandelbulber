@@ -817,6 +817,37 @@ void WriteInterface(sParamRender *params)
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fastAoTune), DoubleToString(params->doubles.fastAoTune));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreX), DoubleToString(params->fractal.doubles.primitives.planeCentre.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreY), DoubleToString(params->fractal.doubles.primitives.planeCentre.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneCentreZ), DoubleToString(params->fractal.doubles.primitives.planeCentre.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalX), DoubleToString(params->fractal.doubles.primitives.planeNormal.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalY), DoubleToString(params->fractal.doubles.primitives.planeNormal.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalZ), DoubleToString(params->fractal.doubles.primitives.planeNormal.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreX), DoubleToString(params->fractal.doubles.primitives.boxCentre.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreY), DoubleToString(params->fractal.doubles.primitives.boxCentre.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreZ), DoubleToString(params->fractal.doubles.primitives.boxCentre.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeX), DoubleToString(params->fractal.doubles.primitives.boxSize.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeY), DoubleToString(params->fractal.doubles.primitives.boxSize.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveBoxSizeZ), DoubleToString(params->fractal.doubles.primitives.boxSize.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreX), DoubleToString(params->fractal.doubles.primitives.invertedBoxCentre.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreY), DoubleToString(params->fractal.doubles.primitives.invertedBoxCentre.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxCentreZ), DoubleToString(params->fractal.doubles.primitives.invertedBoxCentre.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeX), DoubleToString(params->fractal.doubles.primitives.invertedBoxSize.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeY), DoubleToString(params->fractal.doubles.primitives.invertedBoxSize.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedBoxSizeZ), DoubleToString(params->fractal.doubles.primitives.invertedBoxSize.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreX), DoubleToString(params->fractal.doubles.primitives.sphereCentre.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreY), DoubleToString(params->fractal.doubles.primitives.sphereCentre.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveSphereCentreZ), DoubleToString(params->fractal.doubles.primitives.sphereCentre.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveSphereRadius), DoubleToString(params->fractal.doubles.primitives.sphereRadius));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreX), DoubleToString(params->fractal.doubles.primitives.invertedSphereCentre.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreY), DoubleToString(params->fractal.doubles.primitives.invertedSphereCentre.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereCentreZ), DoubleToString(params->fractal.doubles.primitives.invertedSphereCentre.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveInvertedSphereRadius), DoubleToString(params->fractal.doubles.primitives.invertedSphereRadius));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterHeight), DoubleToString(params->fractal.doubles.primitives.waterHeight));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterLength), DoubleToString(params->fractal.doubles.primitives.waterLength));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterAmplitude), DoubleToString(params->fractal.doubles.primitives.waterAmplitude));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations), IntToString(params->fractal.primitives.waterIterations));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -854,6 +885,12 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkVolumetricLightAux4Enabled), params->volumetricLightEnabled[4]);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPenetratingLights), params->penetratingLights);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkRaytracedReflections), params->imageSwitches.raytracedReflections);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitivePlaneEnabled), params->fractal.primitives.planeEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveBoxEnabled), params->fractal.primitives.boxEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedBoxEnabled), params->fractal.primitives.invertedBoxEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveSphereEnabled), params->fractal.primitives.sphereEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedSphereEnabled), params->fractal.primitives.invertedSphereEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled), params->fractal.primitives.waterEnable);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -904,76 +941,46 @@ void WriteInterface(sParamRender *params)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i]), FormulaNumberData2GUI(params->fractal.hybridFormula[i]));
 
 	GdkColor color;
-
-	color.red = params->effectColours.glow_color1.R;
-	color.green = params->effectColours.glow_color1.G;
-	color.blue = params->effectColours.glow_color1.B;
+	color = sRGB2GdkColor(params->effectColours.glow_color1);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
-
-	color.red = params->effectColours.glow_color2.R;
-	color.green = params->effectColours.glow_color2.G;
-	color.blue = params->effectColours.glow_color2.B;
+	color = sRGB2GdkColor(params->effectColours.glow_color2);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorGlow2), &color);
-
-	color.red = params->background_color1.R;
-	color.green = params->background_color1.G;
-	color.blue = params->background_color1.B;
+	color = sRGB2GdkColor(params->background_color1);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud1), &color);
-
-	color.red = params->background_color2.R;
-	color.green = params->background_color2.G;
-	color.blue = params->background_color2.B;
+	color = sRGB2GdkColor(params->background_color2);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), &color);
-
-	color.red = params->background_color3.R;
-	color.green = params->background_color3.G;
-	color.blue = params->background_color3.B;
+	color = sRGB2GdkColor(params->background_color3);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorBackgroud3), &color);
-
-	color.red = params->fogColour1.R;
-	color.green = params->fogColour1.G;
-	color.blue = params->fogColour1.B;
+	color = sRGB2GdkColor(params->fogColour1);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog1), &color);
-
-	color.red = params->fogColour2.R;
-	color.green = params->fogColour2.G;
-	color.blue = params->fogColour2.B;
+	color = sRGB2GdkColor(params->fogColour2);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog2), &color);
-
-	color.red = params->fogColour3.R;
-	color.green = params->fogColour3.G;
-	color.blue = params->fogColour3.B;
+	color = sRGB2GdkColor(params->fogColour3);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog3), &color);
-
-	color.red = params->effectColours.fogColor.R;
-	color.green = params->effectColours.fogColor.G;
-	color.blue = params->effectColours.fogColor.B;
+	color = sRGB2GdkColor(params->effectColours.fogColor);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
-
-	color.red = params->auxLightPre1Colour.R;
-	color.green = params->auxLightPre1Colour.G;
-	color.blue = params->auxLightPre1Colour.B;
+	color = sRGB2GdkColor(params->auxLightPre1Colour);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre1), &color);
-
-	color.red = params->auxLightPre2Colour.R;
-	color.green = params->auxLightPre2Colour.G;
-	color.blue = params->auxLightPre2Colour.B;
+	color = sRGB2GdkColor(params->auxLightPre2Colour);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre2), &color);
-
-	color.red = params->auxLightPre3Colour.R;
-	color.green = params->auxLightPre3Colour.G;
-	color.blue = params->auxLightPre3Colour.B;
+	color = sRGB2GdkColor(params->auxLightPre3Colour);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre3), &color);
-
-	color.red = params->auxLightPre4Colour.R;
-	color.green = params->auxLightPre4Colour.G;
-	color.blue = params->auxLightPre4Colour.B;
+	color = sRGB2GdkColor(params->auxLightPre4Colour);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre4), &color);
-
-	color.red = params->effectColours.mainLightColour.R;
-	color.green = params->effectColours.mainLightColour.G;
-	color.blue = params->effectColours.mainLightColour.B;
+	color = sRGB2GdkColor(params->effectColours.mainLightColour);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorMainLight), &color);
+	color = sRGB2GdkColor(params->primitivePlaneColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitivePlane), &color);
+	color = sRGB2GdkColor(params->primitiveBoxColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitiveBox), &color);
+	color = sRGB2GdkColor(params->primitiveInvertedBoxColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitiveInvertedBox), &color);
+	color = sRGB2GdkColor(params->primitiveSphereColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitiveSphere), &color);
+	color = sRGB2GdkColor(params->primitiveInvertedSphereColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitiveInvertedSphere), &color);
+	color = sRGB2GdkColor(params->primitiveWaterColour);
+	gtk_color_button_set_color(GTK_COLOR_BUTTON(Interface.buColorPrimitiveWater), &color);
 
 	DrawPalette(params->palette);
 }
@@ -2970,6 +2977,15 @@ void CheckPrameters(sParamRender *params)
 sRGB GdkColor2sRGB(GdkColor color)
 {
 	return (sRGB){color.red, color.green, color.blue};
+}
+
+GdkColor sRGB2GdkColor(sRGB color)
+{
+	GdkColor color2;
+	color2.red = color.R;
+	color2.green = color.G;
+	color2.blue = color.B;
+	return color2;
 }
 
 sRGB sRGBDiv256(sRGB color)
