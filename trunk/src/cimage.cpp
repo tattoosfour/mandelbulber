@@ -131,7 +131,7 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 		}
 		color = IndexToColour(color_number);
 	}
-	//double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
+
 	double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * (pixel.shadowsBuf16 / 4096.0 * adj.directLight) * (1.0 - adj.ambient) + adj.ambient;
 	if (zBuf > 1e19) jasSuma1 = 0;
 
