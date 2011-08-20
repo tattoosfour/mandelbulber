@@ -1096,6 +1096,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of aux. light #4");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set position of centre for random lights");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Set Julia constant");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), "Measure");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 1);
 	gtk_box_pack_start(GTK_BOX(renderWindow.boxButtons), renderWindow.comboMouseClickMode, false, false, 1);
 
@@ -1309,6 +1310,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxPrimitiveWater = gtk_vbox_new(FALSE, 1);
 	Interface.boxPrimitiveWater1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxPrimitiveWater2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxMeasure = gtk_vbox_new(FALSE, 1);
+	Interface.boxMeasure1 = gtk_hbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1363,6 +1366,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frPrimitiveSphere = gtk_frame_new("Sphere");
 	Interface.frPrimitiveInvertedSphere = gtk_frame_new("Inverted sphere");
 	Interface.frPrimitiveWater = gtk_frame_new("Water");
+	Interface.frMeasure = gtk_frame_new("Coordinate measurement");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1459,6 +1463,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buColorPrimitiveWater = gtk_color_button_new();
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveWater), "Water colour");
 	Interface.buAutoFog = gtk_button_new_with_label("Auto fog");
+	Interface.buMeasureActivation = gtk_button_new_with_label("Activate measurement");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1645,6 +1650,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_primitiveWaterLength = gtk_entry_new();
 	Interface.edit_primitiveWaterIterations = gtk_entry_new();
 
+	Interface.edit_measureX = gtk_entry_new();
+	Interface.edit_measureY = gtk_entry_new();
+	Interface.edit_measureZ = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1787,6 +1796,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_IFSenabled = gtk_label_new("enabled");
 	Interface.label_paletteOffset = gtk_label_new("offset:");
 	Interface.label_DE_threshold = gtk_label_new("Detail level:");
+	Interface.label_measureDistance = gtk_label_new("Distance from last point:");
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
 		Interface.label_HybridFormula[i-1] = gtk_label_new(g_strdup_printf("Formula #%d:", i));
@@ -1887,6 +1897,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoFog, PressedAutoFog);
+	CONNECT_SIGNAL_CLICKED(Interface.buMeasureActivation, PressedMeasureActivation);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -1966,6 +1977,15 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxArrows3, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxArrows3), Interface.tableArrows2, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frMeasure, true, true, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMeasure), Interface.boxMeasure);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.boxMeasure1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), Interface.buMeasureActivation, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "X:", 20, Interface.edit_measureX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Y:", 20, Interface.edit_measureY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Z:", 20, Interface.edit_measureZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.label_measureDistance, false, false, 1);
 
 	//	frame fractal
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractal, false, false, 1);

@@ -219,6 +219,8 @@ struct sInterface
 	GtkWidget *boxPrimitiveWater;
 	GtkWidget *boxPrimitiveWater1;
 	GtkWidget *boxPrimitiveWater2;
+	GtkWidget *boxMeasure;
+	GtkWidget *boxMeasure1;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -271,6 +273,7 @@ struct sInterface
 	GtkWidget *frPrimitiveSphere;
 	GtkWidget *frPrimitiveInvertedSphere;
 	GtkWidget *frPrimitiveWater;
+	GtkWidget *frMeasure;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -347,6 +350,7 @@ struct sInterface
 	GtkWidget *buColorPrimitiveInvertedSphere;
 	GtkWidget *buColorPrimitiveWater;
 	GtkWidget *buAutoFog;
+	GtkWidget *buMeasureActivation;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -517,6 +521,9 @@ struct sInterface
 	GtkWidget *edit_primitiveWaterAmplitude;
 	GtkWidget *edit_primitiveWaterLength;
 	GtkWidget *edit_primitiveWaterIterations;
+	GtkWidget *edit_measureX;
+	GtkWidget *edit_measureY;
+	GtkWidget *edit_measureZ;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -545,6 +552,7 @@ struct sInterface
 	GtkWidget *label_HybridFormula[HYBRID_COUNT];
 	GtkWidget *label_NavigatorEstimatedDistance;
 	GtkWidget *label_DE_threshold;
+	GtkWidget *label_measureDistance;
 
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
