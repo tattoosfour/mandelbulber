@@ -2147,3 +2147,20 @@ void PressedLoadExample(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(dialog);
 
 }
+
+void PressedAutoFog(GtkWidget *widget, gpointer data)
+{
+	sParamRender params;
+	ReadInterface(&params);
+	undoBuffer.SaveUndo(&params);
+
+	double distance = CalculateDistance(params.doubles.vp, params.fractal);
+	double distance2 = distance + 1.0/params.doubles.persp*params.doubles.zoom;
+
+	params.doubles.fogDensity = 0.5;
+	params.doubles.fogDistanceFactor = distance2;
+	params.doubles.fogColour1Distance = distance2*0.5;
+	params.doubles.fogColour2Distance = distance2;
+
+	WriteInterface(&params);
+}
