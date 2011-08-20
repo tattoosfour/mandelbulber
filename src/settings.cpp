@@ -491,12 +491,12 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	{
 		fprintfInt(fileSettings, "primitive_water_enabled", params.fractal.primitives.waterEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_water_level", params.fractal.doubles.primitives.waterHeight, 0.0, compare);
-		fprintfDot(fileSettings, "primitive_water_amplitude", params.fractal.doubles.primitives.waterAmplitude, 0.05, compare);
-		fprintfDot(fileSettings, "primitive_water_length", params.fractal.doubles.primitives.waterLength, 0.5, compare);
+		fprintfDot(fileSettings, "primitive_water_amplitude", params.fractal.doubles.primitives.waterAmplitude, 0.02, compare);
+		fprintfDot(fileSettings, "primitive_water_length", params.fractal.doubles.primitives.waterLength, 0.2, compare);
 		fprintfInt(fileSettings, "primitive_water_iterations", params.fractal.primitives.waterIterations, 5, compare);
-		fprintfInt(fileSettings, "primitive_water_colour_R", params.primitiveWaterColour.R, 20000, compare);
-		fprintfInt(fileSettings, "primitive_water_colour_G", params.primitiveWaterColour.G, 20000, compare);
-		fprintfInt(fileSettings, "primitive_water_colour_B", params.primitiveWaterColour.B, 20000, compare);
+		fprintfInt(fileSettings, "primitive_water_colour_R", params.primitiveWaterColour.R, 0, compare);
+		fprintfInt(fileSettings, "primitive_water_colour_G", params.primitiveWaterColour.G, 5000, compare);
+		fprintfInt(fileSettings, "primitive_water_colour_B", params.primitiveWaterColour.B, 10000, compare);
 	}
 
 	if(strcmp(filename,"settings/.clipboard"))
