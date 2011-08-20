@@ -100,6 +100,7 @@ void ChangedImageProportion(GtkWidget *widget, gpointer data);
 void PressedCopyToClipboard(GtkWidget *widget, gpointer data);
 void PressedPasteFromClipboard(GtkWidget *widget, gpointer data);
 void PressedLoadExample(GtkWidget *widget, gpointer data);
+void PressedAutoFog(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

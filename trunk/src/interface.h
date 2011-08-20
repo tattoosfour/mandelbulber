@@ -346,6 +346,7 @@ struct sInterface
 	GtkWidget *buColorPrimitiveSphere;
 	GtkWidget *buColorPrimitiveInvertedSphere;
 	GtkWidget *buColorPrimitiveWater;
+	GtkWidget *buAutoFog;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;

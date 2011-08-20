@@ -1458,7 +1458,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveInvertedSphere), "Inverted sphere colour");
 	Interface.buColorPrimitiveWater = gtk_color_button_new();
 	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveWater), "Water colour");
-
+	Interface.buAutoFog = gtk_button_new_with_label("Auto fog");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1886,6 +1886,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buCopyToClipboard, PressedCopyToClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
+	CONNECT_SIGNAL_CLICKED(Interface.buAutoFog, PressedAutoFog);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -2192,6 +2193,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog colour 1 distance:", 5, Interface.edit_volumetricFogColorDistance), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog colour 2 distance:", 5, Interface.edit_volumetricFogColorDistance2), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog distance factor:", 5, Interface.edit_volumetricFogDistanceFact), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), Interface.buAutoFog, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frPalette, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frPalette), Interface.boxPalette);
