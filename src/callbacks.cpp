@@ -185,7 +185,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 							z2 *= perspFactor1/perspFactor2;
 						}
 						else if (clickMode >= 5 && clickMode < 10) y2 = y - lightPlacementDistance/params.doubles.zoom; //lights placement
-						else if (clickMode == 10) y2 = y; //julia constant
+						else if (clickMode == 10 || clickMode == 11) y2 = y; //julia constant
 					}
 
 					CVector3 point = Projection3D(CVector3(x2, y2, z2), params.doubles.vp, mRot, perspectiveType, params.doubles.persp, params.doubles.zoom);
@@ -241,6 +241,20 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						if (clickMode == 10)
 						{
 							params.fractal.doubles.julia = point;
+						}
+						if (clickMode == 11)
+						{
+							CVector3 tempPoint;
+							tempPoint.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_measureX)));
+							tempPoint.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_measureY)));
+							tempPoint.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_measureZ)));
+							double distanceFromLast = (point - tempPoint).Length();
+							char distanceString[1000];
+							sprintf(distanceString, "Distance from last point: %g\n", distanceFromLast);
+							gtk_label_set_text(GTK_LABEL(Interface.label_measureDistance), distanceString);
+							gtk_entry_set_text(GTK_ENTRY(Interface.edit_measureX), DoubleToString(point.x));
+							gtk_entry_set_text(GTK_ENTRY(Interface.edit_measureY), DoubleToString(point.y));
+							gtk_entry_set_text(GTK_ENTRY(Interface.edit_measureZ), DoubleToString(point.z));
 						}
 						WriteInterface(&params);
 						PlaceRandomLights(&params, false);
@@ -2163,4 +2177,9 @@ void PressedAutoFog(GtkWidget *widget, gpointer data)
 	params.doubles.fogColour2Distance = distance2;
 
 	WriteInterface(&params);
+}
+
+void PressedMeasureActivation(GtkWidget *widget, gpointer data)
+{
+	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 11);
 }
