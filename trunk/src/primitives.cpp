@@ -76,8 +76,12 @@ double PrimitiveInvertedSphere(CVector3 point, CVector3 center, double radius)
 	return distance;
 }
 
-double PrimitiveWater(CVector3 point, double height, double amplitude, double length, int iterations)
+double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations)
 {
+	CRotationMatrix rotMatrix;
+	rotMatrix.RotateZ(rotation/180*M_PI);
+	point = rotMatrix.RotateVector(point);
+
 	CVector3 plane(0,0,-1);
 	CVector3 centre(0,0,height);
 	plane.Normalize();

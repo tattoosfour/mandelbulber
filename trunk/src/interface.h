@@ -520,6 +520,7 @@ struct sInterface
 	GtkWidget *edit_primitiveWaterHeight;
 	GtkWidget *edit_primitiveWaterAmplitude;
 	GtkWidget *edit_primitiveWaterLength;
+	GtkWidget *edit_primitiveWaterRotation;
 	GtkWidget *edit_primitiveWaterIterations;
 	GtkWidget *edit_measureX;
 	GtkWidget *edit_measureY;

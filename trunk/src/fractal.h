@@ -143,6 +143,7 @@ struct sFractalPrimitivesD
 	double waterHeight;
 	double waterAmplitude;
 	double waterLength;
+	double waterRotation;
 };
 
 struct sFractalPrimitives

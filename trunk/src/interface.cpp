@@ -493,6 +493,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.primitives.waterHeight = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterHeight)));
 		params->fractal.doubles.primitives.waterAmplitude = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterAmplitude)));
 		params->fractal.doubles.primitives.waterLength = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterLength)));
+		params->fractal.doubles.primitives.waterRotation = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterRotation)));
 		params->fractal.primitives.waterIterations = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations)));
 		params->fractal.primitives.waterEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled));
 
@@ -1648,6 +1649,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_primitiveWaterHeight = gtk_entry_new();
 	Interface.edit_primitiveWaterAmplitude = gtk_entry_new();
 	Interface.edit_primitiveWaterLength = gtk_entry_new();
+	Interface.edit_primitiveWaterRotation = gtk_entry_new();
 	Interface.edit_primitiveWaterIterations = gtk_entry_new();
 
 	Interface.edit_measureX = gtk_entry_new();
@@ -2091,7 +2093,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.0", "Level:", 10, Interface.edit_primitiveWaterHeight), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.1", "Wave amplitude:", 10, Interface.edit_primitiveWaterAmplitude), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("1.0", "Wave length:", 10, Interface.edit_primitiveWaterLength), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 10, Interface.edit_primitiveWaterIterations), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0", "Rotation:", 10, Interface.edit_primitiveWaterRotation), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 3, Interface.edit_primitiveWaterIterations), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.buColorPrimitiveWater, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.checkPrimitiveWaterEnabled, false, false, 1);
