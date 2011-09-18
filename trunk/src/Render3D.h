@@ -12,6 +12,7 @@
 #include "image.h"
 #include "texture.hpp"
 #include "fractparams.h"
+#include "cl_support.hpp"
 
 struct sParam
 {
