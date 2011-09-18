@@ -23,6 +23,7 @@
 #include "files.h"
 #include "undo.hpp"
 #include "timeline.hpp"
+#include "cl_support.hpp"
 
 using namespace std;
 
@@ -349,6 +350,27 @@ void StartRendering(GtkWidget *widget, gpointer data)
 	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\n", distance);
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
+	sClFractal clFractal;
+	sClParams clParams;
+	clParams.alpha = params.doubles.alfa;
+	clParams.beta = params.doubles.beta;
+	clParams.gamma = params.doubles.gamma;
+	clParams.height = CL_HEIGHT;
+	clParams.width = CL_WIDTH;
+	clParams.persp = params.doubles.persp;
+	clParams.vp.x = params.doubles.vp.x;
+	clParams.vp.y = params.doubles.vp.y;
+	clParams.vp.z = params.doubles.vp.z;
+	clParams.zoom = params.doubles.zoom;
+
+	clFractal.N = params.fractal.N;
+	clFractal.power = params.fractal.doubles.power;
+
+	clSupport->SetParams(clParams, clFractal);
+	clSupport->Render();
+	gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE, clSupport->GetRgbBuff(), CL_WIDTH * 3);
+
+	/*
 	Interface_data.animMode = false;
 	Interface_data.playMode = false;
 	Interface_data.recordMode = false;
@@ -358,6 +380,7 @@ void StartRendering(GtkWidget *widget, gpointer data)
 	programClosed = true;
 	isPostRendering = false;
 	renderRequest = true;
+	*/
 }
 
 void PressedAnimationRecord(GtkWidget *widget, gpointer data)
