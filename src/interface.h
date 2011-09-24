@@ -9,9 +9,10 @@
 #define INTERFACE_H_
 
 #include "fractparams.h"
+#include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.08
-#define MANDELBULBER_VERSION_STR "1.08"
+#define MANDELBULBER_VERSION 1.09
+#define MANDELBULBER_VERSION_STR "1.09"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -613,6 +614,7 @@ struct sInterface
 	GtkWidget *checkPrimitiveSphereEnabled;
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
+	GtkWidget *checkOpenClEnable;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
@@ -783,5 +785,6 @@ void CheckPrameters(sParamRender *params);
 sRGB GdkColor2sRGB(GdkColor color);
 GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
+void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal);
 
 #endif /* INTERFACE_H_ */

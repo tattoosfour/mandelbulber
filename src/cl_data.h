@@ -9,6 +9,8 @@ typedef struct
 {
 	unsigned int N;
 	float power;
+	int formula;
+	float mandelboxScale;
 } sClFractal;
 
 typedef struct

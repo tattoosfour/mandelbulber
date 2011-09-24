@@ -66,7 +66,7 @@ void CclSupport::Init(void)
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
 
 	std::ifstream file("cl_engine.cl");
-	checkErr(file.is_open() ? CL_SUCCESS : -1, "cl_engine.cl");
+	checkErr(file.is_open() ? CL_SUCCESS : -1, "Can't open file: cl_engine.cl");
 
 	std::string prog(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
 	source = new cl::Program::Sources(1, std::make_pair(prog.c_str(), prog.length() + 1));
@@ -92,6 +92,8 @@ void CclSupport::Init(void)
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
 	checkErr(err, "CommandQueue::CommandQueue()");
 	printf("OpenCL command queue prepared\n");
+
+	ready = true;
 }
 
 void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal)
@@ -99,6 +101,7 @@ void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal)
 	cl_int err;
 	err = kernel->setArg(1, ClParams);
 	err = kernel->setArg(2, ClFractal);
+	checkErr(err, "Kernel::setArg()");
 }
 
 void CclSupport::Render(void)
@@ -120,4 +123,12 @@ void CclSupport::Render(void)
 	}
 	float time = clock();
 	printf("time = %f \n", (time - time_prev) / CLOCKS_PER_SEC);
+}
+
+void CclSupport::Enable(void)
+{
+	if(ready)
+	{
+		enabled = true;
+	}
 }
