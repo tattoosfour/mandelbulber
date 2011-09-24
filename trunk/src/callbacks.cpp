@@ -350,37 +350,28 @@ void StartRendering(GtkWidget *widget, gpointer data)
 	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\n", distance);
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
-	sClFractal clFractal;
-	sClParams clParams;
-	clParams.alpha = params.doubles.alfa;
-	clParams.beta = params.doubles.beta;
-	clParams.gamma = params.doubles.gamma;
-	clParams.height = CL_HEIGHT;
-	clParams.width = CL_WIDTH;
-	clParams.persp = params.doubles.persp;
-	clParams.vp.x = params.doubles.vp.x;
-	clParams.vp.y = params.doubles.vp.y;
-	clParams.vp.z = params.doubles.vp.z;
-	clParams.zoom = params.doubles.zoom;
+	if (clSupport->IsEnabled())
+	{
+		sClFractal clFractal;
+		sClParams clParams;
+		Params2Cl(&params, &clParams, &clFractal);
+		clSupport->SetParams(clParams, clFractal);
+		clSupport->Render();
+		gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE,
+				clSupport->GetRgbBuff(), CL_WIDTH * 3);
+	}
+	else
+	{
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
 
-	clFractal.N = params.fractal.N;
-	clFractal.power = params.fractal.doubles.power;
-
-	clSupport->SetParams(clParams, clFractal);
-	clSupport->Render();
-	gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE, clSupport->GetRgbBuff(), CL_WIDTH * 3);
-
-	/*
-	Interface_data.animMode = false;
-	Interface_data.playMode = false;
-	Interface_data.recordMode = false;
-	Interface_data.continueRecord = false;
-	Interface_data.keyframeMode = false;
-
-	programClosed = true;
-	isPostRendering = false;
-	renderRequest = true;
-	*/
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
+	}
 }
 
 void PressedAnimationRecord(GtkWidget *widget, gpointer data)
@@ -654,15 +645,27 @@ static void Navigate(int x, int y)
 
 	WriteInterface(&params);
 
-	Interface_data.animMode = false;
-	Interface_data.playMode = false;
-	Interface_data.recordMode = false;
-	Interface_data.continueRecord = false;
-	Interface_data.keyframeMode = false;
-	programClosed = true;
-	isPostRendering = false;
-	renderRequest = true;
-
+	if (clSupport->IsEnabled())
+	{
+		sClFractal clFractal;
+		sClParams clParams;
+		Params2Cl(&params, &clParams, &clFractal);
+		clSupport->SetParams(clParams, clFractal);
+		clSupport->Render();
+		gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE,
+				clSupport->GetRgbBuff(), CL_WIDTH * 3);
+	}
+	else
+	{
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
+	}
 }
 
 void PressedNavigatorUp(GtkWidget *widget, gpointer data)
@@ -723,15 +726,27 @@ static void Move(int x, int y, int z)
 
 	WriteInterface(&params);
 
-	Interface_data.animMode = false;
-	Interface_data.playMode = false;
-	Interface_data.recordMode = false;
-	Interface_data.continueRecord = false;
-	Interface_data.keyframeMode = false;
-	programClosed = true;
-	isPostRendering = false;
-	renderRequest = true;
-
+	if (clSupport->IsEnabled())
+	{
+		sClFractal clFractal;
+		sClParams clParams;
+		Params2Cl(&params, &clParams, &clFractal);
+		clSupport->SetParams(clParams, clFractal);
+		clSupport->Render();
+		gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE,
+				clSupport->GetRgbBuff(), CL_WIDTH * 3);
+	}
+	else
+	{
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
+	}
 }
 
 void PressedNavigatorMoveUp(GtkWidget *widget, gpointer data)
@@ -790,15 +805,27 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 
 	WriteInterface(&params);
 
-	Interface_data.animMode = false;
-	Interface_data.playMode = false;
-	Interface_data.recordMode = false;
-	Interface_data.continueRecord = false;
-	Interface_data.keyframeMode = false;
-	programClosed = true;
-	isPostRendering = false;
-	renderRequest = true;
-
+	if (clSupport->IsEnabled())
+	{
+		sClFractal clFractal;
+		sClParams clParams;
+		Params2Cl(&params, &clParams, &clFractal);
+		clSupport->SetParams(clParams, clFractal);
+		clSupport->Render();
+		gdk_draw_rgb_image(renderWindow.drawingArea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, CL_WIDTH, CL_HEIGHT, GDK_RGB_DITHER_NONE,
+				clSupport->GetRgbBuff(), CL_WIDTH * 3);
+	}
+	else
+	{
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
+		Interface_data.continueRecord = false;
+		Interface_data.keyframeMode = false;
+		programClosed = true;
+		isPostRendering = false;
+		renderRequest = true;
+	}
 }
 
 void ChangedComboScale(GtkWidget *widget, gpointer data)
@@ -2205,4 +2232,16 @@ void PressedAutoFog(GtkWidget *widget, gpointer data)
 void PressedMeasureActivation(GtkWidget *widget, gpointer data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode), 11);
+}
+
+void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable)))
+	{
+		clSupport->Enable();
+	}
+	else
+	{
+		clSupport->Disable();
+	}
 }

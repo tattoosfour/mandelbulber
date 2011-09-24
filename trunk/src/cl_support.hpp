@@ -31,6 +31,10 @@ public:
 	void SetParams(sClParams ClParams, sClFractal ClFractal);
 	void Render(void);
 	unsigned char* GetRgbBuff() {return rgbbuff;}
+	bool IsReady(void) {return ready;}
+	bool IsEnabled(void) {return enabled;}
+	void Enable(void);
+	void Disable(void) {enabled = false;}
 private:
 	bool enabled;
 	bool ready;

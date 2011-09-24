@@ -1762,6 +1762,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -1900,6 +1901,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoFog, PressedAutoFog);
 	CONNECT_SIGNAL_CLICKED(Interface.buMeasureActivation, PressedMeasureActivation);
+	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClEnable, ChangedOpenClEnabled);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -1909,6 +1911,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.boxButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buRender, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buStop, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.checkOpenClEnable, false, false, 1);
 
 	//	frame view point
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frCoordinates, false, false, 1);
@@ -3016,4 +3019,23 @@ GdkColor sRGB2GdkColor(sRGB color)
 sRGB sRGBDiv256(sRGB color)
 {
 	return (sRGB){color.R/256, color.G/256, color.B/256};
+}
+
+void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal)
+{
+	clParams->alpha = params->doubles.alfa;
+	clParams->beta = params->doubles.beta;
+	clParams->gamma = params->doubles.gamma;
+	clParams->height = CL_HEIGHT;
+	clParams->width = CL_WIDTH;
+	clParams->persp = params->doubles.persp;
+	clParams->vp.x = params->doubles.vp.x;
+	clParams->vp.y = params->doubles.vp.y;
+	clParams->vp.z = params->doubles.vp.z;
+	clParams->zoom = params->doubles.zoom;
+
+	clFractal->N = params->fractal.N;
+	clFractal->power = params->fractal.doubles.power;
+	clFractal->mandelboxScale = params->fractal.mandelbox.doubles.scale;
+	clFractal->formula = params->fractal.formula;
 }
