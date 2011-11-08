@@ -786,5 +786,7 @@ sRGB GdkColor2sRGB(GdkColor color);
 GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
 void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal);
+matrix33 RotMatrix2matrix33(CRotationMatrix rot);
+cl_float4 CVector2float4(CVector3 vect);
 
 #endif /* INTERFACE_H_ */
