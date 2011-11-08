@@ -1345,7 +1345,7 @@ int main(int argc, char *argv[])
 
 	//OpenCL
 	clSupport = new CclSupport();
-	clSupport->Init();
+	//clSupport->Init();
 
 	sParamRender fractParamDefault;
 	memset(&fractParamDefault, 0, sizeof(sParamRender));

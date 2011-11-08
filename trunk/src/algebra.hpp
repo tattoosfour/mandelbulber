@@ -144,7 +144,7 @@ public:
 	void SetRotation(double angles[3]);
 	void SetRotation(double alfa, double beta, double gamma);
 	CRotationMatrix Transpose(void) const;
-
+	CMatrix33 GetMatrix() {return matrix;}
 private:
 	CMatrix33 matrix;
 	bool zero;

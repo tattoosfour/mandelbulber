@@ -1,19 +1,20 @@
 #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
 
+typedef float4 cl_float4;
+typedef float cl_float;
+typedef int cl_int;
+typedef unsigned int cl_uint;
+
 #include "cl_data.h"
 
+static float Fractal(float4 point, sClFractal *fr);
+
+/*
 typedef struct
 {
 	float2 m1;
 	float2 m2;
 } matrix22;
-
-typedef struct
-{
-	float4 m1;
-	float4 m2;
-	float4 m3;
-} matrix33;
 
 matrix22 RotationMatrix22(float alpha)
 {
@@ -30,8 +31,9 @@ float2 Matrix22MulFloat2(matrix22 matrix, float2 vect)
 	out.y = dot(vect, matrix.m2);
 	return out;
 }
+*/
 
-float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
+inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
 {
 	float4 out;
 	out.x = dot(vect, matrix.m1);
@@ -92,6 +94,7 @@ matrix33 RotateZ(matrix33 m, float angle)
 		return out;
 }
 
+/*
 float4 Projection3D(float4 point, float4 vp, matrix33 mRot, float fov, float zoom)
 {
 	float perspFactor = 1.0 + point.y * fov;
@@ -109,11 +112,12 @@ float4 Projection3D(float4 point, float4 vp, matrix33 mRot, float fov, float zoo
 	float4 result = vector2 + vp;
 	return result;
 }
-
+*/
+/*
 float PrimitivePlane(float4 point, float4 centre, float4 normal)
 {
 	float4 plane = normal;
-	plane = plane * (1.0/ length(plane));
+	plane = plane * (1.0/ fast_length(plane));
 	float planeDistance = dot(plane, point - centre);
 	return planeDistance;
 }
@@ -141,12 +145,15 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 
 	return distance;
 }
-
+*/
 //--------------- formulas ----------------
 
-float Mandelbulb(float4 point, float power, int N)
+/*
+float Fractal(float4 point, sClFractal *fr)
 {
 	float distance = 0;
+	int N = fr->N;
+	float power = fr->power;
 	float4 z = point;
 	float r = fast_length(z);
 	float r_dz = 1.0f;
@@ -165,7 +172,7 @@ float Mandelbulb(float4 point, float power, int N)
 		z*=rp;
 		z+=point;
 		r = fast_length(z);
-		if(r>100.0f) 
+		if(r>4.0f) 
 		{
 			distance = 0.5f * r * native_log(r) / (r_dz);
 			break;
@@ -174,7 +181,8 @@ float Mandelbulb(float4 point, float power, int N)
 	if(distance < 0) distance = 0;
 	return distance;
 }
-
+*/
+/*
 float Mandelbulb2(float4 point, float power, int N)
 {
 	float distance = 0.0f;
@@ -213,7 +221,7 @@ float Mandelbulb2(float4 point, float power, int N)
 		z = z * r2 + point;
 		r = fast_length(z);
 		
-		if(r>100.0f) 
+		if(r>4.0f) 
 		{
 			distance = 0.5f * r * native_log(r) / (r_dz);
 			break;
@@ -222,20 +230,47 @@ float Mandelbulb2(float4 point, float power, int N)
 	if(distance < 0) distance = 0;
 	return distance;
 }
+*/
 
-float Mandelbox(float4 point, float scale, int N)
+/*
+float Fractal(float4 point, sClFractal *fr)
 {
 	float distance = 0;
+	int N = fr->N;
 	float4 z = point;
 	float tgladDE = 1.0f;
+	float4 ones = 1.0f;
+	float foldingLimit = fr->mandelbox.foldingLimit;
+	float foldingValue = fr->mandelbox.foldingValue;
+	float mr2 = fr->mandelbox.minRadius * fr->mandelbox.minRadius;
+	float fr2 = fr->mandelbox.fixedRadius * fr->mandelbox.fixedRadius;
+	float scale = fr->mandelbox.scale;
+	
 	for(int i=0; i<N; i++)
 	{
-		float4 one = 1.0f;
-		z = fabs(z + one) - fabs(z - one) - z;
+		int4 cond1, cond2;
+		
+		cond1.x = isgreater(z.x, foldingLimit);
+		cond1.y = isgreater(z.y, foldingLimit);
+		cond1.z = isgreater(z.z, foldingLimit);
+		cond2.x = isless(z.x, -foldingLimit);
+		cond2.y = isless(z.y, -foldingLimit);
+		cond2.z = isless(z.z, -foldingLimit);
+		z.x = select(z.x,  foldingValue - z.x, cond1.x);
+		z.y = select(z.y,  foldingValue - z.y, cond1.y);
+		z.z = select(z.z,  foldingValue - z.z, cond1.z);
+		z.x = select(z.x,  -foldingValue - z.x, cond2.x);
+		z.y = select(z.y,  -foldingValue - z.y, cond2.y);
+		z.z = select(z.z,  -foldingValue - z.z, cond2.z);
+		
+		//z = fabs(z + ones) - fabs(z - ones) - z;
+
 		float rr = dot(z,z);
 		float m = scale;
-		if (rr < 0.25f)	m = scale * 4.0f;
-		else if (rr < 1.0f)	m = native_divide(scale,rr);
+		if (rr < mr2)	m = native_divide(scale, mr2);
+		else if (rr < fr2)	m = native_divide(scale,rr);
+		
+		z = Matrix33MulFloat3(fr->mandelbox.mainRot, z);
 		
 		z = z * m + point;
 		tgladDE = tgladDE * fabs(m) + 1.0f;
@@ -249,57 +284,115 @@ float Mandelbox(float4 point, float scale, int N)
 	}
 	return distance;
 }
+*/
 
+/*
+float MengerSponge(float4 point, int N)
+{
+	float4 z = point;
+	float temp = 0;
+	float tgladDE = 1.0f;
+	float distance = 0;
+	
+	for (int i = 0; i < N; i++)
+	{
+		z = fabs(z);
+		
+		if (z.x - z.y < 0)
+		{
+			temp = z.y;
+			z.y = z.x;
+			z.x = temp;
+		}
+		if (z.x - z.z < 0)
+		{
+			temp = z.z;
+			z.z = z.x;
+			z.x = temp;
+		}
+		if (z.y - z.z < 0)
+		{
+			temp = z.z;
+			z.z = z.y;
+			z.y = temp;
+		}
+		
+		z *= 3.0;
+
+		z.x -= 2.0;
+		z.y -= 2.0;
+		if (z.z > 1.0) z.z -= 2.0;
+		float r = fast_length(z);
+		tgladDE *= 3.0;
+
+		if (r > 1024.0f)
+		{
+			distance = r / fabs(tgladDE);
+			break;
+		}
+	}
+	return distance;
+}
+*/
 //--------------------------------------------
 
 float CalculateDistance(float4 point, sClFractal *fractal)
 {
 	float distance;
+	distance = Fractal(point, fractal);
 	
+	/*
 	switch(fractal->formula)
 	{
 		case 1:
 		{
-			distance = Mandelbulb2(point, fractal->power, fractal->N);
+			//distance = Mandelbulb2(point, fractal->power, fractal->N);
 			break;
 		}
 		case 2:
 		{
-			distance = Mandelbulb(point, fractal->power, fractal->N);
+			//distance = Mandelbulb(point, fractal->power, fractal->N);
+			break;
+		}
+		case 7:
+		{
+			//distance = MengerSponge(point, fractal->N);
 			break;
 		}
 		case 8:
 		{
-			distance = Mandelbox(point, fractal->mandelboxScale, fractal->N);
+			distance = Mandelbox(point, fractal);
 			break;
 		}
 	}
-	if(distance<0) distance = 0;
-	if(distance>10) distance = 10;
+	*/
+	if(distance<0.0f) distance = 0.0f;
+	if(distance>10.0f) distance = 10.0f;
 	return distance;
 }
 
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
 {
-	float delta = distThresh * 0.1;
+	float delta = distThresh;
 	float s1 = CalculateDistance(point + (float4){delta,0.0f,0.0f,0.0f}, fractal);
 	float s2 = CalculateDistance(point + (float4){0.0f,delta,0.0f,0.0f}, fractal);
 	float s3 = CalculateDistance(point + (float4){0.0f,0.0f,delta,0.0f}, fractal);
-	float4 normal = (float4) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance, 1e-10f};
+	float4 normal = (float4) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance, 1.0e-10f};
 	normal = fast_normalize(normal);
 	return normal;
 }
 
+
 float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distThresh)
 {
-	float scan = distThresh * 2.0;
-	float shadow = 0;
-	float factor = distThresh * 1000.0f;
+	float scan = distThresh * 2.0f;
+	float shadow = 0.0;
+	float factor = distThresh * 500.0f;
 	for(int count = 0; (count < 100); count++)
 	{
 		float4 pointTemp = point + lightVector*scan;
 		float distance = CalculateDistance(pointTemp, fractal);
-		scan += distance;
+		scan += distance * 2.0;
 		
 		if(scan > factor)
 		{
@@ -316,6 +409,7 @@ float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distTh
 	return shadow;
 }
 
+
 float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, float dist_thresh, float tune, int quality)
 {
 	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
@@ -327,12 +421,13 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 		float scan = i * i * delta;
 		float4 pointTemp = point + normal * scan;
 		float dist = CalculateDistance(pointTemp, fractal);
-		aoTemp += 1.0/(pow(2.0,i)) * (scan - tune*dist)/dist_thresh;
+		aoTemp += 1.0/(native_powr(2.0,i)) * (scan - tune*dist)/dist_thresh;
 	}
 	float ao = 1.0 - 0.2 * aoTemp;
 	if(ao < 0) ao = 0;
 	return ao;
 }
+
 
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, int line)
@@ -387,13 +482,13 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 			break;
 	  }
 				
-		float step = distance * 0.8f;
+		float step = distance * params.DEfactor - 0.5*distThresh;
 		scan += step;
 		
 		if(scan > 50) break;
 	}
 	
-	float4 colour = 0.5f;
+	float4 colour = 0.0f;
 	if(found)
 	{
 		float4 normal = NormalVector(&fractal, point, distance, distThresh);
@@ -404,6 +499,7 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 		if(shade<0) shade = 0;
 		
 		float shadow = Shadow(&fractal, point, lightVector, distThresh);
+		//float shadow = 1.0f;
 		
 		float4 half = lightVector - viewVector;
 		half = fast_normalize(half);
@@ -413,16 +509,29 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 		if (specular > 15.0) specular = 15.0;
 		
 		float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+		//float ao = 0.0f;
+		
 		colour.x = (shade + specular) * shadow + ao;
 		colour.y = (shade + specular) * shadow + ao;
 		colour.z = (shade + specular) * shadow + ao;
 	}
 	
-	uchar R = convert_uchar_sat(colour.x * 150);
-	uchar G = convert_uchar_sat(colour.y * 150);
-	uchar B = convert_uchar_sat(colour.z * 150);
+	float glow = count / 128.0f;
+	float glowN = 1.0f - glow;
+	if(glowN < 0.0f) glowN = 0.0f;
+	float4 glowColor;
+	glowColor.x = 1.0f * glowN + 1.0f * glow;
+	glowColor.y = 0.0f * glowN + 1.0f * glow;
+	glowColor.z = 0.0f * glowN + 0.0f * glow;
+	colour += glowColor * glow;
+	
+	
+	uchar R = convert_uchar_sat(colour.x * 150.0f);
+	uchar G = convert_uchar_sat(colour.y * 150.0f);
+	uchar B = convert_uchar_sat(colour.z * 150.0f);
 	
 	out[buffIndex] = R;
 	out[buffIndex+1] = G;
 	out[buffIndex+2] = B;
 }
+

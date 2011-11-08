@@ -2238,6 +2238,7 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable)))
 	{
+		clSupport->Init();
 		clSupport->Enable();
 	}
 	else

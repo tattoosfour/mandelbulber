@@ -3029,13 +3029,34 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->height = CL_HEIGHT;
 	clParams->width = CL_WIDTH;
 	clParams->persp = params->doubles.persp;
-	clParams->vp.x = params->doubles.vp.x;
-	clParams->vp.y = params->doubles.vp.y;
-	clParams->vp.z = params->doubles.vp.z;
+	clParams->vp = CVector2float4(params->doubles.vp);
 	clParams->zoom = params->doubles.zoom;
+	clParams->DEfactor = params->doubles.DE_factor;
 
 	clFractal->N = params->fractal.N;
 	clFractal->power = params->fractal.doubles.power;
-	clFractal->mandelboxScale = params->fractal.mandelbox.doubles.scale;
+	clFractal->mandelbox.scale = params->fractal.mandelbox.doubles.scale;
+	clFractal->mandelbox.foldingLimit = params->fractal.mandelbox.doubles.foldingLimit;
+	clFractal->mandelbox.foldingValue = params->fractal.mandelbox.doubles.foldingValue;
+	clFractal->mandelbox.minRadius = params->fractal.mandelbox.doubles.foldingSphericalMin;
+	clFractal->mandelbox.fixedRadius = params->fractal.mandelbox.doubles.foldingSphericalFixed;
+	clFractal->mandelbox.mainRot = RotMatrix2matrix33(params->fractal.mandelbox.mainRot);
 	clFractal->formula = params->fractal.formula;
+	clFractal->julia = CVector2float4(params->fractal.doubles.julia);
+}
+
+matrix33 RotMatrix2matrix33(CRotationMatrix rot)
+{
+	matrix33 rot33;
+	CMatrix33 matrix = rot.GetMatrix();
+	rot33.m1 = (cl_float4){{matrix.m11, matrix.m12, matrix.m13, 0.0f}};
+	rot33.m2 = (cl_float4){{matrix.m21, matrix.m22, matrix.m23, 0.0f}};
+	rot33.m3 = (cl_float4){{matrix.m31, matrix.m32, matrix.m33, 0.0f}};
+	return rot33;
+}
+
+cl_float4 CVector2float4(CVector3 vect)
+{
+	cl_float4 vect2 = (cl_float4){{vect.x, vect.y, vect.z, 0.0f}};
+	return vect2;
 }

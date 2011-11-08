@@ -7,6 +7,8 @@
  */
 
 #include "cl_support.hpp"
+#include <string>
+#include "interface.h"
 
 CclSupport *clSupport;
 
@@ -65,18 +67,66 @@ void CclSupport::Init(void)
 	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memorySize);
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
 
-	std::ifstream file("cl_engine.cl");
-	checkErr(file.is_open() ? CL_SUCCESS : -1, "Can't open file: cl_engine.cl");
+	std::string clDir = std::string(sharedDir) + "cl/";
 
-	std::string prog(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
-	source = new cl::Program::Sources(1, std::make_pair(prog.c_str(), prog.length() + 1));
-	printf("OpenCL kernel source loaded\n");
+	sParamRender params;
+	ReadInterface(&params);
+	std::string strFormula = "mandelbulb";
 
-	program = new cl::Program(*context, *source);
+	if(params.fractal.formula == trig_optim) strFormula = "mandelbulb";
+	if(params.fractal.formula == trig_DE) strFormula = "mandelbulb2";
+	if(params.fractal.formula == tglad) strFormula = "mandelbox";
+
+	std::string strFileEngine = clDir + "cl_engine.cl";
+	std::ifstream fileEngine(strFileEngine.c_str());
+	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
+
+	std::string strFileFormulaBegin;
+	if(params.fractal.juliaMode) strFileFormulaBegin  = clDir + "cl_formulaBegin" + "Julia" + ".cl";
+	else  strFileFormulaBegin = clDir + "cl_formulaBegin" + ".cl";
+	std::ifstream fileFormulaBegin(strFileFormulaBegin.c_str());
+	checkErr(fileFormulaBegin.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaBegin).c_str());
+
+	std::string strFileFormulaInit = clDir + "cl_" + strFormula + "Init.cl";
+	std::ifstream fileFormulaInit(strFileFormulaInit.c_str());
+	checkErr(fileFormulaInit.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaInit).c_str());
+
+	std::string strFileFormulaFor = clDir + "cl_formulaFor.cl";
+	std::ifstream fileFormulaFor(strFileFormulaFor.c_str());
+	checkErr(fileFormulaFor.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaFor).c_str());
+
+	std::string strFileFormula = clDir + "cl_" + strFormula + ".cl";
+	std::ifstream fileFormula(strFileFormula.c_str());
+	checkErr(fileFormula.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormula).c_str());
+
+	std::string strFileFormulaEnd = clDir + "cl_formulaEnd.cl";
+	std::ifstream fileFormulaEnd(strFileFormulaEnd.c_str());
+	checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str());
+
+	std::string progEngine(std::istreambuf_iterator<char>(fileEngine), (std::istreambuf_iterator<char>()));
+	std::string progFormulaBegin(std::istreambuf_iterator<char>(fileFormulaBegin), (std::istreambuf_iterator<char>()));
+	std::string progFormulaInit(std::istreambuf_iterator<char>(fileFormulaInit), (std::istreambuf_iterator<char>()));
+	std::string progFormulaFor(std::istreambuf_iterator<char>(fileFormulaFor), (std::istreambuf_iterator<char>()));
+	std::string progFormula(std::istreambuf_iterator<char>(fileFormula), (std::istreambuf_iterator<char>()));
+	std::string progFormulaEnd(std::istreambuf_iterator<char>(fileFormulaEnd), (std::istreambuf_iterator<char>()));
+
+	cl::Program::Sources sources;
+	sources.push_back(std::make_pair(progEngine.c_str(), progEngine.length()));
+	sources.push_back(std::make_pair(progFormulaBegin.c_str(), progFormulaBegin.length()));
+	sources.push_back(std::make_pair(progFormulaInit.c_str(), progFormulaInit.length()));
+	sources.push_back(std::make_pair(progFormulaFor.c_str(), progFormulaFor.length()));
+	sources.push_back(std::make_pair(progFormula.c_str(), progFormula.length()));
+	sources.push_back(std::make_pair(progFormulaEnd.c_str(), progFormulaEnd.length()+1));
+	printf("OpenCL Number of loaded sources %d\n", sources.size());
+
+	program = new cl::Program(*context, sources, &err);
+	checkErr(err, "Program()");
+	//program->getInfo(CL_PROGRAM_SOURCE, )
+	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
+
 	err = program->build(devices, "-w");
-	checkErr(file.is_open() ? CL_SUCCESS : -1, "Program::build()");
-	//std::cout << "Build options:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+	checkErr(err, "Program::build()");
 	printf("OpenCL program built done\n");
 
 	kernel = new cl::Kernel(*program, "fractal3D", &err);
