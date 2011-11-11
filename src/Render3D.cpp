@@ -987,245 +987,265 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 
-	//turn off refreshing if resolution is very low
-	bool bo_refreshing = true;
-
-	//clearing histogram tables
-	for (int i = 0; i < 64; i++)
-		histogram[i] = 0;
-	for (int i = 0; i < 256; i++)
-		histogram2[i] = 0;
-	WriteLog("Histogram data cleared");
-
-	//reseting counters
-	N_counter = 0;
-	Loop_counter = 0;
-	DE_counter = 0;
-	Pixel_counter = 0;
-	Missed_DE_counter = 0;
-	DEerror = 0;
-	DE_counterForDEerror = 0;
-	start_time = real_clock();
-
-	//initialising threads
-	int *thread_done = new int[height];
-	GThread *Thread[NR_THREADS + 1];
-	GError *err[NR_THREADS + 1];
-	sParam thread_param[NR_THREADS];
-
-	int progressiveStart = 8;
-	if (param.recordMode || noGUI) progressiveStart = 1;
-	image->progressiveFactor = progressiveStart;
-
-	int refresh_index = 0;
-	int refresh_skip = 1;
-
-	if(image->IsLowMemMode()) image->CalculateGammaTable();
-
-	for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
+	if (!clSupport->IsReady())
 	{
-		//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
-		//else bo_refreshing = true;
+		//turn off refreshing if resolution is very low
+		bool bo_refreshing = true;
 
-		int done = 0;
-		for (int i = 0; i < NR_THREADS; i++)
-		{
-			err[i] = NULL;
-		}
-		for (int i = 0; i < height; i++)
-		{
-			thread_done[i] = 0;
-		}
-		WriteLog("Thread data prepared");
+		//clearing histogram tables
+		for (int i = 0; i < 64; i++)
+			histogram[i] = 0;
+		for (int i = 0; i < 256; i++)
+			histogram2[i] = 0;
+		WriteLog("Histogram data cleared");
 
-		//running rendering threads in background
-		for (int i = 0; i < NR_THREADS; i++)
-		{
-			//sending some parameters to thread
-			thread_param[i].start = i * height / NR_THREADS;
-			thread_param[i].z = i;
-			thread_param[i].param = param;
-			thread_param[i].image = image;
-			thread_param[i].progressive = progressive;
-			thread_param[i].progressiveStart = progressiveStart;
-			thread_param[i].done = &done;
-			thread_param[i].thread_done = thread_done;
-			//creating thread
-			Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
-			WriteLogDouble("Thread created", i);
-			//printf("Rendering thread #%d created\n", i + 1);
-		}
+		//reseting counters
+		N_counter = 0;
+		Loop_counter = 0;
+		DE_counter = 0;
+		Pixel_counter = 0;
+		Missed_DE_counter = 0;
+		DEerror = 0;
+		DE_counterForDEerror = 0;
+		start_time = real_clock();
 
-		//refresh GUI
-		if (!noGUI && bo_refreshing)
+		//initialising threads
+		int *thread_done = new int[height];
+		GThread *Thread[NR_THREADS + 1];GError
+		*err[NR_THREADS + 1];sParam
+		thread_param[NR_THREADS];
+
+		int progressiveStart = 8;
+		if (param.recordMode || noGUI) progressiveStart = 1;
+		image->progressiveFactor = progressiveStart;
+
+		int refresh_index = 0;
+		int refresh_skip = 1;
+
+		if (image->IsLowMemMode()) image->CalculateGammaTable();
+
+		for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
 		{
-			if (image->IsPreview())
+			//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
+			//else bo_refreshing = true;
+
+			int done = 0;
+			for (int i = 0; i < NR_THREADS; i++)
 			{
-				while (gtk_events_pending())
-					gtk_main_iteration();
+				err[i] = NULL;
+			}
+			for (int i = 0; i < height; i++)
+			{
+				thread_done[i] = 0;
+			}
+			WriteLog("Thread data prepared");
+
+			//running rendering threads in background
+			for (int i = 0; i < NR_THREADS; i++)
+			{
+				//sending some parameters to thread
+				thread_param[i].start = i * height / NR_THREADS;
+				thread_param[i].z = i;
+				thread_param[i].param = param;
+				thread_param[i].image = image;
+				thread_param[i].progressive = progressive;
+				thread_param[i].progressiveStart = progressiveStart;
+				thread_param[i].done = &done;
+				thread_param[i].thread_done = thread_done;
+				//creating thread
+				Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
+				WriteLogDouble("Thread created", i);
+				//printf("Rendering thread #%d created\n", i + 1);
 			}
 
-			//refreshing image and histograms during rendering
-			while (done < height / progressive - 1 && !programClosed)
+			//refresh GUI
+			if (!noGUI && bo_refreshing)
 			{
-				g_usleep(100000);
-				if (progressive < progressiveStart)
-				{
-					refresh_index++;
-
-					if (refresh_index >= refresh_skip)
-					{
-						double refreshStartTime = real_clock();
-
-						if (image->IsPreview())
-						{
-							param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
-							if (param.SSAOEnabled && !image->IsLowMemMode())
-							{
-								param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
-								PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
-								WriteLog("SSAO rendered");
-							}
-							image->CompileImage();
-							WriteLog("Image compiled");
-
-							image->ConvertTo8bit();
-							WriteLog("Image converted to 8-bit");
-							image->UpdatePreview();
-							WriteLog("Preview created");
-							if (outputDarea != NULL)
-							{
-								DrawHistogram();
-								DrawHistogram2();
-								WriteLog("Histograms refreshed");
-								image->RedrawInWidget(outputDarea);
-								WriteLog("Image redrawn in window");
-							}
-						}
-
-						double refreshEndTime = real_clock();
-						//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
-						refresh_skip = (refreshEndTime - refreshStartTime) * 50;
-						refresh_index = 0;
-						WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
-					}
-				}
-
-				if (outputDarea != NULL)
-				{
-					//progress bar
-					char progressText[1000];
-					double progressiveDone, percent_done;
-					if (progressive == progressiveStart) progressiveDone = 0;
-					else progressiveDone = 0.25 / (progressive * progressive);
-					if (progressiveStart == 1)
-					{
-						percent_done = ((double) done / height) * 100.0;
-					}
-					else
-					{
-						percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
-					}
-					double time = real_clock() - start_time;
-					double time_to_go = (100.0 - percent_done) * time / percent_done;
-					int togo_time_s = (int) time_to_go % 60;
-					int togo_time_min = (int) (time_to_go / 60) % 60;
-					int togo_time_h = time_to_go / 3600;
-					int time_s = (int) time % 60;
-					int time_min = (int) (time / 60) % 60;
-					int time_h = time / 3600;
-					double iterations_per_sec = N_counter / time;
-					//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
-					double avgMissedDE = (double)Missed_DE_counter / Pixel_counter * 100.0;
-					sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h, time_min, time_s,
-							iterations_per_sec, avgMissedDE);
-					gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-					gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
-				}
-				//refreshing GUI
 				if (image->IsPreview())
 				{
 					while (gtk_events_pending())
 						gtk_main_iteration();
 				}
+
+				//refreshing image and histograms during rendering
+				while (done < height / progressive - 1 && !programClosed)
+				{
+					g_usleep(100000);
+					if (progressive < progressiveStart)
+					{
+						refresh_index++;
+
+						if (refresh_index >= refresh_skip)
+						{
+							double refreshStartTime = real_clock();
+
+							if (image->IsPreview())
+							{
+								param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
+								if (param.SSAOEnabled && !image->IsLowMemMode())
+								{
+									param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
+									PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
+									WriteLog("SSAO rendered");
+								}
+								image->CompileImage();
+								WriteLog("Image compiled");
+
+								image->ConvertTo8bit();
+								WriteLog("Image converted to 8-bit");
+								image->UpdatePreview();
+								WriteLog("Preview created");
+								if (outputDarea != NULL)
+								{
+									DrawHistogram();
+									DrawHistogram2();
+									WriteLog("Histograms refreshed");
+									image->RedrawInWidget(outputDarea);
+									WriteLog("Image redrawn in window");
+								}
+							}
+
+							double refreshEndTime = real_clock();
+							//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
+							refresh_skip = (refreshEndTime - refreshStartTime) * 50;
+							refresh_index = 0;
+							WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
+						}
+					}
+
+					if (outputDarea != NULL)
+					{
+						//progress bar
+						char progressText[1000];
+						double progressiveDone, percent_done;
+						if (progressive == progressiveStart) progressiveDone = 0;
+						else progressiveDone = 0.25 / (progressive * progressive);
+						if (progressiveStart == 1)
+						{
+							percent_done = ((double) done / height) * 100.0;
+						}
+						else
+						{
+							percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+						}
+						double time = real_clock() - start_time;
+						double time_to_go = (100.0 - percent_done) * time / percent_done;
+						int togo_time_s = (int) time_to_go % 60;
+						int togo_time_min = (int) (time_to_go / 60) % 60;
+						int togo_time_h = time_to_go / 3600;
+						int time_s = (int) time % 60;
+						int time_min = (int) (time / 60) % 60;
+						int time_h = time / 3600;
+						double iterations_per_sec = N_counter / time;
+						//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
+						double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
+						sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h,
+								time_min, time_s, iterations_per_sec, avgMissedDE);
+						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+						gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
+					}
+					//refreshing GUI
+					if (image->IsPreview())
+					{
+						while (gtk_events_pending())
+							gtk_main_iteration();
+					}
+				}
+			}
+			//when rendered all of image lines wait for finishing threads
+			for (int i = 0; i < NR_THREADS; i++)
+			{
+				g_thread_join(Thread[i]);
+				WriteLogDouble("Thread finish confirmed", i);
+				//printf("Rendering thread #%d finished\n", i + 1);
+			}
+			if (programClosed) break;
+		} //next progress
+		printf("\n");
+
+		//refreshing image
+
+		//*** postprocessing
+
+		if (param.SSAOEnabled && !programClosed)
+		{
+			PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
+			WriteLog("SSAO rendered");
+		}
+		image->CompileImage();
+		WriteLog("Image compiled");
+		if (param.DOFEnabled && !programClosed)
+		{
+			double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 2.0) - 1.0 / param.doubles.persp;
+			PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus, param.doubles.persp);
+			WriteLog("DOF rendered");
+		}
+		PostRenderingLights(image, &param);
+		WriteLog("Lights rendered");
+
+		if (!noGUI)
+		{
+			if (image->IsPreview())
+			{
+				image->ConvertTo8bit();
+				WriteLog("Image converted to 8-bit");
+				image->UpdatePreview();
+				WriteLog("Preview created");
+				if (outputDarea != NULL)
+				{
+					DrawHistogram();
+					DrawHistogram2();
+					WriteLog("Histograms refreshed");
+					image->RedrawInWidget(outputDarea);
+					WriteLog("Image redrawn in window");
+				}
 			}
 		}
-		//when rendered all of image lines wait for finishing threads
-		for (int i = 0; i < NR_THREADS; i++)
+
+		if (!noGUI)
 		{
-			g_thread_join(Thread[i]);
-			WriteLogDouble("Thread finish confirmed", i);
-			//printf("Rendering thread #%d finished\n", i + 1);
-		}
-		if (programClosed) break;
-	}//next progress
-	printf("\n");
-
-	//refreshing image
-
-	//*** postprocessing
-
-	if (param.SSAOEnabled && !programClosed)
-	{
-		PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
-		WriteLog("SSAO rendered");
-	}
-	image->CompileImage();
-	WriteLog("Image compiled");
-	if (param.DOFEnabled && !programClosed)
-	{
-		double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 2.0) - 1.0 / param.doubles.persp;
-		PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus, param.doubles.persp);
-		WriteLog("DOF rendered");
-	}
-	PostRenderingLights(image, &param);
-	WriteLog("Lights rendered");
-
-	if (!noGUI)
-	{
-		if (image->IsPreview())
-		{
-			image->ConvertTo8bit();
-			WriteLog("Image converted to 8-bit");
-			image->UpdatePreview();
-			WriteLog("Preview created");
 			if (outputDarea != NULL)
 			{
-				DrawHistogram();
-				DrawHistogram2();
-				WriteLog("Histograms refreshed");
-				image->RedrawInWidget(outputDarea);
-				WriteLog("Image redrawn in window");
+				char progressText[1000];
+				double time = real_clock() - start_time;
+				int time_s = (int) time % 60;
+				int time_min = (int) (time / 60) % 60;
+				int time_h = time / 3600;
+				double iterations_per_sec = N_counter / time;
+				double avg_N = (double) N_counter / Loop_counter;
+				double avg_DE = (double) DE_counter / Pixel_counter;
+				double avgDEerror = DEerror / DE_counterForDEerror * 100.0;
+				double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
+				sprintf(progressText, "Render time %dh%dm%ds, iters/s %.0f, avg. N %.1f, avg. DEsteps %.1f, DEerror %.1f%%, MissedDE %.3f%%", time_h, time_min, time_s, iterations_per_sec,
+						avg_N, avg_DE, avgDEerror, avgMissedDE);
+				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+			}
+			if (image->IsPreview())
+			{
+				while (gtk_events_pending())
+					gtk_main_iteration();
 			}
 		}
+		delete[] thread_done;
 	}
-
-	if (!noGUI)
+	else
 	{
-		if (outputDarea != NULL)
-		{
-			char progressText[1000];
-			double time = real_clock() - start_time;
-			int time_s = (int) time % 60;
-			int time_min = (int) (time / 60) % 60;
-			int time_h = time / 3600;
-			double iterations_per_sec = N_counter / time;
-			double avg_N = (double) N_counter / Loop_counter;
-			double avg_DE = (double) DE_counter / Pixel_counter;
-			double avgDEerror = DEerror / DE_counterForDEerror*100.0;
-			double avgMissedDE = (double)Missed_DE_counter / Pixel_counter*100.0;
-			sprintf(progressText, "Render time %dh%dm%ds, iters/s %.0f, avg. N %.1f, avg. DEsteps %.1f, DEerror %.1f%%, MissedDE %.3f%%", time_h, time_min, time_s,
-					iterations_per_sec, avg_N, avg_DE, avgDEerror, avgMissedDE);
-			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
-		}
-		if(image->IsPreview())
+		printf("OpenCL rendering\n");
+		sClFractal clFractal;
+		sClParams clParams;
+		Params2Cl(&param, &clParams, &clFractal);
+		clSupport->SetParams(clParams, clFractal);
+		clSupport->Render(&mainImage, renderWindow.drawingArea);
+		image->ConvertTo8bit();
+		image->UpdatePreview();
+		image->RedrawInWidget(outputDarea);
+		if (image->IsPreview())
 		{
 			while (gtk_events_pending())
 				gtk_main_iteration();
 		}
 	}
-	delete[] thread_done;
 }
 
 //******************************** Get number of CPU cores *************
