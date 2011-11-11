@@ -38,3 +38,10 @@ typedef struct
 	cl_float4 vp;
 } sClParams;
 
+typedef struct
+{
+	cl_ushort R;
+	cl_ushort G;
+	cl_ushort B;
+	float zBuffer;
+} sClPixel;

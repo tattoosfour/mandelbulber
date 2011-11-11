@@ -21,8 +21,6 @@
 
 #include "cl_data.h"
 
-#define CL_STEPS 30
-
 class CclSupport
 {
 public:
@@ -30,7 +28,7 @@ public:
 	void Init(void);
 	void SetParams(sClParams ClParams, sClFractal ClFractal);
 	void Render(cImage *image, GtkWidget *outputDarea);
-	unsigned char* GetRgbBuff() {return rgbbuff;}
+	sClPixel * GetRgbBuff() {return rgbbuff;}
 	bool IsReady(void) {return ready;}
 	bool IsEnabled(void) {return enabled;}
 	void Enable(void);
@@ -41,7 +39,7 @@ public:
 private:
 	bool enabled;
 	bool ready;
-	unsigned char *rgbbuff;
+	sClPixel *rgbbuff;
 
 	cl::vector<cl::Platform> platformList;
 	std::string platformVendor;
@@ -58,6 +56,7 @@ private:
 	int height;
 	unsigned int buffSize;
 	unsigned int stepSize;
+	unsigned int steps;
 	cl_int numberOfComputeUnits;
 	cl_int maxWorkItemDimmensions;
 	cl_int maxMaxWorkGroupSize[3];

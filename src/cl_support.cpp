@@ -28,6 +28,7 @@ CclSupport::CclSupport(void)
 	ready = false;
 	width = 800;
 	height = 600;
+	steps = 10;
 }
 
 void CclSupport::Init(void)
@@ -133,11 +134,12 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
-	stepSize = (width * height / CL_STEPS / workGroupSize + 1) * workGroupSize;
-	buffSize = stepSize;
+	steps = height * width / 16384;
+	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
+	buffSize = stepSize * sizeof(sClPixel);
 
-	rgbbuff = new unsigned char[buffSize * 3];
-	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize*3,rgbbuff,&err);
+	rgbbuff = new sClPixel[buffSize];
+	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
 
@@ -164,7 +166,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	cl_int err;
 	float time_prev = clock();
 
-	for (unsigned int loop = 0; loop < CL_STEPS; loop++)
+	for (unsigned int loop = 0; loop < steps; loop++)
 	{
 		err = kernel->setArg(3, stepSize * loop);
 
@@ -173,17 +175,18 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		checkErr(err, "ComamndQueue::enqueueNDRangeKernel()");
 
 		event.wait();
-		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize * 3, rgbbuff);
+		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
 		checkErr(err, "ComamndQueue::enqueueReadBuffer()");
 
 		unsigned int offset = loop * stepSize;
-		for(unsigned int i=0; i<buffSize; i++)
+		for(unsigned int i=0; i<stepSize; i++)
 		{
 			unsigned int a = offset + i;
-			sRGB16 pixel = {rgbbuff[i*3]*256, rgbbuff[i*3+1]*256, rgbbuff[i*3+2]*256};
+			sRGB16 pixel = {rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B};
 			int x = a % width;
 			int y = a / width;
 			image->PutPixelImage(x,y,pixel);
+			image->PutPixelZBuffer(x,y,rgbbuff[i].zBuffer);
 		}
 	}
 	float time = clock();
