@@ -8,9 +8,6 @@
 #ifndef CL_SUPPORT_HPP_
 #define CL_SUPPORT_HPP_
 
-#define CL_WIDTH 800
-#define CL_HEIGHT 600
-
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 #include <CL/cl.hpp>
 #include <cstdio>
@@ -20,7 +17,11 @@
 #include <string>
 #include <iterator>
 
+#include "cimage.hpp"
+
 #include "cl_data.h"
+
+#define CL_STEPS 30
 
 class CclSupport
 {
@@ -28,12 +29,15 @@ public:
 	CclSupport();
 	void Init(void);
 	void SetParams(sClParams ClParams, sClFractal ClFractal);
-	void Render(void);
+	void Render(cImage *image, GtkWidget *outputDarea);
 	unsigned char* GetRgbBuff() {return rgbbuff;}
 	bool IsReady(void) {return ready;}
 	bool IsEnabled(void) {return enabled;}
 	void Enable(void);
-	void Disable(void) {enabled = false;}
+	void Disable(void);
+	int GetWidth() {return width;}
+	int GetHeight() {return height;}
+	void SetSize(int w, int h){width = w; height = h;}
 private:
 	bool enabled;
 	bool ready;
@@ -50,7 +54,10 @@ private:
 	cl::Kernel *kernel;
 	cl::CommandQueue *queue;
 
+	int width;
+	int height;
 	unsigned int buffSize;
+	unsigned int stepSize;
 	cl_int numberOfComputeUnits;
 	cl_int maxWorkItemDimmensions;
 	cl_int maxMaxWorkGroupSize[3];

@@ -1833,7 +1833,6 @@ void CreateInterface(sParamRender *default_settings)
 
 	//connected signals
 	CONNECT_SIGNAL_CLICKED(Interface.buRender, StartRendering);
-	CONNECT_SIGNAL_CLICKED(Interface.buRender, StartRendering);
 	CONNECT_SIGNAL_CLICKED(Interface.buStop, StopRendering);
 	CONNECT_SIGNAL_CLICKED(Interface.buApplyBrighness, PressedApplyBrigtness);
 	CONNECT_SIGNAL_CLICKED(Interface.buSaveImage, PressedSaveImage);
@@ -3026,8 +3025,8 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->alpha = params->doubles.alfa;
 	clParams->beta = params->doubles.beta;
 	clParams->gamma = params->doubles.gamma;
-	clParams->height = CL_HEIGHT;
-	clParams->width = CL_WIDTH;
+	clParams->height = clSupport->GetHeight();
+	clParams->width = clSupport->GetWidth();
 	clParams->persp = params->doubles.persp;
 	clParams->vp = CVector2float4(params->doubles.vp);
 	clParams->zoom = params->doubles.zoom;

@@ -26,6 +26,8 @@ CclSupport::CclSupport(void)
 {
 	enabled = false;
 	ready = false;
+	width = 800;
+	height = 600;
 }
 
 void CclSupport::Init(void)
@@ -42,12 +44,6 @@ void CclSupport::Init(void)
 	context = new cl::Context(CL_DEVICE_TYPE_GPU, cprops, NULL, NULL, &err);
 	checkErr(err, "Context::Context()");
 	printf("OpenCL contexts created\n");
-
-	buffSize = CL_WIDTH * CL_HEIGHT * 3;
-	rgbbuff = new unsigned char[buffSize];
-	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
-	checkErr(err, "Buffer::Buffer()");
-	printf("OpenCL buffer created\n");
 
 	devices = context->getInfo<CL_CONTEXT_DEVICES>();
 	checkErr(devices.size() > 0 ? CL_SUCCESS : -1, "devices.size() > 0");
@@ -76,6 +72,7 @@ void CclSupport::Init(void)
 	if(params.fractal.formula == trig_optim) strFormula = "mandelbulb";
 	if(params.fractal.formula == trig_DE) strFormula = "mandelbulb2";
 	if(params.fractal.formula == tglad) strFormula = "mandelbox";
+	if(params.fractal.formula == menger_sponge) strFormula = "mengersponge";
 
 	std::string strFileEngine = clDir + "cl_engine.cl";
 	std::ifstream fileEngine(strFileEngine.c_str());
@@ -136,6 +133,14 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
+	stepSize = (width * height / CL_STEPS / workGroupSize + 1) * workGroupSize;
+	buffSize = stepSize;
+
+	rgbbuff = new unsigned char[buffSize * 3];
+	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize*3,rgbbuff,&err);
+	checkErr(err, "Buffer::Buffer()");
+	printf("OpenCL buffer created\n");
+
 	err = kernel->setArg(0, *outCL);
 	checkErr(err, "Kernel::setArg()");
 
@@ -154,25 +159,38 @@ void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal)
 	checkErr(err, "Kernel::setArg()");
 }
 
-void CclSupport::Render(void)
+void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
 	float time_prev = clock();
 
-	for (unsigned int loop = 0; loop < 1; loop++)
+	for (unsigned int loop = 0; loop < CL_STEPS; loop++)
 	{
-		err = kernel->setArg(3, loop);
+		err = kernel->setArg(3, stepSize * loop);
 
 		cl::Event event;
-		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(CL_WIDTH * CL_HEIGHT), cl::NDRange(workGroupSize), NULL, &event);
+		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize), NULL, &event);
 		checkErr(err, "ComamndQueue::enqueueNDRangeKernel()");
 
 		event.wait();
-		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
+		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize * 3, rgbbuff);
 		checkErr(err, "ComamndQueue::enqueueReadBuffer()");
+
+		unsigned int offset = loop * stepSize;
+		for(unsigned int i=0; i<buffSize; i++)
+		{
+			unsigned int a = offset + i;
+			sRGB16 pixel = {rgbbuff[i*3]*256, rgbbuff[i*3+1]*256, rgbbuff[i*3+2]*256};
+			int x = a % width;
+			int y = a / width;
+			image->PutPixelImage(x,y,pixel);
+		}
 	}
 	float time = clock();
 	printf("time = %f \n", (time - time_prev) / CLOCKS_PER_SEC);
+
+	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
+	//		clSupport->GetRgbBuff(), clSupport->GetWidth() * 3);
 }
 
 void CclSupport::Enable(void)
@@ -181,4 +199,16 @@ void CclSupport::Enable(void)
 	{
 		enabled = true;
 	}
+}
+
+void CclSupport::Disable(void)
+{
+	delete context;
+	delete rgbbuff;
+	delete outCL;
+	delete program;
+	delete kernel;
+	delete queue;
+	enabled = false;
+	ready = false;
 }

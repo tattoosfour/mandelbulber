@@ -94,25 +94,7 @@ matrix33 RotateZ(matrix33 m, float angle)
 		return out;
 }
 
-/*
-float4 Projection3D(float4 point, float4 vp, matrix33 mRot, float fov, float zoom)
-{
-	float perspFactor = 1.0 + point.y * fov;
-	float4 vector1, vector2;
-	
-	vector1.x = point.x * perspFactor;
-	vector1.y = point.y * zoom;
-	vector1.z = point.z * perspFactor;
 
-	vector1.w = 0;
-	
-	vector2 = Matrix33MulFloat3(mRot, vector1);
-	vector2.w = 0;
-
-	float4 result = vector2 + vp;
-	return result;
-}
-*/
 /*
 float PrimitivePlane(float4 point, float4 centre, float4 normal)
 {
@@ -147,144 +129,6 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 }
 */
 //--------------- formulas ----------------
-
-/*
-float Fractal(float4 point, sClFractal *fr)
-{
-	float distance = 0;
-	int N = fr->N;
-	float power = fr->power;
-	float4 z = point;
-	float r = fast_length(z);
-	float r_dz = 1.0f;
-	
-	for(int i=0; i<N; i++)
-	{
-		float th0 = asin(native_divide(z.z ,r));
-		float ph0 = atan2(z.y, z.x);
-		float rp = native_powr(r, power - 1.0f);
-		float th = th0 * power;
-		float ph = ph0 * power;
-		float cth = native_cos(th);
-		r_dz = rp * r_dz * power + 1.0f;
-		rp *= r;
-		z = (float4) {cth * native_cos(ph), cth * native_sin(ph), native_sin(th), 0.0f};
-		z*=rp;
-		z+=point;
-		r = fast_length(z);
-		if(r>4.0f) 
-		{
-			distance = 0.5f * r * native_log(r) / (r_dz);
-			break;
-		}
-	}
-	if(distance < 0) distance = 0;
-	return distance;
-}
-*/
-/*
-float Mandelbulb2(float4 point, float power, int N)
-{
-	float distance = 0.0f;
-	float4 one = {1.0f, 0.0f, 0.0f, 0.0f};
-	float4 z = point;
-	float4 dz = 0.0f;
-	float ph_dz = 0;
-	float th_dz = 0;
-	float r = fast_length(z);
-	float r_dz = 1.0f;
-
-	for(int i=0; i<N; i++)
-	{
-		float r1 = native_powr(r, power - 1.0f);
-		float r2 = r1 * r;
-		float th = atan2(z.y, z.x);
-		float ph = -atan2(z.z, sqrt(z.x * z.x + z.y * z.y));
-
-		float p_r1_rdz = power * r1 * r_dz;
-		float ph_phdz = (power - 1.0f) * ph + ph_dz;
-		float th_thdz = (power - 1.0f) * th + th_dz;
-		dz.x = native_cos(ph_phdz) * native_cos(th_thdz);
-		dz.y = native_cos(ph_phdz) * native_sin(th_thdz);
-		dz.z = native_sin(ph_phdz);
-		dz = dz * p_r1_rdz + one;
-		r_dz = fast_length(dz);
-		th_dz = atan2(dz.y, dz.x);
-		ph_dz = -atan2(dz.z, sqrt(dz.x * dz.x + dz.y * dz.y));
-
-		float pth = power * th;
-		float pph = power * ph;
-		z.x = native_cos(pph) * native_cos(pth);
-		z.y = native_cos(pph) * native_sin(pth);
-		z.z = native_sin(pph);
-
-		z = z * r2 + point;
-		r = fast_length(z);
-		
-		if(r>4.0f) 
-		{
-			distance = 0.5f * r * native_log(r) / (r_dz);
-			break;
-		}
-	}
-	if(distance < 0) distance = 0;
-	return distance;
-}
-*/
-
-/*
-float Fractal(float4 point, sClFractal *fr)
-{
-	float distance = 0;
-	int N = fr->N;
-	float4 z = point;
-	float tgladDE = 1.0f;
-	float4 ones = 1.0f;
-	float foldingLimit = fr->mandelbox.foldingLimit;
-	float foldingValue = fr->mandelbox.foldingValue;
-	float mr2 = fr->mandelbox.minRadius * fr->mandelbox.minRadius;
-	float fr2 = fr->mandelbox.fixedRadius * fr->mandelbox.fixedRadius;
-	float scale = fr->mandelbox.scale;
-	
-	for(int i=0; i<N; i++)
-	{
-		int4 cond1, cond2;
-		
-		cond1.x = isgreater(z.x, foldingLimit);
-		cond1.y = isgreater(z.y, foldingLimit);
-		cond1.z = isgreater(z.z, foldingLimit);
-		cond2.x = isless(z.x, -foldingLimit);
-		cond2.y = isless(z.y, -foldingLimit);
-		cond2.z = isless(z.z, -foldingLimit);
-		z.x = select(z.x,  foldingValue - z.x, cond1.x);
-		z.y = select(z.y,  foldingValue - z.y, cond1.y);
-		z.z = select(z.z,  foldingValue - z.z, cond1.z);
-		z.x = select(z.x,  -foldingValue - z.x, cond2.x);
-		z.y = select(z.y,  -foldingValue - z.y, cond2.y);
-		z.z = select(z.z,  -foldingValue - z.z, cond2.z);
-		
-		//z = fabs(z + ones) - fabs(z - ones) - z;
-
-		float rr = dot(z,z);
-		float m = scale;
-		if (rr < mr2)	m = native_divide(scale, mr2);
-		else if (rr < fr2)	m = native_divide(scale,rr);
-		
-		z = Matrix33MulFloat3(fr->mandelbox.mainRot, z);
-		
-		z = z * m + point;
-		tgladDE = tgladDE * fabs(m) + 1.0f;
-		float r = dot(z,z);
-		
-		if(r>1024.0f) 
-		{
-			distance = native_sqrt(r) / fabs(tgladDE);
-			break;
-		}
-	}
-	return distance;
-}
-*/
 
 /*
 float MengerSponge(float4 point, int N)
@@ -430,12 +274,12 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 
 
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, int line)
+kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, int cl_offset)
 {
-	const unsigned int i = get_global_id(0);
+	const unsigned int i = get_global_id(0) + cl_offset;
 	const unsigned int imageX = i % params.width;
 	const unsigned int imageY = i / params.width;
-	const unsigned int buffIndex = i*3;
+	const unsigned int buffIndex = (i - cl_offset) *3;
 	
 	float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
 	float width = convert_float(params.width);
@@ -482,7 +326,7 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 			break;
 	  }
 				
-		float step = distance * params.DEfactor - 0.5*distThresh;
+		float step = (distance  - 0.5*distThresh) * params.DEfactor;
 		scan += step;
 		
 		if(scan > 50) break;
