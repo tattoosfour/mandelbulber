@@ -4,6 +4,7 @@ typedef float4 cl_float4;
 typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
+typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
@@ -274,12 +275,12 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 
 
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, int cl_offset)
+kernel void fractal3D(global sClPixel *out, sClParams params, sClFractal fractal, int cl_offset)
 {
 	const unsigned int i = get_global_id(0) + cl_offset;
 	const unsigned int imageX = i % params.width;
 	const unsigned int imageY = i / params.width;
-	const unsigned int buffIndex = (i - cl_offset) *3;
+	const unsigned int buffIndex = (i - cl_offset);
 	
 	float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
 	float width = convert_float(params.width);
@@ -332,6 +333,8 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 		if(scan > 50) break;
 	}
 	
+	float zBuff = scan / params.zoom - 1.0;
+	
 	float4 colour = 0.0f;
 	if(found)
 	{
@@ -370,12 +373,13 @@ kernel void fractal3D(global char *out, sClParams params, sClFractal fractal, in
 	colour += glowColor * glow;
 	
 	
-	uchar R = convert_uchar_sat(colour.x * 150.0f);
-	uchar G = convert_uchar_sat(colour.y * 150.0f);
-	uchar B = convert_uchar_sat(colour.z * 150.0f);
+	ushort R = convert_ushort_sat(colour.x * 38400.0f);
+	ushort G = convert_ushort_sat(colour.y * 38400.0f);
+	ushort B = convert_ushort_sat(colour.z * 38400.0f);
 	
-	out[buffIndex] = R;
-	out[buffIndex+1] = G;
-	out[buffIndex+2] = B;
+	out[buffIndex].R = R;
+	out[buffIndex].G = G;
+	out[buffIndex].B = B;
+	out[buffIndex].zBuffer = zBuff;
 }
 
