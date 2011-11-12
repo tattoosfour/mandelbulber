@@ -1236,14 +1236,23 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		sClParams clParams;
 		Params2Cl(&param, &clParams, &clFractal);
 		clSupport->SetParams(clParams, clFractal);
-		clSupport->Render(&mainImage, renderWindow.drawingArea);
-		image->ConvertTo8bit();
-		image->UpdatePreview();
-		image->RedrawInWidget(outputDarea);
+		start_time = real_clock();
+		clSupport->Render(image, outputDarea);
+		double time = real_clock() - start_time;
 		if (image->IsPreview())
 		{
+			image->ConvertTo8bit();
+			image->UpdatePreview();
+			image->RedrawInWidget(outputDarea);
 			while (gtk_events_pending())
 				gtk_main_iteration();
+		}
+		if (outputDarea != NULL)
+		{
+			char progressText[1000];
+			sprintf(progressText, "OpenCL rendering time: %f seconds", time);
+			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}
 	}
 }

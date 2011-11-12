@@ -82,6 +82,7 @@ struct sInterface
 	GtkWidget *tab_label_primitivePlane;
 	GtkWidget *tab_label_primitiveBox;
 	GtkWidget *tab_label_primitiveSphere;
+	GtkWidget *tab_label_openCL;
 
 	GtkWidget *tab_box_view;
 	GtkWidget *tab_box_fractal;
@@ -98,6 +99,7 @@ struct sInterface
 	GtkWidget *tab_box_primitivePlane;
 	GtkWidget *tab_box_primitiveBox;
 	GtkWidget *tab_box_primitiveSphere;
+	GtkWidget *tab_box_openCL;
 
 	GtkWidget *boxMain;
 	GtkWidget *boxButtons;
@@ -222,6 +224,9 @@ struct sInterface
 	GtkWidget *boxPrimitiveWater2;
 	GtkWidget *boxMeasure;
 	GtkWidget *boxMeasure1;
+	GtkWidget *boxOpenClSettings;
+	GtkWidget *boxOpenClSwitches1;
+	GtkWidget *boxOpenClInformation;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -275,6 +280,8 @@ struct sInterface
 	GtkWidget *frPrimitiveInvertedSphere;
 	GtkWidget *frPrimitiveWater;
 	GtkWidget *frMeasure;
+	GtkWidget *frOpenClSettings;
+	GtkWidget *frOpenClInformation;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -555,6 +562,13 @@ struct sInterface
 	GtkWidget *label_NavigatorEstimatedDistance;
 	GtkWidget *label_DE_threshold;
 	GtkWidget *label_measureDistance;
+	GtkWidget *label_OpenClPlatformBy;
+	GtkWidget *label_OpenClComputingUnits;
+	GtkWidget *label_OpenClMaxWorkgroup;
+	GtkWidget *label_OpenClMaxClock;
+	GtkWidget *label_OpenClMemorySize;
+	GtkWidget *label_OpenClWorkgroupSize;
+	GtkWidget *label_OpenClStatus;
 
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
@@ -615,6 +629,7 @@ struct sInterface
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
 	GtkWidget *checkOpenClEnable;
+	GtkWidget *checkOpenClNoEffects;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
