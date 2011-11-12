@@ -33,6 +33,13 @@ CclSupport::CclSupport(void)
 
 void CclSupport::Init(void)
 {
+	char progressText[1000];
+	sprintf(progressText, "OpenCL - initialization");
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+
 	cl_int err;
 	cl::Platform::get(&platformList);
 	checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
@@ -134,7 +141,7 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
-	steps = height * width / 16384;
+	steps = height * width / 65536 + 1;
 	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
 	buffSize = stepSize * sizeof(sClPixel);
 
@@ -150,6 +157,24 @@ void CclSupport::Init(void)
 	checkErr(err, "CommandQueue::CommandQueue()");
 	printf("OpenCL command queue prepared\n");
 
+	sprintf(progressText, "OpenCL - ready");
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+
+	char text[1000];
+	sprintf(text,"OpenCL platform by: %s", platformVendor.c_str());
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClPlatformBy), text);
+	sprintf(text,"GPU frequency: %d MHz", maxClockFrequency);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMaxClock), text);
+	sprintf(text,"GPU memory: %ld MB", memorySize/1024/1024);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMemorySize), text);
+	sprintf(text,"Number of computing units: %d", numberOfComputeUnits);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClComputingUnits), text);
+	sprintf(text,"Max workgroup size: %d", maxMaxWorkGroupSize[0]);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMaxWorkgroup), text);
+	sprintf(text,"Actual workgroup size: %ld", workGroupSize);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClWorkgroupSize), text);
+
 	ready = true;
 }
 
@@ -164,7 +189,6 @@ void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal)
 void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
-	float time_prev = clock();
 
 	for (unsigned int loop = 0; loop < steps; loop++)
 	{
@@ -188,10 +212,15 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			image->PutPixelImage(x,y,pixel);
 			image->PutPixelZBuffer(x,y,rgbbuff[i].zBuffer);
 		}
-	}
-	float time = clock();
-	printf("time = %f \n", (time - time_prev) / CLOCKS_PER_SEC);
 
+		char progressText[1000];
+		double percent = (double)loop/steps;
+		sprintf(progressText, "OpenCL - rendering. Done %.1f%%", percent*100.0);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+		while (gtk_events_pending())
+			gtk_main_iteration();
+	}
 	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
 	//		clSupport->GetRgbBuff(), clSupport->GetWidth() * 3);
 }

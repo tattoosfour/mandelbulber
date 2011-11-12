@@ -1150,6 +1150,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_label_posteffects = gtk_label_new("Post effects");
 	Interface.tab_label_lights = gtk_label_new("Lights");
 	Interface.tab_label_IFS = gtk_label_new("IFS");
+	Interface.tab_label_openCL = gtk_label_new("OpenCL");
 	Interface.tab_label_about = gtk_label_new("About...");
 
 	Interface.tab_box_view = gtk_vbox_new(FALSE, 1);
@@ -1164,6 +1165,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tab_box_IFS = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_hybrid = gtk_vbox_new(FALSE, 1);
 	Interface.tab_box_mandelbox = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_openCL = gtk_vbox_new(FALSE, 1);
 
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_view), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_engine), 5);
@@ -1176,6 +1178,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_IFS), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_about), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_hybrid), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_openCL), 5);
 
 	Interface.tabsPrimitives = gtk_notebook_new();
 	Interface.tab_label_primitivePlane = gtk_label_new("Plane");
@@ -1313,6 +1316,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxPrimitiveWater2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxMeasure = gtk_vbox_new(FALSE, 1);
 	Interface.boxMeasure1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClSettings = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClSwitches1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClInformation = gtk_vbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1368,6 +1374,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frPrimitiveInvertedSphere = gtk_frame_new("Inverted sphere");
 	Interface.frPrimitiveWater = gtk_frame_new("Water");
 	Interface.frMeasure = gtk_frame_new("Coordinate measurement");
+	Interface.frOpenClSettings = gtk_frame_new("OpenCL settings");
+	Interface.frOpenClInformation = gtk_frame_new("OpenCL information");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1762,7 +1770,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
-	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL");
+	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL Enable");
+	Interface.checkOpenClNoEffects = gtk_check_button_new_with_label("No effects");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -1800,6 +1809,13 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_paletteOffset = gtk_label_new("offset:");
 	Interface.label_DE_threshold = gtk_label_new("Detail level:");
 	Interface.label_measureDistance = gtk_label_new("Distance from last point:");
+	Interface.label_OpenClComputingUnits = gtk_label_new("");
+	Interface.label_OpenClMaxClock = gtk_label_new("");
+	Interface.label_OpenClMaxWorkgroup = gtk_label_new("");
+	Interface.label_OpenClMemorySize = gtk_label_new("");
+	Interface.label_OpenClPlatformBy = gtk_label_new("");
+	Interface.label_OpenClStatus = gtk_label_new("");
+	Interface.label_OpenClWorkgroupSize = gtk_label_new("");
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
 		Interface.label_HybridFormula[i-1] = gtk_label_new(g_strdup_printf("Formula #%d:", i));
@@ -1910,7 +1926,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.boxButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buRender, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buStop, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.checkOpenClEnable, false, false, 1);
 
 	//	frame view point
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frCoordinates, false, false, 1);
@@ -2591,6 +2606,23 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
 
+	//tab OpenCL
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClSettings, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClNoEffects, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClInformation, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClPlatformBy, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxClock, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMemorySize, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClComputingUnits, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxWorkgroup, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClWorkgroupSize, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClStatus, false, false, 1);
+
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
 
@@ -2632,6 +2664,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_openCL, Interface.tab_label_openCL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);

@@ -282,104 +282,107 @@ kernel void fractal3D(global sClPixel *out, sClParams params, sClFractal fractal
 	const unsigned int imageY = i / params.width;
 	const unsigned int buffIndex = (i - cl_offset);
 	
-	float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
-	float width = convert_float(params.width);
-	float height = convert_float(params.height);
-	float resolution = 1.0f/width;
-	
-	const float4 one = (float4) {1.0f, 0.0f, 0.0f, 0.0f};
-	const float4 ones = 1.0f;
-	
-	matrix33 rot;
-	rot.m1 = (float4){1.0f, 0.0f, 0.0f, 0.0f};
-	rot.m2 = (float4){0.0f, 1.0f, 0.0f, 0.0f};
-	rot.m3 = (float4){0.0f, 0.0f, 1.0f, 0.0f};
-	rot = RotateZ(rot, params.alpha);
-	rot = RotateX(rot, params.beta);
-	rot = RotateY(rot, params.gamma);
-	
-	float4 back = (float4) {0.0f, 1.0f, 0.0f, 0.0f} / params.persp * params.zoom;
-	float4 start = params.vp - Matrix33MulFloat3(rot, back);
-	
-	float aspectRatio = width / height;
-	float x2,z2;
-	x2 = (screenPoint.x / width - 0.5) * aspectRatio;
-	z2 = (screenPoint.y / height - 0.5);
-	float4 viewVector = (float4) {x2 * params.persp, 1.0f, z2 * params.persp, 0.0f}; 
-	viewVector = Matrix33MulFloat3(rot, viewVector);
-	
-	bool found = false;
-	int count;
-	
-	float4 point;
-	float scan, distThresh, distance;
-	
-	scan = 1e-10f;
-	for(count = 0; (count < 255); count++)
+	if(imageY < params.height)
 	{
-		point = start + viewVector * scan;
-		distance = CalculateDistance(point, &fractal);
-		distThresh = scan * resolution * params.persp;
+		float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
+		float width = convert_float(params.width);
+		float height = convert_float(params.height);
+		float resolution = 1.0f/width;
 		
-		if(distance < distThresh)
+		const float4 one = (float4) {1.0f, 0.0f, 0.0f, 0.0f};
+		const float4 ones = 1.0f;
+		
+		matrix33 rot;
+		rot.m1 = (float4){1.0f, 0.0f, 0.0f, 0.0f};
+		rot.m2 = (float4){0.0f, 1.0f, 0.0f, 0.0f};
+		rot.m3 = (float4){0.0f, 0.0f, 1.0f, 0.0f};
+		rot = RotateZ(rot, params.alpha);
+		rot = RotateX(rot, params.beta);
+		rot = RotateY(rot, params.gamma);
+		
+		float4 back = (float4) {0.0f, 1.0f, 0.0f, 0.0f} / params.persp * params.zoom;
+		float4 start = params.vp - Matrix33MulFloat3(rot, back);
+		
+		float aspectRatio = width / height;
+		float x2,z2;
+		x2 = (screenPoint.x / width - 0.5) * aspectRatio;
+		z2 = (screenPoint.y / height - 0.5);
+		float4 viewVector = (float4) {x2 * params.persp, 1.0f, z2 * params.persp, 0.0f}; 
+		viewVector = Matrix33MulFloat3(rot, viewVector);
+		
+		bool found = false;
+		int count;
+		
+		float4 point;
+		float scan, distThresh, distance;
+		
+		scan = 1e-10f;
+		for(count = 0; (count < 255); count++)
 		{
-			found = true;
-			break;
-	  }
-				
-		float step = (distance  - 0.5*distThresh) * params.DEfactor;
-		scan += step;
+			point = start + viewVector * scan;
+			distance = CalculateDistance(point, &fractal);
+			distThresh = scan * resolution * params.persp;
+			
+			if(distance < distThresh)
+			{
+				found = true;
+				break;
+			}
+					
+			float step = (distance  - 0.5*distThresh) * params.DEfactor;
+			scan += step;
+			
+			if(scan > 50) break;
+		}
 		
-		if(scan > 50) break;
+		float zBuff = scan / params.zoom - 1.0;
+		
+		float4 colour = 0.0f;
+		if(found)
+		{
+			float4 normal = NormalVector(&fractal, point, distance, distThresh);
+			
+			float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
+			lightVector = Matrix33MulFloat3(rot, lightVector);
+			float shade = dot(lightVector, normal);
+			if(shade<0) shade = 0;
+			
+			float shadow = Shadow(&fractal, point, lightVector, distThresh);
+			//float shadow = 1.0f;
+			
+			float4 half = lightVector - viewVector;
+			half = fast_normalize(half);
+			float specular = dot(normal, half);
+			if (specular < 0.0f) specular = 0.0f;
+			specular = pown(specular, 20);
+			if (specular > 15.0) specular = 15.0;
+			
+			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			//float ao = 0.0f;
+			
+			colour.x = (shade + specular) * shadow + ao;
+			colour.y = (shade + specular) * shadow + ao;
+			colour.z = (shade + specular) * shadow + ao;
+		}
+		
+		float glow = count / 128.0f;
+		float glowN = 1.0f - glow;
+		if(glowN < 0.0f) glowN = 0.0f;
+		float4 glowColor;
+		glowColor.x = 1.0f * glowN + 1.0f * glow;
+		glowColor.y = 0.0f * glowN + 1.0f * glow;
+		glowColor.z = 0.0f * glowN + 0.0f * glow;
+		colour += glowColor * glow;
+		
+		
+		ushort R = convert_ushort_sat(colour.x * 38400.0f);
+		ushort G = convert_ushort_sat(colour.y * 38400.0f);
+		ushort B = convert_ushort_sat(colour.z * 38400.0f);
+		
+		out[buffIndex].R = R;
+		out[buffIndex].G = G;
+		out[buffIndex].B = B;
+		out[buffIndex].zBuffer = zBuff;
 	}
-	
-	float zBuff = scan / params.zoom - 1.0;
-	
-	float4 colour = 0.0f;
-	if(found)
-	{
-		float4 normal = NormalVector(&fractal, point, distance, distThresh);
-		
-		float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
-		lightVector = Matrix33MulFloat3(rot, lightVector);
-		float shade = dot(lightVector, normal);
-		if(shade<0) shade = 0;
-		
-		float shadow = Shadow(&fractal, point, lightVector, distThresh);
-		//float shadow = 1.0f;
-		
-		float4 half = lightVector - viewVector;
-		half = fast_normalize(half);
-		float specular = dot(normal, half);
-		if (specular < 0.0f) specular = 0.0f;
-		specular = pown(specular, 20);
-		if (specular > 15.0) specular = 15.0;
-		
-		float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
-		//float ao = 0.0f;
-		
-		colour.x = (shade + specular) * shadow + ao;
-		colour.y = (shade + specular) * shadow + ao;
-		colour.z = (shade + specular) * shadow + ao;
-	}
-	
-	float glow = count / 128.0f;
-	float glowN = 1.0f - glow;
-	if(glowN < 0.0f) glowN = 0.0f;
-	float4 glowColor;
-	glowColor.x = 1.0f * glowN + 1.0f * glow;
-	glowColor.y = 0.0f * glowN + 1.0f * glow;
-	glowColor.z = 0.0f * glowN + 0.0f * glow;
-	colour += glowColor * glow;
-	
-	
-	ushort R = convert_ushort_sat(colour.x * 38400.0f);
-	ushort G = convert_ushort_sat(colour.y * 38400.0f);
-	ushort B = convert_ushort_sat(colour.z * 38400.0f);
-	
-	out[buffIndex].R = R;
-	out[buffIndex].G = G;
-	out[buffIndex].B = B;
-	out[buffIndex].zBuffer = zBuff;
 }
 
