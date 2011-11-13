@@ -17,7 +17,9 @@
 #include <string>
 #include <iterator>
 
+//#include "fractal.h"
 #include "cimage.hpp"
+
 
 #include "cl_data.h"
 
@@ -26,7 +28,7 @@ class CclSupport
 public:
 	CclSupport();
 	void Init(void);
-	void SetParams(sClParams ClParams, sClFractal ClFractal);
+	void SetParams(sClParams ClParams, sClFractal ClFractal, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
 	bool IsReady(void) {return ready;}
@@ -35,10 +37,13 @@ public:
 	void Disable(void);
 	int GetWidth() {return width;}
 	int GetHeight() {return height;}
-	void SetSize(int w, int h){width = w; height = h;}
+	void SetSize(int w, int h);
+	void RecopileRequest(void);
+
 private:
 	bool enabled;
 	bool ready;
+	bool recompileRequest;
 	sClPixel *rgbbuff;
 
 	cl::vector<cl::Platform> platformList;
@@ -63,6 +68,10 @@ private:
 	cl_int maxClockFrequency;
 	size_t memorySize;
 	size_t workGroupSize;
+
+	sClParams lastParams;
+	sClFractal lastFractal;
+	enumFractalFormula lastFormula;
 };
 
 extern CclSupport *clSupport;

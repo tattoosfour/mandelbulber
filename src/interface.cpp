@@ -3067,6 +3067,7 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 
 	clFractal->N = params->fractal.N;
 	clFractal->power = params->fractal.doubles.power;
+	clFractal->juliaMode = params->fractal.juliaMode;
 	clFractal->mandelbox.scale = params->fractal.mandelbox.doubles.scale;
 	clFractal->mandelbox.foldingLimit = params->fractal.mandelbox.doubles.foldingLimit;
 	clFractal->mandelbox.foldingValue = params->fractal.mandelbox.doubles.foldingValue;

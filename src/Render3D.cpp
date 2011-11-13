@@ -1234,8 +1234,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		printf("OpenCL rendering\n");
 		sClFractal clFractal;
 		sClParams clParams;
+		clSupport->SetSize(image->GetWidth(), image->GetHeight());
 		Params2Cl(&param, &clParams, &clFractal);
-		clSupport->SetParams(clParams, clFractal);
+		clSupport->SetParams(clParams, clFractal, param.fractal.formula);
 		start_time = real_clock();
 		clSupport->Render(image, outputDarea);
 		double time = real_clock() - start_time;

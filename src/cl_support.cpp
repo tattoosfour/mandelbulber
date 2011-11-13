@@ -6,9 +6,10 @@
  *      some small parts of code taken from: http://www.codeproject.com/KB/GPU-Programming/IntroToOpenCL.aspx
  */
 
-#include "cl_support.hpp"
+
 #include <string>
 #include "interface.h"
+#include "cl_support.hpp"
 
 CclSupport *clSupport;
 
@@ -29,6 +30,8 @@ CclSupport::CclSupport(void)
 	width = 800;
 	height = 600;
 	steps = 10;
+	recompileRequest = true;
+	lastFormula = trig_optim;
 }
 
 void CclSupport::Init(void)
@@ -73,14 +76,12 @@ void CclSupport::Init(void)
 
 	std::string clDir = std::string(sharedDir) + "cl/";
 
-	sParamRender params;
-	ReadInterface(&params);
 	std::string strFormula = "mandelbulb";
 
-	if(params.fractal.formula == trig_optim) strFormula = "mandelbulb";
-	if(params.fractal.formula == trig_DE) strFormula = "mandelbulb2";
-	if(params.fractal.formula == tglad) strFormula = "mandelbox";
-	if(params.fractal.formula == menger_sponge) strFormula = "mengersponge";
+	if(lastFormula == trig_optim) strFormula = "mandelbulb";
+	if(lastFormula == trig_DE) strFormula = "mandelbulb2";
+	if(lastFormula == tglad) strFormula = "mandelbox";
+	if(lastFormula == menger_sponge) strFormula = "mengersponge";
 
 	std::string strFileEngine = clDir;
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClNoEffects)))
@@ -92,7 +93,7 @@ void CclSupport::Init(void)
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 
 	std::string strFileFormulaBegin;
-	if(params.fractal.juliaMode) strFileFormulaBegin  = clDir + "cl_formulaBegin" + "Julia" + ".cl";
+	if(lastFractal.juliaMode) strFileFormulaBegin  = clDir + "cl_formulaBegin" + "Julia" + ".cl";
 	else  strFileFormulaBegin = clDir + "cl_formulaBegin" + ".cl";
 	std::ifstream fileFormulaBegin(strFileFormulaBegin.c_str());
 	checkErr(fileFormulaBegin.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaBegin).c_str());
@@ -183,17 +184,30 @@ void CclSupport::Init(void)
 	ready = true;
 }
 
-void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal)
+void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal, enumFractalFormula formula)
 {
-	cl_int err;
-	err = kernel->setArg(1, ClParams);
-	err = kernel->setArg(2, ClFractal);
-	checkErr(err, "Kernel::setArg()");
+	if(ClFractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
+	if(formula != lastFormula) recompileRequest = true;
+	lastParams = ClParams;
+	lastFractal = ClFractal;
+	lastFormula = formula;
 }
 
 void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
+
+	if(recompileRequest)
+	{
+		Disable();
+		Enable();
+		Init();
+		recompileRequest = false;
+	}
+
+	err = kernel->setArg(1, lastParams);
+	err = kernel->setArg(2, lastFractal);
+	checkErr(err, "Kernel::setArg()");
 
 	for (unsigned int loop = 0; loop < steps; loop++)
 	{
@@ -248,4 +262,11 @@ void CclSupport::Disable(void)
 	delete queue;
 	enabled = false;
 	ready = false;
+}
+
+void CclSupport::SetSize(int w, int h)
+{
+	if(width != w || height != h) recompileRequest = true;
+	width = w;
+	height = h;
 }
