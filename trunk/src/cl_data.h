@@ -23,6 +23,7 @@ typedef struct
 	cl_int formula;
 	cl_float4 julia;
 	sClMandelbox mandelbox;
+	cl_int juliaMode;
 } sClFractal;
 
 typedef struct
@@ -43,5 +44,5 @@ typedef struct
 	cl_ushort R;
 	cl_ushort G;
 	cl_ushort B;
-	float zBuffer;
+	cl_float zBuffer;
 } sClPixel;
