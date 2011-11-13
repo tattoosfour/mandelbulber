@@ -82,7 +82,12 @@ void CclSupport::Init(void)
 	if(params.fractal.formula == tglad) strFormula = "mandelbox";
 	if(params.fractal.formula == menger_sponge) strFormula = "mengersponge";
 
-	std::string strFileEngine = clDir + "cl_engine.cl";
+	std::string strFileEngine = clDir;
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClNoEffects)))
+		strFileEngine += "cl_engine_fast.cl";
+	else
+		strFileEngine += "cl_engine.cl";
+
 	std::ifstream fileEngine(strFileEngine.c_str());
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 

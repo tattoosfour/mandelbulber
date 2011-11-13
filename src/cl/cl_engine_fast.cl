@@ -10,30 +10,6 @@ typedef unsigned short cl_ushort;
 
 static float Fractal(float4 point, sClFractal *fr);
 
-/*
-typedef struct
-{
-	float2 m1;
-	float2 m2;
-} matrix22;
-
-matrix22 RotationMatrix22(float alpha)
-{
-	matrix22 matrix;
-	matrix.m1 = (float2) {cos(alpha), sin(alpha)};
-	matrix.m2 = (float2) {-sin(alpha), cos(alpha)};
-	return matrix;
-}
-
-float2 Matrix22MulFloat2(matrix22 matrix, float2 vect)
-{
-	float2 out;
-	out.x = dot(vect, matrix.m1);
-	out.y = dot(vect, matrix.m2);
-	return out;
-}
-*/
-
 inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
 {
 	float4 out;
@@ -95,122 +71,11 @@ matrix33 RotateZ(matrix33 m, float angle)
 		return out;
 }
 
-
-/*
-float PrimitivePlane(float4 point, float4 centre, float4 normal)
-{
-	float4 plane = normal;
-	plane = plane * (1.0/ fast_length(plane));
-	float planeDistance = dot(plane, point - centre);
-	return planeDistance;
-}
-
-float PrimitiveBox(float4 point, float4 center, float4 size)
-{
-	float distance, planeDistance;
-	float4 corner1 = (float4){center.x - 0.5f*size.x, center.y - 0.5f*size.y, center.z - 0.5f*size.z, 0.0f};
-	float4 corner2 = (float4){center.x + 0.5f*size.x, center.y + 0.5f*size.y, center.z + 0.5f*size.z, 0.0f};
-
-	planeDistance = PrimitivePlane(point, corner1, (float4){-1,0,0,0});
-	distance = planeDistance;
-	planeDistance = PrimitivePlane(point, corner2, (float4){1,0,0,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	planeDistance = PrimitivePlane(point, corner1, (float4){0,-1,0,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-	planeDistance = PrimitivePlane(point, corner2, (float4){0,1,0,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	planeDistance = PrimitivePlane(point, corner1, (float4){0,0,-1,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-	planeDistance = PrimitivePlane(point, corner2, (float4){0,0,1,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	return distance;
-}
-*/
-//--------------- formulas ----------------
-
-/*
-float MengerSponge(float4 point, int N)
-{
-	float4 z = point;
-	float temp = 0;
-	float tgladDE = 1.0f;
-	float distance = 0;
-	
-	for (int i = 0; i < N; i++)
-	{
-		z = fabs(z);
-		
-		if (z.x - z.y < 0)
-		{
-			temp = z.y;
-			z.y = z.x;
-			z.x = temp;
-		}
-		if (z.x - z.z < 0)
-		{
-			temp = z.z;
-			z.z = z.x;
-			z.x = temp;
-		}
-		if (z.y - z.z < 0)
-		{
-			temp = z.z;
-			z.z = z.y;
-			z.y = temp;
-		}
-		
-		z *= 3.0;
-
-		z.x -= 2.0;
-		z.y -= 2.0;
-		if (z.z > 1.0) z.z -= 2.0;
-		float r = fast_length(z);
-		tgladDE *= 3.0;
-
-		if (r > 1024.0f)
-		{
-			distance = r / fabs(tgladDE);
-			break;
-		}
-	}
-	return distance;
-}
-*/
-//--------------------------------------------
-
 float CalculateDistance(float4 point, sClFractal *fractal)
 {
 	float distance;
 	distance = Fractal(point, fractal);
 	
-	/*
-	switch(fractal->formula)
-	{
-		case 1:
-		{
-			//distance = Mandelbulb2(point, fractal->power, fractal->N);
-			break;
-		}
-		case 2:
-		{
-			//distance = Mandelbulb(point, fractal->power, fractal->N);
-			break;
-		}
-		case 7:
-		{
-			//distance = MengerSponge(point, fractal->N);
-			break;
-		}
-		case 8:
-		{
-			distance = Mandelbox(point, fractal);
-			break;
-		}
-	}
-	*/
 	if(distance<0.0f) distance = 0.0f;
 	if(distance>10.0f) distance = 10.0f;
 	return distance;
@@ -226,53 +91,6 @@ float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float
 	normal = fast_normalize(normal);
 	return normal;
 }
-
-
-float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distThresh)
-{
-	float scan = distThresh * 2.0f;
-	float shadow = 0.0;
-	float factor = distThresh * 500.0f;
-	for(int count = 0; (count < 100); count++)
-	{
-		float4 pointTemp = point + lightVector*scan;
-		float distance = CalculateDistance(pointTemp, fractal);
-		scan += distance * 2.0;
-		
-		if(scan > factor)
-		{
-			shadow = 1.0;
-			break;
-		}
-		
-		if(distance < distThresh)
-		{
-			shadow = scan / factor;
-			break;
-		}
-	}
-	return shadow;
-}
-
-
-float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, float dist_thresh, float tune, int quality)
-{
-	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
-
-	float delta = dist_thresh;
-	float aoTemp = 0;
-	for(int i=1; i<quality*quality; i++)
-	{
-		float scan = i * i * delta;
-		float4 pointTemp = point + normal * scan;
-		float dist = CalculateDistance(pointTemp, fractal);
-		aoTemp += 1.0/(native_powr(2.0,i)) * (scan - tune*dist)/dist_thresh;
-	}
-	float ao = 1.0 - 0.2 * aoTemp;
-	if(ao < 0) ao = 0;
-	return ao;
-}
-
 
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
@@ -350,10 +168,7 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 			lightVector = Matrix33MulFloat3(rot, lightVector);
 			float shade = dot(lightVector, normal);
 			if(shade<0) shade = 0;
-			
-			float shadow = Shadow(&fractal, point, lightVector, distThresh);
-			//float shadow = 1.0f;
-			
+						
 			float4 half = lightVector - viewVector;
 			half = fast_normalize(half);
 			float specular = dot(normal, half);
@@ -361,12 +176,9 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 			specular = pown(specular, 20);
 			if (specular > 15.0) specular = 15.0;
 			
-			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
-			//float ao = 0.0f;
-			
-			colour.x = (shade + specular) * shadow + ao;
-			colour.y = (shade + specular) * shadow + ao;
-			colour.z = (shade + specular) * shadow + ao;
+			colour.x = (shade + specular); 
+			colour.y = (shade + specular); 
+			colour.z = (shade + specular);
 		}
 		
 		float glow = count / 128.0f;
