@@ -18,11 +18,35 @@ typedef struct
 
 typedef struct
 {
+	cl_int absX;
+	cl_int absY;
+	cl_int absZ;
+	cl_int enabled[9];
+	cl_int mengerSpongeMode;
+	matrix33 mainRot;
+	matrix33 rot[9];
+	cl_float rotationAlpha;
+	cl_float rotationBeta;
+	cl_float rotationGamma;
+	cl_float scale;
+	cl_float distance[9];
+	cl_float alpha[9];
+	cl_float beta[9];
+	cl_float gamma[9];
+	cl_float intensity[9];
+	cl_float4 offset;
+	cl_float4 direction[9];
+	cl_float4 edge;
+} sClIFS;
+
+typedef struct
+{
 	cl_uint N;
 	cl_float power;
 	cl_int formula;
 	cl_float4 julia;
 	sClMandelbox mandelbox;
+	sClIFS ifs;
 	cl_int juliaMode;
 } sClFractal;
 

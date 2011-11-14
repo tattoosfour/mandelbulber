@@ -1910,7 +1910,7 @@ void PressedIFSReset(GtkWidget *widget, gpointer data)
 		params.fractal.IFS.doubles.alfa[i] = 0;
 		params.fractal.IFS.doubles.beta[i] = 0;
 		params.fractal.IFS.doubles.gamma[i] = 0;
-		params.fractal.IFS.doubles.intensity[i] = 0;
+		params.fractal.IFS.doubles.intensity[i] = 1;
 	}
 
 	params.fractal.IFS.absX = false;

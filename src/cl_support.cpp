@@ -82,15 +82,24 @@ void CclSupport::Init(void)
 	if(lastFormula == trig_DE) strFormula = "mandelbulb2";
 	if(lastFormula == tglad) strFormula = "mandelbox";
 	if(lastFormula == menger_sponge) strFormula = "mengersponge";
+	if(lastFormula == hypercomplex) strFormula = "hypercomplex";
+	if(lastFormula == kaleidoscopic) strFormula = "kaleidoscopic";
 
 	std::string strFileEngine = clDir;
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClNoEffects)))
 		strFileEngine += "cl_engine_fast.cl";
 	else
 		strFileEngine += "cl_engine.cl";
-
 	std::ifstream fileEngine(strFileEngine.c_str());
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
+
+	std::string strFileDistance = clDir;
+	if(lastFormula == hypercomplex)
+		strFileDistance += "cl_distance_deltaDE.cl";
+	else
+		strFileDistance += "cl_distance.cl";
+	std::ifstream fileDistance(strFileDistance.c_str());
+	checkErr(fileDistance.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileDistance).c_str());
 
 	std::string strFileFormulaBegin;
 	if(lastFractal.juliaMode) strFileFormulaBegin  = clDir + "cl_formulaBegin" + "Julia" + ".cl";
@@ -115,6 +124,7 @@ void CclSupport::Init(void)
 	checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str());
 
 	std::string progEngine(std::istreambuf_iterator<char>(fileEngine), (std::istreambuf_iterator<char>()));
+	std::string progDistance(std::istreambuf_iterator<char>(fileDistance), (std::istreambuf_iterator<char>()));
 	std::string progFormulaBegin(std::istreambuf_iterator<char>(fileFormulaBegin), (std::istreambuf_iterator<char>()));
 	std::string progFormulaInit(std::istreambuf_iterator<char>(fileFormulaInit), (std::istreambuf_iterator<char>()));
 	std::string progFormulaFor(std::istreambuf_iterator<char>(fileFormulaFor), (std::istreambuf_iterator<char>()));
@@ -123,6 +133,7 @@ void CclSupport::Init(void)
 
 	cl::Program::Sources sources;
 	sources.push_back(std::make_pair(progEngine.c_str(), progEngine.length()));
+	sources.push_back(std::make_pair(progDistance.c_str(), progDistance.length()));
 	sources.push_back(std::make_pair(progFormulaBegin.c_str(), progFormulaBegin.length()));
 	sources.push_back(std::make_pair(progFormulaInit.c_str(), progFormulaInit.length()));
 	sources.push_back(std::make_pair(progFormulaFor.c_str(), progFormulaFor.length()));
@@ -133,7 +144,7 @@ void CclSupport::Init(void)
 	program = new cl::Program(*context, sources, &err);
 	checkErr(err, "Program()");
 	//program->getInfo(CL_PROGRAM_SOURCE, )
-	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
+	std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
 	err = program->build(devices, "-w");
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
@@ -147,7 +158,7 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
-	steps = height * width / 65536 + 1;
+	steps = height * width / 50000 + 1;
 	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
 	buffSize = stepSize * sizeof(sClPixel);
 

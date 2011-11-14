@@ -9,6 +9,7 @@ typedef unsigned short cl_ushort;
 #include "cl_data.h"
 
 static float Fractal(float4 point, sClFractal *fr);
+static float CalculateDistance(float4 point, sClFractal *fractal);
 
 inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
 {
@@ -69,16 +70,6 @@ matrix33 RotateZ(matrix33 m, float angle)
 		rot.m3 = (float4) {0.0f, 0.0f, 1.0f, 0.0f};
 		out = Matrix33MulMatrix33(m, rot);
 		return out;
-}
-
-float CalculateDistance(float4 point, sClFractal *fractal)
-{
-	float distance;
-	distance = Fractal(point, fractal);
-	
-	if(distance<0.0f) distance = 0.0f;
-	if(distance>10.0f) distance = 10.0f;
-	return distance;
 }
 
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
