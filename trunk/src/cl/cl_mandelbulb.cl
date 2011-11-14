@@ -11,7 +11,7 @@
 		z*=rp;
 		z+=c;
 		r = fast_length(z);
-		if(r>4.0f) 
+		if(r>4.0f || any(isinf(z))) 
 		{
 			distance = 0.5f * r * native_log(r) / (r_dz);
 			break;

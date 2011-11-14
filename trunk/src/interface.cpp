@@ -3076,6 +3076,29 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clFractal->mandelbox.mainRot = RotMatrix2matrix33(params->fractal.mandelbox.mainRot);
 	clFractal->formula = params->fractal.formula;
 	clFractal->julia = CVector2float4(params->fractal.doubles.julia);
+
+	clFractal->ifs.absX = params->fractal.IFS.absX;
+	clFractal->ifs.absY = params->fractal.IFS.absY;
+	clFractal->ifs.absZ = params->fractal.IFS.absZ;
+	clFractal->ifs.mengerSpongeMode = params->fractal.IFS.mengerSpongeMode;
+	clFractal->ifs.rotationAlpha = params->fractal.IFS.doubles.rotationAlfa;
+	clFractal->ifs.rotationBeta = params->fractal.IFS.doubles.rotationBeta;
+	clFractal->ifs.rotationGamma = params->fractal.IFS.doubles.rotationGamma;
+	clFractal->ifs.scale = params->fractal.IFS.doubles.scale;
+	clFractal->ifs.offset = CVector2float4(params->fractal.IFS.doubles.offset);
+	clFractal->ifs.edge = CVector2float4(params->fractal.IFS.doubles.edge);
+	clFractal->ifs.mainRot = RotMatrix2matrix33(params->fractal.IFS.mainRot);
+	for(int i=0; i<9; i++)
+	{
+		clFractal->ifs.enabled[i] = params->fractal.IFS.enabled[i];
+		clFractal->ifs.rot[i] = RotMatrix2matrix33(params->fractal.IFS.rot[i]);
+		clFractal->ifs.distance[i] = params->fractal.IFS.doubles.distance[i];
+		clFractal->ifs.alpha[i] = params->fractal.IFS.doubles.alfa[i];
+		clFractal->ifs.beta[i] = params->fractal.IFS.doubles.beta[i];
+		clFractal->ifs.gamma[i] = params->fractal.IFS.doubles.gamma[i];
+		clFractal->ifs.intensity[i] = params->fractal.IFS.doubles.intensity[i];
+		clFractal->ifs.direction[i] = CVector2float4(params->fractal.IFS.doubles.direction[i]);
+	}
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)

@@ -9,30 +9,7 @@ typedef unsigned short cl_ushort;
 #include "cl_data.h"
 
 static float Fractal(float4 point, sClFractal *fr);
-
-/*
-typedef struct
-{
-	float2 m1;
-	float2 m2;
-} matrix22;
-
-matrix22 RotationMatrix22(float alpha)
-{
-	matrix22 matrix;
-	matrix.m1 = (float2) {cos(alpha), sin(alpha)};
-	matrix.m2 = (float2) {-sin(alpha), cos(alpha)};
-	return matrix;
-}
-
-float2 Matrix22MulFloat2(matrix22 matrix, float2 vect)
-{
-	float2 out;
-	out.x = dot(vect, matrix.m1);
-	out.y = dot(vect, matrix.m2);
-	return out;
-}
-*/
+static float CalculateDistance(float4 point, sClFractal *fractal);
 
 inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
 {
@@ -129,92 +106,7 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 	return distance;
 }
 */
-//--------------- formulas ----------------
 
-/*
-float MengerSponge(float4 point, int N)
-{
-	float4 z = point;
-	float temp = 0;
-	float tgladDE = 1.0f;
-	float distance = 0;
-	
-	for (int i = 0; i < N; i++)
-	{
-		z = fabs(z);
-		
-		if (z.x - z.y < 0)
-		{
-			temp = z.y;
-			z.y = z.x;
-			z.x = temp;
-		}
-		if (z.x - z.z < 0)
-		{
-			temp = z.z;
-			z.z = z.x;
-			z.x = temp;
-		}
-		if (z.y - z.z < 0)
-		{
-			temp = z.z;
-			z.z = z.y;
-			z.y = temp;
-		}
-		
-		z *= 3.0;
-
-		z.x -= 2.0;
-		z.y -= 2.0;
-		if (z.z > 1.0) z.z -= 2.0;
-		float r = fast_length(z);
-		tgladDE *= 3.0;
-
-		if (r > 1024.0f)
-		{
-			distance = r / fabs(tgladDE);
-			break;
-		}
-	}
-	return distance;
-}
-*/
-//--------------------------------------------
-
-float CalculateDistance(float4 point, sClFractal *fractal)
-{
-	float distance;
-	distance = Fractal(point, fractal);
-	
-	/*
-	switch(fractal->formula)
-	{
-		case 1:
-		{
-			//distance = Mandelbulb2(point, fractal->power, fractal->N);
-			break;
-		}
-		case 2:
-		{
-			//distance = Mandelbulb(point, fractal->power, fractal->N);
-			break;
-		}
-		case 7:
-		{
-			//distance = MengerSponge(point, fractal->N);
-			break;
-		}
-		case 8:
-		{
-			distance = Mandelbox(point, fractal);
-			break;
-		}
-	}
-	*/
-	if(distance<0.0f) distance = 0.0f;
-	if(distance>10.0f) distance = 10.0f;
-	return distance;
-}
 
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
 {
