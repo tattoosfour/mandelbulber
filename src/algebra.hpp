@@ -87,6 +87,14 @@ public:
 	{
 		return x * vector.x + y * vector.y + z * vector.z;
 	}
+	inline CVector3 Cross(const CVector3& v)
+	{
+		CVector3 c;
+		c.x =  y*v.z - z*v.y;
+	  c.y = -x*v.z + z*v.x;
+	  c.z =  x*v.y - y*v.x;
+	  return c;
+	}
 	inline double Normalize() //returns normalization factor
 	{
 		double norm = 1.0 / Length();
