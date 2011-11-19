@@ -54,7 +54,8 @@ enum enumFractalFormula
 	offsetZ = 33,
 	angleMultiplyX = 34,
 	angleMultiplyY = 35,
-	angleMultiplyZ = 36
+	angleMultiplyZ = 36,
+	generalizedFoldBox = 37
 };
 
 enum enumCalculationMode

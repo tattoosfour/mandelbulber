@@ -560,6 +560,7 @@ void ReadInterface(sParamRender *params)
 		if (formula == 17) params->fractal.formula = benesi;
 		if (formula == 18) params->fractal.formula = bristorbrot;
 		if (formula == 19) params->fractal.formula = hybrid;
+		if (formula == 20) params->fractal.formula = generalizedFoldBox;
 
 		CheckPrameters(params);
 
@@ -616,7 +617,8 @@ void ReadInterface(sParamRender *params)
 	}
 
 	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
-			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox || params->fractal.formula == mandelboxVaryScale4D) params->fractal.analitycDE = true;
+			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox || params->fractal.formula == mandelboxVaryScale4D
+			|| params->fractal.formula == generalizedFoldBox) params->fractal.analitycDE = true;
 	else params->fractal.analitycDE = false;
 
 	params->doubles.resolution = 1.0 / params->image_width;
@@ -936,6 +938,7 @@ void WriteInterface(sParamRender *params)
 	if (params->fractal.formula == benesi) formula = 17;
 	if (params->fractal.formula == bristorbrot) formula = 18;
 	if (params->fractal.formula == hybrid) formula = 19;
+	if (params->fractal.formula == generalizedFoldBox) formula = 20;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -1687,6 +1690,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Benesi");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Bristorbrot");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Generalized Fold Box");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 
 	//image format

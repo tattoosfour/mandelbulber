@@ -25,6 +25,84 @@
  *		 colouring: Returns colour index
  *		 delta_DE1, delta_DE2: Returns radius
  */
+
+#define sqrt_i3 0.57735026919
+
+CVector3 Nv_tet[] =
+{
+  { sqrt_i3, sqrt_i3,-sqrt_i3},
+  { sqrt_i3,-sqrt_i3, sqrt_i3},
+  {-sqrt_i3, sqrt_i3, sqrt_i3},
+  {-sqrt_i3,-sqrt_i3,-sqrt_i3}
+};
+
+int sides_tet = 4;
+
+CVector3 Nv_cube[] =
+{
+  { 1, 0, 0},
+  {-1, 0, 0},
+  { 0, 1, 0},
+  { 0,-1, 0},
+  { 0, 0, 1},
+  { 0, 0,-1}
+};
+
+int sides_cube = 6;
+
+CVector3 Nv_oct[] =
+{
+  { sqrt_i3, sqrt_i3,-sqrt_i3},
+  { sqrt_i3,-sqrt_i3, sqrt_i3},
+  {-sqrt_i3, sqrt_i3, sqrt_i3},
+  {-sqrt_i3,-sqrt_i3,-sqrt_i3},
+  { sqrt_i3, sqrt_i3, sqrt_i3},
+  {-sqrt_i3,-sqrt_i3, sqrt_i3},
+  {-sqrt_i3, sqrt_i3,-sqrt_i3},
+  { sqrt_i3,-sqrt_i3,-sqrt_i3}
+};
+
+int sides_oct = 8;
+
+CVector3 Nv_oct_cube[] =
+  {
+    { sqrt_i3, sqrt_i3,-sqrt_i3},
+    { sqrt_i3,-sqrt_i3, sqrt_i3},
+    {-sqrt_i3, sqrt_i3, sqrt_i3},
+    {-sqrt_i3,-sqrt_i3,-sqrt_i3},
+    { sqrt_i3, sqrt_i3, sqrt_i3},
+    {-sqrt_i3,-sqrt_i3, sqrt_i3},
+    {-sqrt_i3, sqrt_i3,-sqrt_i3},
+    { sqrt_i3,-sqrt_i3,-sqrt_i3},
+  { 1, 0, 0},
+    {-1, 0, 0},
+    { 0, 1, 0},
+    { 0,-1, 0},
+    { 0, 0, 1},
+    { 0, 0,-1}
+  };
+int sides_oct_cube = 14;
+
+#define Nv_aa ((1.0+sqrt(5.0))/2.0)
+#define Nv_bb (1.0/sqrt(Nv_aa*Nv_aa+1))
+
+CVector3 Nv_dodeca[] =
+  {
+    { 0, Nv_bb, Nv_aa * Nv_bb},
+    { 0, Nv_bb,-Nv_aa * Nv_bb},
+    { 0,-Nv_bb, Nv_aa*Nv_bb},
+    { 0,-Nv_bb,-Nv_aa*Nv_bb},
+    { Nv_bb, Nv_aa*Nv_bb, 0},
+    { Nv_bb,-Nv_aa*Nv_bb, 0},
+    {-Nv_bb, Nv_aa*Nv_bb, 0},
+    {-Nv_bb,-Nv_aa*Nv_bb, 0},
+    { Nv_aa*Nv_bb, 0, Nv_bb},
+    {-Nv_aa*Nv_bb, 0, Nv_bb},
+    { Nv_aa*Nv_bb, 0,-Nv_bb},
+    {-Nv_aa*Nv_bb, 0,-Nv_bb}
+  };
+int sides_dodeca = 12;
+
 template<int Mode>
 double Compute(CVector3 z, const sFractal &par, int *iter_count)
 {
@@ -514,6 +592,181 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
+
+			case generalizedFoldBox:
+			{
+				int i;
+				CVector3 *Nv;
+				int sides;
+				// HACK HACK HACK. I high jacked the foldingLimit parameter to chose the poly type.
+				// Do not try this at home.
+				Nv = Nv_tet;
+				sides = sides_tet;
+
+				if (int(par.mandelbox.doubles.foldingLimit) == 2)
+				{
+					Nv = Nv_cube;
+					sides = sides_cube;
+				}
+				if (int(par.mandelbox.doubles.foldingLimit) == 3)
+				{
+					Nv = Nv_oct;
+					sides = sides_oct;
+				}
+				if (int(par.mandelbox.doubles.foldingLimit) == 4)
+				{
+					Nv = Nv_dodeca;
+					sides = sides_dodeca;
+				}
+				if (int(par.mandelbox.doubles.foldingLimit) == 5)
+				{
+					Nv = Nv_oct_cube;
+					sides = sides_oct_cube;
+				}
+
+				int sort[3];
+				int tmp_sort;
+				double Z_Dot_Nv[3];
+				double tmp_Z_Dot_Nv;
+
+				// Find the three closest normal vectors to z as defined by max dot product.
+				sort[0] = 0;
+				Z_Dot_Nv[0] = z.Dot(Nv[0]);
+				sort[1] = 1;
+				Z_Dot_Nv[1] = z.Dot(Nv[1]);
+				sort[2] = 2;
+				Z_Dot_Nv[2] = z.Dot(Nv[2]);
+
+				if (Z_Dot_Nv[1] > Z_Dot_Nv[0])
+				{
+					tmp_sort = sort[0];
+					tmp_Z_Dot_Nv = Z_Dot_Nv[0];
+					sort[0] = sort[1];
+					Z_Dot_Nv[0] = Z_Dot_Nv[1];
+					sort[1] = tmp_sort;
+					Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
+				}
+				if (Z_Dot_Nv[2] > Z_Dot_Nv[1])
+				{
+					tmp_sort = sort[1];
+					tmp_Z_Dot_Nv = Z_Dot_Nv[1];
+					sort[1] = sort[2];
+					Z_Dot_Nv[1] = Z_Dot_Nv[2];
+					sort[2] = tmp_sort;
+					Z_Dot_Nv[2] = tmp_Z_Dot_Nv;
+				}
+				if (Z_Dot_Nv[1] > Z_Dot_Nv[0])
+				{
+					tmp_sort = sort[0];
+					tmp_Z_Dot_Nv = Z_Dot_Nv[0];
+					sort[0] = sort[1];
+					Z_Dot_Nv[0] = Z_Dot_Nv[1];
+					sort[1] = tmp_sort;
+					Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
+				}
+
+				for (i = 3; i < sides; i++)
+				{
+					tmp_Z_Dot_Nv = z.Dot(Nv[i]);
+					tmp_sort = i;
+					if (tmp_Z_Dot_Nv > Z_Dot_Nv[2])
+					{
+						sort[2] = tmp_sort;
+						Z_Dot_Nv[2] = tmp_Z_Dot_Nv;
+						if (tmp_Z_Dot_Nv > Z_Dot_Nv[1])
+						{
+							sort[2] = sort[1];
+							Z_Dot_Nv[2] = Z_Dot_Nv[1];
+							sort[1] = tmp_sort;
+							Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
+							if (tmp_Z_Dot_Nv > Z_Dot_Nv[0])
+							{
+								sort[1] = sort[0];
+								Z_Dot_Nv[1] = Z_Dot_Nv[0];
+								sort[0] = tmp_sort;
+								Z_Dot_Nv[0] = tmp_Z_Dot_Nv;
+							}
+						}
+					}
+				}
+				CVector3 Nv0 = Nv[sort[0]];
+				CVector3 Nv1 = Nv[sort[1]];
+				CVector3 Nv2 = Nv[sort[2]];
+
+				CVector3 new_z;
+				double new_z_sqr;
+				CVector3 Zm;
+
+				// Assume z inside the poly and we are wasting our time.
+				new_z = z;
+				new_z_sqr = new_z.Dot(new_z);
+
+				// Find reflection point to closest plain.
+				Zm = z - (Nv0 + Nv0) * (z.Dot(Nv0) - par.mandelbox.doubles.foldingValue);
+				if (new_z_sqr > Zm.Dot(Zm))
+				{
+					new_z = Zm;
+					new_z_sqr = new_z.Dot(new_z);
+					tgladColor += par.mandelbox.doubles.colorFactorX;
+				}
+
+				// Find rotation point to closest line.
+				CVector3 T01, L01;
+				L01 = Nv0.Cross(Nv1);
+				L01 = L01 * (1.0 / L01.Length());
+				T01 = (Nv0 + Nv1) * ((par.mandelbox.doubles.foldingValue) / (1 + Nv0.Dot(Nv1)));
+				CVector3 Zr;
+				Zr = (T01 + L01 * z.Dot(L01)) * 2 - z;
+				if (new_z_sqr > Zr.Dot(Zr))
+				{
+					new_z = Zr;
+					new_z_sqr = new_z.Dot(new_z);
+					tgladColor += par.mandelbox.doubles.colorFactorY;
+				}
+
+				// Find inversion point to closest vert.
+				CVector3 Zi;
+				double a;
+				a = ((par.mandelbox.doubles.foldingValue) - T01.Dot(Nv2)) / (L01.Dot(Nv2));
+				Zi = (L01 * a + T01) * 2 - z;
+				if (new_z_sqr > Zi.Dot(Zi))
+				{
+					new_z = Zi;
+					new_z_sqr = new_z.Dot(new_z);
+					tgladColor += par.mandelbox.doubles.colorFactorZ;
+				}
+				z = new_z;
+
+				r = z.Length();
+				double r2 = r * r;
+
+				z += par.mandelbox.doubles.offset;
+
+				if (r2 < mR2)
+				{
+					z *= tglad_factor1;
+					tgladDE *= tglad_factor1;
+					tgladColor += par.mandelbox.doubles.colorFactorSp1;
+				}
+				else if (r2 < fR2)
+				{
+					double tglad_factor2 = fR2 / r2;
+					z *= tglad_factor2;
+					tgladDE *= tglad_factor2;
+					tgladColor += par.mandelbox.doubles.colorFactorSp2;
+				}
+
+				z -= par.mandelbox.doubles.offset;
+
+				z = par.mandelbox.mainRot.RotateVector(z);
+
+				z = z * scale + constant;
+				tgladDE = tgladDE * fabs(scale) + 1.0;
+
+				r = z.Length();
+				break;
+			}
+
 			case smoothMandelbox:
 			{
 				double sm = par.mandelbox.doubles.sharpness;
@@ -889,7 +1142,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 		}
-		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D || actualFormula == generalizedFoldBox)
 		{
 			if (r > 1024)
 			{
@@ -967,7 +1220,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
 		} 
-		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D || actualFormula == generalizedFoldBox)
 			return tgladColor * 100.0 + z.Length()*par.mandelbox.doubles.colorFactorR;
 		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 			return min * 1000.0;
