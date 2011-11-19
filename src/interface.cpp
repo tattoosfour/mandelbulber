@@ -2664,7 +2664,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_posteffects, Interface.tab_label_posteffects);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
+#ifdef CLSUPPORT
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_openCL, Interface.tab_label_openCL);
+#endif
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);
@@ -3053,6 +3055,7 @@ sRGB sRGBDiv256(sRGB color)
 	return (sRGB){color.R/256, color.G/256, color.B/256};
 }
 
+#ifdef CLSUPPORT
 void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal)
 {
 	clParams->alpha = params->doubles.alfa;
@@ -3116,3 +3119,4 @@ cl_float4 CVector2float4(CVector3 vect)
 	cl_float4 vect2 = (cl_float4){{vect.x, vect.y, vect.z, 0.0f}};
 	return vect2;
 }
+#endif

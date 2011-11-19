@@ -1231,6 +1231,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	}
 	else
 	{
+#ifdef CLSUPPORT
 		printf("OpenCL rendering\n");
 		sClFractal clFractal;
 		sClParams clParams;
@@ -1255,6 +1256,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}
+#endif
 	}
 }
 
@@ -1374,6 +1376,7 @@ int main(int argc, char *argv[])
 	WriteLog("g_thread initialised");
 
 	//OpenCL
+
 	clSupport = new CclSupport();
 	//clSupport->Init();
 

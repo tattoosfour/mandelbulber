@@ -10,7 +10,7 @@
 				float length = dot(z, ifs.direction[i]);
 				if(length < ifs.distance[i])
 				{
-					z -= ifs.direction[i] * 2.0 * (length - ifs.distance[i]);
+					z -= ifs.direction[i] * (2.0 * (length - ifs.distance[i]) * ifs.intensity[i]);
 				}
 			}
 		}
