@@ -6,13 +6,13 @@
  *      some small parts of code taken from: http://www.codeproject.com/KB/GPU-Programming/IntroToOpenCL.aspx
  */
 
-
 #include <string>
 #include "interface.h"
 #include "cl_support.hpp"
 
 CclSupport *clSupport;
 
+#ifdef CLSUPPORT
 void checkErr(cl_int err, const char * name)
 {
 	if (err != CL_SUCCESS)
@@ -281,3 +281,5 @@ void CclSupport::SetSize(int w, int h)
 	width = w;
 	height = h;
 }
+
+#endif

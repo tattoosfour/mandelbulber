@@ -9,6 +9,8 @@
 #define CL_SUPPORT_HPP_
 
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
+
+#ifdef CLSUPPORT
 #include <CL/cl.hpp>
 #include <cstdio>
 #include <cstdlib>
@@ -73,6 +75,20 @@ private:
 	sClFractal lastFractal;
 	enumFractalFormula lastFormula;
 };
+
+#else
+//dummy class CclSupport
+class CclSupport
+{
+public:
+	bool IsEnabled(void) {return false;}
+	bool IsReady(void) {return false;}
+	void Enable(void) {return;}
+	void Disable(void) {return;}
+	void Init(void) {return;}
+	void SetSize(int w, int h) {return;};
+};
+#endif
 
 extern CclSupport *clSupport;
 
