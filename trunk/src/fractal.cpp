@@ -26,83 +26,6 @@
  *		 delta_DE1, delta_DE2: Returns radius
  */
 
-#define sqrt_i3 0.57735026919
-
-CVector3 Nv_tet[] =
-{
-  { sqrt_i3, sqrt_i3,-sqrt_i3},
-  { sqrt_i3,-sqrt_i3, sqrt_i3},
-  {-sqrt_i3, sqrt_i3, sqrt_i3},
-  {-sqrt_i3,-sqrt_i3,-sqrt_i3}
-};
-
-int sides_tet = 4;
-
-CVector3 Nv_cube[] =
-{
-  { 1, 0, 0},
-  {-1, 0, 0},
-  { 0, 1, 0},
-  { 0,-1, 0},
-  { 0, 0, 1},
-  { 0, 0,-1}
-};
-
-int sides_cube = 6;
-
-CVector3 Nv_oct[] =
-{
-  { sqrt_i3, sqrt_i3,-sqrt_i3},
-  { sqrt_i3,-sqrt_i3, sqrt_i3},
-  {-sqrt_i3, sqrt_i3, sqrt_i3},
-  {-sqrt_i3,-sqrt_i3,-sqrt_i3},
-  { sqrt_i3, sqrt_i3, sqrt_i3},
-  {-sqrt_i3,-sqrt_i3, sqrt_i3},
-  {-sqrt_i3, sqrt_i3,-sqrt_i3},
-  { sqrt_i3,-sqrt_i3,-sqrt_i3}
-};
-
-int sides_oct = 8;
-
-CVector3 Nv_oct_cube[] =
-  {
-    { sqrt_i3, sqrt_i3,-sqrt_i3},
-    { sqrt_i3,-sqrt_i3, sqrt_i3},
-    {-sqrt_i3, sqrt_i3, sqrt_i3},
-    {-sqrt_i3,-sqrt_i3,-sqrt_i3},
-    { sqrt_i3, sqrt_i3, sqrt_i3},
-    {-sqrt_i3,-sqrt_i3, sqrt_i3},
-    {-sqrt_i3, sqrt_i3,-sqrt_i3},
-    { sqrt_i3,-sqrt_i3,-sqrt_i3},
-  { 1, 0, 0},
-    {-1, 0, 0},
-    { 0, 1, 0},
-    { 0,-1, 0},
-    { 0, 0, 1},
-    { 0, 0,-1}
-  };
-int sides_oct_cube = 14;
-
-#define Nv_aa ((1.0+sqrt(5.0))/2.0)
-#define Nv_bb (1.0/sqrt(Nv_aa*Nv_aa+1))
-
-CVector3 Nv_dodeca[] =
-  {
-    { 0, Nv_bb, Nv_aa * Nv_bb},
-    { 0, Nv_bb,-Nv_aa * Nv_bb},
-    { 0,-Nv_bb, Nv_aa*Nv_bb},
-    { 0,-Nv_bb,-Nv_aa*Nv_bb},
-    { Nv_bb, Nv_aa*Nv_bb, 0},
-    { Nv_bb,-Nv_aa*Nv_bb, 0},
-    {-Nv_bb, Nv_aa*Nv_bb, 0},
-    {-Nv_bb,-Nv_aa*Nv_bb, 0},
-    { Nv_aa*Nv_bb, 0, Nv_bb},
-    {-Nv_aa*Nv_bb, 0, Nv_bb},
-    { Nv_aa*Nv_bb, 0,-Nv_bb},
-    {-Nv_aa*Nv_bb, 0,-Nv_bb}
-  };
-int sides_dodeca = 12;
-
 template<int Mode>
 double Compute(CVector3 z, const sFractal &par, int *iter_count)
 {
@@ -595,147 +518,194 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 			case generalizedFoldBox:
 			{
+				//Reference: http://www.fractalforums.com/new-theories-and-research/generalized-box-fold/msg36503/#msg36503
+
 				int i;
-				CVector3 *Nv;
+				const CVector3 *Nv;
 				int sides;
-				// HACK HACK HACK. I high jacked the foldingLimit parameter to chose the poly type.
-				// Do not try this at home.
-				Nv = Nv_tet;
-				sides = sides_tet;
 
-				if (int(par.mandelbox.doubles.foldingLimit) == 2)
-				{
-					Nv = Nv_cube;
-					sides = sides_cube;
-				}
-				if (int(par.mandelbox.doubles.foldingLimit) == 3)
-				{
-					Nv = Nv_oct;
-					sides = sides_oct;
-				}
-				if (int(par.mandelbox.doubles.foldingLimit) == 4)
-				{
-					Nv = Nv_dodeca;
-					sides = sides_dodeca;
-				}
-				if (int(par.mandelbox.doubles.foldingLimit) == 5)
-				{
-					Nv = Nv_oct_cube;
-					sides = sides_oct_cube;
-				}
+				Nv = par.genFoldBox.Nv_tet;
+				sides = par.genFoldBox.sides_tet;
 
-				int sort[3];
-				int tmp_sort;
-				double Z_Dot_Nv[3];
-				double tmp_Z_Dot_Nv;
-
-				// Find the three closest normal vectors to z as defined by max dot product.
-				sort[0] = 0;
-				Z_Dot_Nv[0] = z.Dot(Nv[0]);
-				sort[1] = 1;
-				Z_Dot_Nv[1] = z.Dot(Nv[1]);
-				sort[2] = 2;
-				Z_Dot_Nv[2] = z.Dot(Nv[2]);
-
-				if (Z_Dot_Nv[1] > Z_Dot_Nv[0])
+				if (par.genFoldBox.type == foldCube)
 				{
-					tmp_sort = sort[0];
-					tmp_Z_Dot_Nv = Z_Dot_Nv[0];
-					sort[0] = sort[1];
-					Z_Dot_Nv[0] = Z_Dot_Nv[1];
-					sort[1] = tmp_sort;
-					Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
+					Nv = par.genFoldBox.Nv_cube;
+					sides = par.genFoldBox.sides_cube;
 				}
-				if (Z_Dot_Nv[2] > Z_Dot_Nv[1])
+				else if (par.genFoldBox.type == foldOct)
 				{
-					tmp_sort = sort[1];
-					tmp_Z_Dot_Nv = Z_Dot_Nv[1];
-					sort[1] = sort[2];
-					Z_Dot_Nv[1] = Z_Dot_Nv[2];
-					sort[2] = tmp_sort;
-					Z_Dot_Nv[2] = tmp_Z_Dot_Nv;
+					Nv = par.genFoldBox.Nv_oct;
+					sides = par.genFoldBox.sides_oct;
 				}
-				if (Z_Dot_Nv[1] > Z_Dot_Nv[0])
+				else if (par.genFoldBox.type == foldDodeca)
 				{
-					tmp_sort = sort[0];
-					tmp_Z_Dot_Nv = Z_Dot_Nv[0];
-					sort[0] = sort[1];
-					Z_Dot_Nv[0] = Z_Dot_Nv[1];
-					sort[1] = tmp_sort;
-					Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
+					Nv = par.genFoldBox.Nv_dodeca;
+					sides = par.genFoldBox.sides_dodeca;
+				}
+				else if (par.genFoldBox.type == foldOctCube)
+				{
+					Nv = par.genFoldBox.Nv_oct_cube;
+					sides = par.genFoldBox.sides_oct_cube;
+				}
+				else if (par.genFoldBox.type == foldIcosa)
+				{
+					Nv = par.genFoldBox.Nv_icosa;
+					sides = par.genFoldBox.sides_icosa;
+				}
+				else if (par.genFoldBox.type == foldBox6)
+				{
+					Nv = par.genFoldBox.Nv_box6;
+					sides = par.genFoldBox.sides_box6;
+				}
+				else if (par.genFoldBox.type == foldBox5)
+				{
+					Nv = par.genFoldBox.Nv_box5;
+					sides = par.genFoldBox.sides_box5;
 				}
 
-				for (i = 3; i < sides; i++)
+        double melt = par.mandelbox.doubles.melt;
+        double solid = par.mandelbox.doubles.solid * (1.0 - melt);
+        melt =  par.mandelbox.doubles.solid * melt;
+
+				// Find the closest cutting plane if any that cuts the line between the origin and z.
+				// Line is parameterized as X = Y + L*a;
+				// Cutting plane is X.Dot(Nv) = Solid.
+				// (Y + L*a).Dot(Nv) = solid.
+				// a = (solid - Y.Dot(Nv))/L.Dot(Nv) = b/c
+				CVector3 L = z;
+				double a = 1;
+				CVector3 Y; // Y is the origin in this case.
+				int side = -1;
+				double b, c;
+
+				for (i = 0; i < sides; i++)
 				{
-					tmp_Z_Dot_Nv = z.Dot(Nv[i]);
-					tmp_sort = i;
-					if (tmp_Z_Dot_Nv > Z_Dot_Nv[2])
+					b = solid;
+					c = L.Dot(Nv[i]);
+					// A bit subtile here. a_r must be positive and I want to avoid divide by zero.
+					if ((c > 0) && ((a * c) > b))
 					{
-						sort[2] = tmp_sort;
-						Z_Dot_Nv[2] = tmp_Z_Dot_Nv;
-						if (tmp_Z_Dot_Nv > Z_Dot_Nv[1])
+						side = i;
+						a = b / c;
+					}
+				}
+
+				// If z is above the foldingValue we may have to fold. Else early out.
+				if (side != -1)
+				{ // mirror check
+					int side_m = side;
+					CVector3 Nv_m = Nv[side_m];
+					CVector3 X_m = z - Nv_m * (z.Dot(Nv_m) - solid);
+
+					// Find any plane (Nv_r) closest to X_m that cuts the line between Nv_m and X_m.
+					// Nv_m cross Nv_r will define a possible rotation axis.
+					// a = (solid - Y.Dot(Nv)/L.Dot(Nv) = b/c.
+					L = X_m - Nv_m;
+					Y = Nv_m;
+					a = 1;
+					side = -1;
+
+					for (i = 0; i < sides; i++)
+					{
+						if (i != side_m)
 						{
-							sort[2] = sort[1];
-							Z_Dot_Nv[2] = Z_Dot_Nv[1];
-							sort[1] = tmp_sort;
-							Z_Dot_Nv[1] = tmp_Z_Dot_Nv;
-							if (tmp_Z_Dot_Nv > Z_Dot_Nv[0])
+							b = solid - Y.Dot(Nv[i]);
+							c = L.Dot(Nv[i]);
+							// A bit subtile here. a_r must be positive and I want to avoid divide by zero.
+							if ((c > 0) && ((a * c) > b))
 							{
-								sort[1] = sort[0];
-								Z_Dot_Nv[1] = Z_Dot_Nv[0];
-								sort[0] = tmp_sort;
-								Z_Dot_Nv[0] = tmp_Z_Dot_Nv;
+								side = i;
+								a = b / c;
 							}
 						}
 					}
-				}
-				CVector3 Nv0 = Nv[sort[0]];
-				CVector3 Nv1 = Nv[sort[1]];
-				CVector3 Nv2 = Nv[sort[2]];
 
-				CVector3 new_z;
-				double new_z_sqr;
-				CVector3 Zm;
+					// Was a cutting plane found?
+					if (side != -1)
+					{ // rotation check
+						CVector3 Xmr_intersect = Y + L * a;
+						int side_r = side;
+						CVector3 Nv_r = Nv[side_r];
+						// The axis of rotation is define by the cross product of Nv_m and Nv_r and
+						// the intersection of the line between Nv_m and Nv_r and  Xmr_intersect.
+						CVector3 L_r = Nv_m.Cross(Nv_r);
+						// The closest point betwee z and the line of rotation can be found by minimizing
+						// the square of the distance (D) between z and the line
+						// X = Xmr_intersect + L_r * a_rmin.
+						// Setting dD/da_rmin equal to zero and solving for a_rmin.
+						double a_rmin = (z.Dot(L_r) - Xmr_intersect.Dot(L_r)) / (L_r.Dot(L_r));
 
-				// Assume z inside the poly and we are wasting our time.
-				new_z = z;
-				new_z_sqr = new_z.Dot(new_z);
+						// force a_rmin to be positive. I think I made an even number of sign errors here.
+						if (a_rmin < 0)
+						{
+							a_rmin = -a_rmin;
+							L_r = L_r * (-1);
+						}
+						CVector3 X_r = Xmr_intersect + L_r * a_rmin;
 
-				// Find reflection point to closest plain.
-				Zm = z - (Nv0 + Nv0) * (z.Dot(Nv0) - par.mandelbox.doubles.foldingValue);
-				if (new_z_sqr > Zm.Dot(Zm))
-				{
-					new_z = Zm;
-					new_z_sqr = new_z.Dot(new_z);
-					tgladColor += par.mandelbox.doubles.colorFactorX;
-				}
+						// Find any plane (Nv_i) closest to Xmr_intersect that cuts the line between
+						// Xmr_intersect and X_r. This will define a possible inversion point.
+						// a = (solid - Y.Dot(Nv)/L.Dot(Nv) = b/c.
+						L = X_r - Xmr_intersect;
+						Y = Xmr_intersect;
+						a = 1;
+						side = -1;
 
-				// Find rotation point to closest line.
-				CVector3 T01, L01;
-				L01 = Nv0.Cross(Nv1);
-				L01 = L01 * (1.0 / L01.Length());
-				T01 = (Nv0 + Nv1) * ((par.mandelbox.doubles.foldingValue) / (1 + Nv0.Dot(Nv1)));
-				CVector3 Zr;
-				Zr = (T01 + L01 * z.Dot(L01)) * 2 - z;
-				if (new_z_sqr > Zr.Dot(Zr))
-				{
-					new_z = Zr;
-					new_z_sqr = new_z.Dot(new_z);
-					tgladColor += par.mandelbox.doubles.colorFactorY;
-				}
+						for (i = 0; i < sides; i++)
+						{
+							if ((i != side_m) && (i != side_r))
+							{
+								b = solid - Y.Dot(Nv[i]);
+								c = L.Dot(Nv[i]);
+								// A bit subtile here. a must be positive and I want to avoid divide by zero.
+								if ((c > 0) && ((a * c) > b))
+								{
+									side = i;
+									a = b / c;
+								}
+							}
+						}
 
-				// Find inversion point to closest vert.
-				CVector3 Zi;
-				double a;
-				a = ((par.mandelbox.doubles.foldingValue) - T01.Dot(Nv2)) / (L01.Dot(Nv2));
-				Zi = (L01 * a + T01) * 2 - z;
-				if (new_z_sqr > Zi.Dot(Zi))
-				{
-					new_z = Zi;
-					new_z_sqr = new_z.Dot(new_z);
-					tgladColor += par.mandelbox.doubles.colorFactorZ;
-				}
-				z = new_z;
+						if (side != -1)
+						{ // inversion check
+							// Only inversion point possible but still need to check for melt.
+
+							CVector3 X_i = Y + L * a;
+							CVector3 z2X = X_i - z;
+							// Is z above the melt layer.
+							if (z2X.Dot(z2X) > (melt * melt))
+							{
+								double z2X_mag = z2X.Length();
+								z = z + z2X * (2 * (z2X_mag - melt) / (z2X_mag + .00000001));
+								tgladColor += par.mandelbox.doubles.colorFactorZ;
+							}
+						}
+						else
+						{
+							// Only rotation line possible but still need to check for melt.
+							// Is z above the melt layer.
+							CVector3 z2X = X_r - z;
+							if (z2X.Dot(z2X) > (melt * melt))
+							{
+								double z2X_mag = z2X.Length();
+								z = z + z2X * (2 * (z2X_mag - melt) / (z2X_mag + .00000001));
+								tgladColor += par.mandelbox.doubles.colorFactorY;
+							}
+						}
+
+					}
+					else
+					{
+						// Only mirror plane possible but still need to check for melt.
+						CVector3 z2X = X_m - z;
+						if (z2X.Dot(z2X) > (melt * melt))
+						{
+							double z2X_mag = z2X.Length();
+							z = z + z2X * (2 * (z2X_mag - melt) / (z2X_mag + .00000001));
+							tgladColor += par.mandelbox.doubles.colorFactorX;
+						}
+					}
+				} // outside solid
 
 				r = z.Length();
 				double r2 = r * r;
