@@ -351,7 +351,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "stereo_eye_distance", params.doubles.stereoEyeDistance, 0.1, compare);
 	fprintfInt(fileSettings, "stereo_enabled", params.stereoEnabled, false, compare);
 
-	if (!compare || params.fractal.formula == tglad || params.fractal.formula == smoothMandelbox || params.fractal.formula == mandelboxVaryScale4D || params.fractal.formula == hybrid)
+	if (!compare || params.fractal.formula == tglad || params.fractal.formula == smoothMandelbox || params.fractal.formula == mandelboxVaryScale4D || params.fractal.formula == generalizedFoldBox || params.fractal.formula == hybrid)
 	{
 		fprintfDot(fileSettings, "mandelbox_scale", params.fractal.mandelbox.doubles.scale, 2.0, compare);
 		fprintfDot(fileSettings, "mandelbox_folding_limit", params.fractal.mandelbox.doubles.foldingLimit, 1.0, compare);
@@ -384,6 +384,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "mandelbox_color_Sp1", params.fractal.mandelbox.doubles.colorFactorSp1, 0.2, compare);
 		fprintfDot(fileSettings, "mandelbox_color_Sp2", params.fractal.mandelbox.doubles.colorFactorSp2, 0.2, compare);
 		fprintfInt(fileSettings, "mandelbox_rotation_enabled", params.fractal.mandelbox.rotationsEnabled, false, compare);
+		fprintfInt(fileSettings, "mandelbox_fold_mode", params.fractal.genFoldBox.type, true, compare);
+		fprintfDot(fileSettings, "mandelbox_solid", params.fractal.mandelbox.doubles.solid, 1.0, compare);
+		fprintfDot(fileSettings, "mandelbox_melt", params.fractal.mandelbox.doubles.melt, 0.0, compare);
 	}
 
 	fprintfDot(fileSettings, "view_distance_max", params.doubles.viewDistanceMax, 50, compare);
@@ -494,6 +497,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_water_amplitude", params.fractal.doubles.primitives.waterAmplitude, 0.02, compare);
 		fprintfDot(fileSettings, "primitive_water_length", params.fractal.doubles.primitives.waterLength, 0.2, compare);
 		fprintfInt(fileSettings, "primitive_water_iterations", params.fractal.primitives.waterIterations, 5, compare);
+		fprintfDot(fileSettings, "primitive_water_rotation", params.fractal.doubles.primitives.waterRotation, 0.0, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_R", params.primitiveWaterColour.R, 0, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_G", params.primitiveWaterColour.G, 5000, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_B", params.primitiveWaterColour.B, 10000, compare);
@@ -874,6 +878,9 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "mandelbox_color_Sp1")) params.fractal.mandelbox.doubles.colorFactorSp1 = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_color_Sp2")) params.fractal.mandelbox.doubles.colorFactorSp2 = atof2(str2);
 	else if (!strcmp(str1, "mandelbox_rotation_enabled")) params.fractal.mandelbox.rotationsEnabled = atoi(str2);
+	else if (!strcmp(str1, "mandelbox_fold_mode")) params.fractal.genFoldBox.type = (enumGeneralizedFoldBoxType)atoi(str2);
+	else if (!strcmp(str1, "mandelbox_solid")) params.fractal.mandelbox.doubles.solid = atof2(str2);
+	else if (!strcmp(str1, "mandelbox_melt")) params.fractal.mandelbox.doubles.melt = atof2(str2);
 
 	else if (!strcmp(str1, "view_distance_max")) params.doubles.viewDistanceMax = atof2(str2);
 	else if (!strcmp(str1, "view_distance_min")) params.doubles.viewDistanceMin = atof2(str2);
@@ -961,6 +968,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_water_amplitude")) params.fractal.doubles.primitives.waterAmplitude = atof2(str2);
 	else if (!strcmp(str1, "primitive_water_length")) params.fractal.doubles.primitives.waterLength = atof2(str2);
 	else if (!strcmp(str1, "primitive_water_iterations")) params.fractal.primitives.waterIterations = atoi(str2);
+	else if (!strcmp(str1, "primitive_water_rotation")) params.fractal.doubles.primitives.waterRotation = atof2(str2);
 	else if (!strcmp(str1, "primitive_water_colour_R")) params.primitiveWaterColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_G")) params.primitiveWaterColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_B")) params.primitiveWaterColour.B = atoi(str2);

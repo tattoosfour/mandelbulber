@@ -474,6 +474,8 @@ struct sInterface
 	GtkWidget *edit_mandelboxOffsetX;
 	GtkWidget *edit_mandelboxOffsetY;
 	GtkWidget *edit_mandelboxOffsetZ;
+	GtkWidget *edit_mandelboxSolid;
+	GtkWidget *edit_mandelboxMelt;
 	GtkWidget *edit_viewMinDistance;
 	GtkWidget *edit_viewMaxDistance;
 	GtkWidget *edit_FractalConstantFactor;
@@ -576,6 +578,7 @@ struct sInterface
 	GtkWidget *comboHybridDEMethod;
 	GtkWidget *comboPerspectiveType;
 	GtkWidget *comboImageProportion;
+	GtkWidget *comboGeneralizedFoldBoxType;
 
 	GtkWidget *progressBar;
 

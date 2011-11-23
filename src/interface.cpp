@@ -189,21 +189,22 @@ enumFractalFormula FormulaNumberGUI2Data(int formula)
 	if (formula == 16) formula2 = aexion;
 	if (formula == 17) formula2 = benesi;
 	if (formula == 18) formula2 = bristorbrot;
-	if (formula == 19) formula2 = invertX;
-	if (formula == 20) formula2 = invertY;
-	if (formula == 21) formula2 = invertZ;
-	if (formula == 22) formula2 = invertR;
-	if (formula == 23) formula2 = sphericalFold;
-	if (formula == 24) formula2 = powXYZ;
-	if (formula == 25) formula2 = scaleX;
-	if (formula == 26) formula2 = scaleY;
-	if (formula == 27) formula2 = scaleZ;
-	if (formula == 28) formula2 = offsetX;
-	if (formula == 29) formula2 = offsetY;
-	if (formula == 30) formula2 = offsetZ;
-	if (formula == 31) formula2 = angleMultiplyX;
-	if (formula == 32) formula2 = angleMultiplyY;
-	if (formula == 33) formula2 = angleMultiplyZ;
+	if (formula == 19) formula2 = generalizedFoldBox;
+	if (formula == 20) formula2 = invertX;
+	if (formula == 21) formula2 = invertY;
+	if (formula == 22) formula2 = invertZ;
+	if (formula == 23) formula2 = invertR;
+	if (formula == 24) formula2 = sphericalFold;
+	if (formula == 25) formula2 = powXYZ;
+	if (formula == 26) formula2 = scaleX;
+	if (formula == 27) formula2 = scaleY;
+	if (formula == 28) formula2 = scaleZ;
+	if (formula == 29) formula2 = offsetX;
+	if (formula == 30) formula2 = offsetY;
+	if (formula == 31) formula2 = offsetZ;
+	if (formula == 32) formula2 = angleMultiplyX;
+	if (formula == 33) formula2 = angleMultiplyY;
+	if (formula == 34) formula2 = angleMultiplyZ;
 	return formula2;
 }
 
@@ -229,21 +230,22 @@ int FormulaNumberData2GUI(enumFractalFormula formula)
 	if (formula == aexion) formula2 = 16;
 	if (formula == benesi) formula2 = 17;
 	if (formula == bristorbrot) formula2 = 18;
-	if (formula == invertX) formula2 = 19;
-	if (formula == invertY) formula2 = 20;
-	if (formula == invertZ) formula2 = 21;
-	if (formula == invertR) formula2 = 22;
-	if (formula == sphericalFold) formula2 = 23;
-	if (formula == powXYZ) formula2 = 24;
-	if (formula == scaleX) formula2 = 25;
-	if (formula == scaleY) formula2 = 26;
-	if (formula == scaleZ) formula2 = 27;
-	if (formula == offsetX) formula2 = 28;
-	if (formula == offsetY) formula2 = 29;
-	if (formula == offsetZ) formula2 = 30;
-	if (formula == angleMultiplyX) formula2 = 31;
-	if (formula == angleMultiplyY) formula2 = 32;
-	if (formula == angleMultiplyZ) formula2 = 33;
+	if (formula == generalizedFoldBox) formula2 = 19;
+	if (formula == invertX) formula2 = 20;
+	if (formula == invertY) formula2 = 21;
+	if (formula == invertZ) formula2 = 22;
+	if (formula == invertR) formula2 = 23;
+	if (formula == sphericalFold) formula2 = 24;
+	if (formula == powXYZ) formula2 = 25;
+	if (formula == scaleX) formula2 = 26;
+	if (formula == scaleY) formula2 = 27;
+	if (formula == scaleZ) formula2 = 28;
+	if (formula == offsetX) formula2 = 29;
+	if (formula == offsetY) formula2 = 30;
+	if (formula == offsetZ) formula2 = 31;
+	if (formula == angleMultiplyX) formula2 = 32;
+	if (formula == angleMultiplyY) formula2 = 33;
+	if (formula == angleMultiplyZ) formula2 = 34;
 	return formula2;
 }
 
@@ -423,6 +425,8 @@ void ReadInterface(sParamRender *params)
 		params->fractal.mandelbox.doubles.offset.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetX)));
 		params->fractal.mandelbox.doubles.offset.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetY)));
 		params->fractal.mandelbox.doubles.offset.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxOffsetZ)));
+		params->fractal.mandelbox.doubles.solid = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxSolid)));
+		params->fractal.mandelbox.doubles.melt = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mandelboxMelt)));
 
 		params->image_width = (params->image_width/8)*8;
 		params->image_height = (params->image_height/8)*8;
@@ -496,6 +500,8 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.primitives.waterRotation = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterRotation)));
 		params->fractal.primitives.waterIterations = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations)));
 		params->fractal.primitives.waterEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled));
+
+		params->fractal.genFoldBox.type = (enumGeneralizedFoldBoxType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType));
 
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
@@ -777,6 +783,8 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetX), DoubleToString(params->fractal.mandelbox.doubles.offset.x));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetY), DoubleToString(params->fractal.mandelbox.doubles.offset.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxOffsetZ), DoubleToString(params->fractal.mandelbox.doubles.offset.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxSolid), DoubleToString(params->fractal.mandelbox.doubles.solid));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxMelt), DoubleToString(params->fractal.mandelbox.doubles.melt));
 
 	for (int component = 0; component < 3; ++component)
 		gtk_entry_set_text(GTK_ENTRY(Interface.edit_mandelboxRotationMain[component]), DoubleToString(
@@ -916,6 +924,7 @@ void WriteInterface(sParamRender *params)
 	}
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), params->perspectiveType);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), params->fractal.genFoldBox.type);
 
 	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
 	if (params->fractal.formula == trig_optim) formula = 0;
@@ -1010,6 +1019,7 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "Aexion");
 	gtk_combo_box_append_text(combo, "Benesi");
 	gtk_combo_box_append_text(combo, "Bristorbrot");
+	gtk_combo_box_append_text(combo, "Generalized Mandelbox Fold");
 	gtk_combo_box_append_text(combo, "x^2/(x + p)");
 	gtk_combo_box_append_text(combo, "y^2/(y + p)");
 	gtk_combo_box_append_text(combo, "z^2/(z + p)");
@@ -1585,6 +1595,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_mandelboxOffsetX= gtk_entry_new();
 	Interface.edit_mandelboxOffsetY= gtk_entry_new();
 	Interface.edit_mandelboxOffsetZ= gtk_entry_new();
+	Interface.edit_mandelboxSolid = gtk_entry_new();
+	Interface.edit_mandelboxMelt = gtk_entry_new();
 
 	for (int component = 0; component < 3; ++component)
 		Interface.edit_mandelboxRotationMain[component] = gtk_entry_new();
@@ -1690,7 +1702,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Benesi");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Bristorbrot");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Generalized Fold Box");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Generalized Mandelbox Fold");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
 
 	//image format
@@ -1721,6 +1733,16 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "16:9");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboImageProportion), 0);
 
+	Interface.comboGeneralizedFoldBoxType = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Tetrahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Cube");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Octahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Dodecahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Octahedron/Cube");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Icosahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Box 6");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Box 5");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), 0);
 
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
@@ -2546,18 +2568,22 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxMainParams), Interface.boxMandelboxMainParams);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("2", "Scale", 6, Interface.edit_mandelboxScale), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("3,0", "Sharpness", 6, Interface.edit_mandelboxSharpness), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("1,0", "Solid", 6, Interface.edit_mandelboxSolid), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("0,0", "Melt", 6, Interface.edit_mandelboxMelt), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Folding limit", 6, Interface.edit_mandelboxFoldingLimit), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("2", "Folding value", 6, Interface.edit_mandelboxFoldingValue), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Fixed radius", 6, Interface.edit_mandelboxSpFoldingFixedRadius), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, Interface.edit_mandelboxSpFoldingMinRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("3,0", "Sharpness", 6, Interface.edit_mandelboxSharpness), false, false, 1);
+
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxOffset, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Spherical folding offset X", 6, Interface.edit_mandelboxOffsetX), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Y", 6, Interface.edit_mandelboxOffsetY), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Z", 6, Interface.edit_mandelboxOffsetZ), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateWidgetWithLabel("GeneralizedFoldBox type", Interface.comboGeneralizedFoldBoxType), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);

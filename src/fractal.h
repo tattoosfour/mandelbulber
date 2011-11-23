@@ -63,6 +63,18 @@ enum enumCalculationMode
 	normal = 0, colouring = 1, fake_AO = 2, deltaDE1 = 3, deltaDE2 = 4
 };
 
+enum enumGeneralizedFoldBoxType
+{
+	foldTet = 0,
+	foldCube = 1,
+	foldOct = 2,
+	foldDodeca = 3,
+	foldOctCube = 4,
+	foldIcosa = 5,
+	foldBox6 = 6,
+	foldBox5 = 7
+};
+
 struct sFractalIFSD
 {
 	double rotationGamma;
@@ -77,6 +89,27 @@ struct sFractalIFSD
 	CVector3 offset;
 	CVector3 direction[IFS_VECTOR_COUNT];
 	CVector3 edge;
+};
+
+struct sFractalGeneralizedFoldBox
+{
+	enum enumGeneralizedFoldBoxType type;
+	CVector3 Nv_tet[4];
+	CVector3 Nv_cube[6];
+	CVector3 Nv_oct[8];
+	CVector3 Nv_oct_cube[14];
+	CVector3 Nv_dodeca[12];
+	CVector3 Nv_icosa[20];
+	CVector3 Nv_box6[8];
+	CVector3 Nv_box5[7];
+	int sides_tet;
+	int sides_cube;
+	int sides_oct;
+	int sides_oct_cube;
+	int sides_dodeca;
+	int sides_icosa;
+	int sides_box6;
+	int sides_box5;
 };
 
 struct sFractalIFS
@@ -116,6 +149,8 @@ struct sFractalMandelboxD
 	double foldingSphericalMin;
 	double foldingSphericalFixed;
 	double sharpness;
+	double solid;
+	double melt;
 	CVector3 offset;
 	sFractalMandelboxVary4D vary4D;
 };
@@ -210,6 +245,7 @@ struct sFractal
 
 	sFractalIFS IFS;
 	sFractalMandelbox mandelbox;
+	sFractalGeneralizedFoldBox genFoldBox;
 	sFractalPrimitives primitives;
 
 	int specialColour;
