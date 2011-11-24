@@ -311,6 +311,8 @@ struct sInterface
 	GtkWidget *buDown;
 	GtkWidget *buLeft;
 	GtkWidget *buRight;
+	GtkWidget *buRotateLeft;
+	GtkWidget *buRotateRight;
 	GtkWidget *buMoveUp;
 	GtkWidget *buMoveDown;
 	GtkWidget *buMoveLeft;
@@ -641,6 +643,8 @@ struct sInterface
 	GtkWidget *pixmap_down;
 	GtkWidget *pixmap_left;
 	GtkWidget *pixmap_right;
+	GtkWidget *pixmap_rotate_left;
+	GtkWidget *pixmap_rotate_right;
 	GtkWidget *pixmap_move_up;
 	GtkWidget *pixmap_move_down;
 	GtkWidget *pixmap_move_left;

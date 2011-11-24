@@ -564,8 +564,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				}
 
         double melt = par.mandelbox.doubles.melt;
-        double solid = par.mandelbox.doubles.solid * (1.0 - melt);
-        melt =  par.mandelbox.doubles.solid * melt;
+        double solid = par.mandelbox.doubles.solid;
 
 				// Find the closest cutting plane if any that cuts the line between the origin and z.
 				// Line is parameterized as X = Y + L*a;
