@@ -37,6 +37,8 @@ void PressedNavigatorUp(GtkWidget *widget, gpointer data);
 void PressedNavigatorDown(GtkWidget *widget, gpointer data);
 void PressedNavigatorLeft(GtkWidget *widget, gpointer data);
 void PressedNavigatorRight(GtkWidget *widget, gpointer data);
+void PressedNavigatorRotateLeft(GtkWidget *widget, gpointer data);
+void PressedNavigatorRotateRight(GtkWidget *widget, gpointer data);
 void PressedNavigatorMoveUp(GtkWidget *widget, gpointer data);
 void PressedNavigatorMoveDown(GtkWidget *widget, gpointer data);
 void PressedNavigatorMoveLeft(GtkWidget *widget, gpointer data);

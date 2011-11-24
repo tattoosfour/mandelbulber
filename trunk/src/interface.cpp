@@ -1419,6 +1419,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buDown = gtk_button_new();
 	Interface.buLeft = gtk_button_new();
 	Interface.buRight = gtk_button_new();
+	Interface.buRotateLeft = gtk_button_new();
+	Interface.buRotateRight = gtk_button_new();
 	Interface.buMoveUp = gtk_button_new();
 	Interface.buMoveDown = gtk_button_new();
 	Interface.buMoveLeft = gtk_button_new();
@@ -1804,6 +1806,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.pixmap_down = gtk_image_new_from_file((string(sharedDir)+"icons/go-down.png").c_str());
 	Interface.pixmap_left = gtk_image_new_from_file((string(sharedDir)+"icons/go-previous.png").c_str());
 	Interface.pixmap_right = gtk_image_new_from_file((string(sharedDir)+"icons/go-next.png").c_str());
+	Interface.pixmap_rotate_left = gtk_image_new_from_file((string(sharedDir)+"icons/object-rotate-left.png").c_str());
+	Interface.pixmap_rotate_right = gtk_image_new_from_file((string(sharedDir)+"icons/object-rotate-right.png").c_str());
 	Interface.pixmap_move_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
 	Interface.pixmap_move_down = gtk_image_new_from_file((string(sharedDir)+"icons/go-down.png").c_str());
 	Interface.pixmap_move_left = gtk_image_new_from_file((string(sharedDir)+"icons/go-previous.png").c_str());
@@ -1888,6 +1892,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buDown, PressedNavigatorDown);
 	CONNECT_SIGNAL_CLICKED(Interface.buLeft, PressedNavigatorLeft);
 	CONNECT_SIGNAL_CLICKED(Interface.buRight, PressedNavigatorRight);
+	CONNECT_SIGNAL_CLICKED(Interface.buRotateLeft, PressedNavigatorRotateLeft);
+	CONNECT_SIGNAL_CLICKED(Interface.buRotateRight, PressedNavigatorRotateRight);
 	CONNECT_SIGNAL_CLICKED(Interface.buMoveUp, PressedNavigatorMoveUp);
 	CONNECT_SIGNAL_CLICKED(Interface.buMoveDown, PressedNavigatorMoveDown);
 	CONNECT_SIGNAL_CLICKED(Interface.buMoveLeft, PressedNavigatorMoveLeft);
@@ -1984,6 +1990,10 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buLeft, 0, 1, 1, 2);
 	gtk_container_add(GTK_CONTAINER(Interface.buRight), Interface.pixmap_right);
 	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRight, 2, 3, 1, 2);
+	gtk_container_add(GTK_CONTAINER(Interface.buRotateLeft), Interface.pixmap_rotate_left);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateLeft, 0, 1, 2, 3);
+	gtk_container_add(GTK_CONTAINER(Interface.buRotateRight), Interface.pixmap_rotate_right);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateRight, 2, 3, 2, 3);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.fr3Dnavigator, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.fr3Dnavigator), Interface.boxArrows);
