@@ -8,6 +8,7 @@
 
 #include <string>
 #include "interface.h"
+#include "settings.h"
 #include "cl_support.hpp"
 
 CclSupport *clSupport;
@@ -146,10 +147,14 @@ void CclSupport::Init(void)
 	//program->getInfo(CL_PROGRAM_SOURCE, )
 	std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
+	chdir(clDir.c_str());
+
 	err = program->build(devices, "-w");
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 	checkErr(err, "Program::build()");
 	printf("OpenCL program built done\n");
+
+	chdir(data_directory);
 
 	kernel = new cl::Kernel(*program, "fractal3D", &err);
 	checkErr(err, "Kernel::Kernel()");
