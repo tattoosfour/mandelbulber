@@ -76,11 +76,13 @@ double PrimitiveInvertedSphere(CVector3 point, CVector3 center, double radius)
 	return distance;
 }
 
-double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations)
+double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations, double animSpeed, int frame)
 {
 	CRotationMatrix rotMatrix;
 	rotMatrix.RotateZ(rotation/180*M_PI);
 	point = rotMatrix.RotateVector(point);
+
+	double phase = animSpeed * frame;
 
 	CVector3 plane(0,0,-1);
 	CVector3 centre(0,0,height);
@@ -95,7 +97,8 @@ double PrimitiveWater(CVector3 point, double height, double amplitude, double le
 	double p = 1;
 	for(int i=1; i<=iterations; i++)
 	{
-		waveXtemp = sin(i + 0.4*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p)/p;
+		double shift = phase / (i/3.0 + 1.0);
+		waveXtemp = sin(i + 0.4*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p + shift)/p;
 		waveYtemp = cos(i + 0.4*(waveY)*p + sin(point.x / length*p) + k*point.y/length*p)/p;
 		waveX+=waveXtemp;
 		waveY+=waveYtemp;

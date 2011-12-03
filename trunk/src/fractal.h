@@ -249,6 +249,7 @@ struct sFractal
 	sFractalPrimitives primitives;
 
 	int specialColour;
+	int frameNo;
 };
 
 template <int Mode>
