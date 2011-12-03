@@ -1884,6 +1884,9 @@ void MainRender(void)
 			{
 				gtk_label_set_text(GTK_LABEL(Interface.label_animationFrame), label_text);
 			}
+
+			fractParam.fractal.frameNo = index;
+
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
 

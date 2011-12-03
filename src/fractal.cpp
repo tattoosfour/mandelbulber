@@ -1383,7 +1383,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.waterEnable)
 	{
 		double waterDistance = PrimitiveWater(point, params.doubles.primitives.waterHeight, params.doubles.primitives.waterAmplitude,
-				params.doubles.primitives.waterLength, params.doubles.primitives.waterRotation, params.primitives.waterIterations);
+				params.doubles.primitives.waterLength, params.doubles.primitives.waterRotation, params.primitives.waterIterations, 0.1, params.frameNo);
 		if(waterDistance < distance) 	params.specialColour = 248;
 		distance = (waterDistance < distance) ? waterDistance : distance;
 	}

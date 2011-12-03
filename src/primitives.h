@@ -15,6 +15,6 @@ double PrimitiveInvertedBox(CVector3 point, CVector3 center, CVector3 size);
 double PrimitiveBox(CVector3 point, CVector3 center, CVector3 size);
 double PrimitiveSphere(CVector3 point, CVector3 center, double radius);
 double PrimitiveInvertedSphere(CVector3 point, CVector3 center, double radius);
-double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations);
+double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations, double animSpeed, int frame);
 
 #endif /* PRIMITIVES_HPP_ */
