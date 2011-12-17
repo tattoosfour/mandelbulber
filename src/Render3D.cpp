@@ -98,12 +98,14 @@ void *MainThread(void *ptr)
 	//printf("Thread #%d started\n", z + 1);
 	sParamRender param = parametry->param;
 
+	int tiles = param.noOfTiles;
+	int tile = param.tileCount;
 	double dist_thresh = param.doubles.dist_thresh;
 	double DE_factor = param.doubles.DE_factor;
 	CVector3 vp = param.doubles.vp;
 	double min_y = param.doubles.min_y;
 	double max_y = param.doubles.max_y;
-	double resolution = param.doubles.resolution;
+	double resolution = param.doubles.resolution / tiles;
 	double zoom = param.doubles.zoom;
 	double alfa = param.doubles.alfa;
 	double beta = param.doubles.beta;
@@ -114,6 +116,7 @@ void *MainThread(void *ptr)
 	bool global_ilumination = param.global_ilumination;
 	bool fastGlobalIllumination = param.fastGlobalIllumination;
 	int AO_quality = param.globalIlumQuality;
+
 
 	bool fractColor = param.imageSwitches.coloringEnabled;
 	cTexture *envmap_texture = param.envmapTexture;
@@ -220,6 +223,9 @@ void *MainThread(void *ptr)
 	enumPerspectiveType perspectiveType = param.perspectiveType;
 	double fov = param.doubles.persp;
 
+	double tileXOffset = (tile % tiles);
+	double tileYOffset = (tile / tiles);
+
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 2; pass++)
 	{
@@ -257,13 +263,13 @@ void *MainThread(void *ptr)
 					double x2,z2;
 					if (perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
-						x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
-						z2 = M_PI * ((double) z / height - 0.5);
+						x2 = M_PI * ((double) x / width / tiles - 0.5 + tileXOffset/tiles) * aspectRatio;
+						z2 = M_PI * ((double) z / height / tiles  - 0.5 + tileYOffset/tiles);
 					}
 					else
 					{
-						x2 = ((double) x / width - 0.5) * zoom * aspectRatio;
-						z2 = ((double) z / height - 0.5) * zoom;
+						x2 = ((double) x / width / tiles - 0.5 + tileXOffset/tiles) * zoom * aspectRatio;
+						z2 = ((double) z / height / tiles - 0.5 + tileYOffset/tiles) * zoom;
 					}
 
 					//preparing variables
@@ -1705,6 +1711,7 @@ bool LoadTextures(sParamRender *params)
 void MainRender(void)
 {
 	isRendering = true;
+	programClosed = false;
 
 	//allocating memory for fractal parameters
 	sParamRender fractParam;
@@ -1868,6 +1875,8 @@ void MainRender(void)
 
 	CVector3 last_vp_position = fractParam.doubles.vp;
 
+	int tiles = 3;
+
 	printf("************ Rendering frames *************\n");
 	WriteLog("************ Rendering frames *************");
 	for (int index = startFrame; index < endFrame; index++)
@@ -1877,6 +1886,9 @@ void MainRender(void)
 
 		//animation with recorded flight path
 		double speed = 0.02;
+
+		fractParam.fractal.frameNo = index;
+
 		if (fractParam.animMode && !Interface_data.keyframeMode)
 		{
 			sprintf(label_text, "Frame: %d", index);
@@ -1884,8 +1896,6 @@ void MainRender(void)
 			{
 				gtk_label_set_text(GTK_LABEL(Interface.label_animationFrame), label_text);
 			}
-
-			fractParam.fractal.frameNo = index;
 
 			//calculating of mouse pointer position
 			int delta_xm, delta_ym;
@@ -1991,152 +2001,162 @@ void MainRender(void)
 			WriteLog("GUI data refreshed");
 		}
 
-		if (Interface_data.imageFormat == imgFormatJPG)
+		for (int tile = 0; tile < tiles*tiles; tile++)
 		{
-			filename2=IndexFilename(fractParam.file_destination, "jpg", index);
-		}
-		else
-		{
-			filename2=IndexFilename(fractParam.file_destination, "png", index);
-		}
-		FILE *testFile;
-		testFile = fopen(filename2.c_str(), "r");
-		if ((testFile != NULL && !fractParam.recordMode && (autoSaveImage || fractParam.animMode)) || (!foundLastFrame && fractParam.continueRecord))
-		{
-			if (!fractParam.animMode)
+			int index2 = index * tiles * tiles + tile;
+			fractParam.tileCount = tile;
+			fractParam.noOfTiles = tiles;
+			if(tiles > 1)
 			{
-				//printf("Output file exists. Skip to next file index\n");
+				printf("---------- Tile: %d -------------\n", index2);
 			}
-		}
-		else
-		{
 
-			//renderowanie fraktala
-			//if ((index % frame_step == 0) || record_mode)
-
-			if (fractParam.animMode)
+			if (Interface_data.imageFormat == imgFormatJPG)
 			{
-				distance = CalculateDistance(fractParam.doubles.vp, fractParam.fractal);
-				printf("---------- index: %d -------------\n", index);
-				printf("Distance = %e\n", distance);
-				printf("alfa = %f, beta = %f\n", fractParam.doubles.alfa, fractParam.doubles.beta);
-				printf("x = %.8f, y = %.8f, z = %.8f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z);
-				if (!noGUI)
+				filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
+			}
+			else
+			{
+				filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+			}
+			FILE *testFile;
+			testFile = fopen(filename2.c_str(), "r");
+			if ((testFile != NULL && !fractParam.recordMode && (autoSaveImage || fractParam.animMode || tiles > 1)) || (!foundLastFrame && fractParam.continueRecord))
+			{
+				if (!fractParam.animMode)
 				{
-					char distanceString[1000];
-					CVector3 delta_vp = fractParam.doubles.vp - last_vp_position;
-					double actual_speed = delta_vp.Length();
-					sprintf(distanceString, "Estimated viewpoint distance to the surface: %g, actual speed: %g", distance, actual_speed);
-					gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+					//printf("Output file exists. Skip to next file index\n");
 				}
 			}
-
-			CVector3 eyeLeft, eyeRight;
-			int numberOfEyes = 1;
-			if (fractParam.stereoEnabled)
+			else
 			{
-				CRotationMatrix mRotForEyes;
-				mRotForEyes.RotateZ(fractParam.doubles.alfa);
-				mRotForEyes.RotateX(fractParam.doubles.beta);
-				mRotForEyes.RotateY(fractParam.doubles.gamma);
-				CVector3 baseVectorForEyes(0.5 * fractParam.doubles.stereoEyeDistance, 0, 0);
-				eyeLeft = fractParam.doubles.vp - mRotForEyes.RotateVector(baseVectorForEyes);
-				eyeRight = fractParam.doubles.vp + mRotForEyes.RotateVector(baseVectorForEyes);
-				numberOfEyes = 2;
 
-			}
+				//renderowanie fraktala
+				//if ((index % frame_step == 0) || record_mode)
 
-			//if number of eyes = 2 (stereo) then render two times
-			for (int eye = 0; eye < numberOfEyes; eye++)
-			{
+				if (fractParam.animMode)
+				{
+					distance = CalculateDistance(fractParam.doubles.vp, fractParam.fractal);
+					printf("---------- index: %d -------------\n", index);
+					printf("Distance = %e\n", distance);
+					printf("alfa = %f, beta = %f\n", fractParam.doubles.alfa, fractParam.doubles.beta);
+					printf("x = %.8f, y = %.8f, z = %.8f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z);
+					if (!noGUI)
+					{
+						char distanceString[1000];
+						CVector3 delta_vp = fractParam.doubles.vp - last_vp_position;
+						double actual_speed = delta_vp.Length();
+						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g, actual speed: %g", distance, actual_speed);
+						gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+					}
+				}
+
+				CVector3 eyeLeft, eyeRight;
+				int numberOfEyes = 1;
 				if (fractParam.stereoEnabled)
 				{
+					CRotationMatrix mRotForEyes;
+					mRotForEyes.RotateZ(fractParam.doubles.alfa);
+					mRotForEyes.RotateX(fractParam.doubles.beta);
+					mRotForEyes.RotateY(fractParam.doubles.gamma);
+					CVector3 baseVectorForEyes(0.5 * fractParam.doubles.stereoEyeDistance, 0, 0);
+					eyeLeft = fractParam.doubles.vp - mRotForEyes.RotateVector(baseVectorForEyes);
+					eyeRight = fractParam.doubles.vp + mRotForEyes.RotateVector(baseVectorForEyes);
+					numberOfEyes = 2;
+
+				}
+
+				//if number of eyes = 2 (stereo) then render two times
+				for (int eye = 0; eye < numberOfEyes; eye++)
+				{
+					if (fractParam.stereoEnabled)
+					{
+						if (eye == 0)
+						{
+							fractParam.doubles.vp = eyeLeft;
+						}
+						else if (eye == 1)
+						{
+							fractParam.doubles.vp = eyeRight;
+						}
+					}
+
+					Interface_data.disableInitRefresh = false;
+
 					if (eye == 0)
 					{
-						fractParam.doubles.vp = eyeLeft;
+						mainImage.ClearImage();
+						WriteLog("Image cleared");
+						Render(fractParam, &mainImage, renderWindow.drawingArea);
+						WriteLog("Image rendered");
 					}
 					else if (eye == 1)
 					{
-						fractParam.doubles.vp = eyeRight;
+						secondEyeImage->ClearImage();
+						WriteLog("Image cleared");
+						Render(fractParam, secondEyeImage, renderWindow.drawingArea);
+						WriteLog("Image rendered");
+						MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
+						WriteLog("Stereo image made");
+						if (!noGUI) StereoPreview(&mainImage, stereoImage);
+						filename2 = IndexFilename(fractParam.file_destination, "jpg", index);
+						SaveJPEG(filename2.c_str(), 100, width * 2, height, (JSAMPLE*) stereoImage);
+						WriteLog("Stereo image saved");
+						if (!noGUI)
+						{
+							char progressText[1000];
+							sprintf(progressText, "Stereoscopic image was saved to: %s", filename2.c_str());
+							gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+							StereoPreview(&mainImage, stereoImage);
+						}
+					}
+
+					//save image
+					if ((autoSaveImage || fractParam.animMode || tiles > 1) && !fractParam.stereoEnabled)
+					{
+						unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
+						if (Interface_data.imageFormat == imgFormatJPG)
+						{
+							filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
+							SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
+						}
+						else if (Interface_data.imageFormat == imgFormatPNG)
+						{
+							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+							SavePNG(filename2.c_str(), 100, width, height, (png_byte*) rgbbuf2);
+						}
+						else if (Interface_data.imageFormat == imgFormatPNG16)
+						{
+							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+							SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
+						}
+						else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
+						{
+							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+							SavePNG16Alpha(filename2.c_str(), 100, width, height, &mainImage);
+						}
+						printf("Image saved: %s\n", filename2.c_str());
+						WriteLog("Image saved");
+						WriteLog(filename2.c_str());
 					}
 				}
-
-				Interface_data.disableInitRefresh = false;
-
-				if (eye == 0)
-				{
-					mainImage.ClearImage();
-					WriteLog("Image cleared");
-					Render(fractParam, &mainImage, renderWindow.drawingArea);
-					WriteLog("Image rendered");
-				}
-				else if (eye == 1)
-				{
-					secondEyeImage->ClearImage();
-					WriteLog("Image cleared");
-					Render(fractParam, secondEyeImage, renderWindow.drawingArea);
-					WriteLog("Image rendered");
-					MakeStereoImage(&mainImage, secondEyeImage, stereoImage);
-					WriteLog("Stereo image made");
-					if (!noGUI) StereoPreview(&mainImage,stereoImage);
-					filename2=IndexFilename(fractParam.file_destination, "jpg", index);
-					SaveJPEG(filename2.c_str(), 100, width * 2, height, (JSAMPLE*) stereoImage);
-					WriteLog("Stereo image saved");
-					if (!noGUI)
-					{
-						char progressText[1000];
-						sprintf(progressText, "Stereoscopic image was saved to: %s", filename2.c_str());
-						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-						StereoPreview(&mainImage, stereoImage);
-					}
-				}
-
-				//save image
-				if ((autoSaveImage || fractParam.animMode) && !fractParam.stereoEnabled)
-				{
-					unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
-					if (Interface_data.imageFormat == imgFormatJPG)
-					{
-						filename2=IndexFilename(fractParam.file_destination, "jpg", index);
-						SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
-					}
-					else if (Interface_data.imageFormat == imgFormatPNG)
-					{
-						filename2=IndexFilename(fractParam.file_destination, "png", index);
-						SavePNG(filename2.c_str(), 100, width, height, (png_byte*) rgbbuf2);
-					}
-					else if (Interface_data.imageFormat == imgFormatPNG16)
-					{
-						filename2=IndexFilename(fractParam.file_destination, "png", index);
-						SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
-					}
-					else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
-					{
-						filename2=IndexFilename(fractParam.file_destination, "png", index);
-						SavePNG16Alpha(filename2.c_str(), 100, width, height, &mainImage);
-					}
-					printf("Image saved: %s\n", filename2.c_str());
-					WriteLog("Image saved");
-					WriteLog(filename2.c_str());
-				}
-
 			}
 			//terminate animation loop when not animation mode
-			if (!fractParam.animMode)
+			if (!fractParam.animMode && tile >= tiles*tiles-1)
 			{
 				index = 9999999;
 			}
 
 			last_vp_position = fractParam.doubles.vp;
 
+			if (testFile != NULL)
+			{
+				fclose(testFile);
+			}
+
 			if (programClosed) break;
 		}
-
-		if (testFile != NULL)
-		{
-			fclose(testFile);
-		}
-
+		if (programClosed) break;
 	}
 
 	if (fractParam.playMode && !Interface_data.keyframeMode) fclose(pFile_coordinates);

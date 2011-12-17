@@ -256,6 +256,8 @@ void SavePNG(const char *filename, int /*quality*/, int width, int height, png_b
 	fclose(fp);
 }
 
+
+
 void SavePNG16(const char *filename, int /*quality*/, int width, int height, cImage *image)
 {
 	/* create file */
