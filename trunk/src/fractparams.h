@@ -76,6 +76,8 @@ struct sParamRender
 	int endFrame;
 	int framesPerKeyframe;
 	int imageFormat;
+	int noOfTiles;
+	int tileCount;
 
 	enumPerspectiveType perspectiveType;
 

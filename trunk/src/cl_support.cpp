@@ -145,7 +145,7 @@ void CclSupport::Init(void)
 	program = new cl::Program(*context, sources, &err);
 	checkErr(err, "Program()");
 	//program->getInfo(CL_PROGRAM_SOURCE, )
-	std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
+	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
 	chdir(clDir.c_str());
 

@@ -681,7 +681,6 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 
 	if (numberOfLights < 4) numberOfLights = 4;
 
-	programClosed = false;
 	for (int i = 0; i < numberOfLights; ++i)
 	{
 		if(programClosed) break;
