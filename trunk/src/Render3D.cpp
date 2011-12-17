@@ -1875,7 +1875,7 @@ void MainRender(void)
 
 	CVector3 last_vp_position = fractParam.doubles.vp;
 
-	int tiles = 3;
+	int tiles = fractParam.noOfTiles;
 
 	printf("************ Rendering frames *************\n");
 	WriteLog("************ Rendering frames *************");
@@ -2001,23 +2001,27 @@ void MainRender(void)
 			WriteLog("GUI data refreshed");
 		}
 
+		bool tilesDone = false;
 		for (int tile = 0; tile < tiles*tiles; tile++)
 		{
 			int index2 = index * tiles * tiles + tile;
 			fractParam.tileCount = tile;
-			fractParam.noOfTiles = tiles;
 			if(tiles > 1)
 			{
 				printf("---------- Tile: %d -------------\n", index2);
 			}
 
-			if (Interface_data.imageFormat == imgFormatJPG)
+			if (Interface_data.imageFormat == imgFormatJPG && tiles == 1)
 			{
 				filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
 			}
-			else
+			else if(tiles == 1)
 			{
 				filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+			}
+			else
+			{
+				filename2 = IndexFilename(fractParam.file_destination, "tile", index2);
 			}
 			FILE *testFile;
 			testFile = fopen(filename2.c_str(), "r");
@@ -2025,7 +2029,7 @@ void MainRender(void)
 			{
 				if (!fractParam.animMode)
 				{
-					//printf("Output file exists. Skip to next file index\n");
+					printf("Output file (%s) exists. Skip to next file index\n", filename2.c_str());
 				}
 			}
 			else
@@ -2112,28 +2116,39 @@ void MainRender(void)
 					}
 
 					//save image
-					if ((autoSaveImage || fractParam.animMode || tiles > 1) && !fractParam.stereoEnabled)
+					if ((autoSaveImage || fractParam.animMode || tiles > 1) && !fractParam.stereoEnabled && !programClosed)
 					{
-						unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
-						if (Interface_data.imageFormat == imgFormatJPG)
+						if(tiles>1)
 						{
-							filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
-							SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
+							FILE * binFile;
+							filename2 = IndexFilename(fractParam.file_destination, "tile", index2);
+							binFile = fopen(filename2.c_str(), "wb");
+							fwrite(mainImage.GetImage16Ptr(), 1, sizeof(sRGB16)*width*height, binFile);
+							fclose(binFile);
 						}
-						else if (Interface_data.imageFormat == imgFormatPNG)
+						else
 						{
-							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
-							SavePNG(filename2.c_str(), 100, width, height, (png_byte*) rgbbuf2);
-						}
-						else if (Interface_data.imageFormat == imgFormatPNG16)
-						{
-							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
-							SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
-						}
-						else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
-						{
-							filename2 = IndexFilename(fractParam.file_destination, "png", index2);
-							SavePNG16Alpha(filename2.c_str(), 100, width, height, &mainImage);
+							unsigned char *rgbbuf2 = mainImage.ConvertTo8bit();
+							if (Interface_data.imageFormat == imgFormatJPG)
+							{
+								filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
+								SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
+							}
+							else if (Interface_data.imageFormat == imgFormatPNG)
+							{
+								filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+								SavePNG(filename2.c_str(), 100, width, height, (png_byte*) rgbbuf2);
+							}
+							else if (Interface_data.imageFormat == imgFormatPNG16)
+							{
+								filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+								SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
+							}
+							else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
+							{
+								filename2 = IndexFilename(fractParam.file_destination, "png", index2);
+								SavePNG16Alpha(filename2.c_str(), 100, width, height, &mainImage);
+							}
 						}
 						printf("Image saved: %s\n", filename2.c_str());
 						WriteLog("Image saved");
@@ -2155,6 +2170,12 @@ void MainRender(void)
 			}
 
 			if (programClosed) break;
+
+			if(tile == tiles * tiles -1) tilesDone = true;
+		}
+		if(tiles > 1 && tilesDone)
+		{
+			SaveFromTilesPNG16(fractParam.file_destination, width, height, tiles);
 		}
 		if (programClosed) break;
 	}

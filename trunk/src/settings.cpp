@@ -135,6 +135,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "Mandelbulber", MANDELBULBER_VERSION, MANDELBULBER_VERSION, false);
 	fprintfInt(fileSettings, "image_width", params.image_width, 800, compare);
 	fprintfInt(fileSettings, "image_height", params.image_height, 600, compare);
+	fprintfInt(fileSettings, "tiles", params.noOfTiles, 1, compare);
 	fprintfDot(fileSettings, "x_min", params.fractal.doubles.amin, -10.0, compare);
 	fprintfDot(fileSettings, "x_max", params.fractal.doubles.amax, 10.0, compare);
 	fprintfDot(fileSettings, "y_min", params.fractal.doubles.bmin, -10.0, compare);
@@ -696,6 +697,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "Mandelbulber")) params.settingsVersion = atof2(str2);
 	else if (!strcmp(str1, "image_width")) params.image_width = atoi(str2);
 	else if (!strcmp(str1, "image_height")) params.image_height = atoi(str2);
+	else if (!strcmp(str1, "tiles")) params.noOfTiles = atoi(str2);
 	else if (!strcmp(str1, "x_min")) params.fractal.doubles.amin = atof2(str2);
 	else if (!strcmp(str1, "x_max")) params.fractal.doubles.amax = atof2(str2);
 	else if (!strcmp(str1, "y_min")) params.fractal.doubles.bmin = atof2(str2);

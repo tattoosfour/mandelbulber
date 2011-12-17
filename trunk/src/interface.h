@@ -11,8 +11,8 @@
 #include "fractparams.h"
 #include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.09
-#define MANDELBULBER_VERSION_STR "1.09"
+#define MANDELBULBER_VERSION 1.10
+#define MANDELBULBER_VERSION_STR "1.10"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -537,6 +537,7 @@ struct sInterface
 	GtkWidget *edit_measureX;
 	GtkWidget *edit_measureY;
 	GtkWidget *edit_measureZ;
+	GtkWidget *edit_tiles;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

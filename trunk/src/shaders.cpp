@@ -679,6 +679,12 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 
 	int numberOfLights = lightsPlaced;
 
+	int tiles = fractParam->noOfTiles;
+	int tile = fractParam->tileCount;
+
+	double tileXOffset = (tile % tiles);
+	double tileYOffset = (tile / tiles);
+
 	if (numberOfLights < 4) numberOfLights = 4;
 
 	for (int i = 0; i < numberOfLights; ++i)
@@ -694,8 +700,8 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 			double wsp_persp = 1.0 + y * fractParam->doubles.persp;
 			double x2 = point3D2.x / wsp_persp;
 			double z2 = point3D2.z / wsp_persp;
-			double x = (x2 / (fractParam->doubles.zoom * aspectRatio) + 0.5) * width;
-			double z = (z2 / fractParam->doubles.zoom + 0.5) * height;
+			double x = (x2 / (fractParam->doubles.zoom * aspectRatio) + 0.5 - tileXOffset/tiles) * width * tiles;
+			double z = (z2 / fractParam->doubles.zoom + 0.5 - tileYOffset/tiles) * height * tiles;
 
 			int xs = (int) x;
 			int ys = (int) z;
@@ -709,7 +715,7 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 					int G = Lights[i].colour.G;
 					int B = Lights[i].colour.B;
 
-					double size = 50.0 / wsp_persp * Lights[i].intensity / fractParam->doubles.zoom * width * fractParam->doubles.auxLightIntensity / fractParam->auxLightNumber
+					double size = 50.0 / wsp_persp * Lights[i].intensity / fractParam->doubles.zoom * width * tiles * fractParam->doubles.auxLightIntensity / fractParam->auxLightNumber
 							* fractParam->doubles.auxLightVisibility;
 
 					int x_start = xs - size * 5 - 1;
