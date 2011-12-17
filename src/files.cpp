@@ -256,7 +256,103 @@ void SavePNG(const char *filename, int /*quality*/, int width, int height, png_b
 	fclose(fp);
 }
 
+void SaveFromTilesPNG16(const char *filename, int width, int height, int tiles)
+{
+	/* create file */
+		string filenamePNG(filename);
+		filenamePNG += "_fromTiles.png";
+		FILE *fp = fopen(filenamePNG.c_str(), "wb");
+		if (!fp) fprintf(stderr, "[write_png_file] File %s could not be opened for writing", filename);
 
+		/* initialize stuff */
+		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+		if (!png_ptr) fprintf(stderr, "[write_png_file] png_create_write_struct failed");
+
+		png_info *info_ptr = png_create_info_struct(png_ptr);
+		if (!info_ptr)
+		{
+			fprintf(stderr, "[write_png_file] png_create_info_struct failed");
+			return;
+		}
+
+		if (setjmp(png_jmpbuf(png_ptr)))
+		{
+			fprintf(stderr, "[write_png_file] Error during init_io");
+			return;
+		};
+
+		png_init_io(png_ptr, fp);
+
+		/* write header */
+		if (setjmp(png_jmpbuf(png_ptr)))
+		{
+			fprintf(stderr, "[write_png_file] Error during writing header");
+			return;
+		}
+
+		png_set_IHDR(png_ptr, info_ptr, width * tiles, height * tiles, 16, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+		png_write_info(png_ptr, info_ptr);
+		png_set_swap(png_ptr);
+
+		/* write bytes */
+		if (setjmp(png_jmpbuf(png_ptr)))
+		{
+			fprintf(stderr, "[write_png_file] Error during writing bytes");
+			return;
+		}
+
+		FILE **files = new FILE*[tiles];
+
+		sRGB16 *rowBuffer = new sRGB16[width*tiles];
+
+		for(int tileRow = 0; tileRow<tiles; tileRow++)
+		{
+			printf("Compiling image from tiles, row %d\n", tileRow);
+			for(int tile = 0; tile<tiles; tile++)
+			{
+				int fileNumber = tile + tileRow * tiles;
+				string filename2 = IndexFilename(filename, "tile", fileNumber);
+				files[tile] = fopen(filename2.c_str(), "rb");
+			}
+
+			for(int y = 0; y < height; y++)
+			{
+				for(int tile = 0; tile<tiles; tile++)
+				{
+					size_t result = fread(&rowBuffer[tile*width], 1, sizeof(sRGB16)*width, files[tile]);
+					if (result != sizeof(sRGB16)*width)
+					{
+						printf("Reading error of image tile files");
+						return;
+					}
+				}
+				png_write_rows(png_ptr, (png_bytep*)&rowBuffer,	1);
+			}
+
+			for(int tile = 0; tile<tiles; tile++)
+			{
+				fclose(files[tile]);
+				int fileNumber = tile + tileRow * tiles;
+				string filename2 = IndexFilename(filename, "tile", fileNumber);
+				remove(filename2.c_str());
+			}
+		}
+
+		/* end write */
+		if (setjmp(png_jmpbuf(png_ptr)))
+		{
+			fprintf(stderr, "[write_png_file] Error during end of write");
+			return;
+		}
+
+		png_write_end(png_ptr, NULL);
+
+		delete[] rowBuffer;
+
+		fclose(fp);
+}
 
 void SavePNG16(const char *filename, int /*quality*/, int width, int height, cImage *image)
 {

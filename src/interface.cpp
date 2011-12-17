@@ -270,6 +270,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)));
 		params->image_width = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth)));
 		params->image_height = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight)));
+		params->noOfTiles = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_tiles)));
 		params->doubles.imageAdjustments.brightness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)));
 		params->doubles.imageAdjustments.imageGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gamma)));
 		params->doubles.imageAdjustments.ambient = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient)));
@@ -697,6 +698,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(params->image_width));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageHeight), IntToString(params->image_height));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_tiles), IntToString(params->noOfTiles));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_brightness), DoubleToString(params->doubles.imageAdjustments.brightness));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gamma), DoubleToString(params->doubles.imageAdjustments.imageGamma));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_ambient), DoubleToString(params->doubles.imageAdjustments.ambient));
@@ -1681,6 +1683,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_measureY = gtk_entry_new();
 	Interface.edit_measureZ = gtk_entry_new();
 
+	Interface.edit_tiles = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -2209,6 +2213,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "Image width:", 5, Interface.edit_imageWidth), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "Image height:", 5, Interface.edit_imageHeight), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", Interface.comboImageProportion), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateEdit("1", "Tiles (rows and columns):", 5, Interface.edit_tiles), false, false, 1);
 
 	//frame Stereoscopic
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frStereo, false, false, 1);
@@ -3074,6 +3079,8 @@ void CheckPrameters(sParamRender *params)
 	if(params->image_width < 32) params->image_width = 32;
 	if(params->image_height < 32) params->image_height = 32;
 	if(params->reflectionsMax > 10) params->reflectionsMax = 10;
+	if(params->noOfTiles < 1) params->noOfTiles = 1;
+	if(params->noOfTiles > 100) params->noOfTiles = 100;
 }
 
 sRGB GdkColor2sRGB(GdkColor color)
