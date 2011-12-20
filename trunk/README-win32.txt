@@ -1,4 +1,4 @@
-MANDELBULBER 1.06 - win32
+MANDELBULBER 1.10 - Windows
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
