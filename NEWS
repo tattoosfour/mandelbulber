@@ -1,5 +1,39 @@
 Version history
 
+v1.10
+- added tile renderig (without any image resolution limitations)
+- fixed bug: water animation worked only in flight mode
+
+v1.09
+
+- Implemented OpenCL support (now only under linux) for image preview. Works only for few formulas.
+- Added formula General Fold Box (reference: http://www.fractalforums.com/new-theories-and-research/generalized-box-fold/msg36503/#msg36503)
+- Fixed rotation problems in aminations. Patch by mintaka (http://www.fractalforums.com/mandelbulber/mandelbulber-1-06-patch/)
+- Added animation effect for water
+
+v1.08
+- Impelemnted primitive objects like plane, box, sphere and water
+- Improved raytraced reflections algorithm - better reflections with ambient occlusion
+- Added fast ambient occlusion effect. Reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
+- Added possibility to turn off "penetrating light" for the main light source
+- Added function for auto-calculate of fog parameters
+- Added coordinates and distance measurement tool
+
+v1.07
+- Added reset button on IFS tab
+- Removed some further limitations for image size
+- Image brightness adjustment affects now on all image layers
+- Added saturation adjustment for random colour palette
+- Added volumetric fog effect
+- Corrected displaying of image size in MegaBytes when size is greater than 2GB
+- Changed shaders sequence. Glow looks better when fog (from post-processing) is enabled.
+
+v1.061
+- Cretated 64-bit version for Windows (based on experimental versio of GTK+ libraries)
+- Fixed bug: Removed many uninitialised variables (found using valgrind)
+- Fixed problem with -lowmem mode (reported on http://www.fractalforums.com/mandelbulber/(1-06)-lowmem-switch-causes-segfaults-when-increasing-resolution/msg34210/#msg34210)
+- Fixed bug: overflow in UpdatePreviewSettingsDialog()
+
 v1.06
 - Added possibility to render MengerKoch formula. It is added as an option for IFS formula (Menger Sponge mode; edge x,y,z)
 - Corrected ray-tracing algorithm. Fog and specular highlights weren't calculated properly in reflections.

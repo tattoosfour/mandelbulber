@@ -15,11 +15,13 @@ CPP_SRCS += \
 ../src/image.cpp \
 ../src/interface.cpp \
 ../src/morph.cpp \
+../src/primitives.cpp \
 ../src/settings.cpp \
 ../src/shaders.cpp \
 ../src/texture.cpp \
 ../src/timeline.cpp \
-../src/undo.cpp 
+../src/undo.cpp \
+../src/cl_support.cpp  
 
 OBJS += \
 ./src/Render3D.o \
@@ -33,11 +35,13 @@ OBJS += \
 ./src/image.o \
 ./src/interface.o \
 ./src/morph.o \
+./src/primitives.o \
 ./src/settings.o \
 ./src/shaders.o \
 ./src/texture.o \
 ./src/timeline.o \
-./src/undo.o 
+./src/undo.o \
+./src/cl_support.o 
 
 CPP_DEPS += \
 ./src/Render3D.d \
@@ -51,11 +55,13 @@ CPP_DEPS += \
 ./src/image.d \
 ./src/interface.d \
 ./src/morph.d \
+./src/primitives.d \
 ./src/settings.d \
 ./src/shaders.d \
 ./src/texture.d \
 ./src/timeline.d \
-./src/undo.d 
+./src/undo.d \
+./src/cl_support.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

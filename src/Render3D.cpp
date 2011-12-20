@@ -965,8 +965,9 @@ void *MainThread(void *ptr)
 				if (*parametry->done == height - 1)
 				{
 					double avg_N = (double) N_counter / Loop_counter;
-					double avg_DE = (double) DE_counter / Pixel_counter * 100.0;
-					printf("Average N = %f, Average DE steps = %f, Failed DE = %d%%\n", avg_N, avg_DE, Missed_DE_counter);
+					double avg_DE = (double) DE_counter / Pixel_counter;
+					double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
+					printf("Average N = %f, Average DE steps = %f, Missed DE %.3f%%\n", avg_N, avg_DE, avgMissedDE);
 				}
 
 				//WriteLogDouble("Rendering line finished", z);

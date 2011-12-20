@@ -19,7 +19,10 @@ else
   fi
 fi
 
-sudo cp usr/share/ /usr/share/mandelbulber/ -a
+sudo mkdir /usr/share/mandelbulber
+sudo cp -ua usr/share/* /usr/share/mandelbulber
+
+sudo desktop-file-install mandelbulber.desktop
 
 echo mandelbulber installed successfully
-echo to run please type "mandelbulber"
+echo to run please type "mandelbulber" or select from system menu

@@ -165,6 +165,52 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 	return ao;
 }
 
+float AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, float quality)
+{
+	float AO = 0.0;
+	int count = 0;
+	float factor = dist_thresh * 500.0f;
+	
+	for (float b = -0.49 * M_PI; b < 0.49 * M_PI; b += 1.0 / quality)
+	{
+		for (float a = 0.0; a < 2.0 * M_PI; a += ((2.0 / quality) / cos(b)))
+		{
+			count++;
+			float4 d;
+			d.x = cos(a + b) * cos(b);
+			d.y = sin(a + b) * cos(b);
+			d.z = sin(b);
+			d.w = 0.0;
+			
+			float shadow = 0.0;
+			float scan = dist_thresh * 2.0f;
+			
+			for (int count = 0; (count < 100); count++)
+			{
+				float4 pointTemp = point + d * scan;
+				float distance = CalculateDistance(pointTemp, fractal);
+				scan += distance * 2.0;
+
+				if (scan > factor)
+				{
+					shadow = 1.0;
+					break;
+				}
+
+				if (distance < dist_thresh)
+				{
+					shadow = scan / factor;
+					break;
+				}
+			}
+			
+			AO += shadow;
+		}
+	}
+	AO /= count;
+	return AO;
+}
+
 
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
@@ -213,6 +259,7 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 		float scan, distThresh, distance;
 		
 		scan = 1e-10f;
+		//ray-marching
 		for(count = 0; (count < 255); count++)
 		{
 			point = start + viewVector * scan;
@@ -231,6 +278,30 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 			if(scan > 50) break;
 		}
 		
+		
+		//binary searching
+		float step = distThresh * 0.5;
+		for(int i=0; i<10; i++)
+		{
+			if(distance < distThresh && distance > distThresh * 0.95)
+			{
+				break;
+			}
+			else
+			{
+				if(distance > distThresh)
+				{
+					point += viewVector * step;
+				}
+				else if(distance < distThresh * 0.95)
+				{
+					point -= viewVector * step;
+				}
+			}
+			distance = CalculateDistance(point, &fractal);
+			step *= 0.5;
+		}
+		
 		float zBuff = scan / params.zoom - 1.0;
 		
 		float4 colour = 0.0f;
@@ -245,6 +316,7 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 			
 			float shadow = Shadow(&fractal, point, lightVector, distThresh);
 			//float shadow = 1.0f;
+			//shadow = 0.0;
 			
 			float4 half = lightVector - viewVector;
 			half = fast_normalize(half);
@@ -254,6 +326,7 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 			if (specular > 15.0) specular = 15.0;
 			
 			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			//float ao = AmbientOcclusion(&fractal, point, distThresh, 2.0) * 1.0;
 			//float ao = 0.0f;
 			
 			colour.x = (shade + specular) * shadow + ao;
