@@ -621,6 +621,18 @@ void ReadInterface(sParamRender *params)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
 		}
 
+		if ((params->SSAOEnabled || params->DOFEnabled) && params->noOfTiles > 1)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+					"Warning! When tile rendering is enabled, DOF and SSAO have to be disabled");
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+			params->SSAOEnabled = false;
+			params->DOFEnabled = false;
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled), params->DOFEnabled);
+		}
+
 	}
 
 	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
