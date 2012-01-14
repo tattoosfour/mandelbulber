@@ -1,7 +1,7 @@
-float CalculateDistance(float4 point, sClFractal *fractal)
+formulaOut CalculateDistance(float4 point, sClFractal *fractal)
 {
-	float distance = Fractal(point, fractal);
-	if(distance<0.0f) distance = 0.0f;
-	if(distance>10.0f) distance = 10.0f;
-	return distance;
+	formulaOut out=Fractal(point, fractal);
+	if(out.distance<0.0f) out.distance = 0.0f;
+	if(out.distance>10.0f) out.distance = 10.0f;
+	return out;
 }

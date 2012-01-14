@@ -10,6 +10,8 @@
 
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 
+//#define CLSUPPORT
+
 #ifdef CLSUPPORT
 #include <CL/cl.hpp>
 #include <cstdio>
@@ -41,17 +43,19 @@ public:
 	int GetHeight() {return height;}
 	void SetSize(int w, int h);
 	void RecopileRequest(void);
+	sClInBuff* GetInBuffer1(void) {return inBuffer1;}
 
 private:
 	bool enabled;
 	bool ready;
 	bool recompileRequest;
 	sClPixel *rgbbuff;
-
+	sClInBuff *inBuffer1;
 	cl::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
 	cl::Buffer *outCL;
+	cl::Buffer *inCLBuffer1;
 	cl::vector<cl::Device> devices;
 	cl::Program::Sources *source;
 	cl::Program::Sources *source2;

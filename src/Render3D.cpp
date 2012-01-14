@@ -1244,6 +1244,51 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		sClParams clParams;
 		clSupport->SetSize(image->GetWidth(), image->GetHeight());
 		Params2Cl(&param, &clParams, &clFractal);
+
+		sClInBuff *inCLBuff = clSupport->GetInBuffer1();
+		//calculating vectors for AmbientOcclusion
+
+		int counter = 0;
+		int lightMapWidth = param.lightmapTexture->Width();
+		int lightMapHeight = param.lightmapTexture->Height();
+		for (double b = -0.49 * M_PI; b < 0.49 * M_PI; b += 1.0 / param.globalIlumQuality)
+		{
+			for (double a = 0.0; a < 2.0 * M_PI; a += ((2.0 / param.globalIlumQuality) / cos(b)))
+			{
+				CVector3 d;
+				d.x = cos(a + b) * cos(b);
+				d.y = sin(a + b) * cos(b);
+				d.z = sin(b);
+				inCLBuff->vectorsAround[counter].x = d.x;
+				inCLBuff->vectorsAround[counter].y = d.y;
+				inCLBuff->vectorsAround[counter].z = d.z;
+				int X = (int) ((a + b) / (2.0 * M_PI) * lightMapWidth + lightMapWidth * 8.5) % lightMapWidth;
+				int Y = (int) (b / (M_PI) * lightMapHeight + lightMapHeight * 8.5) % lightMapHeight;
+				inCLBuff->vectorsAroundColours[counter].x = param.lightmapTexture->FastPixel(X, Y).R / 256.0;
+				inCLBuff->vectorsAroundColours[counter].y = param.lightmapTexture->FastPixel(X, Y).G / 256.0;
+				inCLBuff->vectorsAroundColours[counter].z = param.lightmapTexture->FastPixel(X, Y).B / 256.0;
+				if (inCLBuff->vectorsAroundColours[counter].x > 0.05 || inCLBuff->vectorsAroundColours[counter].y > 0.05 || inCLBuff->vectorsAroundColours[counter].z > 0.05)
+				{
+					counter++;
+				}
+				if (counter >= 10000) break;
+			}
+			if (counter >= 10000) break;
+		}
+		if (counter == 0)
+		{
+			counter = 1;
+			inCLBuff->vectorsAround[0].x = 0;
+			inCLBuff->vectorsAround[0].y = 0;
+			inCLBuff->vectorsAround[0].z = 0;
+
+			inCLBuff->vectorsAroundColours[0].x = 0;
+			inCLBuff->vectorsAroundColours[0].y = 0;
+			inCLBuff->vectorsAroundColours[0].z = 0;
+		}
+		clParams.AmbientOcclusionNoOfVectors = counter;
+		printf("Ambient occlusion counter %d\n", counter);
+
 		clSupport->SetParams(clParams, clFractal, param.fractal.formula);
 		start_time = real_clock();
 		clSupport->Render(image, outputDarea);
@@ -2232,6 +2277,8 @@ void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage)
 	fractParamLoaded.recordMode = false;
 	fractParamLoaded.animMode = false;
 	fractParamLoaded.quiet = true;
+	fractParamLoaded.tileCount = 0;
+	fractParamLoaded.noOfTiles = 1;
 
 	RecalculateIFSParams(fractParamLoaded.fractal);
 	CreateFormulaSequence(fractParamLoaded.fractal);

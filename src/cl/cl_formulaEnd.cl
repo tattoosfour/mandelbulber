@@ -1,4 +1,7 @@
 	}
 	if(distance < 0.0f) distance = 0.0f;
-	return distance;
+	out.distance = distance;
+	out.iters = i;
+	out.z = z;
+	return out;
 }

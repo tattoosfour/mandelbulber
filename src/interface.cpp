@@ -504,6 +504,11 @@ void ReadInterface(sParamRender *params)
 
 		params->fractal.genFoldBox.type = (enumGeneralizedFoldBoxType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType));
 
+		params->OpenCLEngine = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
+		params->doubles.OpenCLOpacity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLOpacity)));
+		params->OpenCLPixelsPerJob = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
+		params->doubles.OpenCLOpacityTrim = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLOpacityTrim)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1 = GdkColor2sRGB(color);
@@ -1346,6 +1351,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClSettings = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClSwitches1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClInformation = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsV = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH1 = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH2 = gtk_vbox_new(FALSE, 1);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1403,6 +1411,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frMeasure = gtk_frame_new("Coordinate measurement");
 	Interface.frOpenClSettings = gtk_frame_new("OpenCL settings");
 	Interface.frOpenClInformation = gtk_frame_new("OpenCL information");
+	Interface.frOpenClEngineSettings = gtk_frame_new("Engine settings");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1697,6 +1706,10 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_tiles = gtk_entry_new();
 
+	Interface.edit_OpenCLOpacity = gtk_entry_new();
+	Interface.edit_OpenCLOpacityTrim = gtk_entry_new();
+	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1762,6 +1775,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Box 5");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), 0);
 
+	Interface.comboOpenCLEngine = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Fast: no effects");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Normal: shadows, glow, fast AO");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Full: all shaders");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Crazy: iteration count fog");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine), 0);
+
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
 
@@ -1815,7 +1835,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL Enable");
-	Interface.checkOpenClNoEffects = gtk_check_button_new_with_label("No effects");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -2668,7 +2687,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClNoEffects, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.comboOpenCLEngine, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClInformation, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
@@ -2679,6 +2698,13 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxWorkgroup, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClWorkgroupSize, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClStatus, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("1000", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("100", "Opacity", 6, Interface.edit_OpenCLOpacity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("3", "Opacity trim (iterations)", 6, Interface.edit_OpenCLOpacityTrim), false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
@@ -3161,6 +3187,9 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 		clFractal->ifs.intensity[i] = params->fractal.IFS.doubles.intensity[i];
 		clFractal->ifs.direction[i] = CVector2float4(params->fractal.IFS.doubles.direction[i]);
 	}
+
+	clFractal->opacity = params->doubles.OpenCLOpacity;
+	clFractal->opacityTrim = params->doubles.OpenCLOpacityTrim;
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
