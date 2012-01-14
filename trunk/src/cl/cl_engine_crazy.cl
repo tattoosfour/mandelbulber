@@ -115,6 +115,15 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 }
 */
 
+float Opacity(float step, int iters, int maxN, float trim, float opacitySp)
+{
+	float opacity = ((float)iters - trim) / maxN;
+	if(opacity < 0.0) opacity = 0;
+	opacity*=opacity;
+	opacity*=step  * opacitySp;
+	if(opacity > 1.0) opacity = 1.0;
+	return opacity;
+}
 
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
 {
@@ -131,25 +140,37 @@ float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float
 float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distThresh)
 {
 	float scan = distThresh * 2.0f;
-	float shadow = 0.0;
+	float shadow = 1.0;
 	float factor = distThresh * 500.0f;
+	float last_distance = distThresh;
+	int N = fractal->N;
+	float opacitySp = fractal->opacity;
+	float opacityTrim = fractal->opacityTrim;
 	for(int count = 0; (count < 100); count++)
 	{
 		float4 pointTemp = point + lightVector*scan;
-		float distance = CalculateDistance(pointTemp, fractal).distance;
-		scan += distance * 2.0;
+		formulaOut out = CalculateDistance(pointTemp, fractal);
+		
+		float step = out.distance;
+		if(step < distThresh) step = distThresh;
+		scan += step;
 		
 		if(scan > factor)
 		{
-			shadow = 1.0;
 			break;
 		}
 		
-		if(distance < distThresh)
+		float opacity = Opacity(last_distance, out.iters, N, opacityTrim, opacitySp);
+
+		shadow-=opacity * (factor - scan) / factor;
+		
+		if(out.iters == N || shadow < 0.0)
 		{
-			shadow = scan / factor;
+			shadow-= (factor - scan) / factor;
+			if(shadow < 0) shadow = 0;
 			break;
 		}
+		last_distance = step;
 	}
 	return shadow;
 }
@@ -172,6 +193,58 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 	if(ao < 0) ao = 0;
 	return ao;
 }
+
+float4 AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, int noOfVectors, global sClInBuff *inBuff)
+{
+	float4 AO = 0.0;
+	int count = 0;
+	float factor = dist_thresh * 500.0f;
+	float last_distance = dist_thresh;
+	int N = fractal->N;
+	float opacitySp = fractal->opacity;
+	float opacityTrim = fractal->opacityTrim;
+	
+	for (int i = 0; i < noOfVectors; i++)
+	{
+		float shadow = 1.0;
+		float scan = dist_thresh * 2.0f;
+
+		float4 d = inBuff->vectorsAround[i];
+		float4 colour = inBuff->vectorsAroundColours[i];
+		for (int count = 0; (count < 100); count++)
+		{
+			
+			float4 pointTemp = point + d * scan;
+			formulaOut out = CalculateDistance(pointTemp, fractal);
+			
+			float step = out.distance * 5.0;
+			if(step < dist_thresh * 5.0) step = dist_thresh * 5.0;
+			scan += step;
+						
+			if (scan > factor)
+			{
+				break;
+			}
+
+			float opacity = Opacity(last_distance, out.iters, N, opacityTrim, opacitySp);
+			shadow-=opacity * (factor - scan) / factor;
+			
+			if(out.iters == N || shadow < 0.0)
+			{
+				shadow -= (factor - scan) / factor;
+				if(shadow < 0.0) shadow = 0.0;
+				break;
+			}
+			last_distance = step;
+		}
+
+		AO += shadow * colour;
+	}
+
+	AO /= noOfVectors;
+	return AO;
+}
+
 
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
@@ -217,95 +290,108 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		int count;
 		
 		float4 point;
-		float scan, distThresh, distance;
+		float scan, distThresh, distance, step;
 		
 		scan = 1e-10f;
 		//ray-marching
-		for(count = 0; (count < 255); count++)
+		for(count = 0; count < 2000; count++)
 		{
 			point = start + viewVector * scan;
-			distance = CalculateDistance(point, &fractal).distance;
+			formulaOut out = CalculateDistance(point, &fractal);
 			distThresh = scan * resolution * params.persp;
 			
-			if(distance < distThresh)
+			if(out.iters == fractal.N)
 			{
 				found = true;
 				break;
 			}
-					
-			float step = (distance  - 0.5*distThresh) * params.DEfactor;
-			scan += step;
 			
-			if(scan > 50) break;
-		}
-		
-		
-		//binary searching
-		float step = distThresh * 0.5;
-		for(int i=0; i<10; i++)
-		{
-			if(distance < distThresh && distance > distThresh * 0.95)
+			if(out.distance * params.DEfactor > distThresh)
 			{
-				break;
+				step = out.distance * params.DEfactor;
 			}
 			else
 			{
-				if(distance > distThresh)
-				{
-					point += viewVector * step;
-				}
-				else if(distance < distThresh * 0.95)
-				{
-					point -= viewVector * step;
-				}
+				step = distThresh * params.DEfactor;
 			}
-			distance = CalculateDistance(point, &fractal).distance;
+			
+			scan += step;
+			
+			if(scan > 10.0) break;
+		}
+
+		//binary searching
+		scan-=step;
+		//step = distThresh*0.5;
+		for(int i=0; i<10; i++)
+		{
+			formulaOut out = Fractal(point, &fractal);
+			if(out.iters < fractal.N)
+			{
+				scan += step;
+				point = start + viewVector * scan;
+			}
+			else
+			{
+				scan -= step;
+				point = start + viewVector * scan;
+			}
 			step *= 0.5;
 		}
 		
+			
 		float zBuff = scan / params.zoom - 1.0;
 		
-		float4 colour = 0.0f;
-		if(found)
-		{
-			float4 normal = NormalVector(&fractal, point, distance, distThresh);
+		float4 colour = {0.0f, 0.0f, 0.0f, 0.0f};;
+		bool first = true;
+		
+		float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
+		lightVector = Matrix33MulFloat3(rot, lightVector);
+		
+		for(;scan>1e-10; scan -= step)
+		{			
+			point = start + viewVector * scan;
+			formulaOut out = CalculateDistance(point, &fractal);
+			int iters = out.iters;
+			float opacity = Opacity(step, iters, fractal.N, fractal.opacityTrim, fractal.opacity);
+			if(first && found) opacity = 1.0;
 			
-			float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
-			lightVector = Matrix33MulFloat3(rot, lightVector);
-			float shade = dot(lightVector, normal);
-			if(shade<0) shade = 0;
+			float shade = 1.0;
+			float shadow = 0.0;
+			float4 ao = 0.5;
 			
-			float shadow = Shadow(&fractal, point, lightVector, distThresh);
-			//float shadow = 1.0f;
-			//shadow = 0.0;
+			if(opacity > 0.0)
+			{
+				//if(first)
+				//{
+					//float4 normal = NormalVector(&fractal, point, out.distance, distThresh);
+					//shade = dot(lightVector, normal);
+					//if(shade<0) shade = 0;
+				//}
+				//else
+				//{
+				//	shade = 1.0;
+				//}
+
+				shadow = Shadow(&fractal, point, lightVector, distThresh);
+				ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
+			}
+
+			float4 newcolour = 0.5*shade * shadow + ao;
+			colour = colour * (1.0 - opacity) + newcolour * opacity;
 			
-			float4 half = lightVector - viewVector;
-			half = fast_normalize(half);
-			float specular = dot(normal, half);
-			if (specular < 0.0f) specular = 0.0f;
-			specular = pown(specular, 20);
-			if (specular > 15.0) specular = 15.0;
+			distThresh = scan * resolution * params.persp;
+
+			step = out.distance * 0.2;
 			
-			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
-			
-			colour.x = (shade + specular) * shadow + ao;
-			colour.y = (shade + specular) * shadow + ao;
-			colour.z = (shade + specular) * shadow + ao;
+			if(out.distance * 0.5 < distThresh * 0.5)	step = distThresh * 0.5;
+
+			first = false;
 		}
 		
-		float glow = count / 128.0f;
-		float glowN = 1.0f - glow;
-		if(glowN < 0.0f) glowN = 0.0f;
-		float4 glowColor;
-		glowColor.x = 1.0f * glowN + 1.0f * glow;
-		glowColor.y = 0.0f * glowN + 1.0f * glow;
-		glowColor.z = 0.0f * glowN + 0.0f * glow;
-		colour += glowColor * glow;
-		
-		
-		ushort R = convert_ushort_sat(colour.x * 38400.0f);
-		ushort G = convert_ushort_sat(colour.y * 38400.0f);
-		ushort B = convert_ushort_sat(colour.z * 38400.0f);
+		ushort R = convert_ushort_sat(colour.x * 65536.0f);
+		ushort G = convert_ushort_sat(colour.y * 65535.0f);
+		ushort B = convert_ushort_sat(colour.z * 65535.0f);
 		
 		out[buffIndex].R = R;
 		out[buffIndex].G = G;

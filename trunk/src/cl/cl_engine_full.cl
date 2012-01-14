@@ -173,6 +173,47 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 	return ao;
 }
 
+float4 AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, int noOfVectors, global sClInBuff *inBuff)
+{
+	float4 AO = 0.0;
+	int count = 0;
+	float factor = dist_thresh * 500.0f;
+
+	for (int i = 0; i < noOfVectors; i++)
+	{
+		float4 shadow = 0.0;
+		float scan = dist_thresh * 2.0f;
+
+		float4 d = inBuff->vectorsAround[i];
+		float4 colour = inBuff->vectorsAroundColours[i];
+		for (int count = 0; (count < 100); count++)
+		{
+			
+			float4 pointTemp = point + d * scan;
+			float distance = CalculateDistance(pointTemp, fractal).distance;
+			scan += distance * 2.0;
+
+			if (scan > factor)
+			{
+				shadow = colour;
+				break;
+			}
+
+			if (distance < dist_thresh)
+			{
+				shadow = colour * scan / factor;
+				break;
+			}
+		}
+
+		AO += shadow;
+	}
+
+	AO /= noOfVectors;
+	return AO;
+}
+
+
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
 {
@@ -286,14 +327,16 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			specular = pown(specular, 20);
 			if (specular > 15.0) specular = 15.0;
 			
-			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			//float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			float4 ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
+			//float ao = 0.0f;
 			
-			colour.x = (shade + specular) * shadow + ao;
-			colour.y = (shade + specular) * shadow + ao;
-			colour.z = (shade + specular) * shadow + ao;
+			colour.x = (shade + specular) * shadow + ao.x;
+			colour.y = (shade + specular) * shadow + ao.y;
+			colour.z = (shade + specular) * shadow + ao.z;
 		}
 		
-		float glow = count / 128.0f;
+		float glow = 0.2 * count / 128.0f;
 		float glowN = 1.0f - glow;
 		if(glowN < 0.0f) glowN = 0.0f;
 		float4 glowColor;

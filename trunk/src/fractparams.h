@@ -55,6 +55,8 @@ struct sParamRenderD
 	double fogDistanceFactor;
 	double colourSaturation;
 	double fastAoTune;
+	double OpenCLOpacity;
+	double OpenCLOpacityTrim;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -78,6 +80,9 @@ struct sParamRender
 	int imageFormat;
 	int noOfTiles;
 	int tileCount;
+
+	int OpenCLEngine;
+	int OpenCLPixelsPerJob;
 
 	enumPerspectiveType perspectiveType;
 

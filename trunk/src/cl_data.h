@@ -48,6 +48,8 @@ typedef struct
 	sClMandelbox mandelbox;
 	sClIFS ifs;
 	cl_int juliaMode;
+	cl_float opacity;
+	cl_float opacityTrim;
 } sClFractal;
 
 typedef struct
@@ -61,6 +63,7 @@ typedef struct
 	cl_float persp;
 	cl_float DEfactor;
 	cl_float4 vp;
+	cl_int AmbientOcclusionNoOfVectors;
 } sClParams;
 
 typedef struct
@@ -70,3 +73,10 @@ typedef struct
 	cl_ushort B;
 	cl_float zBuffer;
 } sClPixel;
+
+typedef struct
+{
+	cl_float4 palette[256];
+	cl_float4 vectorsAround[10000];
+	cl_float4 vectorsAroundColours[10000];
+} sClInBuff;

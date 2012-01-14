@@ -8,8 +8,15 @@ typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
-static float Fractal(float4 point, sClFractal *fr);
-static float CalculateDistance(float4 point, sClFractal *fractal);
+typedef struct
+{
+	float4 z;
+	float iters;
+	float distance;
+} formulaOut;
+
+static formulaOut Fractal(float4 point, sClFractal *fr);
+static formulaOut CalculateDistance(float4 point, sClFractal *fractal);
 
 inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
 {
@@ -75,16 +82,16 @@ matrix33 RotateZ(matrix33 m, float angle)
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
 {
 	float delta = distThresh;
-	float s1 = CalculateDistance(point + (float4){delta,0.0f,0.0f,0.0f}, fractal);
-	float s2 = CalculateDistance(point + (float4){0.0f,delta,0.0f,0.0f}, fractal);
-	float s3 = CalculateDistance(point + (float4){0.0f,0.0f,delta,0.0f}, fractal);
+	float s1 = CalculateDistance(point + (float4){delta,0.0f,0.0f,0.0f}, fractal).distance;
+	float s2 = CalculateDistance(point + (float4){0.0f,delta,0.0f,0.0f}, fractal).distance;
+	float s3 = CalculateDistance(point + (float4){0.0f,0.0f,delta,0.0f}, fractal).distance;
 	float4 normal = (float4) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance, 1.0e-10f};
 	normal = fast_normalize(normal);
 	return normal;
 }
 
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
+kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
 {
 	sClParams params = Gparams;
 	sClFractal fractal = Gfractal;
@@ -133,7 +140,7 @@ kernel void fractal3D(global sClPixel *out, sClParams Gparams, sClFractal Gfract
 		for(count = 0; (count < 255); count++)
 		{
 			point = start + viewVector * scan;
-			distance = CalculateDistance(point, &fractal);
+			distance = CalculateDistance(point, &fractal).distance;
 			distThresh = scan * resolution * params.persp;
 			
 			if(distance < distThresh)

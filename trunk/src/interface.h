@@ -11,8 +11,8 @@
 #include "fractparams.h"
 #include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.10
-#define MANDELBULBER_VERSION_STR "1.10"
+#define MANDELBULBER_VERSION 1.11
+#define MANDELBULBER_VERSION_STR "1.11"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -227,6 +227,9 @@ struct sInterface
 	GtkWidget *boxOpenClSettings;
 	GtkWidget *boxOpenClSwitches1;
 	GtkWidget *boxOpenClInformation;
+	GtkWidget *boxOpenClEngineSettingsV;
+	GtkWidget *boxOpenClEngineSettingsH1;
+	GtkWidget *boxOpenClEngineSettingsH2;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -282,6 +285,7 @@ struct sInterface
 	GtkWidget *frMeasure;
 	GtkWidget *frOpenClSettings;
 	GtkWidget *frOpenClInformation;
+	GtkWidget *frOpenClEngineSettings;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -538,6 +542,9 @@ struct sInterface
 	GtkWidget *edit_measureY;
 	GtkWidget *edit_measureZ;
 	GtkWidget *edit_tiles;
+	GtkWidget *edit_OpenCLPixelsPerJob;
+	GtkWidget *edit_OpenCLOpacityTrim;
+	GtkWidget *edit_OpenCLOpacity;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -582,6 +589,7 @@ struct sInterface
 	GtkWidget *comboPerspectiveType;
 	GtkWidget *comboImageProportion;
 	GtkWidget *comboGeneralizedFoldBoxType;
+	GtkWidget *comboOpenCLEngine;
 
 	GtkWidget *progressBar;
 
@@ -635,7 +643,6 @@ struct sInterface
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
 	GtkWidget *checkOpenClEnable;
-	GtkWidget *checkOpenClNoEffects;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

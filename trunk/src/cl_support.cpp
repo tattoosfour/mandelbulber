@@ -87,10 +87,12 @@ void CclSupport::Init(void)
 	if(lastFormula == kaleidoscopic) strFormula = "kaleidoscopic";
 
 	std::string strFileEngine = clDir;
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClNoEffects)))
-		strFileEngine += "cl_engine_fast.cl";
-	else
-		strFileEngine += "cl_engine.cl";
+	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
+	if		 (engineNumber == 0) 	strFileEngine += "cl_engine_fast.cl";
+	else if(engineNumber == 1)	strFileEngine += "cl_engine.cl";
+	else if(engineNumber == 2)	strFileEngine += "cl_engine_full.cl";
+	else if(engineNumber == 3)	strFileEngine += "cl_engine_crazy.cl";
+
 	std::ifstream fileEngine(strFileEngine.c_str());
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 
@@ -163,16 +165,21 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
-	steps = height * width / 50000 + 1;
+	int pixelsPerJob =  atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
+	steps = height * width / pixelsPerJob + 1;
 	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
+	printf("OpenCL Job size: %d\n", stepSize);
 	buffSize = stepSize * sizeof(sClPixel);
 
 	rgbbuff = new sClPixel[buffSize];
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
+	inBuffer1 = new sClInBuff;
+	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
 
 	err = kernel->setArg(0, *outCL);
+	err = kernel->setArg(1, *inCLBuffer1);
 	checkErr(err, "Kernel::setArg()");
 
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
@@ -215,19 +222,27 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 	if(recompileRequest)
 	{
+		sClInBuff *tempInBuff = new sClInBuff;
+		memcpy(tempInBuff, inBuffer1, sizeof(sClInBuff));
 		Disable();
 		Enable();
 		Init();
+		memcpy(inBuffer1, tempInBuff, sizeof(sClInBuff));
+		delete tempInBuff;
 		recompileRequest = false;
+
 	}
 
-	err = kernel->setArg(1, lastParams);
-	err = kernel->setArg(2, lastFractal);
+	err = kernel->setArg(2, lastParams);
+	err = kernel->setArg(3, lastFractal);
 	checkErr(err, "Kernel::setArg()");
 
 	for (unsigned int loop = 0; loop < steps; loop++)
 	{
-		err = kernel->setArg(3, stepSize * loop);
+		err = kernel->setArg(4, stepSize * loop);
+
+		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
+		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
 
 		cl::Event event;
 		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize), NULL, &event);
@@ -276,6 +291,8 @@ void CclSupport::Disable(void)
 	delete program;
 	delete kernel;
 	delete queue;
+	delete inCLBuffer1;
+	delete inBuffer1;
 	enabled = false;
 	ready = false;
 }
