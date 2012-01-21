@@ -16,7 +16,7 @@
 		
 		z = z * m + c;
 		tgladDE = tgladDE * fabs(m) + 1.0f;
-		float r = dot(z,z);
+		r = dot(z,z);
 		
 		if(r>1024.0f) 
 		{

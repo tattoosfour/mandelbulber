@@ -24,7 +24,7 @@
 		z.x -= 2.0;
 		z.y -= 2.0;
 		if (z.z > 1.0) z.z -= 2.0;
-		float r = fast_length(z);
+		r = fast_length(z);
 		DE *= 3.0;
 
 		if (r > 1024.0f)
