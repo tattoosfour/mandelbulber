@@ -3,7 +3,7 @@
 		newz.z = 2.0 * z.x * z.z - 2.0 * z.y * z.w;
 		newz.w = 2.0 * z.x * z.w - 2.0 * z.y * z.z;
 		z = newz + c;
-		float r = fast_length(z);
+		r = fast_length(z);
 		if(r>4000.0f || any(isinf(z))) 
 		{
 			distance = r;

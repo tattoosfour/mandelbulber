@@ -36,7 +36,7 @@
 		}
 		
 		DE *= ifs.scale;
-		float r = fast_length(z);
+		r = fast_length(z);
 		
 		if(r>1024.0f) 
 		{

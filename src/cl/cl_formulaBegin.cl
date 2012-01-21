@@ -6,4 +6,5 @@ formulaOut Fractal(float4 point, sClFractal *fr)
 	float4 c = point;
 	int i;
 	formulaOut out;
+	float r = 0.0f;
 	
