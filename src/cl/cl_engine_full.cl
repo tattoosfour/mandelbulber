@@ -13,6 +13,7 @@ typedef struct
 	float4 z;
 	float iters;
 	float distance;
+	float colourIndex;
 } formulaOut;
 
 static formulaOut Fractal(float4 point, sClFractal *fr);
@@ -115,6 +116,28 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 }
 */
 
+
+float4 IndexToColour(int index, global float4 *palette)
+{
+	float4 colOut, col1, col2, colDiff;
+
+	if (index < 0)
+	{
+		colOut = palette[255];
+	}
+	else
+	{
+		int index2 = index % 65280;
+		int no = index2 / 256;
+		col1 = palette[no];
+		col2 = palette[no+1];
+		colDiff = col2 - col1;
+		float delta = (index2 % 256)/256.0;
+		colOut = col1 + colDiff * delta;
+	}
+	colOut.w = 0.0f;
+	return colOut;
+}
 
 float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
 {
@@ -262,10 +285,14 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		
 		scan = 1e-10f;
 		//ray-marching
+		
+		formulaOut outF;
+		
 		for(count = 0; (count < 255); count++)
 		{
 			point = start + viewVector * scan;
-			distance = CalculateDistance(point, &fractal).distance;
+			outF = CalculateDistance(point, &fractal);
+			distance = outF.distance;
 			distThresh = scan * resolution * params.persp;
 			
 			if(distance < distThresh)
@@ -283,6 +310,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		
 		//binary searching
 		float step = distThresh * 0.5;
+		
 		for(int i=0; i<10; i++)
 		{
 			if(distance < distThresh && distance > distThresh * 0.95)
@@ -300,7 +328,8 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 					point -= viewVector * step;
 				}
 			}
-			distance = CalculateDistance(point, &fractal).distance;
+			outF = CalculateDistance(point, &fractal);
+			distance = outF.distance;
 			step *= 0.5;
 		}
 		
@@ -327,13 +356,16 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			specular = pown(specular, 20);
 			if (specular > 15.0) specular = 15.0;
 			
-			//float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			//float4 ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
 			float4 ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
-			//float ao = 0.0f;
+			//float4 ao = 0.0f;
 			
-			colour.x = (shade + specular) * shadow + ao.x;
-			colour.y = (shade + specular) * shadow + ao.y;
-			colour.z = (shade + specular) * shadow + ao.z;
+			int colIndex = outF.colourIndex;
+			//int colIndex = 50.0;
+			float4 surfaceColour = IndexToColour(colIndex, inBuff->palette);
+		
+			colour = (shade*surfaceColour + specular) * shadow + ao * surfaceColour;
+			colour.w = 0;
 		}
 		
 		float glow = 0.2 * count / 128.0f;
