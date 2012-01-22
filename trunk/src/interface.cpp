@@ -3140,8 +3140,9 @@ sRGB sRGBDiv256(sRGB color)
 	return (sRGB){color.R/256, color.G/256, color.B/256};
 }
 
+//#define CLSUPPORT
 #ifdef CLSUPPORT
-void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal)
+void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal, sClInBuff *clInBuff)
 {
 	clParams->alpha = params->doubles.alfa;
 	clParams->beta = params->doubles.beta;
@@ -3190,6 +3191,14 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 
 	clFractal->opacity = params->doubles.OpenCLOpacity;
 	clFractal->opacityTrim = params->doubles.OpenCLOpacityTrim;
+
+	for(int i=0; i<256; i++)
+	{
+		clInBuff->palette[i].x = params->palette[i].R/256.0;
+		clInBuff->palette[i].y = params->palette[i].G/256.0;
+		clInBuff->palette[i].z = params->palette[i].B/256.0;
+		clInBuff->palette[i].w = 0.0;
+	}
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
