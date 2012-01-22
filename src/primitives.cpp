@@ -78,34 +78,35 @@ double PrimitiveInvertedSphere(CVector3 point, CVector3 center, double radius)
 
 double PrimitiveWater(CVector3 point, double height, double amplitude, double length, double rotation, int iterations, double animSpeed, int frame)
 {
-	CRotationMatrix rotMatrix;
-	rotMatrix.RotateZ(rotation/180*M_PI);
-	point = rotMatrix.RotateVector(point);
-
-	double phase = animSpeed * frame;
-
 	CVector3 plane(0,0,-1);
 	CVector3 centre(0,0,height);
 	plane.Normalize();
 	double planeDistance = plane.Dot(point - centre);
-
-	double k=0.23;
-	double waveXtemp = point.x;
-	double waveYtemp = point.y;
-	double waveX = 0;
-	double waveY = 0;
-	double p = 1;
-	for(int i=1; i<=iterations; i++)
+	if(planeDistance < amplitude * 10.0)
 	{
-		double shift = phase / (i/3.0 + 1.0);
-		waveXtemp = sin(i + 0.4*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p + shift)/p;
-		waveYtemp = cos(i + 0.4*(waveY)*p + sin(point.x / length*p) + k*point.y/length*p + shift*0.23)/p;
-		waveX+=waveXtemp;
-		waveY+=waveYtemp;
-		p *= 1.872;
-	}
+		CRotationMatrix rotMatrix;
+		rotMatrix.RotateZ(rotation/180*M_PI);
+		point = rotMatrix.RotateVector(point);
 
-	planeDistance += (waveX + waveY) * amplitude;
+		double phase = animSpeed * frame;
+		double k=0.23;
+		double waveXtemp = point.x;
+		double waveYtemp = point.y;
+		double waveX = 0;
+		double waveY = 0;
+		double p = 1;
+		for(int i=1; i<=iterations; i++)
+		{
+			double shift = phase / (i/3.0 + 1.0);
+			waveXtemp = sin(i + 0.4*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p + shift)/p;
+			waveYtemp = cos(i + 0.4*(waveY)*p + sin(point.x / length*p) + k*point.y/length*p + shift*0.23)/p;
+			waveX+=waveXtemp;
+			waveY+=waveYtemp;
+			p *= 1.872;
+		}
+
+		planeDistance += (waveX + waveY) * amplitude;
+	}
 
 	return planeDistance;
 }

@@ -1243,9 +1243,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		sClFractal clFractal;
 		sClParams clParams;
 		clSupport->SetSize(image->GetWidth(), image->GetHeight());
-		Params2Cl(&param, &clParams, &clFractal);
 
 		sClInBuff *inCLBuff = clSupport->GetInBuffer1();
+		Params2Cl(&param, &clParams, &clFractal, inCLBuff);
+
 		//calculating vectors for AmbientOcclusion
 
 		int counter = 0;

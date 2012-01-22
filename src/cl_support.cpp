@@ -84,7 +84,9 @@ void CclSupport::Init(void)
 	if(lastFormula == tglad) strFormula = "mandelbox";
 	if(lastFormula == menger_sponge) strFormula = "mengersponge";
 	if(lastFormula == hypercomplex) strFormula = "hypercomplex";
+	if(lastFormula == quaternion) strFormula = "quaternion";
 	if(lastFormula == kaleidoscopic) strFormula = "kaleidoscopic";
+	if(lastFormula == xenodreambuie) strFormula = "xenodreambuie";
 
 	std::string strFileEngine = clDir;
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
@@ -97,7 +99,7 @@ void CclSupport::Init(void)
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 
 	std::string strFileDistance = clDir;
-	if(lastFormula == hypercomplex)
+	if(lastFormula == hypercomplex || lastFormula == quaternion || lastFormula == xenodreambuie)
 		strFileDistance += "cl_distance_deltaDE.cl";
 	else
 		strFileDistance += "cl_distance.cl";
@@ -178,9 +180,7 @@ void CclSupport::Init(void)
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
 
-	err = kernel->setArg(0, *outCL);
-	err = kernel->setArg(1, *inCLBuffer1);
-	checkErr(err, "Kernel::setArg()");
+
 
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
 	checkErr(err, "CommandQueue::CommandQueue()");
@@ -230,16 +230,17 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		memcpy(inBuffer1, tempInBuff, sizeof(sClInBuff));
 		delete tempInBuff;
 		recompileRequest = false;
-
 	}
 
-	err = kernel->setArg(2, lastParams);
-	err = kernel->setArg(3, lastFractal);
-	checkErr(err, "Kernel::setArg()");
 
 	for (unsigned int loop = 0; loop < steps; loop++)
 	{
+		err = kernel->setArg(0, *outCL);
+		err = kernel->setArg(1, *inCLBuffer1);
+		err = kernel->setArg(2, lastParams);
+		err = kernel->setArg(3, lastFractal);
 		err = kernel->setArg(4, stepSize * loop);
+
 
 		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
 		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
