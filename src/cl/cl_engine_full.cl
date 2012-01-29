@@ -360,11 +360,11 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			float4 ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
 			//float4 ao = 0.0f;
 			
-			int colIndex = outF.colourIndex;
-			//int colIndex = 50.0;
-			float4 surfaceColour = IndexToColour(colIndex, inBuff->palette);
+			int colourNumber = outF.colourIndex * params.colouringSpeed + 256.0 * params.colouringOffset;
+			float4 surfaceColour = 1.0;
+			if (params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
 		
-			colour = (shade*surfaceColour + specular) * shadow + ao * surfaceColour;
+			colour = (shade*surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
 			colour.w = 0;
 		}
 		

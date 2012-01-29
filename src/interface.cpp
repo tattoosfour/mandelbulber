@@ -2702,7 +2702,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("1000", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("10000", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("100", "Opacity", 6, Interface.edit_OpenCLOpacity), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("3", "Opacity trim (iterations)", 6, Interface.edit_OpenCLOpacityTrim), false, false, 1);
 
@@ -3199,6 +3199,16 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 		clInBuff->palette[i].z = params->palette[i].B/256.0;
 		clInBuff->palette[i].w = 0.0;
 	}
+
+	clParams->colouringSpeed = params->doubles.imageAdjustments.coloring_speed;
+	clParams->colouringOffset = params->doubles.imageAdjustments.paletteOffset;
+	clParams->ambientOcclusionIntensity = params->doubles.imageAdjustments.globalIlum;
+	clParams->specularIntensity = params->doubles.imageAdjustments.specular;
+	clParams->mainLightIntensity = params->doubles.imageAdjustments.directLight * params->doubles.imageAdjustments.mainLightIntensity;
+	clParams->colouringEnabled = params->imageSwitches.coloringEnabled;
+	clParams->fastAmbientOcclusionEnabled = params->fastGlobalIllumination;
+	clParams->slowAmbientOcclusionEnabled = params->global_ilumination;
+
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
