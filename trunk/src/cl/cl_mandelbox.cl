@@ -18,8 +18,11 @@
 		tgladDE = tgladDE * fabs(m) + 1.0f;
 		r = dot(z,z);
 		
+		colourMin += fabs(m);
+		
 		if(r>1024.0f) 
 		{
 			distance = native_sqrt(r) / fabs(tgladDE);
+			out.colourIndex = colourMin / i * 300.0;
 			break;
 		}

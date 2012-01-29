@@ -64,6 +64,14 @@ typedef struct
 	cl_float DEfactor;
 	cl_float4 vp;
 	cl_int AmbientOcclusionNoOfVectors;
+	cl_int colouringEnabled;
+	cl_int fastAmbientOcclusionEnabled;
+	cl_int slowAmbientOcclusionEnabled;
+	cl_float colouringSpeed;
+	cl_float colouringOffset;
+	cl_float ambientOcclusionIntensity;
+	cl_float specularIntensity;
+	cl_float mainLightIntensity;
 } sClParams;
 
 typedef struct

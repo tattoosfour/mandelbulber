@@ -6,6 +6,7 @@ formulaOut Fractal(float4 point, sClFractal *fr)
 	float4 c = fr->julia;
 	int i;
 	formulaOut out;
-	float r;
+	float r = 0.0f;
+	float colourMin = 1e8;
 	
 	

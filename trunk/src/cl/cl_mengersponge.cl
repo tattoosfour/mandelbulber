@@ -19,6 +19,9 @@
 			z.y = temp;
 		}
 		
+		r = fast_length(z);
+		if (r < colourMin) colourMin = r;
+		
 		z *= 3.0;
 
 		z.x -= 2.0;
@@ -30,6 +33,7 @@
 		if (r > 1024.0f)
 		{
 			distance = r / fabs(DE);
+			out.colourIndex = colourMin * 1000.0;
 			break;
 		}
 		

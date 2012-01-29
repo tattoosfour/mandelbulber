@@ -4,9 +4,11 @@
 		newz.w = 2.0 * z.x * z.w - 2.0 * z.y * z.z;
 		z = newz + c;
 		r = fast_length(z);
+		if (r < colourMin) colourMin = r;
 		if(r>4000.0f || any(isinf(z))) 
 		{
 			distance = r;
+			out.colourIndex = colourMin * 5000.0;
 			break;
 		}
 		

@@ -17,9 +17,12 @@
 		
 		z = Matrix33MulFloat3(ifs.mainRot, z - ifs.offset) + ifs.offset;
 		
-		if(ifs.edge.x > 0) z.x = ifs.edge.x - fabs(ifs.edge.x - z.x);
-		if(ifs.edge.y > 0) z.y = ifs.edge.y - fabs(ifs.edge.y - z.y);
-		if(ifs.edge.z > 0) z.z = ifs.edge.z - fabs(ifs.edge.z - z.z);
+		if(ifs.edge.x > 0.0) z.x = ifs.edge.x - fabs(ifs.edge.x - z.x);
+		if(ifs.edge.y > 0.0) z.y = ifs.edge.y - fabs(ifs.edge.y - z.y);
+		if(ifs.edge.z > 0.0) z.z = ifs.edge.z - fabs(ifs.edge.z - z.z);
+		
+		r = fast_length(z);
+		if (r < colourMin) colourMin = r;
 		
 		z *= ifs.scale;
 		
@@ -41,5 +44,6 @@
 		if(r>1024.0f) 
 		{
 			distance = (r - 2.0) / DE;
+			out.colourIndex = colourMin * 1000.0;
 			break;
 		}

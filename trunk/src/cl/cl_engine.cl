@@ -133,7 +133,7 @@ float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distTh
 {
 	float scan = distThresh * 2.0f;
 	float shadow = 0.0;
-	float factor = distThresh * 500.0f;
+	float factor = distThresh * 1000.0f;
 	for(int count = 0; (count < 100); count++)
 	{
 		float4 pointTemp = point + lightVector*scan;
@@ -172,6 +172,28 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 	float ao = 1.0 - 0.2 * aoTemp;
 	if(ao < 0) ao = 0;
 	return ao;
+}
+
+float4 IndexToColour(int index, global float4 *palette)
+{
+	float4 colOut, col1, col2, colDiff;
+
+	if (index < 0)
+	{
+		colOut = palette[255];
+	}
+	else
+	{
+		int index2 = index % 65280;
+		int no = index2 / 256;
+		col1 = palette[no];
+		col2 = palette[no+1];
+		colDiff = col2 - col1;
+		float delta = (index2 % 256)/256.0;
+		colOut = col1 + colDiff * delta;
+	}
+	colOut.w = 0.0f;
+	return colOut;
 }
 
 //------------------ MAIN RENDER FUNCTION --------------------
@@ -221,11 +243,14 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		float scan, distThresh, distance;
 		
 		scan = 1e-10f;
+		
+		formulaOut outF;
 		//ray-marching
-		for(count = 0; (count < 255); count++)
+		for(count = 0; count < 512; count++)
 		{
 			point = start + viewVector * scan;
-			distance = CalculateDistance(point, &fractal).distance;
+			outF = CalculateDistance(point, &fractal);
+			distance = outF.distance;
 			distThresh = scan * resolution * params.persp;
 			
 			if(distance < distThresh)
@@ -242,7 +267,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		
 		
 		//binary searching
-		float step = distThresh * 0.5;
+		float step = distThresh;
 		for(int i=0; i<10; i++)
 		{
 			if(distance < distThresh && distance > distThresh * 0.95)
@@ -260,7 +285,8 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 					point -= viewVector * step;
 				}
 			}
-			distance = CalculateDistance(point, &fractal).distance;
+			outF = CalculateDistance(point, &fractal);
+			distance = outF.distance;
 			step *= 0.5;
 		}
 		
@@ -284,17 +310,20 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			half = fast_normalize(half);
 			float specular = dot(normal, half);
 			if (specular < 0.0f) specular = 0.0f;
-			specular = pown(specular, 20);
+			specular = pown(specular, 30.0);
 			if (specular > 15.0) specular = 15.0;
 			
-			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 1.0f, 3);
 			
-			colour.x = (shade + specular) * shadow + ao;
-			colour.y = (shade + specular) * shadow + ao;
-			colour.z = (shade + specular) * shadow + ao;
+			int colourNumber = outF.colourIndex * params.colouringSpeed + 256.0 * params.colouringOffset;
+			float4 surfaceColour = 1.0;
+			if (params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
+			
+			colour = (shade * surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
+			colour.w = 0;
 		}
 		
-		float glow = count / 128.0f;
+		float glow = count / 2560.0f;
 		float glowN = 1.0f - glow;
 		if(glowN < 0.0f) glowN = 0.0f;
 		float4 glowColor;
@@ -304,9 +333,9 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		colour += glowColor * glow;
 		
 		
-		ushort R = convert_ushort_sat(colour.x * 38400.0f);
-		ushort G = convert_ushort_sat(colour.y * 38400.0f);
-		ushort B = convert_ushort_sat(colour.z * 38400.0f);
+		ushort R = convert_ushort_sat(colour.x * 65536.0f);
+		ushort G = convert_ushort_sat(colour.y * 65536.0f);
+		ushort B = convert_ushort_sat(colour.z * 65536.0f);
 		
 		out[buffIndex].R = R;
 		out[buffIndex].G = G;
