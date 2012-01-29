@@ -3205,10 +3205,15 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->ambientOcclusionIntensity = params->doubles.imageAdjustments.globalIlum;
 	clParams->specularIntensity = params->doubles.imageAdjustments.specular;
 	clParams->mainLightIntensity = params->doubles.imageAdjustments.directLight * params->doubles.imageAdjustments.mainLightIntensity;
+	clParams->glowIntensity = params->doubles.imageAdjustments.glow_intensity;
 	clParams->colouringEnabled = params->imageSwitches.coloringEnabled;
-	clParams->fastAmbientOcclusionEnabled = params->fastGlobalIllumination;
-	clParams->slowAmbientOcclusionEnabled = params->global_ilumination;
-
+	clParams->fastAmbientOcclusionEnabled = (params->fastGlobalIllumination || params->SSAOEnabled);
+	clParams->slowAmbientOcclusionEnabled = params->global_ilumination && !params->fastGlobalIllumination;
+	clParams->glowColour1 = sRGB2float4(params->effectColours.glow_color1, 65536.0);
+	clParams->glowColour2 = sRGB2float4(params->effectColours.glow_color2, 65536.0);
+	clParams->backgroundColour1 = sRGB2float4(params->background_color1, 65536.0);
+	clParams->backgroundColour2 = sRGB2float4(params->background_color2, 65536.0);
+	clParams->backgroundColour3 = sRGB2float4(params->background_color3, 65536.0);
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
@@ -3226,4 +3231,11 @@ cl_float4 CVector2float4(CVector3 vect)
 	cl_float4 vect2 = (cl_float4){{vect.x, vect.y, vect.z, 0.0f}};
 	return vect2;
 }
+
+cl_float4 sRGB2float4(sRGB colour, double factor)
+{
+	cl_float4 col = (cl_float4){{colour.R / factor, colour.G / factor, colour.B / factor, 0.0f}};
+	return col;
+}
 #endif
+

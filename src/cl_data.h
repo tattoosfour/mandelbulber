@@ -72,6 +72,12 @@ typedef struct
 	cl_float ambientOcclusionIntensity;
 	cl_float specularIntensity;
 	cl_float mainLightIntensity;
+	cl_float glowIntensity;
+	cl_float4 glowColour1;
+	cl_float4 glowColour2;
+	cl_float4 backgroundColour1;
+	cl_float4 backgroundColour2;
+	cl_float4 backgroundColour3;
 } sClParams;
 
 typedef struct
