@@ -819,5 +819,6 @@ sRGB sRGBDiv256(sRGB color);
 void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal, sClInBuff *clInBuff);
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
 cl_float4 CVector2float4(CVector3 vect);
+cl_float4 sRGB2float4(sRGB colour, double factor);
 #endif
 #endif /* INTERFACE_H_ */

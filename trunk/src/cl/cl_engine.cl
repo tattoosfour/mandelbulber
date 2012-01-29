@@ -196,6 +196,26 @@ float4 IndexToColour(int index, global float4 *palette)
 	return colOut;
 }
 
+float4 Background(float4 viewVector, sClParams *params)
+{
+	float4 vector = {1.0, 1.0, -1.0, 0.0};
+	vector = fast_normalize(vector);
+	float grad = dot(viewVector, vector) + 1.0;
+	float4 colour;
+	if(grad < 1.0)
+	{
+		float ngrad = 1.0 - grad;
+		colour = params->backgroundColour3 * ngrad + params->backgroundColour2 * grad;
+	}
+	else
+	{
+		grad = grad - 1.0;
+		float ngrad = 1.0 - grad;
+		colour = params->backgroundColour2 * ngrad + params->backgroundColour1 * grad;
+	}
+	return colour;
+}
+
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
 {
@@ -321,6 +341,10 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			
 			colour = (shade * surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
 			colour.w = 0;
+		}
+		else
+		{
+			colour = Background(viewVector, &params);
 		}
 		
 		float glow = count / 2560.0f;

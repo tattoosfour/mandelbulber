@@ -200,7 +200,7 @@ float4 AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, in
 {
 	float4 AO = 0.0;
 	int count = 0;
-	float factor = dist_thresh * 500.0f;
+	float factor = dist_thresh * 1000.0f;
 
 	for (int i = 0; i < noOfVectors; i++)
 	{
@@ -236,6 +236,25 @@ float4 AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, in
 	return AO;
 }
 
+float4 Background(float4 viewVector, sClParams *params)
+{
+	float4 vector = {1.0, 1.0, -1.0, 0.0};
+	vector = fast_normalize(vector);
+	float grad = dot(viewVector, vector) + 1.0;
+	float4 colour;
+	if(grad < 1.0)
+	{
+		float ngrad = 1.0 - grad;
+		colour = params->backgroundColour3 * ngrad + params->backgroundColour2 * grad;
+	}
+	else
+	{
+		grad = grad - 1.0;
+		float ngrad = 1.0 - grad;
+		colour = params->backgroundColour2 * ngrad + params->backgroundColour1 * grad;
+	}
+	return colour;
+}
 
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
@@ -288,7 +307,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		
 		formulaOut outF;
 		
-		for(count = 0; (count < 255); count++)
+		for(count = 0; (count < 5000); count++)
 		{
 			point = start + viewVector * scan;
 			outF = CalculateDistance(point, &fractal);
@@ -356,9 +375,9 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			specular = pown(specular, 20);
 			if (specular > 15.0) specular = 15.0;
 			
-			//float4 ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
-			float4 ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
-			//float4 ao = 0.0f;
+			float4 ao = 0.0;
+			if (params.fastAmbientOcclusionEnabled) ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
+			if (params.slowAmbientOcclusionEnabled) ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
 			
 			int colourNumber = outF.colourIndex * params.colouringSpeed + 256.0 * params.colouringOffset;
 			float4 surfaceColour = 1.0;
@@ -367,20 +386,21 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			colour = (shade*surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
 			colour.w = 0;
 		}
+		else
+		{
+			colour = Background(viewVector, &params);
+		}
 		
-		float glow = 0.2 * count / 128.0f;
+		float glow = params.glowIntensity * count / 512.0f;
 		float glowN = 1.0f - glow;
 		if(glowN < 0.0f) glowN = 0.0f;
-		float4 glowColor;
-		glowColor.x = 1.0f * glowN + 1.0f * glow;
-		glowColor.y = 0.0f * glowN + 1.0f * glow;
-		glowColor.z = 0.0f * glowN + 0.0f * glow;
+		float4 glowColor = params.glowColour1 * glowN + params.glowColour2 * glow;
 		colour += glowColor * glow;
 		
 		
-		ushort R = convert_ushort_sat(colour.x * 38400.0f);
-		ushort G = convert_ushort_sat(colour.y * 38400.0f);
-		ushort B = convert_ushort_sat(colour.z * 38400.0f);
+		ushort R = convert_ushort_sat(colour.x * 65536.0f);
+		ushort G = convert_ushort_sat(colour.y * 65536.0f);
+		ushort B = convert_ushort_sat(colour.z * 65536.0f);
 		
 		out[buffIndex].R = R;
 		out[buffIndex].G = G;
