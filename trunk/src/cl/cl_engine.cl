@@ -8,6 +8,8 @@ typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
+#define MAX_RAYMARCHING 500
+
 typedef struct
 {
 	float4 z;
@@ -263,10 +265,10 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		float scan, distThresh, distance;
 		
 		scan = 1e-10f;
-		
+				
 		formulaOut outF;
 		//ray-marching
-		for(count = 0; count < 512; count++)
+		for(count = 0; count < MAX_RAYMARCHING; count++)
 		{
 			point = start + viewVector * scan;
 			outF = CalculateDistance(point, &fractal);
@@ -279,7 +281,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 				break;
 			}
 					
-			float step = (distance  - 0.5*distThresh) * params.DEfactor;
+			float step = (distance  - 0.5*distThresh) * params.DEfactor;			
 			scan += step;
 			
 			if(scan > 50) break;
@@ -317,7 +319,11 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		{
 			float4 normal = NormalVector(&fractal, point, distance, distThresh);
 			
-			float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
+			float4 lightVector = (float4) {
+				cos(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
+				sin(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
+				sin(-params.mainLightBeta), 
+				0.0f};
 			lightVector = Matrix33MulFloat3(rot, lightVector);
 			float shade = dot(lightVector, normal);
 			if(shade<0) shade = 0;

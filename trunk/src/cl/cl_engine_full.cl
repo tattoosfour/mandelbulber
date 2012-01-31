@@ -8,6 +8,8 @@ typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
+#define MAX_RAYMARCHING 1000
+
 typedef struct
 {
 	float4 z;
@@ -202,7 +204,7 @@ float4 AmbientOcclusion(sClFractal *fractal, float4 point, float dist_thresh, in
 	int count = 0;
 	float factor = dist_thresh * 1000.0f;
 
-	for (int i = 0; i < noOfVectors; i++)
+	for (int i = 0; i < noOfVectors -1; i++)
 	{
 		float4 shadow = 0.0;
 		float scan = dist_thresh * 2.0f;
@@ -256,6 +258,43 @@ float4 Background(float4 viewVector, sClParams *params)
 	return colour;
 }
 
+float4 VolumetricFog(sClParams *params, int buffCount, float *distanceBuff, float *stepBuff)
+{
+	float density = 0.0;
+	float4 fogCol = params->fogColour1;
+	float4 fogCol1 = fogCol;
+	float4 fogCol2 = params->fogColour2;
+	float4 fogCol3 = params->fogColour3;
+
+	float colourThresh = params->fogColour1Distance;
+	float colourThresh2 = params->fogColour2Distance;
+	float fogReduce = params->fogDistanceFactor;
+	float fogIntensity = params->fogDensity;
+	for (int i = buffCount - 1; i >= 0; i--)
+	{
+		float densityTemp = (stepBuff[i] * fogReduce) / (distanceBuff[i] * distanceBuff[i] + fogReduce * fogReduce);
+
+		float k = distanceBuff[i] / colourThresh;
+		if (k > 1.0) k = 1.0;
+		float kn = 1.0 - k;
+		float4 fogTemp = (fogCol1 * kn + fogCol2 * k);
+
+		float k2 = distanceBuff[i] / colourThresh2 * k;
+		if (k2 > 1.0) k2 = 1.0;
+		kn = 1.0 - k2;
+		fogTemp = (fogTemp * kn + fogCol3 * k2);
+
+		float d1 = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
+		float d2 = 1.0 - d1;
+		fogCol = fogCol * d2 + fogTemp * d1;
+		
+		density += densityTemp;
+	}
+	density *= fogIntensity;
+	fogCol.w = density / (1.0 + density);
+	return fogCol;
+}
+
 //------------------ MAIN RENDER FUNCTION --------------------
 kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
 {
@@ -305,9 +344,12 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		scan = 1e-10f;
 		//ray-marching
 		
+		float distanceBuff[MAX_RAYMARCHING];
+		float stepBuff[MAX_RAYMARCHING];
+		
 		formulaOut outF;
 		
-		for(count = 0; (count < 5000); count++)
+		for(count = 0; (count < MAX_RAYMARCHING); count++)
 		{
 			point = start + viewVector * scan;
 			outF = CalculateDistance(point, &fractal);
@@ -320,10 +362,14 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 				break;
 			}
 					
-			float step = (distance  - 0.5*distThresh) * params.DEfactor;
+			float step = (distance  - 0.5*distThresh) * params.DEfactor;	
+			stepBuff[count] = step;
+			distanceBuff[count] = distance;
+			
 			scan += step;
 			
 			if(scan > 50) break;
+
 		}
 		
 		
@@ -359,10 +405,14 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		{
 			float4 normal = NormalVector(&fractal, point, distance, distThresh);
 			
-			float4 lightVector = (float4) {-0.7f, -0.7f, -0.7f, 0.0f};
+			float4 lightVector = (float4) {
+				cos(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
+				sin(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
+				sin(-params.mainLightBeta), 
+				0.0f};
 			lightVector = Matrix33MulFloat3(rot, lightVector);
 			float shade = dot(lightVector, normal);
-			if(shade<0) shade = 0;
+			if(shade<0.0) shade = 0.0;
 			
 			float shadow = Shadow(&fractal, point, lightVector, distThresh);
 			//float shadow = 1.0f;
@@ -384,13 +434,17 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			if (params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
 		
 			colour = (shade*surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
-			colour.w = 0;
+			colour.w = 0.0;
 		}
 		else
 		{
 			colour = Background(viewVector, &params);
 		}
 		
+		float4 volFog = VolumetricFog(&params, count-1, distanceBuff, stepBuff);
+		if(volFog.w > 1.0) volFog.w = 1.0;
+		colour = colour * (1.0 - volFog.w) + volFog * volFog.w;
+
 		float glow = params.glowIntensity * count / 512.0f;
 		float glowN = 1.0f - glow;
 		if(glowN < 0.0f) glowN = 0.0f;
