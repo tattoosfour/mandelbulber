@@ -3153,6 +3153,8 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->vp = CVector2float4(params->doubles.vp);
 	clParams->zoom = params->doubles.zoom;
 	clParams->DEfactor = params->doubles.DE_factor;
+	clParams->mainLightAlfa = params->doubles.mainLightAlfa;
+	clParams->mainLightBeta = params->doubles.mainLightBeta;
 
 	clFractal->N = params->fractal.N;
 	clFractal->power = params->fractal.doubles.power;
@@ -3214,6 +3216,15 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->backgroundColour1 = sRGB2float4(params->background_color1, 65536.0);
 	clParams->backgroundColour2 = sRGB2float4(params->background_color2, 65536.0);
 	clParams->backgroundColour3 = sRGB2float4(params->background_color3, 65536.0);
+	clParams->mainLightColour = sRGB2float4(params->effectColours.mainLightColour, 65536.0);
+
+	clParams->fogColour1Distance = params->doubles.fogColour1Distance;
+	clParams->fogColour2Distance = params->doubles.fogColour2Distance;
+	clParams->fogDensity = params->doubles.fogDensity;
+	clParams->fogDistanceFactor = params->doubles.fogDistanceFactor;
+	clParams->fogColour1 = sRGB2float4(params->fogColour1, 65536.0);
+	clParams->fogColour2 = sRGB2float4(params->fogColour2, 65536.0);
+	clParams->fogColour3 = sRGB2float4(params->fogColour3, 65536.0);
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)

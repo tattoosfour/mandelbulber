@@ -1,5 +1,6 @@
 		int4 cond1, cond2;
 		
+		z.w = 0.0;
 		cond1 = isgreater(z, foldingLimit);
 		cond2 = isless(z, -foldingLimit);
 		z = select(z,  foldingValue - z, cond1);

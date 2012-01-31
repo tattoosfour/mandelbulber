@@ -241,6 +241,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		err = kernel->setArg(3, lastFractal);
 		err = kernel->setArg(4, stepSize * loop);
 
+		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
 		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
 		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");

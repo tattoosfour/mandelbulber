@@ -63,6 +63,8 @@ typedef struct
 	cl_float persp;
 	cl_float DEfactor;
 	cl_float4 vp;
+	cl_float mainLightAlfa;
+	cl_float mainLightBeta;
 	cl_int AmbientOcclusionNoOfVectors;
 	cl_int colouringEnabled;
 	cl_int fastAmbientOcclusionEnabled;
@@ -73,11 +75,19 @@ typedef struct
 	cl_float specularIntensity;
 	cl_float mainLightIntensity;
 	cl_float glowIntensity;
+	cl_float fogColour1Distance;
+	cl_float fogColour2Distance;
+	cl_float fogDistanceFactor;
+	cl_float fogDensity;
 	cl_float4 glowColour1;
 	cl_float4 glowColour2;
 	cl_float4 backgroundColour1;
 	cl_float4 backgroundColour2;
 	cl_float4 backgroundColour3;
+	cl_float4 mainLightColour;
+	cl_float4 fogColour1;
+	cl_float4 fogColour2;
+	cl_float4 fogColour3;
 } sClParams;
 
 typedef struct
