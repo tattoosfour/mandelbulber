@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/algebra.cpp \
 ../src/callbacks.cpp \
 ../src/cimage.cpp \
+../src/cl_support.cpp \
 ../src/common_math.cpp \
 ../src/database.cpp \
 ../src/files.cpp \
@@ -15,6 +16,7 @@ CPP_SRCS += \
 ../src/image.cpp \
 ../src/interface.cpp \
 ../src/morph.cpp \
+../src/primitives.cpp \
 ../src/settings.cpp \
 ../src/shaders.cpp \
 ../src/texture.cpp \
@@ -26,6 +28,7 @@ OBJS += \
 ./src/algebra.o \
 ./src/callbacks.o \
 ./src/cimage.o \
+./src/cl_support.o \
 ./src/common_math.o \
 ./src/database.o \
 ./src/files.o \
@@ -33,6 +36,7 @@ OBJS += \
 ./src/image.o \
 ./src/interface.o \
 ./src/morph.o \
+./src/primitives.o \
 ./src/settings.o \
 ./src/shaders.o \
 ./src/texture.o \
@@ -44,6 +48,7 @@ CPP_DEPS += \
 ./src/algebra.d \
 ./src/callbacks.d \
 ./src/cimage.d \
+./src/cl_support.d \
 ./src/common_math.d \
 ./src/database.d \
 ./src/files.d \
@@ -51,6 +56,7 @@ CPP_DEPS += \
 ./src/image.d \
 ./src/interface.d \
 ./src/morph.d \
+./src/primitives.d \
 ./src/settings.d \
 ./src/shaders.d \
 ./src/texture.d \
