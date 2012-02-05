@@ -30,7 +30,7 @@ extern int lightsPlaced;
 
 sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 lightVect, double wsp_persp, double dist_thresh);
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
-		int vectorsCount, CVector3 normal);
+		int vectorsCount);
 sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point);
 sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality);
 CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh);
@@ -49,4 +49,7 @@ sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distance
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
 void PostRenderingLights(cImage *image, sParamRender *fractParam);
 void RenderBuddhabrot(sParamRender *fractParam);
+double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp);
+sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom, CVector3 lightVector,
+		bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount);
 #endif /* SHADERS_H_ */

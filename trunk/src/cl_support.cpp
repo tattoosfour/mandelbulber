@@ -33,6 +33,8 @@ CclSupport::CclSupport(void)
 	steps = 10;
 	recompileRequest = true;
 	lastFormula = trig_optim;
+	lastEngineNumber = 0;
+	lastStepSize = 0;
 }
 
 void CclSupport::Init(void)
@@ -180,8 +182,6 @@ void CclSupport::Init(void)
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
 
-
-
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
 	checkErr(err, "CommandQueue::CommandQueue()");
 	printf("OpenCL command queue prepared\n");
@@ -211,6 +211,15 @@ void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal, enumFractal
 {
 	if(ClFractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
 	if(formula != lastFormula) recompileRequest = true;
+
+	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
+	if(engineNumber != lastEngineNumber) recompileRequest = true;
+	lastEngineNumber = engineNumber;
+
+	int pixelsPerJob =  atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
+	if(pixelsPerJob != lastStepSize) recompileRequest = true;
+	lastStepSize = pixelsPerJob;
+
 	lastParams = ClParams;
 	lastFractal = ClFractal;
 	lastFormula = formula;

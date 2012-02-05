@@ -589,7 +589,7 @@ void *MainThread(void *ptr)
 							//ambient occlusion based on many rays in spherical directions
 							else
 							{
-								AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vn);
+								AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount);
 							}
 						}
 
@@ -675,7 +675,7 @@ void *MainThread(void *ptr)
 												ambientBuff[i] = FastAmbientOcclusion2(&calcParam, pointTemp, vnTemp, dist_thresh, param.doubles.fastAoTune, param.globalIlumQuality);
 											}
 											else
-												ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount, vnTemp);
+												ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, dist_thresh, last_distance, vectorsAround, vectorsCount);
 										}
 
 										auxLightsBuff[i] = AuxLightsShader(&param, &calcParam, pointTemp, vnTemp, viewTemp, wsp_persp, dist_thresh, &auxSpecBuff[i]);
@@ -891,16 +891,28 @@ void *MainThread(void *ptr)
 
 					//************* volumetric fog / light
 					sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
-					if (param.imageSwitches.volumetricLightEnabled)
+					if (!param.imageSwitches.iterFogEnabled)
 					{
-						volFog = VolumetricLight(&param, &calcParam, CVector3(x2,y,z2), y, min_y, last_distance, zoom, lightVector);
+						if (param.imageSwitches.volumetricLightEnabled)
+						{
+							volFog = VolumetricLight(&param, &calcParam, CVector3(x2, y, z2), y, min_y, last_distance, zoom, lightVector);
+						}
+						else
+						{
+							double density;
+							volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
+							pixelData.fogDensity16 = 65535 * density / (1.0 + density);
+						}
 					}
 					else
 					{
+						//iteration fog
 						double density;
-						volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
-						pixelData.fogDensity16 = 65535 * density / (1.0 + density);
+						volFog = IterationFog(&param, &calcParam, CVector3(x2, y, z2), y, min_y, last_distance, zoom, lightVector, found, &density, vectorsAround, vectorsCount);
+						pixelData.fogDensity16 = density * 65535;
+						//end of iteration fog
 					}
+
 					if(volFog.R>65535.0) volFog.R = 65535.0;
 					if(volFog.G>65535.0) volFog.G = 65535.0;
 					if(volFog.B>65535.0) volFog.B = 65535.0;
@@ -908,6 +920,7 @@ void *MainThread(void *ptr)
 					pixelData.volumetricLight.R = volFog.R;
 					pixelData.volumetricLight.G = volFog.G;
 					pixelData.volumetricLight.B = volFog.B;
+
 					if(!image->IsLowMemMode())
 					{
 						image->PutPixelVolumetricFog(x, z, pixelData.volumetricLight);

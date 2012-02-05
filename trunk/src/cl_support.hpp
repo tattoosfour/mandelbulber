@@ -78,6 +78,8 @@ private:
 	sClParams lastParams;
 	sClFractal lastFractal;
 	enumFractalFormula lastFormula;
+	int lastStepSize;
+	int lastEngineNumber;
 };
 
 #else

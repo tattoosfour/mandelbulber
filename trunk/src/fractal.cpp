@@ -1265,6 +1265,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 			else
 				*max_iter = false;
 		}
+		params.itersOut = L;
 
 		if (L < params.minN && distance < params.doubles.detailSize)
 			distance = params.doubles.detailSize;
@@ -1285,6 +1286,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 
 		double r = Compute<deltaDE1>(point, params, &L);
 		int retval = L;
+		params.itersOut = L;
 
 		point.x += deltaDE;
 		point.y += 0;
