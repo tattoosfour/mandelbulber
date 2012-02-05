@@ -250,6 +250,8 @@ struct sFractal
 
 	int specialColour;
 	int frameNo;
+
+	int itersOut;
 };
 
 template <int Mode>

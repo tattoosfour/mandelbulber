@@ -29,11 +29,15 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 	if(calcParam->interiorMode) 
 		start = dist_thresh*param->doubles.DE_factor*0.5;
 
+	double opacity = 0.0;
+	double shadowTemp = 1.0;
+
 	for (double i = start; i < factor; i += dist * param->doubles.DE_factor)
 	{
 		point2 = point + lightVect * i;
 
 		dist = CalculateDistance(point2, *calcParam, &max_iter);
+
 		if (param->fractal.iterThresh)
 		{
 			if (dist < dist_thresh && !max_iter)
@@ -41,17 +45,28 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 				dist = dist_thresh * 1.01;
 			}
 		}
-		if (dist < dist_thresh || max_iter)
+
+		if(param->imageSwitches.iterFogEnabled)
 		{
-			double shadowing = i / factor;
-			if(!param->penetratingLights) shadowing = 0;
-			shadow.R = shadowing;
-			shadow.G = shadowing;
-			shadow.B = shadowing;
+			opacity = IterOpacity(dist * param->doubles.DE_factor,calcParam->itersOut, calcParam->N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+		}
+		else
+		{
+			opacity = 0.0;
+		}
+		shadowTemp -= opacity * (factor - i) / factor;
+
+		if (dist < dist_thresh || max_iter || shadowTemp < 0.0)
+		{
+			shadowTemp -= (factor - i) / factor;
+			if(!param->penetratingLights) shadowTemp = 0.0;
+			if(shadowTemp < 0.0) shadowTemp = 0.0;
 			break;
 		}
-
 	}
+	shadow.R = shadowTemp;
+	shadow.G = shadowTemp;
+	shadow.B = shadowTemp;
 	return shadow;
 }
 
@@ -90,7 +105,7 @@ sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector
 }
 
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
-		int vectorsCount, CVector3 normal)
+		int vectorsCount)
 {
 	sShaderOutput AO = { 0, 0, 0 };
 
@@ -106,10 +121,9 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 		sVectorsAround v = vectorsAround[i];
 
 		double dist = last_distance;
-		bool not_shade = true;
 
-		//double shade = normal.Dot(vectorsAround[i].v);
-		//if(shade<0) shade = 0;
+		double opacity = 0.0;
+		double shadowTemp = 1.0;
 
 		for (double r = start_dist; r < end_dist; r += dist * 2.0)
 		{
@@ -123,25 +137,31 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 					dist = dist_thresh * 1.01;
 				}
 			}
-			if (dist < dist_thresh || max_iter)
+
+			if (param->imageSwitches.iterFogEnabled)
 			{
-				not_shade = false;
-				intense = r / end_dist;
+				opacity = IterOpacity(dist * param->doubles.DE_factor, calcParam->itersOut, calcParam->N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+			}
+			else
+			{
+				opacity = 0.0;
+			}
+			shadowTemp -= opacity * (end_dist - r) / end_dist;
+
+			if (dist < dist_thresh || max_iter || shadowTemp < 0.0)
+			{
+				shadowTemp -= (end_dist - r) / end_dist;
+				if(shadowTemp < 0.0) shadowTemp = 0.0;
 				break;
 			}
 		}
-		if (not_shade)
-		{
-			AO.R += v.R;
-			AO.G += v.G;
-			AO.B += v.B;
-		}
-		else
-		{
-			AO.R += intense * v.R;
-			AO.G += intense * v.G;
-			AO.B += intense * v.B;
-		}
+
+		intense = shadowTemp;
+
+		AO.R += intense * v.R;
+		AO.G += intense * v.G;
+		AO.B += intense * v.B;
+
 	}
 	AO.R /= (vectorsCount * 256.0);
 	AO.G /= (vectorsCount * 256.0);
@@ -289,7 +309,7 @@ int SurfaceColour(sFractal *calcParam, CVector3 point)
 	calcParam->N *= 10;
 	int nrKol = floor(Compute<colouring> (point, *calcParam));
 	calcParam->N /= 10;
-	nrKol = abs(nrKol) % 65536;
+	nrKol = abs(nrKol) % (248*256);
 	return nrKol;
 }
 
@@ -421,6 +441,10 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 	double step = delta * fractParams->doubles.DE_factor * stepFactor;
 	double dist = step;
 	double light = 1.0;
+
+	double opacity = 0.0;
+	double shadowTemp = 1.0;
+
 	for (double i = dist_thresh; i < distance; i += dist * stepFactor * fractParams->doubles.DE_factor)
 	{
 		CVector3 point2 = point + lightVector * i;
@@ -434,19 +458,32 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 				dist = dist_thresh * 1.01;
 			}
 		}
-		if (dist < 0.5 * dist_thresh || max_iter)
+
+		if(fractParams->imageSwitches.iterFogEnabled)
+		{
+			opacity = IterOpacity(dist * stepFactor * fractParams->doubles.DE_factor, calcParam->itersOut, calcParam->N, fractParams->doubles.iterFogOpacityTrim, fractParams->doubles.iterFogOpacity);
+		}
+		else
+		{
+			opacity = 0.0;
+		}
+		shadowTemp -= opacity * (distance - i) / distance;
+
+		if (dist < 0.5 * dist_thresh || max_iter || shadowTemp < 0.0)
 		{
 			if(linear)
 			{
-				light = i/distance;
+				shadowTemp -= (distance - i) / distance;
+				if(shadowTemp < 0.0) shadowTemp = 0.0;
 			}
 			else
 			{
-				light = 0.0;
+				shadowTemp = 0.0;
 			}
 			break;
 		}
 	}
+	light = shadowTemp;
 	return light;
 }
 
@@ -802,6 +839,111 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 	}
 }
 
+double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp)
+{
+	double opacity = ((double)iters - trim) / maxN;
+	if(opacity < 0.0) opacity = 0;
+	opacity*=opacity;
+	opacity*=step  * opacitySp;
+	if(opacity > 1.0) opacity = 1.0;
+	return opacity;
+}
+
+sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
+		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount)
+{
+	double density = 0.0;
+	double tempDist = last_distance;
+	sShaderOutput iterFog = { 0.0, 0.0, 0.0 };
+	enumPerspectiveType perspectiveType = param->perspectiveType;
+	double fov = param->doubles.persp;
+	double quality = param->doubles.quality;
+	CVector3 vp = param->doubles.vp;
+	CRotationMatrix mRot;
+	mRot.RotateZ(param->doubles.alfa);
+	mRot.RotateX(param->doubles.beta);
+	mRot.RotateY(param->doubles.gamma);
+	bool max_iter;
+	double DE_factor = param->doubles.DE_factor;
+	double resolution = param->doubles.resolution;
+
+	for (double scan = yStart; scan > min_y; scan -= tempDist / zoom)
+	{
+		CVector3 pointTemp = Projection3D(CVector3(point.x, scan, point.z), vp, mRot, perspectiveType, fov, zoom);
+		double wsp_perspTemp = 1.0 + scan * fov;
+		double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
+		tempDist = CalculateDistance(pointTemp, *calcParam, &max_iter) * DE_factor / param->doubles.volumetricLightQuality + dist_threshTemp;
+		tempDist = tempDist * (1.0 - Random(1000) / 2000.0);
+
+		int L = calcParam->itersOut;
+		double opacity = IterOpacity(tempDist, L, param->fractal.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+
+		sShaderOutput newColour = { 0.0, 0.0, 0.0 };
+
+		if (opacity > 0)
+		{
+			for (int i = 0; i < 5; i++)
+			{
+				if (i == 0)
+				{
+					if(param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight > 0.0)
+					{
+						sShaderOutput shadowOutputTemp = MainShadow(param, calcParam, pointTemp, lightVector, wsp_perspTemp, dist_threshTemp);
+						newColour.R += shadowOutputTemp.R * param->effectColours.mainLightColour.R / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
+						newColour.G += shadowOutputTemp.G * param->effectColours.mainLightColour.G / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
+						newColour.B += shadowOutputTemp.B * param->effectColours.mainLightColour.B / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
+					}
+				}
+
+				if (i > 0)
+				{
+					if (Lights[i - 1].enabled)
+					{
+						CVector3 d = Lights[i - 1].position - pointTemp;
+						double distance = d.Length();
+						double distance2 = distance * distance;
+						CVector3 lightVectorTemp = d;
+						lightVectorTemp.Normalize();
+						double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
+						double intensity = Lights[i - 1].intensity * 100.0;
+						newColour.R += light * Lights[i - 1].colour.R / 65536.0 / distance2 * intensity;
+						newColour.G += light * Lights[i - 1].colour.G / 65536.0 / distance2 * intensity;
+						newColour.B += light * Lights[i - 1].colour.B / 65536.0 / distance2 * intensity;
+					}
+				}
+
+			}
+
+			if(param->global_ilumination)
+			{
+				sShaderOutput AO = AmbientOcclusion(param, calcParam, pointTemp, wsp_perspTemp, dist_threshTemp, last_distance, vectorsAround, vectorsCount);
+				newColour.R += AO.R * param->doubles.imageAdjustments.globalIlum;
+				newColour.G += AO.G * param->doubles.imageAdjustments.globalIlum;
+				newColour.B += AO.B * param->doubles.imageAdjustments.globalIlum;
+			}
+
+			iterFog.R = iterFog.R * (1.0 - opacity) + newColour.R * opacity;
+			iterFog.G = iterFog.G * (1.0 - opacity) + newColour.G * opacity;
+			iterFog.B = iterFog.B * (1.0 - opacity) + newColour.B * opacity;
+
+			density+=opacity;
+			if(density>1.0) density = 1.0;
+		}
+	}
+
+	iterFog.R *= 6553.0;
+	iterFog.G *= 6553.0;
+	iterFog.B *= 6553.0;
+	if(iterFog.R > 65535) iterFog.R = 65535;
+	if(iterFog.G > 65535) iterFog.G = 65535;
+	if(iterFog.B > 65535) iterFog.B = 65535;
+
+	*densityOut = density;
+
+	//printf("R: %f, G: %f, B: %f\n", iterFog.R, iterFog.G, iterFog.B);
+
+	return iterFog;
+}
 
 /*
 void RenderBuddhabrot(sParamRender *fractParam)

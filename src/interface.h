@@ -543,8 +543,8 @@ struct sInterface
 	GtkWidget *edit_measureZ;
 	GtkWidget *edit_tiles;
 	GtkWidget *edit_OpenCLPixelsPerJob;
-	GtkWidget *edit_OpenCLOpacityTrim;
-	GtkWidget *edit_OpenCLOpacity;
+	GtkWidget *edit_iterFogOpacityTrim;
+	GtkWidget *edit_iterFogOpacity;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -643,6 +643,7 @@ struct sInterface
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
 	GtkWidget *checkOpenClEnable;
+	GtkWidget *checkIterFogEnable;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

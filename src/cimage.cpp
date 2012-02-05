@@ -173,9 +173,18 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	double fogN = 1.0 - fogDensity;
 	alpha2 += fogDensity;
 
-	R = R * fogN + pixel.volumetricLight.R * fogDensity;
-	G = G * fogN + pixel.volumetricLight.G * fogDensity;
-	B = B * fogN + pixel.volumetricLight.B * fogDensity;
+	if(sw.iterFogEnabled)
+	{
+		R = R * fogN + pixel.volumetricLight.R * fogDensity * 10;
+		G = G * fogN + pixel.volumetricLight.G * fogDensity * 10;
+		B = B * fogN + pixel.volumetricLight.B * fogDensity * 10;
+	}
+	else
+	{
+		R = R * fogN + pixel.volumetricLight.R * fogDensity;
+		G = G * fogN + pixel.volumetricLight.G * fogDensity;
+		B = B * fogN + pixel.volumetricLight.B * fogDensity;
+	}
 
 	//glow
 	double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;

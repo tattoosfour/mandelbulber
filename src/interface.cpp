@@ -505,9 +505,11 @@ void ReadInterface(sParamRender *params)
 		params->fractal.genFoldBox.type = (enumGeneralizedFoldBoxType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType));
 
 		params->OpenCLEngine = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
-		params->doubles.OpenCLOpacity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLOpacity)));
 		params->OpenCLPixelsPerJob = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
-		params->doubles.OpenCLOpacityTrim = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLOpacityTrim)));
+
+		params->doubles.iterFogOpacityTrim = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_iterFogOpacityTrim)));
+		params->doubles.iterFogOpacity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_iterFogOpacity)));
+		params->imageSwitches.iterFogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable));
 
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
@@ -1706,8 +1708,8 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_tiles = gtk_entry_new();
 
-	Interface.edit_OpenCLOpacity = gtk_entry_new();
-	Interface.edit_OpenCLOpacityTrim = gtk_entry_new();
+	Interface.edit_iterFogOpacity = gtk_entry_new();
+	Interface.edit_iterFogOpacityTrim = gtk_entry_new();
 	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
 
 	//combo
@@ -1835,6 +1837,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL Enable");
+	Interface.checkIterFogEnable = gtk_check_button_new_with_label("Iteration fog");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -2275,20 +2278,24 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxBrightness, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("1,0", "brightness:", 5, Interface.edit_brightness), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("1,0", "gamma:", 5, Interface.edit_gamma), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("0,5", "shading:", 5, Interface.edit_shading), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("1,0", "direct light:", 5, Interface.edit_shadows), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("1,0", "specularity:", 5, Interface.edit_specular), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBrightness), CreateEdit("1,0", "glow:", 5, Interface.edit_glow), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxShading, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("0,5", "shading:", 5, Interface.edit_shading), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("1,0", "direct light:", 5, Interface.edit_shadows), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("1,0", "specularity:", 5, Interface.edit_specular), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("0,0", "ambient:", 5, Interface.edit_ambient), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("2,0", "ambient occlusion:", 5, Interface.edit_ambient_occlusion), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("4", "AO quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("1,0", "Fast AO tune:", 5, Interface.edit_fastAoTune), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxShading2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("1,0", "glow:", 5, Interface.edit_glow), false, false, 1);
+
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("0,0", "reflection:", 5, Interface.edit_reflect), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("5", "reflections depth:", 5, Interface.edit_reflectionsMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("4", "AO quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("1,0", "Fast AO tune:", 5, Interface.edit_fastAoTune), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("100", "opacity", 6, Interface.edit_iterFogOpacity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("3", "opacity trim (iterations)", 6, Interface.edit_iterFogOpacityTrim), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkShadow, false, false, 1);
@@ -2299,6 +2306,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkBitmapBackground, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkIterFogEnable, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxVolumetricFog, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog density:", 5, Interface.edit_volumetricFogDensity), false, false, 1);
@@ -2703,8 +2711,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("10000", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("100", "Opacity", 6, Interface.edit_OpenCLOpacity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("3", "Opacity trim (iterations)", 6, Interface.edit_OpenCLOpacityTrim), false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
@@ -3191,8 +3197,8 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 		clFractal->ifs.direction[i] = CVector2float4(params->fractal.IFS.doubles.direction[i]);
 	}
 
-	clFractal->opacity = params->doubles.OpenCLOpacity;
-	clFractal->opacityTrim = params->doubles.OpenCLOpacityTrim;
+	clFractal->opacity = params->doubles.iterFogOpacity;
+	clFractal->opacityTrim = params->doubles.iterFogOpacityTrim;
 
 	for(int i=0; i<256; i++)
 	{
