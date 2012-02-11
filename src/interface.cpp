@@ -879,6 +879,8 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterLength), DoubleToString(params->fractal.doubles.primitives.waterLength));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterAmplitude), DoubleToString(params->fractal.doubles.primitives.waterAmplitude));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations), IntToString(params->fractal.primitives.waterIterations));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacity), DoubleToString(params->doubles.iterFogOpacity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacityTrim), DoubleToString(params->doubles.iterFogOpacityTrim));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -923,6 +925,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveSphereEnabled), params->fractal.primitives.sphereEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedSphereEnabled), params->fractal.primitives.invertedSphereEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled), params->fractal.primitives.waterEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable), params->imageSwitches.iterFogEnabled);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
@@ -1987,6 +1990,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoFog, PressedAutoFog);
 	CONNECT_SIGNAL_CLICKED(Interface.buMeasureActivation, PressedMeasureActivation);
 	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClEnable, ChangedOpenClEnabled);
+	CONNECT_SIGNAL_CLICKED(Interface.checkIterFogEnable, ChangedIterFogEnable);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -2294,8 +2298,8 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("0,0", "reflection:", 5, Interface.edit_reflect), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("5", "reflections depth:", 5, Interface.edit_reflectionsMax), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("100", "opacity", 6, Interface.edit_iterFogOpacity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("3", "opacity trim (iterations)", 6, Interface.edit_iterFogOpacityTrim), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("100", "fog opacity", 6, Interface.edit_iterFogOpacity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading2), CreateEdit("3", "fog opacity trim (iterations)", 6, Interface.edit_iterFogOpacityTrim), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks), Interface.checkShadow, false, false, 1);
@@ -2769,6 +2773,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_widget_show_all(window_interface);
 
+	//set default sensivity settings
 	ChangedComboFormula(NULL, NULL);
 	ChangedTgladFoldingMode(NULL, NULL);
 	ChangedJulia(NULL, NULL);
@@ -2777,6 +2782,7 @@ void CreateInterface(sParamRender *default_settings)
 	ChangedMandelboxRotations(NULL, NULL);
 	ChangedAmbientOcclusion(NULL, NULL);
 	ChangedFastAmbientOcclusion(NULL, NULL);
+	ChangedIterFogEnable(NULL, NULL);
 
 	//Writing default settings
 	WriteInterface(default_settings);

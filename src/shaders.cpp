@@ -914,7 +914,7 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 
 			}
 
-			if(param->global_ilumination)
+			if(param->global_ilumination && !param->fastGlobalIllumination)
 			{
 				sShaderOutput AO = AmbientOcclusion(param, calcParam, pointTemp, wsp_perspTemp, dist_threshTemp, last_distance, vectorsAround, vectorsCount);
 				newColour.R += AO.R * param->doubles.imageAdjustments.globalIlum;

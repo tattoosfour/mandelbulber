@@ -938,6 +938,8 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 	gtk_widget_set_sensitive(Interface.tab_box_hybrid, formula == hybrid);
 	gtk_widget_set_sensitive(Interface.edit_mandelboxSharpness, formula == smoothMandelbox);
 	gtk_widget_set_sensitive(Interface.comboGeneralizedFoldBoxType, formula == generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxSolid, formula == generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxMelt, formula == generalizedFoldBox);
 }
 
 void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data)
@@ -2410,4 +2412,11 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 	{
 		clSupport->Disable();
 	}
+}
+
+void ChangedIterFogEnable(GtkWidget *widget, gpointer data)
+{
+	bool active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable));
+	gtk_widget_set_sensitive(Interface.edit_iterFogOpacity, active);
+	gtk_widget_set_sensitive(Interface.edit_iterFogOpacityTrim, active);
 }

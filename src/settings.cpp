@@ -425,6 +425,10 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "volumetric_fog_colour_2_distance", params.doubles.fogColour2Distance, 2.0, compare);
 	fprintfDot(fileSettings, "volumetric_fog_distance_factor", params.doubles.fogDistanceFactor, 1.0, compare);
 
+	fprintfInt(fileSettings, "iteration_fog_enable", params.imageSwitches.iterFogEnabled, false, compare);
+	fprintfDot(fileSettings, "iteration_fog_opacity", params.doubles.iterFogOpacity, 1000.0, compare);
+	fprintfDot(fileSettings, "iteration_fog_opacity_trim", params.doubles.iterFogOpacityTrim, 4.0, compare);
+
 	if (!compare || params.fractal.primitives.planeEnable)
 	{
 		fprintfInt(fileSettings, "primitive_plane_enabled", params.fractal.primitives.planeEnable, false, compare);
@@ -913,6 +917,10 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "volumetric_fog_colour_1_distance")) params.doubles.fogColour1Distance = atof2(str2);
 	else if (!strcmp(str1, "volumetric_fog_colour_2_distance")) params.doubles.fogColour2Distance = atof2(str2);
 	else if (!strcmp(str1, "volumetric_fog_distance_factor")) params.doubles.fogDistanceFactor = atof2(str2);
+
+	else if (!strcmp(str1, "iteration_fog_enable")) params.imageSwitches.iterFogEnabled = atoi(str2);
+	else if (!strcmp(str1, "iteration_fog_opacity")) params.doubles.iterFogOpacity = atof2(str2);
+	else if (!strcmp(str1, "iteration_fog_opacity_trim")) params.doubles.iterFogOpacityTrim = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_plane_enabled")) params.fractal.primitives.planeEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_plane_centre_X")) params.fractal.doubles.primitives.planeCentre.x = atof2(str2);
