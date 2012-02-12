@@ -1527,7 +1527,7 @@ int main(int argc, char *argv[])
 	string defaults = string(data_directory) + "/.defaults";
 	if(!FileIfExists(defaults.c_str()))
 	{
-		fcopy((string(sharedDir)+"defaults").c_str(),defaults.c_str());
+		fcopy((string(sharedDir)+"/defaults").c_str(),defaults.c_str());
 		WriteLog("Defaults copied");
 	}
 
@@ -2215,11 +2215,11 @@ void MainRender(void)
 						WriteLog(filename2.c_str());
 					}
 				}
-			}
-			//terminate animation loop when not animation mode
-			if (!fractParam.animMode && tile >= tiles*tiles-1)
-			{
-				index = 9999999;
+				//terminate animation loop when not animation mode
+				if (!fractParam.animMode && tile >= tiles*tiles-1)
+				{
+					index = 9999999;
+				}
 			}
 
 			last_vp_position = fractParam.doubles.vp;

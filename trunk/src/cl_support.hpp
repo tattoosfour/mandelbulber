@@ -10,7 +10,7 @@
 
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 
-#define CLSUPPORT
+//#define CLSUPPORT
 
 #ifdef CLSUPPORT
 #include <CL/cl.hpp>

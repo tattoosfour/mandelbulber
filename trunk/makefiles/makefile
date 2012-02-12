@@ -44,7 +44,7 @@ all: mandelbulber
 mandelbulber: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/lib/x86_64-linux-gnu/ `pkg-config --libs gtk+-2.0 gthread-2.0` -o"mandelbulber"$(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -o"mandelbulber" -L/usr/lib/x86_64-linux-gnu/ $(OBJS) $(USER_OBJS) $(LIBS)  `pkg-config --libs gtk+-2.0 gthread-2.0`
 	@echo 'Finished building target: $@'
 	@echo ' '
 
