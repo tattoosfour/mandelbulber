@@ -1,11 +1,11 @@
 [Desktop Entry]
 Categories=Graphics;3DGraphics;Math;Science;
 Comment=Visit 3D Fractal World
-Exec=mandelbulber
+Exec=mandelbulber-opencl
 GenericName=Mandelbulber - Advanced 3D fractal generator
 Icon=/usr/share/mandelbulber/icons/mandelbulber.png
 MimeType=
-Name=Mandelbulber
+Name=Mandelbulber-OpenCL
 StartupNotify=true
 Terminal=false
 Type=Application

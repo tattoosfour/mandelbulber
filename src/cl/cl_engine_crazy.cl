@@ -13,6 +13,7 @@ typedef struct
 	float4 z;
 	float iters;
 	float distance;
+	float colourIndex;
 } formulaOut;
 
 static formulaOut Fractal(float4 point, sClFractal *fr);

@@ -1,4 +1,4 @@
-Mandelbulber 1.1000000000000001;
+Mandelbulber 1.1100000000000001;
 image_width 800;
 image_height 600;
 tiles 1;
@@ -333,6 +333,9 @@ volumetric_fog_density 0;
 volumetric_fog_colour_1_distance 1;
 volumetric_fog_colour_2_distance 2;
 volumetric_fog_distance_factor 1;
+iteration_fog_enable 0;
+iteration_fog_opacity 1000;
+iteration_fog_opacity_trim 4;
 primitive_plane_enabled 0;
 primitive_plane_centre_X 0;
 primitive_plane_centre_Y 0;

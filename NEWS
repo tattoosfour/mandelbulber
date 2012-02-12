@@ -1,5 +1,20 @@
 Version history
 
+v1.11
+- added iteration fog effect (fog which density depends on interation count). This fog cast shadows on fractal surface and on itself. Can be also iluminated by auxiliary lights and ambiet occlusion.
+- improved water animation effect
+- disabling of SSAO and DOF when tile rendering is enabled
+- OpenCL: added ambient occlusion effect
+- OpenCL: added colouring algorithms
+- OpenCL: added setting for OpenCL job size
+- OpenCL: added new rendering engine "Crazy: iteration fog count"
+- OpebCL: added Quaternion and Xonodreambuie formulas
+- OpenCL: added volumetric fog effect
+- fixed bug: thumbanils weren't rendered properly
+- fixed bug: weird colour gradients (http://www.fractalforums.com/index.php?topic=10305.msg41172#msg41172)
+- added few example files for "iteration fog" effect
+
+
 v1.10
 - added tile renderig (without any image resolution limitations)
 - fixed bug: water animation worked only in flight mode
