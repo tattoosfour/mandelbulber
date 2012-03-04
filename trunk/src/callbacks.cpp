@@ -1913,7 +1913,7 @@ void PressedIFSDefaultDodeca(GtkWidget *widget, gpointer widget_pointer)
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
 
-	double phi = (1 + sqrt(5))/2.0;
+	double phi = (1 + sqrt(5.0))/2.0;
 	params.fractal.IFS.doubles.direction[0].x = phi*phi;
 	params.fractal.IFS.doubles.direction[0].y = 1.0;
 	params.fractal.IFS.doubles.direction[0].z = -phi;
@@ -1951,7 +1951,7 @@ void PressedIFSDefaultIcosa(GtkWidget *widget, gpointer widget_pointer)
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
 
-	double phi = (1 + sqrt(5))/2.0;
+	double phi = (1 + sqrt(5.0))/2.0;
 	params.fractal.IFS.doubles.direction[3].x = -phi*phi;
 	params.fractal.IFS.doubles.direction[3].y = 1.0;
 	params.fractal.IFS.doubles.direction[3].z = phi;
