@@ -179,7 +179,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 				{
 					int dx = xx - x;
 					int dy = yy - y;
-					double r = sqrt(dx * dx + dy * dy);
+					double r = sqrt((float)dx * dx + dy * dy);
 					double op = (blur - r) / factor;
 					if (op > 1.0) op = 1.0;
 					if (op < 0.0) op = 0.0;
@@ -415,10 +415,10 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiv
 			gtk_main_iteration();
 	}
 
-	GThread *Thread[NR_THREADS];
-	GError *err[NR_THREADS];
+	GThread **Thread = new GThread *[NR_THREADS];
+	GError **err = new GError *[NR_THREADS];
 
-	sSSAOparams thread_param[NR_THREADS];
+	sSSAOparams *thread_param = new sSSAOparams[NR_THREADS];
 	for (int i = 0; i < NR_THREADS; i++)
 	{
 		err[i] = NULL;
@@ -490,6 +490,10 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiv
 	printf("Rendering Screen Space Ambient Occlusion. Done 100%%       \n");
 
 	isPostRendering = false;
+
+	delete[] Thread;
+	delete[] err;
+	delete thread_param;
 }
 
 void DrawHistogram(void)

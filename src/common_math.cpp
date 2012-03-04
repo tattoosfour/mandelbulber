@@ -14,6 +14,9 @@
  */
 #include "common_math.h"
 #include <cstdlib>
+#ifdef __sgi
+#include <stdlib.h>
+#endif
 
 //********** Random ******************************
 int Random(int max)

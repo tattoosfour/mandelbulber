@@ -619,7 +619,7 @@ void *MainThread(void *ptr)
 
 							double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0)*zoom;
 
-							envMapping = (sShaderOutput){0,0,0};
+							envMapping.R = envMapping.G = envMapping.B = 0;
 							sShaderOutput shadeBuff[10];
 							sShaderOutput shadowBuff[10];
 							sShaderOutput specularBuff[10];
@@ -665,9 +665,9 @@ void *MainThread(void *ptr)
 										vnTemp = CalculateNormals(&param, &calcParam, pointTemp, dist_thresh);
 										shadeBuff[i] = MainShading(vnTemp, lightVector);
 										specularBuff[i] = MainSpecular(vnTemp, lightVector, viewTemp);
-										shadowBuff[i] = (sShaderOutput){1.0,1.0,1.0};
+										shadowBuff[i].R = shadowBuff[i].G = shadowBuff[i].B = 1.0;
 										if (shadow) shadowBuff[i] = MainShadow(&param, &calcParam, pointTemp, lightVector, wsp_persp, dist_thresh);
-										ambientBuff[i]=(sShaderOutput){0,0,0};
+										ambientBuff[i].R = ambientBuff[i].G = ambientBuff[i].B = 0;
 										if (global_ilumination)
 										{
 											if (fastGlobalIllumination)
@@ -682,7 +682,8 @@ void *MainThread(void *ptr)
 
 										int colorIndexTemp = SurfaceColour(&calcParam, pointTemp);
 										if (specialColour != 0) colorIndexTemp = specialColour*256;
-										sRGB color = { 256, 256, 256 };
+										sRGB color;
+										color.R = color.G = color.B = 256;
 										if (param.imageSwitches.coloringEnabled)
 										{
 											int color_number;
@@ -696,7 +697,9 @@ void *MainThread(void *ptr)
 											}
 											color = image->IndexToColour(color_number);
 										}
-										colorBuff[i] = (sShaderOutput){color.R/256.0,color.G/256.0,color.B/256.0};
+										colorBuff[i].R = color.R/256.0;
+										colorBuff[i].G = color.G/256.0;
+										colorBuff[i].B = color.B/256.0;
 
 										totalFog += scan;
 										fogBuff[i] = totalFog;;
@@ -890,7 +893,8 @@ void *MainThread(void *ptr)
 					pixelData.glowBuf16 = counter;
 
 					//************* volumetric fog / light
-					sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+					sShaderOutput volFog;
+					volFog.R = volFog.G = volFog.B = 0.0;
 					if (!param.imageSwitches.iterFogEnabled)
 					{
 						if (param.imageSwitches.volumetricLightEnabled)
@@ -1031,9 +1035,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		//initialising threads
 		int *thread_done = new int[height];
-		GThread *Thread[NR_THREADS + 1];GError
-		*err[NR_THREADS + 1];sParam
-		thread_param[NR_THREADS];
+		GThread **Thread = new GThread *[NR_THREADS + 1];
+		GError **err = new GError *[NR_THREADS + 1];
+		sParam *thread_param = new sParam[NR_THREADS];
 
 		int progressiveStart = 8;
 		if (param.recordMode || noGUI) progressiveStart = 1;
@@ -1248,6 +1252,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			}
 		}
 		delete[] thread_done;
+		delete[] thread_param;
+		delete[] Thread;
+		delete[] err;
 	}
 	else
 	{
@@ -1337,6 +1344,8 @@ int get_cpu_count()
 
 	GetSystemInfo(&info);
 	ret = info.dwNumberOfProcessors;
+#elif defined(__sgi)
+	ret = (int) sysconf(_SC_NPROC_ONLN);
 #else               /*other unix - try sysconf*/
 	ret = (int) sysconf(_SC_NPROCESSORS_ONLN);
 #endif  /* WINDOWS */

@@ -325,7 +325,9 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 		double texX = alfaTexture / (2.0 * M_PI) * param->backgroundTexture->Width();
 		double texY = (betaTexture / (M_PI) + 0.5) * param->backgroundTexture->Height();
 		sRGB8 pixel = param->backgroundTexture->Pixel(texX, texY);
-		pixel2 = (sShaderOutput){ pixel.R/256.0, pixel.G/256.0, pixel.B/256.0};
+		pixel2.R = pixel.R/256.0;
+		pixel2.G = pixel.G/256.0;
+		pixel2.B = pixel.B/256.0;
 	}
 	else
 	{
@@ -349,7 +351,9 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 			pixel.B = (param->background_color2.B * Ngrad + param->background_color1.B * grad);
 		}
 
-		pixel2 = (sShaderOutput){ pixel.R/65536.0, pixel.G/65536.0, pixel.B/65536.0};
+		pixel2.R = pixel.R/65536.0;
+		pixel2.G = pixel.G/65536.0;
+		pixel2.B = pixel.B/65536.0;
 	}
 	return pixel2;
 }
@@ -491,7 +495,8 @@ sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3
 {
 	//volumetric light
 	double tempDist = last_distance;
-	sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+	sShaderOutput volFog;
+	volFog.R = volFog.G = volFog.B = 0.0;
 	enumPerspectiveType perspectiveType = param->perspectiveType;
 	double fov = param->doubles.persp;
 	double quality = param->doubles.quality;
@@ -543,7 +548,8 @@ sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3
 
 sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distanceBuff, double *stepBuff, double *densityOut)
 {
-	sShaderOutput volFog = (sShaderOutput){ 0.0,0.0,0.0};
+	sShaderOutput volFog;
+	volFog.R = volFog.G = volFog.B = 0.0;
 	double density = 0;
 	double fogR = param->fogColour1.R;
 	double fogG = param->fogColour1.G;

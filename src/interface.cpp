@@ -2802,6 +2802,7 @@ void CreateInterface(sParamRender *default_settings)
 
 void CreateTooltips(void)
 {
+#ifndef __sgi
 	gtk_widget_set_tooltip_text(Interface.boxCoordinates, "Coordinates of camera view point in fractal units");
 	gtk_widget_set_tooltip_text(Interface.comboFractType, "Type of fractal formula");
 	gtk_widget_set_tooltip_text(Interface.checkJulia, "Fractal will be rendered as Julia fractal\naccording to coordinates of Julia constant");
@@ -2899,6 +2900,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.buAutoDEStep, "Scan for optimal DE factor for low image quality");
 	gtk_widget_set_tooltip_text(Interface.buAutoDEStepHQ, "Scan for optimal DE factor for high image quality");
 	gtk_widget_set_tooltip_text(Interface.checkConstantDEThreshold, "Switches to constant DE threshold mode\nDetail size not depends on image resolution and perspective depthness");
+#endif
 }
 
 bool ReadComandlineParams(int argc, char *argv[])
@@ -3136,7 +3138,11 @@ void CheckPrameters(sParamRender *params)
 
 sRGB GdkColor2sRGB(GdkColor color)
 {
-	return (sRGB){color.red, color.green, color.blue};
+	sRGB color2;
+	color2.R = color.red;
+	color2.G = color.green;
+	color2.B = color.blue;
+	return color2;
 }
 
 GdkColor sRGB2GdkColor(sRGB color)
@@ -3150,7 +3156,11 @@ GdkColor sRGB2GdkColor(sRGB color)
 
 sRGB sRGBDiv256(sRGB color)
 {
-	return (sRGB){color.R/256, color.G/256, color.B/256};
+	sRGB color2;
+	color2.R = color.R/256;
+	color2.G = color.G/256;
+	color2.B = color.B/256;
+	return color2;
 }
 
 //#define CLSUPPORT
