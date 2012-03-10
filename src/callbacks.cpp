@@ -570,7 +570,7 @@ void PressedSaveImagePNG16(GtkWidget *widget, gpointer data)
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		SavePNG16(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), &mainImage);
+		SavePNG16(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), mainImage.GetImage16Ptr());
 		strcpy(lastFilenameImage, filename);
 	}
 	gtk_widget_destroy(dialog);
@@ -2419,4 +2419,22 @@ void ChangedIterFogEnable(GtkWidget *widget, gpointer data)
 	bool active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable));
 	gtk_widget_set_sensitive(Interface.edit_iterFogOpacity, active);
 	gtk_widget_set_sensitive(Interface.edit_iterFogOpacityTrim, active);
+}
+
+void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
+{
+	GtkWidget *dialog;
+	dialog = gtk_file_chooser_dialog_new("Save all layers image as...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE,
+			GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), lastFilenameImage);
+
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+	{
+		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		SaveAllImageLayers(filename, &mainImage);
+		strcpy(lastFilenameImage, filename);
+	}
+	gtk_widget_destroy(dialog);
 }

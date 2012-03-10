@@ -42,11 +42,14 @@ int LoadJPEG(const char *filename, JSAMPLE *image);
 bool CheckJPEGsize(const char *filename, int *width, int *height);
 void SaveJPEG(const char *filename, int quality, int width, int height, JSAMPLE *image);
 void SavePNG(const char *filename, int quality, int width, int height, png_byte *image);
-void SavePNG16(const char *filename, int quality, int width, int height, cImage *image);
+void SavePNG16(const char *filename, int quality, int width, int height, sRGB16* image16);
 void SavePNG16Alpha(const char *filename, int quality, int width, int height, cImage *image);
 void SaveFromTilesPNG16(const char *filename, int width, int height, int tiles);
 bool FileIfExists(const char *filename);
 void WriteLog(const char *text);
 void WriteLogDouble(const char *text, double value);
 int fcopy(const char *source, const char *dest);
+void BufferNormalize16(sRGB16 *buffer, unsigned int size);
+void SaveAllImageLayers(const char *filename, cImage *image);
+std::string removeFileExtension(const std::string &filename);
 #endif /* FILES_H_ */
