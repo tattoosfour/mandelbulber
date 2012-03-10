@@ -171,7 +171,7 @@ sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, floa
 	//volumetric fog
 	double fogDensity = pixel.fogDensity16 / 65535.0;
 	double fogN = 1.0 - fogDensity;
-	alpha2 += fogDensity;
+	alpha2 += pixel.fogDensity16;
 
 	if(sw.iterFogEnabled)
 	{

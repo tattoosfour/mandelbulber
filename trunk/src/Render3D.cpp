@@ -2211,7 +2211,7 @@ void MainRender(void)
 							else if (Interface_data.imageFormat == imgFormatPNG16)
 							{
 								filename2 = IndexFilename(fractParam.file_destination, "png", index2);
-								SavePNG16(filename2.c_str(), 100, width, height, &mainImage);
+								SavePNG16(filename2.c_str(), 100, width, height, mainImage.GetImage16Ptr());
 							}
 							else if (Interface_data.imageFormat == imgFormatPNG16Alpha)
 							{

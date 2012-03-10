@@ -365,6 +365,7 @@ struct sInterface
 	GtkWidget *buColorPrimitiveWater;
 	GtkWidget *buAutoFog;
 	GtkWidget *buMeasureActivation;
+	GtkWidget *buSaveAllImageLayers;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
