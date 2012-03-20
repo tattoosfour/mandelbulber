@@ -91,9 +91,15 @@ CVector3 Projection3D(CVector3 point, CVector3 vp, CRotationMatrix mRot, enumPer
 
 	if (perspectiveType == fishEye)
 	{
-		vector1.x = sin(fov * point.x) * point.y;
-		vector1.z = sin(fov * point.z) * point.y;
-		vector1.y = cos(fov * point.x) * cos(fov * point.z) * point.y;
+		double r = sqrt(point.x * point.x + point.z * point.z);
+
+		vector1.x = point.x / r * sin(r*fov) * point.y;
+		vector1.z = point.z / r * sin(r*fov) * point.y;
+		vector1.y = cos(r*fov) * point.y;
+
+		//vector1.x = sin(fov * point.x) * point.y;
+		//vector1.z = sin(fov * point.z) * point.y;
+		//vector1.y = cos(fov * point.x) * cos(fov * point.z) * point.y;
 
 	}
 	else if(perspectiveType == equirectangular)
