@@ -389,6 +389,14 @@ void ReadInterface(sParamRender *params)
 		}
 		params->fractal.hybridCyclic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkHybridCyclic));
 		params->perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+		if(params->perspectiveType == fishEyeCut){
+			params->fishEyeCut = true;
+			params->perspectiveType = fishEye;
+		}
+		else
+		{
+			params->fishEyeCut = false;
+		}
 		params->doubles.stereoEyeDistance = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_stereoDistance)));
 		params->stereoEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStereoEnabled));
 		params->doubles.viewDistanceMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_viewMinDistance)));
@@ -948,7 +956,9 @@ void WriteInterface(sParamRender *params)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled), params->fractal.IFS.enabled[i]);
 	}
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), params->perspectiveType);
+	enumPerspectiveType perspTypeTemp = params->perspectiveType;
+	if(params->fishEyeCut && perspTypeTemp == fishEye) perspTypeTemp = fishEyeCut;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), perspTypeTemp);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), params->fractal.genFoldBox.type);
 
 	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
@@ -1760,6 +1770,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Three-point perspective");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Fish eye");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Equirectangular projection");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Fish eye 180 degree cut");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), 0);
 
 	Interface.comboImageProportion = gtk_combo_box_new_text();

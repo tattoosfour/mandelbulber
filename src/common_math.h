@@ -36,7 +36,7 @@ struct sSortZ
 
 enum enumPerspectiveType
 {
-	threePoint = 0, fishEye = 1, equirectangular = 2
+	threePoint = 0, fishEye = 1, equirectangular = 2, fishEyeCut = 3
 };
 
 //int abs(int v);

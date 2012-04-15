@@ -76,7 +76,7 @@ cTexture::~cTexture(void)
 sRGB8 cTexture::Pixel(double x, double y)
 {
 	sRGB8 black = { 0, 0, 0 };
-	if (x >= 0 && x < width && y >= 0 && y < height - 1)
+	if (x >= 0 && x < width - 1.0 && y >= 0 && y < height - 1.0)
 	{
 		return Interpolation(x, y);
 	}
