@@ -558,7 +558,7 @@ sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distance
 	double colourThresh2 = param->doubles.fogColour2Distance;
 	double fogReduce = param->doubles.fogDistanceFactor;
 	double fogIntensity = param->doubles.fogDensity;
-	for (int i = buffCount - 1; i >= 0; i--)
+	for (int i = buffCount - 2; i >= 0; i--)
 	{
 		double densityTemp = (stepBuff[i] * fogReduce) / (distanceBuff[i] * distanceBuff[i] + fogReduce * fogReduce);
 

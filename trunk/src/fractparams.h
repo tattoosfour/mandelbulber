@@ -105,6 +105,7 @@ struct sParamRender
 	bool penetratingLights;
 	bool stereoEnabled;
 	bool quiet;
+	bool fishEyeCut;
 	sImageSwitches imageSwitches;
 
 	sRGB background_color1; //background colour

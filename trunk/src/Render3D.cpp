@@ -249,6 +249,10 @@ void *MainThread(void *ptr)
 					if (programClosed)
 					{
 						delete[] vectorsAround;
+						delete[] distanceBuff;
+						delete[] stepBuff;
+						delete[] distanceBuffRefl;
+						delete[] stepBuffRefl;
 						return NULL;
 					}
 
@@ -261,10 +265,17 @@ void *MainThread(void *ptr)
 					if (y_scan_start > min_y) min_y = y_scan_start;
 
 					double x2,z2;
+					bool hemisphereCut = false;
 					if (perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
-						x2 = M_PI * ((double) x / width / tiles - 0.5 + tileXOffset/tiles) * aspectRatio;
-						z2 = M_PI * ((double) z / height / tiles  - 0.5 + tileYOffset/tiles);
+						x2 = ((double) x / width / tiles - 0.5 + tileXOffset/tiles) * aspectRatio;
+						z2 = ((double) z / height / tiles  - 0.5 + tileYOffset/tiles);
+						if(param.fishEyeCut && sqrt(x2*x2 + z2*z2) > 0.5 / fov)
+						{
+								hemisphereCut = true;
+						}
+						x2*=M_PI;
+						z2*=M_PI;
 					}
 					else
 					{
@@ -512,6 +523,14 @@ void *MainThread(void *ptr)
 								lastDist = dist;
 								lastStepY = stepYpersp;
 								lastCorrection = correction;
+
+								if (hemisphereCut)
+								{
+									found = false;
+									y_start = y;
+									last_distance = dist;
+									break;
+								}
 							}
 						}
 					} //next y
