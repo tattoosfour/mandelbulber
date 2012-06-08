@@ -856,11 +856,11 @@ double IterOpacity(double step, double iters, double maxN, double trim, double o
 }
 
 sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
-		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount)
+		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel)
 {
 	double density = 0.0;
 	double tempDist = last_distance;
-	sShaderOutput iterFog = { 0.0, 0.0, 0.0 };
+	sShaderOutput iterFog = {oldPixel.R/65536.0, oldPixel.G/65536.0, oldPixel.B/65536.0};
 	enumPerspectiveType perspectiveType = param->perspectiveType;
 	double fov = param->doubles.persp;
 	double quality = param->doubles.quality;
@@ -888,6 +888,24 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 
 		if (opacity > 0)
 		{
+			//fog colour
+			double iterFactor = (double)2.0* (L - param->doubles.iterFogOpacityTrim)/(param->fractal.N - param->doubles.iterFogOpacityTrim);
+			double k = iterFactor;
+			if (k > 1) k = 1.0;
+			double kn = 1.0 - k;
+			double fogColR = (param->fogColour1.R * kn + param->fogColour2.R * k);
+			double fogColG = (param->fogColour1.G * kn + param->fogColour2.G * k);
+			double fogColB = (param->fogColour1.B * kn + param->fogColour2.B * k);
+
+			double k2 = iterFactor - 1.0;
+			if (k2 < 0.0) k2 = 0.0;
+			if (k2 > 1.0) k2 = 1.0;
+			kn = 1.0 - k2;
+			fogColR = (fogColR * kn + param->fogColour3.R * k2);
+			fogColG = (fogColG * kn + param->fogColour3.G * k2);
+			fogColB = (fogColB * kn + param->fogColour3.B * k2);
+			//----
+
 			for (int i = 0; i < 5; i++)
 			{
 				if (i == 0)
@@ -928,11 +946,17 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 				newColour.B += AO.B * param->doubles.imageAdjustments.globalIlum;
 			}
 
-			iterFog.R = iterFog.R * (1.0 - opacity) + newColour.R * opacity;
-			iterFog.G = iterFog.G * (1.0 - opacity) + newColour.G * opacity;
-			iterFog.B = iterFog.B * (1.0 - opacity) + newColour.B * opacity;
+			if(opacity > 1.0) opacity = 1.0;
+			{
+				iterFog.R = iterFog.R * (1.0 - opacity) + newColour.R * opacity * fogColR/65536.0;
+				iterFog.G = iterFog.G * (1.0 - opacity) + newColour.G * opacity * fogColG/65536.0;
+				iterFog.B = iterFog.B * (1.0 - opacity) + newColour.B * opacity * fogColB/65536.0;
+			}
 
 			density+=opacity;
+
+			//printf("iF.R=%g, dens=%g\n", iterFog.R, density);
+
 			if(density>1.0) density = 1.0;
 		}
 	}

@@ -16,6 +16,7 @@
 #include "Render3D.h"
 #include "interface.h"
 #include "primitives.h"
+#include <stdlib.h>
 
 /**
  * Compute the fractal at the point, in one of the various modes
@@ -25,6 +26,21 @@
  *		 colouring: Returns colour index
  *		 delta_DE1, delta_DE2: Returns radius
  */
+
+unsigned int MixNumbers(double a, double b, double c)
+{
+	unsigned int result = int(a*12356312.0)^int(b*23564234.0)^int(c*35564353.0);
+	//printf("%ud\n", result);
+	return result;
+}
+
+int Noise(int seed)
+{
+	int x = seed;
+	x = (x<<7) ^ x;
+	return abs((x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff);
+}
+
 
 template<int Mode>
 double Compute(CVector3 z, const sFractal &par, int *iter_count)
@@ -824,6 +840,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			case kaleidoscopic:
 			{
+
 				if (par.IFS.absX) z.x = fabs(z.x);
 				if (par.IFS.absY) z.y = fabs(z.y);
 				if (par.IFS.absZ) z.z = fabs(z.z);

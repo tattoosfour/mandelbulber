@@ -580,7 +580,7 @@ void *MainThread(void *ptr)
 						sShaderOutput shadowOutput = { 1.0, 1.0, 1.0 };
 						sShaderOutput AO;
 						sRGB16 oldAO = {0,0,0};
-						if(!image->IsLowMemMode()) oldAO = image->GetPixelAmbient(x, z);
+						if(!image->IsLowMemMode() || param.imageSwitches.iterFogEnabled) oldAO = image->GetPixelAmbient(x, z);
 						AO.R = oldAO.R / 4096.0;
 						AO.G = oldAO.G / 4096.0;
 						AO.B = oldAO.B / 4096.0;
@@ -930,9 +930,20 @@ void *MainThread(void *ptr)
 					else
 					{
 						//iteration fog
+
+						unsigned short alpha2 = 0;
+						float zBuf = image->GetPixelZBuffer(x,z);
+						unsigned short colorIndex = image->GetPixelColor(x,z);
+						double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0);
+						double fog_visibility_front = pow(10,  param.doubles.imageAdjustments.fogVisibilityFront / 10 - 2.0) - 10.0;
+						pixelData.volumetricLight.R = 0;
+						pixelData.volumetricLight.G = 0;
+						pixelData.volumetricLight.B = 0;
+						pixelData.fogDensity16 = 0;
+						sRGB16 oldPixel16 = image->CalculatePixel(pixelData, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
 						double density;
-						volFog = IterationFog(&param, &calcParam, CVector3(x2, y, z2), y, min_y, last_distance, zoom, lightVector, found, &density, vectorsAround, vectorsCount);
-						pixelData.fogDensity16 = density * 65535;
+						volFog = IterationFog(&param, &calcParam, CVector3(x2, y, z2), y, min_y, last_distance, zoom, lightVector, found, &density, vectorsAround, vectorsCount, oldPixel16);
+						pixelData.fogDensity16 = 65535;
 						//end of iteration fog
 					}
 
@@ -1065,7 +1076,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		int refresh_index = 0;
 		int refresh_skip = 1;
 
-		if (image->IsLowMemMode()) image->CalculateGammaTable();
+		image->CalculateGammaTable();
 
 		for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
 		{
