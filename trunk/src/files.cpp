@@ -583,7 +583,7 @@ void BufferNormalize16(sRGB16 *buffer, unsigned int size)
 	int maxR = 0;
 	int maxG = 0;
 	int maxB = 0;
-	for(uint i = 0; i<size; i++)
+	for(unsigned int i = 0; i<size; i++)
 	{
 		int R = buffer[i].R; if(R > maxR) maxR = R;
 		int G = buffer[i].G; if(G > maxG) maxG = G;
@@ -594,7 +594,7 @@ void BufferNormalize16(sRGB16 *buffer, unsigned int size)
 	max = (maxB > max) ? maxB : max;
 	double factor = 65535.0 / max;
 	if(max == 0) factor = 1.0;
-	for(uint i = 0; i<size; i++)
+	for(unsigned int i = 0; i<size; i++)
 	{
 		buffer[i].R *= factor;
 		buffer[i].G *= factor;
@@ -611,53 +611,53 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 	sComplexImage *ci = image->GetComplexImagePtr();
 	string file(filename);
 	file = removeFileExtension(file);
-	for(uint i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].fogDensity16;
+	for(unsigned int i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].fogDensity16;
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_fog.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].glowBuf16;
+	for(unsigned int i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].glowBuf16;
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_glow.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].shadingBuf16;
+	for(unsigned int i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].shadingBuf16;
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_shading.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].shadowsBuf16;
+	for(unsigned int i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].shadowsBuf16;
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_shadow.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].specularBuf16;
+	for(unsigned int i = 0; i<size; i++)	buffer16[i].R = buffer16[i].G = buffer16[i].B = ci[i].specularBuf16;
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_specular.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].ambientBuf16.R; buffer16[i].G = ci[i].ambientBuf16.G; buffer16[i].B = ci[i].ambientBuf16.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].ambientBuf16.R; buffer16[i].G = ci[i].ambientBuf16.G; buffer16[i].B = ci[i].ambientBuf16.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_ambient.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].auxLight.R; buffer16[i].G = ci[i].auxLight.G; buffer16[i].B = ci[i].auxLight.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].auxLight.R; buffer16[i].G = ci[i].auxLight.G; buffer16[i].B = ci[i].auxLight.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_auxLights.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].auxSpecular.R; buffer16[i].G = ci[i].auxSpecular.G; buffer16[i].B = ci[i].auxSpecular.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].auxSpecular.R; buffer16[i].G = ci[i].auxSpecular.G; buffer16[i].B = ci[i].auxSpecular.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_auxlightsSpec.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].backgroundBuf16.R; buffer16[i].G = ci[i].backgroundBuf16.G; buffer16[i].B = ci[i].backgroundBuf16.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].backgroundBuf16.R; buffer16[i].G = ci[i].backgroundBuf16.G; buffer16[i].B = ci[i].backgroundBuf16.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_bkg.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].reflectBuf16.R; buffer16[i].G = ci[i].reflectBuf16.G; buffer16[i].B = ci[i].reflectBuf16.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].reflectBuf16.R; buffer16[i].G = ci[i].reflectBuf16.G; buffer16[i].B = ci[i].reflectBuf16.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_refl.png").c_str(), 100, width, height, buffer16);
 
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = ci[i].volumetricLight.R; buffer16[i].G = ci[i].volumetricLight.G; buffer16[i].B = ci[i].volumetricLight.B;}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = ci[i].volumetricLight.R; buffer16[i].G = ci[i].volumetricLight.G; buffer16[i].B = ci[i].volumetricLight.B;}
 	BufferNormalize16(buffer16, size);
 	SavePNG16((file+"_fogCol.png").c_str(), 100, width, height, buffer16);
 
 	sImageAdjustments *imageAdjustments = image->GetImageAdjustments();
 	unsigned short *colours = image->GetColourIndexBufPtr();
-	for (uint i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		int colorIndex = colours[i];
 		int color_number;
@@ -676,14 +676,14 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 	SavePNG16((file+"_col.png").c_str(), 100, width, height, buffer16);
 
 	unsigned short *alpha = image->GetAlphaBufPtr();
-	for(uint i = 0; i<size; i++)	{buffer16[i].R = alpha[i]; buffer16[i].G = alpha[i]; buffer16[i].B = alpha[i];}
+	for(unsigned int i = 0; i<size; i++)	{buffer16[i].R = alpha[i]; buffer16[i].G = alpha[i]; buffer16[i].B = alpha[i];}
 	SavePNG16((file+"_alpha.png").c_str(), 100, width, height, buffer16);
 
 	//normalize zBuffer
 	float *zbuffer = image->GetZBufferPtr();
 	float minZ = 1.0e50;
 	float maxZ = 0.0;
-	for (uint i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		float z = zbuffer[i];
 		if(z > maxZ && z < 1e19) maxZ = z;
@@ -691,7 +691,7 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 	}
 	float zRange = maxZ - minZ;
 	float zFactor = 65000.0 / zRange;
-	for(uint i = 0; i<size; i++)
+	for(unsigned int i = 0; i<size; i++)
 	{
 		int z = (zbuffer[i] - minZ) * zFactor;
 		if(zbuffer[i] > 1e19) z = 65535;
