@@ -1,5 +1,14 @@
 Version history
 
+v1.12-1
+- fixed bud: background texture was not seamless
+- fixed bug: some of shadows in volumatric iteration fog weren't calculated properly
+
+v1.12
+- added saving of all image layers in separate PNG 16-bit files
+- improved fish eye perspective projection - now is compatible with full-dome projectors
+- added "fish eye 180 degree cut" mode to limit rendering area to hemisphere
+
 v1.11
 - added iteration fog effect (fog which density depends on interation count). This fog cast shadows on fractal surface and on itself. Can be also iluminated by auxiliary lights and ambiet occlusion.
 - improved water animation effect

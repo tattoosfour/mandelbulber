@@ -868,8 +868,15 @@ void *MainThread(void *ptr)
 						}
 
 						image->PutPixelColor(x, z, colorIndex);
-						image->PutPixelZBuffer(x, z, y);
 
+						if (perspectiveType == fishEye || perspectiveType == equirectangular)
+						{
+							image->PutPixelZBuffer(x, z, y*1.0e12);
+						}
+						else
+						{
+							image->PutPixelZBuffer(x, z, y);
+						}
 						pixelData.shadowsBuf16 = shadow16;
 						pixelData.ambientBuf16 = globalLight;
 						pixelData.shadingBuf16 = shade16;

@@ -145,8 +145,11 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				double aspectRatio = (double) width / height;
 
 				enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+				if(perspectiveType == fishEyeCut) perspectiveType = fishEye;
+
 				if (perspectiveType == fishEye || perspectiveType == equirectangular)
 				{
+					y /= 1e12;
 					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 					z2 = M_PI * ((double) z / height - 0.5);
 				}
