@@ -27,6 +27,9 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1181385980" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.643711976" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-march=native -mfpmath=387,sse -ffast-math" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.other.other.966241485" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags gtk+-2.0 gthread-2.0;`" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1050697635" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="ONETHREAD"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.424358389" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1497891766" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">

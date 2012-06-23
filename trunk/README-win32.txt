@@ -1,4 +1,4 @@
-MANDELBULBER 1.11 - Windows
+MANDELBULBER 1.12-1 - Windows
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
