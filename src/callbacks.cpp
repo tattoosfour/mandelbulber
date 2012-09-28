@@ -2441,3 +2441,13 @@ void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
 	}
 	gtk_widget_destroy(dialog);
 }
+
+void PressedServerEnable(GtkWidget *widget, gpointer data)
+{
+
+}
+
+void PressedClientEnable(GtkWidget *widget, gpointer data)
+{
+
+}

@@ -107,6 +107,8 @@ void PressedMeasureActivation(GtkWidget *widget, gpointer data);
 void ChangedOpenClEnabled(GtkWidget *widget, gpointer data);
 void ChangedIterFogEnable(GtkWidget *widget, gpointer data);
 void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data);
+void PressedServerEnable(GtkWidget *widget, gpointer data);
+void PressedClientEnable(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

@@ -1241,6 +1241,16 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_primitiveBox), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_primitiveSphere), 5);
 
+	Interface.tabsNetRender = gtk_notebook_new();
+	Interface.tab_label_server = gtk_label_new("Server");
+	Interface.tab_label_client = gtk_label_new("Client");
+
+	Interface.tab_box_server = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_client = gtk_vbox_new(FALSE, 1);
+
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_server), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_client), 5);
+
 	//boxes
 	Interface.boxMain = gtk_vbox_new(FALSE, 1);
 	Interface.boxButtons = gtk_hbox_new(FALSE, 1);
@@ -1370,6 +1380,11 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClEngineSettingsV = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH1 = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH2 = gtk_vbox_new(FALSE, 1);
+	Interface.boxNetRenderClientV = gtk_vbox_new(FALSE, 1);
+	Interface.boxNetRenderClientH1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxNetRenderServerV = gtk_vbox_new(FALSE, 1);
+	Interface.boxNetRenderServerH1 = gtk_hbox_new(FALSE, 1);
+
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
 	//tables
@@ -1428,6 +1443,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frOpenClSettings = gtk_frame_new("OpenCL settings");
 	Interface.frOpenClInformation = gtk_frame_new("OpenCL information");
 	Interface.frOpenClEngineSettings = gtk_frame_new("Engine settings");
+	Interface.frNetRender = gtk_frame_new("Rendering via network");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1727,6 +1743,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_iterFogOpacityTrim = gtk_entry_new();
 	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
 
+	Interface.edit_netRenderClientName = gtk_entry_new();
+	Interface.edit_netRenderClientPort = gtk_entry_new();
+	Interface.edit_netRenderServerPort = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1854,6 +1874,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL Enable");
 	Interface.checkIterFogEnable = gtk_check_button_new_with_label("Iteration fog");
+	Interface.checkNetRenderClientEnable = gtk_check_button_new_with_label("Client enable");
+	Interface.checkNetRenderServerEnable = gtk_check_button_new_with_label("Server enable");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -1900,6 +1922,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_OpenClPlatformBy = gtk_label_new("");
 	Interface.label_OpenClStatus = gtk_label_new("");
 	Interface.label_OpenClWorkgroupSize = gtk_label_new("");
+	Interface.label_serverStatus = gtk_label_new("status: not enabled");
+	Interface.label_clientStatus = gtk_label_new("status: not enabled");
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
 		Interface.label_HybridFormula[i-1] = gtk_label_new(g_strdup_printf("Formula #%d:", i));
@@ -2005,6 +2029,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClEnable, ChangedOpenClEnabled);
 	CONNECT_SIGNAL_CLICKED(Interface.checkIterFogEnable, ChangedIterFogEnable);
 	CONNECT_SIGNAL_CLICKED(Interface.buSaveAllImageLayers, PressedSaveAllImageLayers);
+	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerEnable, PressedServerEnable);
+	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderClientEnable, PressedClientEnable);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -2289,6 +2315,23 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), Interface.checkAutoSaveImage, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frNetRender, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frNetRender), Interface.tabsNetRender);
+
+	//frame netRender
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_server), Interface.boxNetRenderServerV, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.boxNetRenderServerH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), CreateEdit("5555", "   network port:", 20, Interface.edit_netRenderServerPort), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.label_serverStatus, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_client), Interface.boxNetRenderClientV, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.boxNetRenderClientH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), Interface.checkNetRenderClientEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("11.0.0.5", "   IP or domain of server:", 20, Interface.edit_netRenderClientName), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("5555", "port:", 10, Interface.edit_netRenderClientPort), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.label_clientStatus, false, false, 1);
 
 	//frame effects
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frEffects, false, false, 1);
@@ -2780,6 +2823,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBox, Interface.tab_label_primitiveBox);
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphere, Interface.tab_label_primitiveSphere);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_server, Interface.tab_label_server);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_client, Interface.tab_label_client);
 
 	//main window pack
 	gtk_container_add(GTK_CONTAINER(window_interface), Interface.boxMain);
