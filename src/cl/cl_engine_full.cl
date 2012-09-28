@@ -191,7 +191,7 @@ float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, flo
 		float scan = i * i * delta;
 		float4 pointTemp = point + normal * scan;
 		float dist = CalculateDistance(pointTemp, fractal).distance;
-		aoTemp += 1.0/(native_powr(2.0,i)) * (scan - tune*dist)/dist_thresh;
+		aoTemp += 1.0/(native_powr(2.0,(float)i)) * (scan - tune*dist)/dist_thresh;
 	}
 	float ao = 1.0 - 0.2 * aoTemp;
 	if(ao < 0) ao = 0;

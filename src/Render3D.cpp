@@ -8,8 +8,6 @@
  / Windows port by Makemeunsee, Knigty                   *
  ********************************************************/
 
-//SVN TEST
-
 #ifdef WIN32 /* WINDOWS */
 #include <windows.h>
 #define HAVE_BOOLEAN  /* prevent jmorecfg.h from redefining it */
