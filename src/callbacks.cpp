@@ -24,6 +24,7 @@
 #include "undo.hpp"
 #include "timeline.hpp"
 #include "cl_support.hpp"
+#include "netrender.hpp"
 
 using namespace std;
 
@@ -2444,7 +2445,9 @@ void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
 
 void PressedServerEnable(GtkWidget *widget, gpointer data)
 {
-
+	char status[1000];
+	netRender->SetServer("5555", status);
+	gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
 }
 
 void PressedClientEnable(GtkWidget *widget, gpointer data)

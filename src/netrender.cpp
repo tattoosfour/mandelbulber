@@ -7,6 +7,8 @@
 
 #include "netrender.hpp"
 
+CNetRender *netRender;
+
 CNetRender::CNetRender()
 {
   memset(&host_info, 0, sizeof host_info);
@@ -16,7 +18,7 @@ CNetRender::CNetRender()
   socketfd = 0;
 }
 
-void CNetRender::SetServer(char *portNo)
+void CNetRender::SetServer(char *portNo, char *statusOut)
 {
 	isServer = true;
   memset(&host_info, 0, sizeof host_info);
@@ -51,5 +53,11 @@ void CNetRender::SetServer(char *portNo)
   	std::cout << "socket options error " << strerror(errno);
 
   status = bind(socketfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
-  if (status == -1)  std::cout << "bind error" << std::endl ;
+  if (status == -1)
+  	std::cout << "bind error" << std::endl ;
+  else
+  {
+  	strcpy(statusOut,"status: server enabled");
+  	printf("Server enabled\n");
+  }
 }
