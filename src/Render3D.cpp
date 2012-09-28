@@ -998,6 +998,16 @@ void *MainThread(void *ptr)
 				{
 					percent_done = (((double) *parametry->done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 				}
+
+				if(param.noOfTiles > 1)
+				{
+					percent_done = (param.tileCount + percent_done/100.0) / (param.noOfTiles * param.noOfTiles)*100.0;
+				}
+				if(Interface_data.animMode)
+				{
+					percent_done = (param.fractal.frameNo - param.startFrame + percent_done/100.0) / (param.endFrame - param.startFrame + 1) * 100.0;
+				}
+
 				double time = real_clock() - start_time;
 				double time_to_go = (100.0 - percent_done) * time / percent_done;
 				int togo_time_s = (int) time_to_go % 60;
@@ -1068,7 +1078,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		Missed_DE_counter = 0;
 		DEerror = 0;
 		DE_counterForDEerror = 0;
-		start_time = real_clock();
 
 		//initialising threads
 		int *thread_done = new int[height];
@@ -1189,6 +1198,16 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						{
 							percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 						}
+
+						if(param.noOfTiles > 1)
+						{
+							percent_done = (param.tileCount + percent_done/100.0) / (param.noOfTiles * param.noOfTiles)*100.0;
+						}
+						if(Interface_data.animMode)
+						{
+							percent_done = (param.fractal.frameNo - param.startFrame + percent_done/100.0) / (param.endFrame - param.startFrame + 1) * 100.0;
+						}
+
 						double time = real_clock() - start_time;
 						double time_to_go = (100.0 - percent_done) * time / percent_done;
 						int togo_time_s = (int) time_to_go % 60;
@@ -1982,6 +2001,8 @@ void MainRender(void)
 	CVector3 last_vp_position = fractParam.doubles.vp;
 
 	int tiles = fractParam.noOfTiles;
+
+	start_time = real_clock();
 
 	printf("************ Rendering frames *************\n");
 	WriteLog("************ Rendering frames *************");

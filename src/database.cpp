@@ -22,7 +22,6 @@ cDatabase::cDatabase(int size)
 	recordCount = size;
 	indexCount = size - 1;
 }
-;
 
 void cDatabase::ClearDatabase()
 {
@@ -65,7 +64,6 @@ errorCode cDatabase::SetRecord(int index, const char *record, int recordSize)
 	}
 	return err;
 }
-;
 
 //get data from database
 errorCode cDatabase::GetRecord(int index, char *record)
@@ -199,7 +197,6 @@ errorCode cDatabase::DeleteRecord(int index)
 	}
 	return err;
 }
-;
 
 int cDatabase::Count()
 {
@@ -224,7 +221,6 @@ bool cDatabase::IsFilled(int index)
 		return false;
 	}
 }
-;
 
 int cDatabase::GetInternalIndex(int index)
 {
