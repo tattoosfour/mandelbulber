@@ -8,6 +8,7 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
+#include <gtk/gtk.h>
 #include "fractparams.h"
 #include "cl_support.hpp"
 
@@ -83,6 +84,9 @@ struct sInterface
 	GtkWidget *tab_label_primitiveBox;
 	GtkWidget *tab_label_primitiveSphere;
 	GtkWidget *tab_label_openCL;
+	GtkWidget *tabsNetRender;
+	GtkWidget *tab_label_server;
+	GtkWidget *tab_label_client;
 
 	GtkWidget *tab_box_view;
 	GtkWidget *tab_box_fractal;
@@ -100,6 +104,8 @@ struct sInterface
 	GtkWidget *tab_box_primitiveBox;
 	GtkWidget *tab_box_primitiveSphere;
 	GtkWidget *tab_box_openCL;
+	GtkWidget *tab_box_server;
+	GtkWidget *tab_box_client;
 
 	GtkWidget *boxMain;
 	GtkWidget *boxButtons;
@@ -230,6 +236,10 @@ struct sInterface
 	GtkWidget *boxOpenClEngineSettingsV;
 	GtkWidget *boxOpenClEngineSettingsH1;
 	GtkWidget *boxOpenClEngineSettingsH2;
+	GtkWidget *boxNetRenderServerV;
+	GtkWidget *boxNetRenderClientV;
+	GtkWidget *boxNetRenderServerH1;
+	GtkWidget *boxNetRenderClientH1;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -286,6 +296,7 @@ struct sInterface
 	GtkWidget *frOpenClSettings;
 	GtkWidget *frOpenClInformation;
 	GtkWidget *frOpenClEngineSettings;
+	GtkWidget *frNetRender;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -546,6 +557,9 @@ struct sInterface
 	GtkWidget *edit_OpenCLPixelsPerJob;
 	GtkWidget *edit_iterFogOpacityTrim;
 	GtkWidget *edit_iterFogOpacity;
+	GtkWidget *edit_netRenderServerPort;
+	GtkWidget *edit_netRenderClientPort;
+	GtkWidget *edit_netRenderClientName;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -582,6 +596,8 @@ struct sInterface
 	GtkWidget *label_OpenClMemorySize;
 	GtkWidget *label_OpenClWorkgroupSize;
 	GtkWidget *label_OpenClStatus;
+	GtkWidget *label_serverStatus;
+	GtkWidget *label_clientStatus;
 
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
@@ -645,6 +661,8 @@ struct sInterface
 	GtkWidget *checkPrimitiveWaterEnabled;
 	GtkWidget *checkOpenClEnable;
 	GtkWidget *checkIterFogEnable;
+	GtkWidget *checkNetRenderServerEnable;
+	GtkWidget *checkNetRenderClientEnable;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
