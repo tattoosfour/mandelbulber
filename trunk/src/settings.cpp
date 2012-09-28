@@ -100,7 +100,7 @@ void GetPaletteFromString(sRGB *palette, const char *paletteString)
 	for (int i = 0; i < 2000; i++)
 	{
 		int colour = 0;
-		sscanf(&paletteString[i], "%x", &colour);
+		sscanf(&paletteString[i], "%x", (unsigned int*)&colour);
 		sRGB rgbColour;
 		rgbColour.R = colour / 65536;
 		rgbColour.G = (colour / 256) % 256;

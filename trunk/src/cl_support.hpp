@@ -13,6 +13,8 @@
 //#define CLSUPPORT
 
 #ifdef CLSUPPORT
+
+#include <CL/opencl.h>
 #include <CL/cl.hpp>
 #include <cstdio>
 #include <cstdlib>
