@@ -35,6 +35,7 @@
 #include "settings.h"
 #include "undo.hpp"
 #include "callbacks.h"
+#include "netrender.hpp"
 
 using namespace std;
 
@@ -1609,6 +1610,9 @@ int main(int argc, char *argv[])
 			WriteLog("Parameters loaded in noGUI mode");
 		}
 	}
+
+	//initialise netRender
+	netRender = new CNetRender;
 
 	//set program home directory
 	if (!chdir(data_directory))

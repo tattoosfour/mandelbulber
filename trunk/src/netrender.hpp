@@ -22,8 +22,8 @@ class CNetRender
 public:
 	CNetRender();
 	~CNetRender();
-	void SetServer(char *portNo);
-	void SetClient(char *portNo, char*name);
+	void SetServer(char *portNo, char *status);
+	void SetClient(char *portNo, char*name, char *statusOut);
 
 private:
   int status;
@@ -33,5 +33,6 @@ private:
   int socketfd ; // The socket descripter
 };
 
+extern CNetRender *netRender;
 
 #endif /* NETRENDER_HPP_ */
