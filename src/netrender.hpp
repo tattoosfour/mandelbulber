@@ -22,8 +22,8 @@ class CNetRender
 public:
 	CNetRender();
 	~CNetRender();
-	void SetServer(char *portNo, char *status);
-	void SetClient(char *portNo, char*name, char *statusOut);
+	bool SetServer(char *portNo, char *statusOut);
+	bool SetClient(char *portNo, char*name, char *statusOut);
 
 private:
   int status;

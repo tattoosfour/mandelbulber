@@ -2445,12 +2445,20 @@ void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
 
 void PressedServerEnable(GtkWidget *widget, gpointer data)
 {
-	char status[1000];
-	netRender->SetServer("5555", status);
-	gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderServerEnable)))
+	{
+		char status[1000];
+		netRender->SetServer("5555", status);
+		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
+	}
 }
 
 void PressedClientEnable(GtkWidget *widget, gpointer data)
 {
-
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable)))
+	{
+		char status[1000];
+		netRender->SetClient("5555", "11.0.0.5", status);
+		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
+	}
 }
