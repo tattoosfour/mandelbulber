@@ -7,6 +7,7 @@
 
 #include "netrender.hpp"
 #include <stdio.h>
+#include <arpa/inet.h>
 
 CNetRender *netRender;
 
