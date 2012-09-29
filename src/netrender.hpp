@@ -14,8 +14,16 @@
 #include <netdb.h>
 #include <errno.h>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
+
+struct sClients
+{
+	int socketfd;
+	char ipstr[INET6_ADDRSTRLEN];
+	int port;
+};
 
 class CNetRender
 {
@@ -24,6 +32,7 @@ public:
 	~CNetRender();
 	bool SetServer(char *portNo, char *statusOut);
 	bool SetClient(char *portNo, char*name, char *statusOut);
+	int WaitForClient(void);
 
 private:
   int status;
@@ -31,6 +40,8 @@ private:
   struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
   bool isServer;
   int socketfd ; // The socket descripter
+  int clientIndex;
+  vector<sClients> clients;
 };
 
 extern CNetRender *netRender;

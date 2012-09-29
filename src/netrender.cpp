@@ -98,3 +98,51 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   	return true;
   }
 }
+
+int CNetRender::WaitForClient()
+{
+	std::cout << "Listen()ing for connections..." << std::endl;
+	status = listen(socketfd, 5);
+	if (status == -1) std::cout << "listen error" << std::endl;
+
+	struct sockaddr_storage their_addr;
+	socklen_t addr_size = sizeof(their_addr);
+	sClients newClient;
+	newClient.socketfd = accept(socketfd, (struct sockaddr *) &their_addr, &addr_size);
+	if (newClient.socketfd  == -1)
+	{
+		std::cout << "listen error" << std::endl;
+	}
+	else
+	{
+		std::cout << "Connection accepted. Using new socketfd : " << newClient.socketfd << std::endl;
+
+		//getting IP address
+		socklen_t len;
+		struct sockaddr_storage addr;
+		char ipstr[INET6_ADDRSTRLEN];
+		int port;
+
+		len = sizeof addr;
+		getpeername(newClient.socketfd, (struct sockaddr*)&addr, &len);
+
+		// deal with both IPv4 and IPv6:
+		if (addr.ss_family == AF_INET) {
+		    struct sockaddr_in *saddr = (struct sockaddr_in *)&addr;
+		    port = ntohs(saddr->sin_port);
+		    inet_ntop(AF_INET, &saddr->sin_addr, ipstr, sizeof ipstr);
+		} else { // AF_INET6
+		    struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)&addr;
+		    port = ntohs(saddr->sin6_port);
+		    inet_ntop(AF_INET6, &saddr->sin6_addr, ipstr, sizeof ipstr);
+		}
+		printf("Peer IP address: %s, port %d\n", ipstr, port);
+
+		strcpy(newClient.ipstr, ipstr);
+		newClient.port = port;
+
+		clients.push_back(newClient);
+		clientIndex = clients.size();
+	}
+	return clientIndex;
+}
