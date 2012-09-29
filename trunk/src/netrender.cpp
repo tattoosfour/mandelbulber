@@ -6,6 +6,7 @@
  */
 
 #include "netrender.hpp"
+#include <stdio.h>
 
 CNetRender *netRender;
 
@@ -18,9 +19,8 @@ CNetRender::CNetRender()
   socketfd = 0;
 }
 
-void CNetRender::SetServer(char *portNo, char *statusOut)
+bool CNetRender::SetServer(char *portNo, char *statusOut)
 {
-	isServer = true;
   memset(&host_info, 0, sizeof host_info);
 
   host_info.ai_family = AF_UNSPEC;     // IP version not specified. Can be both.
@@ -54,10 +54,47 @@ void CNetRender::SetServer(char *portNo, char *statusOut)
 
   status = bind(socketfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1)
+  {
   	std::cout << "bind error" << std::endl ;
+  	return false;
+  }
   else
   {
   	strcpy(statusOut,"status: server enabled");
   	printf("Server enabled\n");
+  	isServer = true;
+  	return true;
+  }
+}
+
+bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
+{
+	memset(&host_info, 0, sizeof host_info);
+
+	host_info.ai_family = AF_UNSPEC;     // IP version not specified. Can be both.
+	host_info.ai_socktype = SOCK_STREAM; // Use SOCK_STREAM for TCP or SOCK_DGRAM for UDP.
+
+	status = getaddrinfo(name, portNo, &host_info, &host_info_list);
+	if (status != 0)  std::cout << "getaddrinfo error" << gai_strerror(status) ;
+
+	std::cout << "Creating a socket..."  << std::endl;
+	int socketfd ; // The socket descripter
+	socketfd = socket(host_info_list->ai_family, host_info_list->ai_socktype,
+	host_info_list->ai_protocol);
+	if (socketfd == -1)  std::cout << "socket error " << strerror(errno);
+
+  std::cout << "Connect()ing..."  << std::endl;
+  status = connect(socketfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
+  if (status == -1)
+  {
+  	std::cout << "connect error" << strerror(errno);
+  	strcpy(statusOut, strerror(errno));
+  	return false;
+  }
+  else
+  {
+  	strcpy(statusOut,"status: client connected to server");
+  	printf("Client connected to server\n");
+  	return true;
   }
 }
