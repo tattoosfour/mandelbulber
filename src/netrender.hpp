@@ -32,7 +32,7 @@ public:
 	~CNetRender();
 	bool SetServer(char *portNo, char *statusOut);
 	bool SetClient(char *portNo, char*name, char *statusOut);
-	int WaitForClient(void);
+	bool WaitForClient(char *statusOut);
 
 private:
   int status;
