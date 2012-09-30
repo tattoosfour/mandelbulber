@@ -86,6 +86,7 @@ void CNetRender::DeleteServer(void)
 		}
 		clients.clear();
 	}
+	isServer = false;
 }
 
 bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)

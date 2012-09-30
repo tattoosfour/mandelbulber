@@ -662,6 +662,7 @@ struct sInterface
 	GtkWidget *checkOpenClEnable;
 	GtkWidget *checkIterFogEnable;
 	GtkWidget *checkNetRenderServerEnable;
+	GtkWidget *checkNetRenderServerScan;
 	GtkWidget *checkNetRenderClientEnable;
 
 	GtkWidget *colorSelectionGlow1;
