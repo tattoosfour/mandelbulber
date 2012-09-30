@@ -18,6 +18,7 @@ CNetRender::CNetRender()
   status = 0;
   isServer = false;
   socketfd = 0;
+  clientIndex = 0;
 }
 
 bool CNetRender::SetServer(char *portNo, char *statusOut)
@@ -42,7 +43,7 @@ bool CNetRender::SetServer(char *portNo, char *statusOut)
   status = setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
   struct timeval timeout;
-  timeout.tv_sec = 60;
+  timeout.tv_sec = 1;
   timeout.tv_usec = 0;
 
   if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
@@ -100,11 +101,16 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   }
 }
 
-int CNetRender::WaitForClient()
+bool CNetRender::WaitForClient(char *statusOut)
 {
-	std::cout << "Listen()ing for connections..." << std::endl;
+	//std::cout << "Listen()ing for connections..." << std::endl;
 	status = listen(socketfd, 5);
-	if (status == -1) std::cout << "listen error" << std::endl;
+	if (status == -1)
+	{
+		//std::cout << "listen error" << std::endl;
+		strcpy(statusOut,"status: listen error");
+		return false;
+	}
 
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size = sizeof(their_addr);
@@ -112,7 +118,9 @@ int CNetRender::WaitForClient()
 	newClient.socketfd = accept(socketfd, (struct sockaddr *) &their_addr, &addr_size);
 	if (newClient.socketfd  == -1)
 	{
-		std::cout << "listen error" << std::endl;
+		//std::cout << "listen error" << std::endl;
+		strcpy(statusOut,"status: client not found");
+		return false;
 	}
 	else
 	{
@@ -137,13 +145,19 @@ int CNetRender::WaitForClient()
 		    port = ntohs(saddr->sin6_port);
 		    inet_ntop(AF_INET6, &saddr->sin6_addr, ipstr, sizeof ipstr);
 		}
-		printf("Peer IP address: %s, port %d\n", ipstr, port);
 
 		strcpy(newClient.ipstr, ipstr);
 		newClient.port = port;
 
 		clients.push_back(newClient);
 		clientIndex = clients.size();
+
+		char stat[1000];
+		sprintf(stat,"status: Client #%d has IP address: %s, port %d\n", clientIndex, ipstr, port);
+		strcpy(statusOut, stat);
+		std::cout << stat;
+
+		return true;
 	}
-	return clientIndex;
+
 }

@@ -2450,9 +2450,22 @@ void PressedServerEnable(GtkWidget *widget, gpointer data)
 		char status[1000];
 		bool result = netRender->SetServer("5555", status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
+
+		while (gtk_events_pending())
+			gtk_main_iteration();
+
 		if(result)
 		{
-			netRender->WaitForClient();
+			for(int i=0; i<1000; i++)
+			{
+				result = netRender->WaitForClient(status);
+				if(result)
+				{
+					gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
+				}
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
 		}
 	}
 }
