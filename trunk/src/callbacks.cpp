@@ -2452,28 +2452,16 @@ void PressedServerEnable(GtkWidget *widget, gpointer data)
 		char status[1000];
 		bool result = netRender->SetServer((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderServerPort)), status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
-
-		while (gtk_events_pending())
-			gtk_main_iteration();
-
 		if(result)
 		{
-			for(int i=0; i<1000; i++)
-			{
-				result = netRender->WaitForClient(status);
-				if(result)
-				{
-					gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
-				}
-				while (gtk_events_pending())
-					gtk_main_iteration();
-			}
+			gtk_widget_set_sensitive(Interface.checkNetRenderServerScan, true);
 		}
 	}
 	else
 	{
 		netRender->DeleteServer();
 		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),"status: not enabled");
+		gtk_widget_set_sensitive(Interface.checkNetRenderServerScan, false);
 	}
 }
 
@@ -2489,5 +2477,37 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 	{
 		netRender->DeleteClient();
 		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus),"status: not enabled");
+	}
+}
+
+void PressedServerScan(GtkWidget *widget, gpointer data)
+{
+	char status[1000];
+
+	if (netRender->IsServer())
+	{
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderServerScan)))
+		{
+			gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), "status: waiting for clients");
+
+			while (gtk_events_pending())
+				gtk_main_iteration();
+
+			while (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderServerScan)))
+			{
+				bool result = netRender->WaitForClient(status);
+				if (result)
+				{
+					gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
+				}
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
+		}
+		else
+		{
+			sprintf(status, "status: %d clients connected", netRender->getNoOfClients());
+			gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
+		}
 	}
 }

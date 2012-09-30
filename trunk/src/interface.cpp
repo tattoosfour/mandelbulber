@@ -1876,6 +1876,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkIterFogEnable = gtk_check_button_new_with_label("Iteration fog");
 	Interface.checkNetRenderClientEnable = gtk_check_button_new_with_label("Client enable");
 	Interface.checkNetRenderServerEnable = gtk_check_button_new_with_label("Server enable");
+	Interface.checkNetRenderServerScan = gtk_check_button_new_with_label("Scan for clients");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -2030,6 +2031,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkIterFogEnable, ChangedIterFogEnable);
 	CONNECT_SIGNAL_CLICKED(Interface.buSaveAllImageLayers, PressedSaveAllImageLayers);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerEnable, PressedServerEnable);
+	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerScan, PressedServerScan);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderClientEnable, PressedClientEnable);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
@@ -2323,6 +2325,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_server), Interface.boxNetRenderServerV, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.boxNetRenderServerH1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerScan, false, false, 1);
+	gtk_widget_set_sensitive(Interface.checkNetRenderServerScan, false);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), CreateEdit("5555", "   network port:", 20, Interface.edit_netRenderServerPort), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.label_serverStatus, false, false, 1);
 

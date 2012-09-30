@@ -35,6 +35,8 @@ public:
 	bool SetClient(char *portNo, char*name, char *statusOut);
 	void DeleteClient(void);
 	bool WaitForClient(char *statusOut);
+	bool IsServer() {return isServer;}
+	int getNoOfClients() {return clientIndex;};
 
 private:
   int status;
