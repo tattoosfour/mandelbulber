@@ -31,7 +31,9 @@ public:
 	CNetRender();
 	~CNetRender();
 	bool SetServer(char *portNo, char *statusOut);
+	void DeleteServer(void);
 	bool SetClient(char *portNo, char*name, char *statusOut);
+	void DeleteClient(void);
 	bool WaitForClient(char *statusOut);
 
 private:
