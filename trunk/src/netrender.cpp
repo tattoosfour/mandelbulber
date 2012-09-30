@@ -21,6 +21,11 @@ CNetRender::CNetRender()
   clientIndex = 0;
 }
 
+CNetRender::~CNetRender()
+{
+
+}
+
 bool CNetRender::SetServer(char *portNo, char *statusOut)
 {
   memset(&host_info, 0, sizeof host_info);
@@ -69,6 +74,20 @@ bool CNetRender::SetServer(char *portNo, char *statusOut)
   }
 }
 
+void CNetRender::DeleteServer(void)
+{
+	if(host_info_list) freeaddrinfo(host_info_list);
+	if(socketfd > 0) close(socketfd);
+	if(clients.size() > 0)
+	{
+		for(unsigned int i=0; i<clients.size(); i++)
+		{
+			close(clients[0].socketfd);
+		}
+		clients.clear();
+	}
+}
+
 bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 {
 	memset(&host_info, 0, sizeof host_info);
@@ -99,6 +118,12 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   	printf("Client connected to server\n");
   	return true;
   }
+}
+
+void CNetRender::DeleteClient(void)
+{
+	if(host_info_list) freeaddrinfo(host_info_list);
+	if(socketfd > 0) close(socketfd);
 }
 
 bool CNetRender::WaitForClient(char *statusOut)

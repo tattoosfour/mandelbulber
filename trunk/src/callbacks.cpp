@@ -2283,13 +2283,15 @@ void PressedCopyToClipboard(GtkWidget *widget, gpointer data)
 		if (result != lSize)
 		{
 			printf("Reading error of clipboard temporary file");
+			fclose(pFile);
+			delete [] buffer;
 			return;
 		}
 
 		gtk_clipboard_set_text(clipboard, buffer, lSize);
 
 		fclose(pFile);
-		delete buffer;
+		delete [] buffer;
 		remove("settings/.clipboard");
 	}
 }
@@ -2448,7 +2450,7 @@ void PressedServerEnable(GtkWidget *widget, gpointer data)
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderServerEnable)))
 	{
 		char status[1000];
-		bool result = netRender->SetServer("5555", status);
+		bool result = netRender->SetServer((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderServerPort)), status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),status);
 
 		while (gtk_events_pending())
@@ -2468,6 +2470,11 @@ void PressedServerEnable(GtkWidget *widget, gpointer data)
 			}
 		}
 	}
+	else
+	{
+		netRender->DeleteServer();
+		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus),"status: not enabled");
+	}
 }
 
 void PressedClientEnable(GtkWidget *widget, gpointer data)
@@ -2475,7 +2482,12 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable)))
 	{
 		char status[1000];
-		netRender->SetClient("5555", "11.0.0.5", status);
-		gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
+		netRender->SetClient((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort)), (char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName)), status);
+		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus), status);
+	}
+	else
+	{
+		netRender->DeleteClient();
+		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus),"status: not enabled");
 	}
 }
