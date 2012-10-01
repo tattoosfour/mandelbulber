@@ -2333,7 +2333,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_client), Interface.boxNetRenderClientV, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.boxNetRenderClientH1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), Interface.checkNetRenderClientEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("11.0.0.5", "   IP or domain of server:", 20, Interface.edit_netRenderClientName), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("11.0.0.4", "   IP or domain of server:", 20, Interface.edit_netRenderClientName), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("5555", "port:", 10, Interface.edit_netRenderClientPort), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.label_clientStatus, false, false, 1);
 

@@ -36,6 +36,7 @@ public:
 	void DeleteClient(void);
 	bool WaitForClient(char *statusOut);
 	bool IsServer() {return isServer;}
+	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
 
 private:
@@ -43,6 +44,7 @@ private:
   struct addrinfo host_info;       // The struct that getaddrinfo() fills up with data.
   struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
   bool isServer;
+  bool isClient;
   int socketfd ; // The socket descripter
   int clientIndex;
   vector<sClients> clients;
