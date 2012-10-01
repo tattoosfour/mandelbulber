@@ -2472,18 +2472,6 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 		char status[1000];
 		bool result = netRender->SetClient((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort)), (char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName)), status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus), status);
-
-		if(result)
-		{
-			if(netRender->CompareVersion(MANDELBULBER_VERSION * 1000, netRender->getNoOfClients()-1))
-			{
-				printf("Proper version of client\n");
-			}
-			else
-			{
-				printf("Wrong version of client\n");
-			}
-		}
 	}
 	else
 	{
@@ -2511,15 +2499,6 @@ void PressedServerScan(GtkWidget *widget, gpointer data)
 				if (result)
 				{
 					gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
-
-					if(netRender->CompareVersion(MANDELBULBER_VERSION * 1000, netRender->getNoOfClients()-1))
-					{
-						printf("Proper version of client\n");
-					}
-					else
-					{
-						printf("Wrong version of client\n");
-					}
 				}
 				while (gtk_events_pending())
 					gtk_main_iteration();
