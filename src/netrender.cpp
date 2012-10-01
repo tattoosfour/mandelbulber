@@ -189,3 +189,21 @@ bool CNetRender::WaitForClient(char *statusOut)
 	}
 
 }
+
+bool CNetRender::CompareVersion(int myVersion, int index)
+{
+	size_t len = sizeof(int);
+	ssize_t bytes_sent = send(clients[index].socketfd, &myVersion, len, 0);
+
+	int itsVersion;
+	ssize_t bytes_recvd = recv(clients[index].socketfd, &itsVersion, len, 0);
+
+	if(myVersion == itsVersion)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

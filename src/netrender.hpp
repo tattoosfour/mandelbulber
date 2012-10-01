@@ -38,6 +38,7 @@ public:
 	bool IsServer() {return isServer;}
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
+	bool CompareVersion(int myVersion, int index);
 
 private:
   int status;
