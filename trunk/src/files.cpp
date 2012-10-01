@@ -701,7 +701,7 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 
 	SavePNG16((file+"_image16.png").c_str(), 100, width, height, image->GetImage16Ptr());
 
-	delete buffer16;
+	delete [] buffer16;
 }
 
 string removeFileExtension(const string &filename)

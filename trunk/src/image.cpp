@@ -493,7 +493,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiv
 
 	delete[] Thread;
 	delete[] err;
-	delete thread_param;
+	delete[] thread_param;
 }
 
 void DrawHistogram(void)
