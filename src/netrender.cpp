@@ -11,7 +11,7 @@
 
 CNetRender *netRender;
 
-CNetRender::CNetRender()
+CNetRender::CNetRender(int myVersion)
 {
   memset(&host_info, 0, sizeof host_info);
   host_info_list = NULL;
@@ -20,6 +20,7 @@ CNetRender::CNetRender()
   isClient = false;
   socketfd = 0;
   clientIndex = 0;
+  version = myVersion;
 }
 
 CNetRender::~CNetRender()
@@ -118,6 +119,10 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   {
   	strcpy(statusOut,"status: client connected to server");
   	printf("Client connected to server\n");
+
+  	size_t len = sizeof(version);
+  	ssize_t bytes_sent = send(socketfd, &version, len, 0);
+
   	isClient = true;
   	return true;
   }
@@ -185,25 +190,21 @@ bool CNetRender::WaitForClient(char *statusOut)
 		strcpy(statusOut, stat);
 		std::cout << stat;
 
-		return true;
+		int clientVersion;
+		ssize_t bytes_recvd = recv(newClient.socketfd, &clientVersion, len, 0);
+
+		if(clientVersion == version)
+		{
+			printf("Client version is correct\n");
+			return true;
+		}
+		else
+		{
+			printf("Wrong client version\n");
+			clients.erase(clients.end()-1);
+			return false;
+		}
 	}
 
 }
 
-bool CNetRender::CompareVersion(int myVersion, int index)
-{
-	size_t len = sizeof(int);
-	ssize_t bytes_sent = send(clients[index].socketfd, &myVersion, len, 0);
-
-	int itsVersion;
-	ssize_t bytes_recvd = recv(clients[index].socketfd, &itsVersion, len, 0);
-
-	if(myVersion == itsVersion)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}

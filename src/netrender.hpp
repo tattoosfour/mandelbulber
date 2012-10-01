@@ -28,7 +28,7 @@ struct sClients
 class CNetRender
 {
 public:
-	CNetRender();
+	CNetRender(int myVersion);
 	~CNetRender();
 	bool SetServer(char *portNo, char *statusOut);
 	void DeleteServer(void);
@@ -38,7 +38,6 @@ public:
 	bool IsServer() {return isServer;}
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
-	bool CompareVersion(int myVersion, int index);
 
 private:
   int status;
@@ -49,6 +48,7 @@ private:
   int socketfd ; // The socket descripter
   int clientIndex;
   vector<sClients> clients;
+  int version;
 };
 
 extern CNetRender *netRender;
