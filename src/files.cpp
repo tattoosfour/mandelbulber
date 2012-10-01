@@ -574,7 +574,7 @@ int fcopy(const char *source, const char *dest)
 	fwrite(buffer, 1, lSize, pFile);
 	fclose(pFile);
 
-	delete buffer;
+	delete [] buffer;
 	return 0;
 }
 
