@@ -17,6 +17,7 @@ CNetRender::CNetRender()
   host_info_list = NULL;
   status = 0;
   isServer = false;
+  isClient = false;
   socketfd = 0;
   clientIndex = 0;
 }
@@ -117,6 +118,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   {
   	strcpy(statusOut,"status: client connected to server");
   	printf("Client connected to server\n");
+  	isClient = true;
   	return true;
   }
 }
