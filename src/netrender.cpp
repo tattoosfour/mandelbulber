@@ -107,6 +107,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 	host_info_list->ai_protocol);
 	if (socketfd == -1)  std::cout << "socket error " << strerror(errno);
 
+	//connecting to server
   std::cout << "Connect()ing..."  << std::endl;
   status = connect(socketfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1)
@@ -120,11 +121,30 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   	strcpy(statusOut,"status: client connected to server");
   	printf("Client connected to server\n");
 
+  	//sending version number
   	size_t len = sizeof(version);
-  	ssize_t bytes_sent = send(socketfd, &version, len, 0);
+  	send(socketfd, &version, len, 0);
 
-  	isClient = true;
-  	return true;
+  	//checking aswer regarding version
+  	char answerBuff[10];
+  	recv(socketfd, answerBuff, sizeof(answerBuff), 0);
+
+  	printf("answer: %s\n", answerBuff);
+
+  	if(!strcmp(answerBuff, "accepted"))
+  	{
+    	printf("Client version approved\n");
+  		isClient = true;
+    	return true;
+  	}
+  	else
+  	{
+    	printf("Client version refused\n");
+  		isClient = false;
+  		strcpy(statusOut,"status: client has wrong version");
+  		printf("Client disconnected from server because client version is wrong\n");
+    	return false;
+  	}
   }
 }
 
@@ -145,6 +165,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 		return false;
 	}
 
+	//accepting donnection
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size = sizeof(their_addr);
 	sClients newClient;
@@ -182,25 +203,38 @@ bool CNetRender::WaitForClient(char *statusOut)
 		strcpy(newClient.ipstr, ipstr);
 		newClient.port = port;
 
+		//remembering new client
 		clients.push_back(newClient);
 		clientIndex = clients.size();
 
+		//preparing status
 		char stat[1000];
 		sprintf(stat,"status: Client #%d has IP address: %s, port %d\n", clientIndex, ipstr, port);
 		strcpy(statusOut, stat);
 		std::cout << stat;
 
+		//checking client version
 		int clientVersion;
-		ssize_t bytes_recvd = recv(newClient.socketfd, &clientVersion, len, 0);
+		recv(newClient.socketfd, &clientVersion, len, 0);
 
 		if(clientVersion == version)
 		{
 			printf("Client version is correct\n");
+
+			//sending answer
+			char *accepted = (char*)"accepted";
+			send(newClient.socketfd, accepted, strlen(accepted)+1, 0);
 			return true;
 		}
 		else
 		{
 			printf("Wrong client version\n");
+
+			//sending answer
+			char *refused = (char*)"refused";
+			send(newClient.socketfd, refused, strlen(refused)+1, 0);
+
+			//deleting client
 			clients.erase(clients.end()-1);
 			return false;
 		}
