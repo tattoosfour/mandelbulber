@@ -300,9 +300,25 @@ size_t CNetRender::receiveData(char *command)
 	{
 		if(dataBuffer) delete [] dataBuffer;
 		dataBuffer = new char[size];
-		bytes_recvd = recv(socketfd, dataBuffer, size, 0);
+
+		char *dataPointer = dataBuffer;
+		size_t rcv_left = size;
+
+		while(rcv_left > 0)
+		{
+			bytes_recvd = recv(socketfd, dataPointer, rcv_left, 0);
+			printf("%d bytes received\n", bytes_recvd);
+			if(bytes_recvd == -1)
+			{
+				printf("Data receive error\n");
+				return 0;
+			}
+
+			rcv_left -= bytes_recvd;
+			dataPointer += bytes_recvd;
+		}
+
 		dataSize = size;
-		printf("%d bytes received\n", bytes_recvd);
 	}
 	return size;
 }
