@@ -2588,7 +2588,7 @@ bool GetSettingsfromServer(char *data, size_t size)
 		Params2InterfaceData(&fractParamLoaded);
 		WriteInterface(&fractParamLoaded);
 
-		remove("settings/.temp_rcv");
+		//remove("settings/.temp_rcv");
 	}
 	return true;
 }
