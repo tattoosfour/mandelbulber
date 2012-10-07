@@ -260,15 +260,19 @@ bool CNetRender::sendData(void *data, size_t size, char *command, int index)
 	printf("Sending %d bytes data with command %s...\n", size, command);
 	send(clients[index].socketfd, command, 4, 0);
 	send(clients[index].socketfd, &size, sizeof(size_t), 0);
-	ssize_t bytes_send = send(clients[index].socketfd, data, size, 0);
-	if(bytes_send == size)
+
+	size_t send_left = size;
+	char *dataPointer = (char*)data;
+
+	while(send_left > 0)
 	{
-		return true;
+		ssize_t bytes_send = send(clients[index].socketfd, dataPointer, send_left, 0);
+		if (bytes_send == -1) return false;
+		send_left -= bytes_send;
+		dataPointer += bytes_send;
+		printf("Sent %d bytes\n", bytes_send);
 	}
-	else
-	{
-		return false;
-	}
+	return true;
 }
 
 size_t CNetRender::receiveData(char *command)
