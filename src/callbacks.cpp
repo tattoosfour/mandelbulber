@@ -2569,7 +2569,7 @@ bool SendSettingsToClients(void)
 		delete [] buffer;
 		remove("settings/.temp_send");
 
-		printf("Sending sent\n");
+		printf("Settings sent\n");
 	}
 	return true;
 }
