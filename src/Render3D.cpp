@@ -1852,6 +1852,8 @@ void MainRender(void)
 
 	InitMainParameters(&fractParam);
 
+	if(netRender->IsServer()) SendSettingsToClients();
+
 	if (!LoadTextures(&fractParam)) return;
 
 	//image size

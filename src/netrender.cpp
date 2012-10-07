@@ -21,11 +21,13 @@ CNetRender::CNetRender(int myVersion)
   socketfd = 0;
   clientIndex = 0;
   version = myVersion;
+  dataBuffer = NULL;
+  dataSize = 0;
 }
 
 CNetRender::~CNetRender()
 {
-
+	if (dataBuffer) delete [] dataBuffer;
 }
 
 bool CNetRender::SetServer(char *portNo, char *statusOut)
@@ -102,10 +104,22 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 	if (status != 0)  std::cout << "getaddrinfo error" << gai_strerror(status) ;
 
 	std::cout << "Creating a socket..."  << std::endl;
-	int socketfd ; // The socket descripter
+
 	socketfd = socket(host_info_list->ai_family, host_info_list->ai_socktype,
 	host_info_list->ai_protocol);
 	if (socketfd == -1)  std::cout << "socket error " << strerror(errno);
+
+  struct timeval timeout;
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 100000;
+
+  if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
+              sizeof(timeout)) < 0)
+  	std::cout << "socket options error " << strerror(errno);
+
+  if (setsockopt (socketfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
+              sizeof(timeout)) < 0)
+  	std::cout << "socket options error " << strerror(errno);
 
 	//connecting to server
   std::cout << "Connect()ing..."  << std::endl;
@@ -239,6 +253,57 @@ bool CNetRender::WaitForClient(char *statusOut)
 			return false;
 		}
 	}
-
 }
 
+bool CNetRender::sendData(void *data, size_t size, char *command, int index)
+{
+	printf("Sending %d bytes data with command %s...\n", size, command);
+	send(clients[index].socketfd, command, 4, 0);
+	send(clients[index].socketfd, &size, sizeof(size_t), 0);
+	ssize_t bytes_send = send(clients[index].socketfd, data, size, 0);
+	if(bytes_send == size)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+size_t CNetRender::receiveData(char *command)
+{
+	//printf("Waiting for data...\n");
+	ssize_t bytes_recvd = recv(socketfd, command, 4, 0);
+
+	if (bytes_recvd <= 0)
+	{
+		if(errno != 11)
+		{
+			std::cout << errno << strerror(errno) << endl;
+		}
+		return 0;
+	}
+
+	printf("Received command: %s\n", command);
+
+	size_t size = 0;
+	recv(socketfd, &size, sizeof(size_t), 0);
+
+	printf("Will be received %d bytes\n", size);
+
+	if (size > 0)
+	{
+		if(dataBuffer) delete [] dataBuffer;
+		dataBuffer = new char[size];
+		bytes_recvd = recv(socketfd, dataBuffer, size, 0);
+		dataSize = size;
+		printf("%d bytes received\n", bytes_recvd);
+	}
+	return size;
+}
+
+void CNetRender::GetData(void *data)
+{
+	memcpy(data, dataBuffer, dataSize);
+}

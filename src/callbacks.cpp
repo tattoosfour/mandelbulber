@@ -2472,6 +2472,29 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 		char status[1000];
 		bool result = netRender->SetClient((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort)), (char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName)), status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus), status);
+		if(result)
+		{
+			while (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable)))
+			{
+				while (gtk_events_pending())
+					gtk_main_iteration();
+
+				char command[4];
+				size_t size = netRender->receiveData(command);
+				if(size>0)
+				{
+					if(!strcmp(command, "set"))
+					{
+						char *buffer = new char[size];
+						netRender->GetData(buffer);
+						GetSettingsfromServer(buffer, size);
+						while (gtk_events_pending())
+							gtk_main_iteration();
+						delete buffer;
+					}
+				}
+			}
+		}
 	}
 	else
 	{
@@ -2510,4 +2533,62 @@ void PressedServerScan(GtkWidget *widget, gpointer data)
 			gtk_label_set_text(GTK_LABEL(Interface.label_serverStatus), status);
 		}
 	}
+}
+
+bool SendSettingsToClients(void)
+{
+	printf("Sending settings to clients\n");
+	sParamRender fractParamToSave;
+	ReadInterface(&fractParamToSave);
+	SaveSettings("settings/.temp_send", fractParamToSave, true);
+
+	FILE * pFile;
+	pFile = fopen("settings/.temp_send", "rb");
+	if (pFile != NULL)
+	{
+		// obtain file size:
+		fseek(pFile, 0, SEEK_END);
+		unsigned int lSize = ftell(pFile);
+		rewind(pFile);
+
+		char *buffer = new char[lSize];
+
+		// copy the file into the buffer:
+		size_t result = fread(buffer, 1, lSize, pFile);
+		if (result != lSize)
+		{
+			printf("Reading error of clipboard temporary file");
+			fclose(pFile);
+			delete [] buffer;
+			return false;
+		}
+
+		netRender->sendData(buffer, lSize, (char*)"set", 0);
+
+		fclose(pFile);
+		delete [] buffer;
+		remove("settings/.temp_send");
+
+		printf("Sending sent\n");
+	}
+	return true;
+}
+
+bool GetSettingsfromServer(char *data, size_t size)
+{
+	FILE * pFile;
+	pFile = fopen("settings/.temp_rcv", "wb");
+	if (pFile != NULL)
+	{
+		fwrite(data, 1, size, pFile);
+		fclose(pFile);
+
+		sParamRender fractParamLoaded;
+		LoadSettings("settings/.temp_rcv", fractParamLoaded);
+		Params2InterfaceData(&fractParamLoaded);
+		WriteInterface(&fractParamLoaded);
+
+		remove("settings/.temp_rcv");
+	}
+	return true;
 }

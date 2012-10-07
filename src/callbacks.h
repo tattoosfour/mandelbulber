@@ -114,5 +114,7 @@ void PressedServerScan(GtkWidget *widget, gpointer data);
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);
 void AutoDEStep(bool highQuality);
+bool SendSettingsToClients(void);
+bool GetSettingsfromServer(char *data, size_t size);
 
 #endif /* CALLBACKS_H_ */
