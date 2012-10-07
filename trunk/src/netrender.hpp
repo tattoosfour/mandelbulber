@@ -38,6 +38,9 @@ public:
 	bool IsServer() {return isServer;}
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
+	bool sendData(void *data, size_t size, char *command, int index);
+	size_t receiveData(char *command);
+	void GetData(void *data);
 
 private:
   int status;
@@ -49,6 +52,8 @@ private:
   int clientIndex;
   vector<sClients> clients;
   int version;
+  char *dataBuffer;
+  size_t dataSize;
 };
 
 extern CNetRender *netRender;
