@@ -23,12 +23,13 @@ struct sClients
 	int socketfd;
 	char ipstr[INET6_ADDRSTRLEN];
 	int port;
+	int noOfCPU;
 };
 
 class CNetRender
 {
 public:
-	CNetRender(int myVersion);
+	CNetRender(int myVersion, int CPUs);
 	~CNetRender();
 	bool SetServer(char *portNo, char *statusOut);
 	void DeleteServer(void);
@@ -38,8 +39,10 @@ public:
 	bool IsServer() {return isServer;}
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
-	bool sendData(void *data, size_t size, char *command, int index);
-	size_t receiveData(char *command);
+	bool sendDataToClient(void *data, size_t size, char *command, int index);
+	bool sendDataToServer(void *data, size_t size, char *command);
+	size_t receiveDataFromServer(char *command);
+	size_t receiveDataFromClient(char *command, int index);
 	void GetData(void *data);
 
 private:
@@ -54,6 +57,7 @@ private:
   int version;
   char *dataBuffer;
   size_t dataSize;
+  int noOfCPUs;
 };
 
 extern CNetRender *netRender;

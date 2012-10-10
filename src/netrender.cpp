@@ -11,7 +11,7 @@
 
 CNetRender *netRender;
 
-CNetRender::CNetRender(int myVersion)
+CNetRender::CNetRender(int myVersion, int CPUs)
 {
   memset(&host_info, 0, sizeof host_info);
   host_info_list = NULL;
@@ -23,6 +23,7 @@ CNetRender::CNetRender(int myVersion)
   version = myVersion;
   dataBuffer = NULL;
   dataSize = 0;
+  noOfCPUs = CPUs;
 }
 
 CNetRender::~CNetRender()
@@ -110,8 +111,8 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 	if (socketfd == -1)  std::cout << "socket error " << strerror(errno);
 
   struct timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 100000;
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
 
   if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
               sizeof(timeout)) < 0)
@@ -136,29 +137,41 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   	printf("Client connected to server\n");
 
   	//sending version number
-  	size_t len = sizeof(version);
-  	send(socketfd, &version, len, 0);
+
+		char command[4];
+		size_t recvd_bytes = receiveDataFromServer(command);
+		if(!strcmp("ver", command))
+		{
+	  	size_t len = sizeof(version);
+	  	sendDataToServer(&version, len, "VER");
+		}
 
   	//checking aswer regarding version
-  	char answerBuff[10];
-  	recv(socketfd, answerBuff, sizeof(answerBuff), 0);
-
-  	printf("answer: %s\n", answerBuff);
-
-  	if(!strcmp(answerBuff, "accepted"))
-  	{
+		recvd_bytes = receiveDataFromServer(command);
+		if(!strcmp("ok.", command))
+		{
     	printf("Client version approved\n");
   		isClient = true;
+
+  		recvd_bytes = receiveDataFromServer(command);
+  		if(!strcmp("cpu", command))
+  		{
+  			sendDataToServer(&noOfCPUs, sizeof(noOfCPUs), "CPU");
+  		}
+
     	return true;
-  	}
-  	else
-  	{
-    	printf("Client version refused\n");
+		}
+
+		if(!strcmp("bad", command))
+		{
+    	int serverVersion;
+    	if(recvd_bytes == sizeof(int)) GetData(&serverVersion);
+			printf("Client version refused. Server version is %f\n", serverVersion/1000);
   		isClient = false;
-  		strcpy(statusOut,"status: client has wrong version");
+  		sprintf(statusOut,"status: client has wrong version. Server is %f", serverVersion/1000);
   		printf("Client disconnected from server because client version is wrong\n");
     	return false;
-  	}
+		}
   }
 }
 
@@ -229,7 +242,13 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 		//checking client version
 		int clientVersion;
-		recv(newClient.socketfd, &clientVersion, len, 0);
+		sendDataToClient(NULL, 0, "ver", clientIndex-1);
+		char command[4];
+		size_t recvd_bytes = receiveDataFromClient(command, clientIndex-1);
+		if(!strcmp("VER", command) && recvd_bytes == sizeof(int))
+		{
+			GetData(&clientVersion);
+		}
 
 		if(clientVersion == version)
 		{
@@ -237,7 +256,19 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 			//sending answer
 			char *accepted = (char*)"accepted";
-			send(newClient.socketfd, accepted, strlen(accepted)+1, 0);
+			sendDataToClient(NULL, 0, "ok.", clientIndex-1);
+
+			//ask for number of CPUs
+			sendDataToClient(NULL, 0, "cpu", clientIndex-1);
+			recvd_bytes = receiveDataFromClient(command, clientIndex-1);
+			if(!strcmp("CPU", command) && recvd_bytes == sizeof(int))
+			{
+				int noOfCpu;
+				GetData(&noOfCpu);
+				clients[clientIndex-1].noOfCPU = noOfCpu;
+				printf("Client #%d has %d CPUs\n", clientIndex, noOfCpu);
+			}
+
 			return true;
 		}
 		else
@@ -246,7 +277,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 			//sending answer
 			char *refused = (char*)"refused";
-			send(newClient.socketfd, refused, strlen(refused)+1, 0);
+			sendDataToClient(&version, sizeof(version), "bad", clientIndex-1);
 
 			//deleting client
 			clients.erase(clients.end()-1);
@@ -255,7 +286,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 	}
 }
 
-bool CNetRender::sendData(void *data, size_t size, char *command, int index)
+bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index)
 {
 	printf("Sending %d bytes data with command %s...\n", size, command);
 	send(clients[index].socketfd, command, 4, 0);
@@ -275,7 +306,27 @@ bool CNetRender::sendData(void *data, size_t size, char *command, int index)
 	return true;
 }
 
-size_t CNetRender::receiveData(char *command)
+bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
+{
+	printf("Sending %d bytes data with command %s...\n", size, command);
+	send(socketfd, command, 4, 0);
+	send(socketfd, &size, sizeof(size_t), 0);
+
+	size_t send_left = size;
+	char *dataPointer = (char*)data;
+
+	while(send_left > 0)
+	{
+		ssize_t bytes_send = send(socketfd, dataPointer, send_left, 0);
+		if (bytes_send == -1) return false;
+		send_left -= bytes_send;
+		dataPointer += bytes_send;
+		printf("Sent %d bytes\n", bytes_send);
+	}
+	return true;
+}
+
+size_t CNetRender::receiveDataFromServer(char *command)
 {
 	//printf("Waiting for data...\n");
 	ssize_t bytes_recvd = recv(socketfd, command, 4, 0);
@@ -307,6 +358,54 @@ size_t CNetRender::receiveData(char *command)
 		while(rcv_left > 0)
 		{
 			bytes_recvd = recv(socketfd, dataPointer, rcv_left, 0);
+			printf("%d bytes received\n", bytes_recvd);
+			if(bytes_recvd == -1)
+			{
+				printf("Data receive error\n");
+				return 0;
+			}
+
+			rcv_left -= bytes_recvd;
+			dataPointer += bytes_recvd;
+		}
+
+		dataSize = size;
+	}
+	return size;
+}
+
+size_t CNetRender::receiveDataFromClient(char *command, int index)
+{
+	//printf("Waiting for data...\n");
+	ssize_t bytes_recvd = recv(clients[index].socketfd, command, 4, 0);
+
+	if (bytes_recvd <= 0)
+	{
+		if(errno != 11)
+		{
+			std::cout << errno << strerror(errno) << endl;
+		}
+		return 0;
+	}
+
+	printf("Received command: %s\n", command);
+
+	size_t size = 0;
+	recv(clients[index].socketfd, &size, sizeof(size_t), 0);
+
+	printf("Will be received %d bytes\n", size);
+
+	if (size > 0)
+	{
+		if(dataBuffer) delete [] dataBuffer;
+		dataBuffer = new char[size];
+
+		char *dataPointer = dataBuffer;
+		size_t rcv_left = size;
+
+		while(rcv_left > 0)
+		{
+			bytes_recvd = recv(clients[index].socketfd, dataPointer, rcv_left, 0);
 			printf("%d bytes received\n", bytes_recvd);
 			if(bytes_recvd == -1)
 			{
