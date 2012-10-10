@@ -2480,7 +2480,7 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 					gtk_main_iteration();
 
 				char command[4];
-				size_t size = netRender->receiveData(command);
+				size_t size = netRender->receiveDataFromServer(command);
 				if(size>0)
 				{
 					if(!strcmp(command, "set"))
@@ -2563,7 +2563,10 @@ bool SendSettingsToClients(void)
 			return false;
 		}
 
-		netRender->sendData(buffer, lSize, (char*)"set", 0);
+		for(int i=0; i<netRender->getNoOfClients(); i++)
+		{
+			netRender->sendDataToClient(buffer, lSize, (char*)"set", i);
+		}
 
 		fclose(pFile);
 		delete [] buffer;

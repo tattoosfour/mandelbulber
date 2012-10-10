@@ -1612,7 +1612,7 @@ int main(int argc, char *argv[])
 	}
 
 	//initialise netRender
-	netRender = new CNetRender(MANDELBULBER_VERSION * 1000);
+	netRender = new CNetRender(MANDELBULBER_VERSION * 1000, NR_THREADS);
 
 	//set program home directory
 	if (!chdir(data_directory))
