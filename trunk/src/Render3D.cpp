@@ -63,6 +63,8 @@ bool newLineRendered = false;
 
 cImage mainImage(800, 600);
 
+bool *linesToSend = NULL;
+
 double real_clock(void)
 {
 #ifdef WIN32 /* WINDOWS */
@@ -319,7 +321,7 @@ void *MainThread(void *ptr)
 					for (double y = min_y; y < max_y; y += stepYpersp)
 					{
 						//recheck threads
-						if (parametry->thread_done[z] == thread_number + 1)
+						if (parametry->thread_done[z] == thread_number + 1 || parametry->thread_done[z] == 0)
 						{
 
 							//perspective factor (wsp = factor in Polish :-)
@@ -993,6 +995,8 @@ void *MainThread(void *ptr)
 
 				}//next x
 
+				if(!breakX) linesToSend[z] = true;
+
 				if(!image->IsLowMemMode()) image->Squares(z, progressive);
 
 				(*parametry->done)++;
@@ -1103,9 +1107,12 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		//initialising threads
 		int *thread_done = new int[height];
+		int *thread_done_from_server = new int[height];
+		linesToSend = new bool[height];
 		GThread **Thread = new GThread *[NR_THREADS + 1];
 		GError **err = new GError *[NR_THREADS + 1];
 		sParam *thread_param = new sParam[NR_THREADS];
+		sAllImageData *lineOfImage = new sAllImageData[width+1];
 
 		int progressiveStart = 8;
 		if (param.recordMode || noGUI || netRender->IsServer() || netRender->IsClient()) progressiveStart = 1;
@@ -1136,6 +1143,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			for (int i = 0; i < height; i++)
 			{
 				thread_done[i] = 0;
+				thread_done_from_server[i] = 0;
+				linesToSend[i] = false;
 			}
 			WriteLog("Thread data prepared");
 
@@ -1182,12 +1191,66 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					}
 
 					char command[4];
+					//get rendered line if available
+					if (netRender->IsServer())
+					{
+						for (int i = 0; i < netRender->getNoOfClients(); i++)
+						{
+							netRender->sendDataToClient(NULL, 0, "get", i);
+						}
+
+						for (int i = 0; i < netRender->getNoOfClients(); i++)
+						{
+							netRender->receiveDataFromClient(command, i);
+							if(!strcmp(command, "GET"))
+							{
+								netRender->GetData(lineOfImage);
+								int *last;
+								last = (int*)&lineOfImage[width];
+								int y = *last;
+								for(int x=0; x<width; x++)
+								{
+									image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
+									image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
+									image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
+									image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+								}
+								thread_done[y] = 99;
+							}
+						}
+					}
+
 					if (netRender->IsClient())
 					{
 						netRender->receiveDataFromServer(command);
 						if(!strcmp(command, "lst"))
 						{
-							netRender->GetData(thread_done);
+							netRender->GetData(thread_done_from_server);
+							memcpy(thread_done, thread_done_from_server, sizeof(int)*height);
+						}
+
+						//sending rendered line
+						if(!strcmp(command, "get"))
+						{
+							for(int y=0; y<height; y++)
+							{
+								if(linesToSend[y] && thread_done_from_server[y] == 0)
+								{
+									linesToSend[y] = false;
+									for(int x=0; x<width; x++)
+									{
+										lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width];
+										lineOfImage[x].alpha = image->GetPixelAlpha(x,y);
+										lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y);
+										lineOfImage[x].zBuffer = image->GetPixelZBuffer(x,y);
+									}
+									int *last;
+									last = (int*)&lineOfImage[width];
+									*last = y;
+									netRender->sendDataToServer(lineOfImage,sizeof(sAllImageData)*(width+1),"GET");
+									break;
+								}
+							}
 						}
 					}
 
@@ -1203,7 +1266,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							if (image->IsPreview())
 							{
 								param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
-								if (param.SSAOEnabled && !image->IsLowMemMode())
+								if (param.SSAOEnabled && !image->IsLowMemMode() && !netRender->IsClient() && !netRender->IsServer())
 								{
 									param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
 									PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
@@ -1371,6 +1434,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		delete[] thread_param;
 		delete[] Thread;
 		delete[] err;
+		delete[] linesToSend;
+		delete[] lineOfImage;
 	}
 	else
 	{
