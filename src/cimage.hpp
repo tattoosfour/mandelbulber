@@ -83,6 +83,14 @@ struct sImageSwitches
 	bool iterFogEnabled;
 };
 
+struct sAllImageData
+{
+	sComplexImage complex;
+	unsigned short alpha;
+	float zBuffer;
+	unsigned short colorIndexBuf16;
+};
+
 class cImage
 {
 public:
