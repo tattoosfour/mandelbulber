@@ -39,6 +39,7 @@ public:
 	bool IsServer() {return isServer;}
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
+	int getCpuCount(int index) {return clients[index].noOfCPU;};
 	bool sendDataToClient(void *data, size_t size, char *command, int index);
 	bool sendDataToServer(void *data, size_t size, char *command);
 	size_t receiveDataFromServer(char *command);
