@@ -293,7 +293,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index)
 {
-	printf("Sending %d bytes data with command %s...\n", size, command);
+	//printf("Sending %d bytes data with command %s...\n", size, command);
 	send(clients[index].socketfd, command, 4, 0);
 	send(clients[index].socketfd, &size, sizeof(size_t), 0);
 
@@ -306,14 +306,14 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 		if (bytes_send == -1) return false;
 		send_left -= bytes_send;
 		dataPointer += bytes_send;
-		printf("Sent %d bytes\n", bytes_send);
+		//printf("Sent %d bytes\n", bytes_send);
 	}
 	return true;
 }
 
 bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 {
-	printf("Sending %d bytes data with command %s...\n", size, command);
+	//printf("Sending %d bytes data with command %s...\n", size, command);
 	send(socketfd, command, 4, 0);
 	send(socketfd, &size, sizeof(size_t), 0);
 
@@ -326,7 +326,7 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 		if (bytes_send == -1) return false;
 		send_left -= bytes_send;
 		dataPointer += bytes_send;
-		printf("Sent %d bytes\n", bytes_send);
+		//printf("Sent %d bytes\n", bytes_send);
 	}
 	return true;
 }
@@ -346,12 +346,12 @@ size_t CNetRender::receiveDataFromServer(char *command)
 		return 0;
 	}
 
-	printf("Received command: %s\n", command);
+	//printf("Received command: %s\n", command);
 
 	size_t size = 0;
 	recv(socketfd, &size, sizeof(size_t), 0);
 
-	printf("Will be received %d bytes\n", size);
+	//printf("Will be received %d bytes\n", size);
 
 	if (size > 0)
 	{
@@ -364,7 +364,7 @@ size_t CNetRender::receiveDataFromServer(char *command)
 		while(rcv_left > 0)
 		{
 			bytes_recvd = recv(socketfd, dataPointer, rcv_left, 0);
-			printf("%d bytes received\n", bytes_recvd);
+			//printf("%d bytes received\n", bytes_recvd);
 			if(bytes_recvd == -1)
 			{
 				printf("Data receive error\n");
@@ -395,12 +395,12 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 		return 0;
 	}
 
-	printf("Received command: %s\n", command);
+	//printf("Received command: %s\n", command);
 
 	size_t size = 0;
 	recv(clients[index].socketfd, &size, sizeof(size_t), 0);
 
-	printf("Will be received %d bytes\n", size);
+	//printf("Will be received %d bytes\n", size);
 
 	if (size > 0)
 	{
@@ -413,7 +413,7 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 		while(rcv_left > 0)
 		{
 			bytes_recvd = recv(clients[index].socketfd, dataPointer, rcv_left, 0);
-			printf("%d bytes received\n", bytes_recvd);
+			//printf("%d bytes received\n", bytes_recvd);
 			if(bytes_recvd == -1)
 			{
 				printf("Data receive error\n");
