@@ -1254,7 +1254,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						}
 					}
 
-					g_usleep(100000);
+					if(!netRender->IsClient() && !netRender->IsServer()) g_usleep(100000);
+
 					if (progressive < progressiveStart || netRender->IsServer() || netRender->IsClient())
 					{
 						refresh_index++;
