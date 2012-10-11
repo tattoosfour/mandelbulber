@@ -161,8 +161,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 
     	return true;
 		}
-
-		if(!strcmp("bad", command))
+		else if(!strcmp("bad", command))
 		{
     	int serverVersion;
     	if(recvd_bytes == sizeof(int)) GetData(&serverVersion);
@@ -171,6 +170,12 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   		sprintf(statusOut,"status: client has wrong version. Server is %f", serverVersion/1000);
   		printf("Client disconnected from server because client version is wrong\n");
     	return false;
+		}
+		else
+		{
+			sprintf(statusOut,"status: communication error during version verification");
+			printf("communication error during version verification");
+			return false;
 		}
   }
 }
@@ -329,6 +334,7 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 size_t CNetRender::receiveDataFromServer(char *command)
 {
 	//printf("Waiting for data...\n");
+	memset(command,0,4);
 	ssize_t bytes_recvd = recv(socketfd, command, 4, 0);
 
 	if (bytes_recvd <= 0)
@@ -377,6 +383,7 @@ size_t CNetRender::receiveDataFromServer(char *command)
 size_t CNetRender::receiveDataFromClient(char *command, int index)
 {
 	//printf("Waiting for data...\n");
+	memset(command,0,4);
 	ssize_t bytes_recvd = recv(clients[index].socketfd, command, 4, 0);
 
 	if (bytes_recvd <= 0)

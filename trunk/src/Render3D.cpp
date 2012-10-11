@@ -59,6 +59,8 @@ double start_time = 0.0;
 bool isRendering = false;
 bool isPostRendering = false;
 
+bool newLineRendered = false;
+
 cImage mainImage(800, 600);
 
 double real_clock(void)
@@ -244,6 +246,7 @@ void *MainThread(void *ptr)
 				//WriteLogDouble("Started rendering line", z);
 
 				//main loop for x values
+				bool breakX = false;
 				for (int x = 0; x <= width - progressive; x += progressive)
 				{
 					//checking if program was not closed
@@ -534,7 +537,14 @@ void *MainThread(void *ptr)
 								}
 							}
 						}
-					} //next y
+						else
+						{
+							breakX = true;
+							break;
+						}
+					}//next y
+
+					if(breakX) break;
 
 					//if(thread_number == 0) printf("next y\n");
 
@@ -1035,6 +1045,8 @@ void *MainThread(void *ptr)
 					printf("Average N = %f, Average DE steps = %f, Missed DE %.3f%%\n", avg_N, avg_DE, avgMissedDE);
 				}
 
+				newLineRendered = true;
+
 				//WriteLogDouble("Rendering line finished", z);
 			}//end if thread done
 
@@ -1064,6 +1076,15 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//turn off refreshing if resolution is very low
 		bool bo_refreshing = true;
 
+		//if it is a server, send "run" command to all clients
+		if (netRender->IsServer())
+		{
+			for (int i = 0; i < netRender->getNoOfClients(); i++)
+			{
+				netRender->sendDataToClient(NULL, 0, "run", i);
+			}
+		}
+
 		//clearing histogram tables
 		for (int i = 0; i < 64; i++)
 			histogram[i] = 0;
@@ -1087,13 +1108,20 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		sParam *thread_param = new sParam[NR_THREADS];
 
 		int progressiveStart = 8;
-		if (param.recordMode || noGUI) progressiveStart = 1;
+		if (param.recordMode || noGUI || netRender->IsServer() || netRender->IsClient()) progressiveStart = 1;
 		image->progressiveFactor = progressiveStart;
 
 		int refresh_index = 0;
 		int refresh_skip = 1;
 
 		image->CalculateGammaTable();
+
+		//calculate total number of vailable CPUs
+		int netCpuCount = NR_THREADS;
+		for(int i=0; i<netRender->getNoOfClients(); i++)
+		{
+			netCpuCount += netRender->getCpuCount(i);
+		}
 
 		for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
 		{
@@ -1115,7 +1143,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			for (int i = 0; i < NR_THREADS; i++)
 			{
 				//sending some parameters to thread
-				thread_param[i].start = i * height / NR_THREADS;
+				thread_param[i].start = i * height / netCpuCount;
 				thread_param[i].z = i;
 				thread_param[i].param = param;
 				thread_param[i].image = image;
@@ -1138,11 +1166,33 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						gtk_main_iteration();
 				}
 
+
+				int done2 = 0;
 				//refreshing image and histograms during rendering
-				while (done < height / progressive - 1 && !programClosed)
+				while (done2 < height / progressive - 1 && !programClosed)
 				{
+					//send list of rendered lines
+					if (netRender->IsServer() && newLineRendered)
+					{
+						newLineRendered = false;
+						for (int i = 0; i < netRender->getNoOfClients(); i++)
+						{
+							netRender->sendDataToClient(thread_done, sizeof(int)*height, "lst", i);
+						}
+					}
+
+					char command[4];
+					if (netRender->IsClient())
+					{
+						netRender->receiveDataFromServer(command);
+						if(!strcmp(command, "lst"))
+						{
+							netRender->GetData(thread_done);
+						}
+					}
+
 					g_usleep(100000);
-					if (progressive < progressiveStart)
+					if (progressive < progressiveStart || netRender->IsServer() || netRender->IsClient())
 					{
 						refresh_index++;
 
@@ -1193,11 +1243,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						else progressiveDone = 0.25 / (progressive * progressive);
 						if (progressiveStart == 1)
 						{
-							percent_done = ((double) done / height) * 100.0;
+							percent_done = ((double) done2 / height) * 100.0;
 						}
 						else
 						{
-							percent_done = (((double) done / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
+							percent_done = (((double) done2 / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 						}
 
 						if(param.noOfTiles > 1)
@@ -1230,6 +1280,15 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					{
 						while (gtk_events_pending())
 							gtk_main_iteration();
+					}
+
+					done2 = 0;
+					for(int i=0; i<height; i++)
+					{
+						if(thread_done[i] > 0)
+						{
+							done2++;
+						}
 					}
 				}
 			}

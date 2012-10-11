@@ -2467,31 +2467,43 @@ void PressedServerEnable(GtkWidget *widget, gpointer data)
 
 void PressedClientEnable(GtkWidget *widget, gpointer data)
 {
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable)))
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable) ))
 	{
 		char status[1000];
-		bool result = netRender->SetClient((char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort)), (char*)gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName)), status);
+		bool result = netRender->SetClient((char*) gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort) ),
+				(char*) gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName) ), status);
 		gtk_label_set_text(GTK_LABEL(Interface.label_clientStatus), status);
-		if(result)
+		if (result)
 		{
-			while (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable)))
+			while (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNetRenderClientEnable) ))
 			{
 				while (gtk_events_pending())
 					gtk_main_iteration();
 
 				char command[4];
 				size_t size = netRender->receiveDataFromServer(command);
-				if(size>0)
+
+				if (!strcmp(command, "set"))
 				{
-					if(!strcmp(command, "set"))
-					{
-						char *buffer = new char[size];
-						netRender->GetData(buffer);
-						GetSettingsfromServer(buffer, size);
-						while (gtk_events_pending())
-							gtk_main_iteration();
-						delete buffer;
-					}
+					char *buffer = new char[size];
+					netRender->GetData(buffer);
+					GetSettingsfromServer(buffer, size);
+					while (gtk_events_pending())
+						gtk_main_iteration();
+					delete buffer;
+				}
+				if (!strcmp(command, "run"))
+				{
+					Interface_data.animMode = false;
+					Interface_data.playMode = false;
+					Interface_data.recordMode = false;
+					Interface_data.continueRecord = false;
+					Interface_data.keyframeMode = false;
+
+					programClosed = true;
+					isPostRendering = false;
+					renderRequest = true;
+
 				}
 			}
 		}
