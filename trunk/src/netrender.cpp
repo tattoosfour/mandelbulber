@@ -297,6 +297,9 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	send(clients[index].socketfd, command, 4, 0);
 	send(clients[index].socketfd, &size, sizeof(size_t), 0);
 
+	char crc = command[0] + command[1] + command[2] + size;
+	send(clients[index].socketfd, &crc, sizeof(crc), 0);
+
 	size_t send_left = size;
 	char *dataPointer = (char*)data;
 
@@ -316,6 +319,8 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	//printf("Sending %d bytes data with command %s...\n", size, command);
 	send(socketfd, command, 4, 0);
 	send(socketfd, &size, sizeof(size_t), 0);
+	char crc = command[0] + command[1] + command[2] + size;
+	send(socketfd, &crc, sizeof(crc), 0);
 
 	size_t send_left = size;
 	char *dataPointer = (char*)data;
@@ -350,6 +355,16 @@ size_t CNetRender::receiveDataFromServer(char *command)
 
 	size_t size = 0;
 	recv(socketfd, &size, sizeof(size_t), 0);
+
+	char crc = command[0] + command[1] + command[2] + size;
+	char crc2 = 0;
+	recv(socketfd, &crc2, sizeof(crc2), 0);
+
+	if(crc != crc2)
+	{
+		printf("Data header crc error\n");
+		return 0;
+	}
 
 	//printf("Will be received %d bytes\n", size);
 
@@ -401,6 +416,16 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 	recv(clients[index].socketfd, &size, sizeof(size_t), 0);
 
 	//printf("Will be received %d bytes\n", size);
+
+	char crc = command[0] + command[1] + command[2] + size;
+	char crc2 = 0;
+	recv(clients[index].socketfd, &crc2, sizeof(crc2), 0);
+
+	if(crc != crc2)
+	{
+		printf("Data header crc error\n");
+		return 0;
+	}
 
 	if (size > 0)
 	{
