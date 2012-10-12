@@ -232,9 +232,9 @@ void *MainThread(void *ptr)
 	double tileYOffset = (tile / tiles);
 
 	//2-pass loop (for multi-threading)
-	for (int pass = 0; pass < 2; pass++)
+	for (int pass = 0; pass < 3; pass++)
 	{
-		if (pass == 1) start = 0;
+		if (pass > 0) start = 0;
 
 		//main loop for z values
 		for (z = start; z <= height - progressive; z += progressive)
@@ -1055,24 +1055,27 @@ void *MainThread(void *ptr)
 			}//end if thread done
 			else
 			{
-				int firstFree = -1;
-				int lastFree = -1;
-				for(int i=z; i<height; i+=progressive)
+				if(pass < 2)
 				{
-					if(firstFree < 0 && parametry->thread_done[i] == 0)
+					int firstFree = -1;
+					int lastFree = -1;
+					for(int i=z; i<height; i+=progressive)
 					{
-						firstFree = i;
+						if(firstFree < 0 && parametry->thread_done[i] == 0)
+						{
+							firstFree = i;
+						}
+						if(firstFree > 0 && parametry->thread_done[i] > 0)
+						{
+							lastFree = i;
+							z = (((firstFree+lastFree) / 2)/progressive) * progressive;
+							break;
+						}
 					}
-					if(firstFree > 0 && parametry->thread_done[i] > 0)
+					if(firstFree > 0 && lastFree < 0)
 					{
-						lastFree = i;
-						z = (((firstFree+lastFree) / 2)/progressive) * progressive;
-						break;
+						z = (((firstFree+height) / 2)/progressive) * progressive;
 					}
-				}
-				if(firstFree > 0 && lastFree < 0)
-				{
-					z = (((firstFree+height) / 2)/progressive) * progressive;
 				}
 			}
 		}//next z
@@ -1231,14 +1234,17 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									int *last;
 									last = (int*)&lineOfImage[width];
 									int y = *last;
-									for(int x=0; x<width; x++)
+									if(y<height)
 									{
-										image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
-										image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
-										image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
-										image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+										for(int x=0; x<width; x++)
+										{
+											image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
+											image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
+											image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
+											image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+										}
+										thread_done[y] = 99;
 									}
-									thread_done[y] = 99;
 								}
 							}
 						}
