@@ -363,6 +363,12 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	if(crc != crc2)
 	{
 		printf("Data header crc error\n");
+		char scrapBuffer[1000];
+		do
+		{
+			bytes_recvd = recv(socketfd, scrapBuffer, 1000, 0);
+		}
+		while(bytes_recvd > 0);
 		return 0;
 	}
 
@@ -424,6 +430,12 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 	if(crc != crc2)
 	{
 		printf("Data header crc error\n");
+		char scrapBuffer[1000];
+		do
+		{
+			bytes_recvd = recv(clients[index].socketfd, scrapBuffer, 1000, 0);
+		}
+		while(bytes_recvd > 0);
 		return 0;
 	}
 
