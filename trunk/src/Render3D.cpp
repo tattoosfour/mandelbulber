@@ -245,6 +245,8 @@ void *MainThread(void *ptr)
 				//giving information for another threads that this thread renders this z value
 				parametry->thread_done[z] = thread_number + 1;
 
+				newLineRendered = true;
+
 				//WriteLogDouble("Started rendering line", z);
 
 				//main loop for x values
@@ -1049,11 +1051,30 @@ void *MainThread(void *ptr)
 					printf("Average N = %f, Average DE steps = %f, Missed DE %.3f%%\n", avg_N, avg_DE, avgMissedDE);
 				}
 
-				newLineRendered = true;
-
 				//WriteLogDouble("Rendering line finished", z);
 			}//end if thread done
-
+			else
+			{
+				int firstFree = -1;
+				int lastFree = -1;
+				for(int i=z; i<height; i+=progressive)
+				{
+					if(firstFree < 0 && parametry->thread_done[i] == 0)
+					{
+						firstFree = i;
+					}
+					if(firstFree > 0 && parametry->thread_done[i] > 0)
+					{
+						lastFree = i;
+						z = (((firstFree+lastFree) / 2)/progressive) * progressive;
+						break;
+					}
+				}
+				if(firstFree > 0 && lastFree < 0)
+				{
+					z = (((firstFree+height) / 2)/progressive) * progressive;
+				}
+			}
 		}//next z
 	}// next pass
 	WriteLogDouble("Thread finished", thread_number);
@@ -1201,21 +1222,24 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							netRender->receiveDataFromClient(command, i);
+							size_t bytes_recvd = netRender->receiveDataFromClient(command, i);
 							if(!strcmp(command, "GET"))
 							{
-								netRender->GetData(lineOfImage);
-								int *last;
-								last = (int*)&lineOfImage[width];
-								int y = *last;
-								for(int x=0; x<width; x++)
+								if(bytes_recvd > 0)
 								{
-									image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
-									image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
-									image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
-									image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+									netRender->GetData(lineOfImage);
+									int *last;
+									last = (int*)&lineOfImage[width];
+									int y = *last;
+									for(int x=0; x<width; x++)
+									{
+										image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
+										image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
+										image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
+										image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+									}
+									thread_done[y] = 99;
 								}
-								thread_done[y] = 99;
 							}
 						}
 					}
@@ -1232,6 +1256,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						//sending rendered line
 						if(!strcmp(command, "get"))
 						{
+							bool sentSomething = false;
 							for(int y=0; y<height; y++)
 							{
 								if(linesToSend[y] && thread_done_from_server[y] == 0)
@@ -1248,8 +1273,13 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									last = (int*)&lineOfImage[width];
 									*last = y;
 									netRender->sendDataToServer(lineOfImage,sizeof(sAllImageData)*(width+1),"GET");
+									sentSomething = true;
 									break;
 								}
+							}
+							if(!sentSomething)
+							{
+								netRender->sendDataToServer(NULL,0,"GET");
 							}
 						}
 					}
