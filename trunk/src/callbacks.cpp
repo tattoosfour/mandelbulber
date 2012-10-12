@@ -435,6 +435,14 @@ void StopRendering(GtkWidget *widget, gpointer data)
 	programClosed = true;
 	isPostRendering = false;
 	printf("Rendering terminated\n");
+
+	if (netRender->IsServer())
+	{
+		for (int i = 0; i < netRender->getNoOfClients(); i++)
+		{
+			netRender->sendDataToClient(NULL, 0, "stp", i);
+		}
+	}
 }
 
 void PressedApplyBrigtness(GtkWidget *widget, gpointer data)

@@ -1282,6 +1282,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 								netRender->sendDataToServer(NULL,0,"GET");
 							}
 						}
+
+						if(!strcmp(command, "stp"))
+						{
+							programClosed = true;
+						}
 					}
 
 					if(!netRender->IsClient() && !netRender->IsServer()) g_usleep(100000);
@@ -1393,6 +1398,16 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				WriteLogDouble("Thread finish confirmed", i);
 				//printf("Rendering thread #%d finished\n", i + 1);
 			}
+
+			//terminate rendering by all clients
+			if (netRender->IsServer())
+			{
+				for (int i = 0; i < netRender->getNoOfClients(); i++)
+				{
+					netRender->sendDataToClient(NULL, 0, "stp", i);
+				}
+			}
+
 			if (programClosed) break;
 		} //next progress
 		printf("\n");
@@ -1401,14 +1416,14 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		//*** postprocessing
 
-		if (param.SSAOEnabled && !programClosed)
+		if (param.SSAOEnabled && !programClosed && !netRender->IsClient())
 		{
 			PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
 			WriteLog("SSAO rendered");
 		}
 		image->CompileImage();
 		WriteLog("Image compiled");
-		if (param.DOFEnabled && !programClosed)
+		if (param.DOFEnabled && !programClosed && !netRender->IsClient())
 		{
 			double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 2.0) - 1.0 / param.doubles.persp;
 			PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus, param.doubles.persp);
