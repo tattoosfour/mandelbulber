@@ -47,6 +47,7 @@ public:
 	void GetData(void *data);
 
 private:
+	unsigned int CalculateCRC(char *data, size_t len);
   int status;
   struct addrinfo host_info;       // The struct that getaddrinfo() fills up with data.
   struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
