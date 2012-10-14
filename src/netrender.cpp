@@ -311,6 +311,13 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 		dataPointer += bytes_send;
 		//printf("Sent %d bytes\n", bytes_send);
 	}
+
+	if(size > 0)
+	{
+		unsigned int crcData = CalculateCRC((char*)data, size);
+		send(clients[index].socketfd, &crcData, sizeof(crcData), 0);
+	}
+
 	return true;
 }
 
@@ -333,11 +340,20 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 		dataPointer += bytes_send;
 		//printf("Sent %d bytes\n", bytes_send);
 	}
+
+	if(size > 0)
+	{
+		unsigned int crcData = CalculateCRC((char*)data, size);
+		send(socketfd, &crcData, sizeof(crcData), 0);
+	}
+
 	return true;
 }
 
 size_t CNetRender::receiveDataFromServer(char *command)
 {
+	dataSize = 0;
+
 	//printf("Waiting for data...\n");
 	memset(command,0,4);
 	ssize_t bytes_recvd = recv(socketfd, command, 4, 0);
@@ -394,6 +410,22 @@ size_t CNetRender::receiveDataFromServer(char *command)
 
 			rcv_left -= bytes_recvd;
 			dataPointer += bytes_recvd;
+		}
+
+		unsigned int crcData = CalculateCRC((char*)dataBuffer, size);
+		unsigned int crcData2 = 0;
+		recv(socketfd, &crcData2, sizeof(crcData2), 0);
+
+		if(crc != crc2)
+		{
+			printf("Received data crc error\n");
+			char scrapBuffer[1000];
+			do
+			{
+				bytes_recvd = recv(socketfd, scrapBuffer, 1000, 0);
+			}
+			while(bytes_recvd > 0);
+			return 0;
 		}
 
 		dataSize = size;
@@ -461,6 +493,22 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 			dataPointer += bytes_recvd;
 		}
 
+		unsigned int crcData = CalculateCRC((char*)dataBuffer, size);
+		unsigned int crcData2 = 0;
+		recv(clients[index].socketfd, &crcData2, sizeof(crcData2), 0);
+
+		if(crc != crc2)
+		{
+			printf("Received data crc error\n");
+			char scrapBuffer[1000];
+			do
+			{
+				bytes_recvd = recv(socketfd, scrapBuffer, 1000, 0);
+			}
+			while(bytes_recvd > 0);
+			return 0;
+		}
+
 		dataSize = size;
 	}
 	return size;
@@ -469,4 +517,14 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 void CNetRender::GetData(void *data)
 {
 	memcpy(data, dataBuffer, dataSize);
+}
+
+unsigned int CNetRender::CalculateCRC(char *data, size_t len)
+{
+	unsigned int crc = 0;
+	for(size_t i=0; i<len; i++)
+	{
+		crc+=data[i];
+	}
+	return crc;
 }
