@@ -2488,30 +2488,32 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 				while (gtk_events_pending())
 					gtk_main_iteration();
 
-				char command[4];
-				size_t size = netRender->receiveDataFromServer(command);
-
-				if (!strcmp(command, "set"))
+				if(!isRendering && !renderRequest)
 				{
-					char *buffer = new char[size];
-					netRender->GetData(buffer);
-					GetSettingsfromServer(buffer, size);
-					while (gtk_events_pending())
-						gtk_main_iteration();
-					delete buffer;
-				}
-				if (!strcmp(command, "run"))
-				{
-					Interface_data.animMode = false;
-					Interface_data.playMode = false;
-					Interface_data.recordMode = false;
-					Interface_data.continueRecord = false;
-					Interface_data.keyframeMode = false;
+					char command[4];
+					size_t size = netRender->receiveDataFromServer(command);
 
-					programClosed = true;
-					isPostRendering = false;
-					renderRequest = true;
+					if (!strcmp(command, "set"))
+					{
+						char *buffer = new char[size];
+						netRender->GetData(buffer);
+						GetSettingsfromServer(buffer, size);
+						while (gtk_events_pending())
+							gtk_main_iteration();
+						delete buffer;
+					}
+					if (!strcmp(command, "run"))
+					{
+						Interface_data.animMode = false;
+						Interface_data.playMode = false;
+						Interface_data.recordMode = false;
+						Interface_data.continueRecord = false;
+						Interface_data.keyframeMode = false;
 
+						programClosed = true;
+						isPostRendering = false;
+						renderRequest = true;
+					}
 				}
 			}
 		}
@@ -2555,12 +2557,10 @@ void PressedServerScan(GtkWidget *widget, gpointer data)
 	}
 }
 
-bool SendSettingsToClients(void)
+bool SendSettingsToClients(sParamRender fractParamToSend)
 {
 	printf("Sending settings to clients\n");
-	sParamRender fractParamToSave;
-	ReadInterface(&fractParamToSave);
-	SaveSettings("settings/.temp_send", fractParamToSave, true);
+	SaveSettings("settings/.temp_send", fractParamToSend, true);
 
 	FILE * pFile;
 	pFile = fopen("settings/.temp_send", "rb");

@@ -1104,12 +1104,37 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//turn off refreshing if resolution is very low
 		bool bo_refreshing = true;
 
+		//sending settings to clients
+		if(netRender->IsServer()) SendSettingsToClients(param);
+
 		//if it is a server, send "run" command to all clients
 		if (netRender->IsServer())
 		{
 			for (int i = 0; i < netRender->getNoOfClients(); i++)
 			{
 				netRender->sendDataToClient(NULL, 0, "run", i);
+			}
+		}
+
+		//calculate total number of vailable CPUs
+		int netCpuCount = NR_THREADS;
+		for(int i=0; i<netRender->getNoOfClients(); i++)
+		{
+			netCpuCount += netRender->getCpuCount(i);
+		}
+
+		int cpuIndex = NR_THREADS;
+		if (netRender->IsServer())
+		{
+			for (int clientIndex = 0; clientIndex < netRender->getNoOfClients(); clientIndex++)
+			{
+				for(int i=0; i<netRender->getCpuCount(clientIndex); i++)
+				{
+					int startLine = cpuIndex * height / netCpuCount;
+					netRender->sendDataToClient(&startLine, sizeof(startLine), "stl", clientIndex);
+					printf("set start line = %d\n", startLine);
+					cpuIndex++;
+				}
 			}
 		}
 
@@ -1147,13 +1172,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		image->CalculateGammaTable();
 
-		//calculate total number of vailable CPUs
-		int netCpuCount = NR_THREADS;
-		for(int i=0; i<netRender->getNoOfClients(); i++)
-		{
-			netCpuCount += netRender->getCpuCount(i);
-		}
-
 		for (int progressive = progressiveStart; progressive != 0; progressive /= 2)
 		{
 			//if (width * height / progressive / progressive <= 100 * 100) bo_refreshing = false;
@@ -1176,7 +1194,22 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			for (int i = 0; i < NR_THREADS; i++)
 			{
 				//sending some parameters to thread
-				thread_param[i].start = i * height / netCpuCount;
+				if(!netRender->IsClient())
+				{
+					thread_param[i].start = i * height / netCpuCount;
+				}
+				else
+				{
+					int startLine = 0;
+					char command[4];
+					size_t bytes_received = netRender->receiveDataFromServer(command);
+					if(!strcmp(command, "stl") && bytes_received == sizeof(int))
+					{
+						netRender->GetData(&startLine);
+					}
+					printf("command = %s, start line = %d\n", command, startLine);
+					thread_param[i].start = startLine;
+				}
 				thread_param[i].z = i;
 				thread_param[i].param = param;
 				thread_param[i].image = image;
@@ -2025,8 +2058,6 @@ void MainRender(void)
 	}
 
 	InitMainParameters(&fractParam);
-
-	if(netRender->IsServer()) SendSettingsToClients();
 
 	if (!LoadTextures(&fractParam)) return;
 
