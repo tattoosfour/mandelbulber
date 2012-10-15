@@ -1142,8 +1142,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		if (param.recordMode || noGUI || netRender->IsServer() || netRender->IsClient()) progressiveStart = 1;
 		image->progressiveFactor = progressiveStart;
 
-		int refresh_index = 0;
-		int refresh_skip = 1;
+		double refresh_skip = 0.1;
+		double refreshEndTime = real_clock();
 
 		image->CalculateGammaTable();
 
@@ -1299,9 +1299,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 					if (progressive < progressiveStart || netRender->IsServer() || netRender->IsClient())
 					{
-						refresh_index++;
 
-						if (refresh_index >= refresh_skip)
+						if (real_clock() - refreshEndTime >= refresh_skip)
 						{
 							double refreshStartTime = real_clock();
 
@@ -1331,10 +1330,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 								}
 							}
 
-							double refreshEndTime = real_clock();
+							refreshEndTime = real_clock();
 							//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
 							refresh_skip = (refreshEndTime - refreshStartTime) * 50;
-							refresh_index = 0;
 							WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
 						}
 					}
