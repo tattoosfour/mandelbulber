@@ -1365,7 +1365,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 							refreshEndTime = real_clock();
 							//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
-							refresh_skip = (refreshEndTime - refreshStartTime) * 50;
+							refresh_skip = (refreshEndTime - refreshStartTime) * 10;
 							WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
 						}
 					}
