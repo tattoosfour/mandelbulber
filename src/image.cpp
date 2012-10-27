@@ -116,6 +116,9 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 			sSortZ temp2 = temp_sort[ii];
 			double z2 = temp2.z;
 			double size2 = (z2 - neutral) / (z2 - min) * deep;
+
+			if(size1 == 0 && size2 ==0) done = true;
+
 			if (size1 * size2 > 0)
 			{
 				double sizeCompare;
@@ -142,6 +145,8 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 				done = false;
 			}
 			randomStep = randomStep * 0.7 - 1;
+
+			if(randomStep <= 0) done = true;
 		}
 		while(!done);
 		temp_sort[i] = temp_sort[ii];
