@@ -21,7 +21,8 @@ CPP_SRCS += \
 ../src/texture.cpp \
 ../src/timeline.cpp \
 ../src/undo.cpp \
-../src/cl_support.cpp  
+../src/cl_support.cpp \
+../src/netrender.cpp  
 
 OBJS += \
 ./src/Render3D.o \
@@ -41,7 +42,8 @@ OBJS += \
 ./src/texture.o \
 ./src/timeline.o \
 ./src/undo.o \
-./src/cl_support.o 
+./src/cl_support.o \
+./src/netrender.o
 
 CPP_DEPS += \
 ./src/Render3D.d \
@@ -61,7 +63,8 @@ CPP_DEPS += \
 ./src/texture.d \
 ./src/timeline.d \
 ./src/undo.d \
-./src/cl_support.d 
+./src/cl_support.d \
+./src/netrender.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -1,5 +1,11 @@
 Version history
 
+v1.13
+- added NetRender (possible to create render farms)
+- fixed bug: program crashed when in lowMem mode "iter fog" was used
+- fixed bug: program crashed when DOF was used on very big images
+- fixed memoryleaks
+
 v1.12-1
 - fixed bud: background texture was not seamless
 - fixed bug: some of shadows in volumatric iteration fog weren't calculated properly

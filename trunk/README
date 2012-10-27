@@ -1,4 +1,4 @@
-MANDELBULBER 1.12-1
+MANDELBULBER 1.13
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
@@ -41,7 +41,7 @@ please type:
 - Debian Wheeze x64
 (there is also available Windows and Mac version)
 
-- gcc 4.6.0-10
+- gcc 4.7
 
 5. USAGE
 
