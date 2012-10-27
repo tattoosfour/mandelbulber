@@ -1123,6 +1123,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			netCpuCount += netRender->getCpuCount(i);
 		}
 
+		//setting first lines to render
 		int cpuIndex = NR_THREADS;
 		if (netRender->IsServer())
 		{
@@ -1161,7 +1162,14 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		GThread **Thread = new GThread *[NR_THREADS + 1];
 		GError **err = new GError *[NR_THREADS + 1];
 		sParam *thread_param = new sParam[NR_THREADS];
-		sAllImageData *lineOfImage = new sAllImageData[width+1];
+
+		//initialise send/receive buffer
+		sAllImageData *lineOfImage = NULL;
+		sAllImageDataLowMem *lineOfImageLowMem = NULL;
+		if(!image->IsLowMemMode())
+			lineOfImage = new sAllImageData[width+1];
+		else
+			lineOfImageLowMem = new sAllImageDataLowMem[width+1];
 
 		int progressiveStart = 8;
 		if (param.recordMode || noGUI || netRender->IsServer() || netRender->IsClient()) progressiveStart = 1;
@@ -1200,6 +1208,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				}
 				else
 				{
+					//getting indexes of first lines to render
 					int startLine = 0;
 					char command[4];
 					size_t bytes_received = netRender->receiveDataFromServer(command);
@@ -1210,6 +1219,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					printf("command = %s, start line = %d\n", command, startLine);
 					thread_param[i].start = startLine;
 				}
+
+				//initialising local threads
 				thread_param[i].z = i;
 				thread_param[i].param = param;
 				thread_param[i].image = image;
@@ -1263,20 +1274,40 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							{
 								if(bytes_recvd > 0)
 								{
-									netRender->GetData(lineOfImage);
 									int *last;
-									last = (int*)&lineOfImage[width];
+									if(!image->IsLowMemMode())
+									{
+										netRender->GetData(lineOfImage);
+										last = (int*)&lineOfImage[width];
+									}
+									else
+									{
+										netRender->GetData(lineOfImageLowMem);
+										last = (int*)&lineOfImageLowMem[width];
+									}
+
 									int y = *last;
 									if(y<height)
 									{
 										for(int x=0; x<width; x++)
 										{
-											image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
-											image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
-											image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
-											image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+											if(!image->IsLowMemMode())
+											{
+												image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
+												image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
+												image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
+												image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
+											}
+											else
+											{
+												image->GetImage16Ptr()[x+y*width] = lineOfImageLowMem[x].image16;
+												image->PutPixelAlpha(x,y,lineOfImageLowMem[x].alpha);
+												image->PutPixelZBuffer(x,y,lineOfImageLowMem[x].zBuffer);
+												image->PutPixelColor(x,y,lineOfImageLowMem[x].colorIndexBuf16);
+											}
 										}
 										thread_done[y] = 99;
+										newLineRendered = true;
 									}
 								}
 							}
@@ -1285,6 +1316,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 					if (netRender->IsClient())
 					{
+						//receiving list of already rendered lines
 						netRender->receiveDataFromServer(command);
 						if(!strcmp(command, "lst"))
 						{
@@ -1303,21 +1335,41 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									linesToSend[y] = false;
 									for(int x=0; x<width; x++)
 									{
-										lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width];
-										lineOfImage[x].alpha = image->GetPixelAlpha(x,y);
-										lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y);
-										lineOfImage[x].zBuffer = image->GetPixelZBuffer(x,y);
+										if(!image->IsLowMemMode())
+										{
+											lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width];
+											lineOfImage[x].alpha = image->GetPixelAlpha(x,y);
+											lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y);
+											lineOfImage[x].zBuffer = image->GetPixelZBuffer(x,y);
+										}
+										else
+										{
+											lineOfImageLowMem[x].image16 = image->GetImage16Ptr()[x+y*width];
+											lineOfImageLowMem[x].alpha = image->GetPixelAlpha(x,y);
+											lineOfImageLowMem[x].colorIndexBuf16 = image->GetPixelColor(x,y);
+											lineOfImageLowMem[x].zBuffer = image->GetPixelZBuffer(x,y);
+										}
 									}
 									int *last;
-									last = (int*)&lineOfImage[width];
+									if(!image->IsLowMemMode())
+										last = (int*)&lineOfImage[width];
+									else
+										last = (int*)&lineOfImageLowMem[width];
 									*last = y;
-									netRender->sendDataToServer(lineOfImage,sizeof(sAllImageData)*(width+1),"GET");
+
+									size_t sizeOfLine;
+									if(!image->IsLowMemMode())
+										netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),"GET");
+									else
+										netRender->sendDataToServer(lineOfImageLowMem, sizeof(sAllImageDataLowMem)*(width+1),"GET");
+
 									sentSomething = true;
 									break;
 								}
 							}
 							if(!sentSomething)
 							{
+								//sending null answer when there si nothing to send
 								netRender->sendDataToServer(NULL,0,"GET");
 							}
 						}
@@ -1518,7 +1570,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		delete[] Thread;
 		delete[] err;
 		delete[] linesToSend;
-		delete[] lineOfImage;
+		if (lineOfImage) delete[] lineOfImage;
+		if (lineOfImageLowMem) delete[] lineOfImageLowMem;
 	}
 	else
 	{

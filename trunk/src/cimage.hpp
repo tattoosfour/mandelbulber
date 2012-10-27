@@ -34,6 +34,7 @@ struct sRGB
 
 struct sComplexImage
 {
+	sRGB16 backgroundBuf16;
 	unsigned short shadowsBuf16;
 	unsigned short shadingBuf16;
 	unsigned short specularBuf16;
@@ -42,7 +43,6 @@ struct sComplexImage
 	unsigned short glowBuf16;
 	sRGB16 reflectBuf16;
 	sRGB16 ambientBuf16;
-	sRGB16 backgroundBuf16;
 	sRGB16 volumetricLight;
 	unsigned short fogDensity16;
 };
@@ -85,10 +85,18 @@ struct sImageSwitches
 
 struct sAllImageData
 {
-	sComplexImage complex;
 	unsigned short alpha;
 	float zBuffer;
 	unsigned short colorIndexBuf16;
+	sComplexImage complex;
+};
+
+struct sAllImageDataLowMem
+{
+	unsigned short alpha;
+	float zBuffer;
+	unsigned short colorIndexBuf16;
+	sRGB16 image16;
 };
 
 class cImage
