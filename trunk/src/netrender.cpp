@@ -294,8 +294,9 @@ bool CNetRender::WaitForClient(char *statusOut)
 bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index)
 {
 	//printf("Sending %d bytes data with command %s...\n", size, command);
+	uint64_t size64 = size;
 	send(clients[index].socketfd, command, 4, 0);
-	send(clients[index].socketfd, &size, sizeof(size_t), 0);
+	send(clients[index].socketfd, &size64, sizeof(size64), 0);
 
 	int crc = command[0] + command[1] + command[2] + size;
 	send(clients[index].socketfd, &crc, sizeof(crc), 0);
@@ -324,8 +325,9 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 {
 	//printf("Sending %d bytes data with command %s...\n", size, command);
+	uint64_t size64 = size;
 	send(socketfd, command, 4, 0);
-	send(socketfd, &size, sizeof(size_t), 0);
+	send(socketfd, &size64, sizeof(size64), 0);
 	int crc = command[0] + command[1] + command[2] + size;
 	send(socketfd, &crc, sizeof(crc), 0);
 
@@ -369,10 +371,10 @@ size_t CNetRender::receiveDataFromServer(char *command)
 
 	//printf("Received command: %s\n", command);
 
-	size_t size = 0;
-	recv(socketfd, &size, sizeof(size_t), 0);
+	uint64_t size64 = 0;
+	recv(socketfd, &size64, sizeof(size64), 0);
 
-	int crc = command[0] + command[1] + command[2] + size;
+	int crc = command[0] + command[1] + command[2] + size64;
 	int crc2 = 0;
 	recv(socketfd, &crc2, sizeof(crc2), 0);
 
@@ -390,13 +392,13 @@ size_t CNetRender::receiveDataFromServer(char *command)
 
 	//printf("Will be received %d bytes\n", size);
 
-	if (size > 0)
+	if (size64 > 0)
 	{
 		if(dataBuffer) delete [] dataBuffer;
-		dataBuffer = new char[size];
+		dataBuffer = new char[size64];
 
 		char *dataPointer = dataBuffer;
-		size_t rcv_left = size;
+		size_t rcv_left = size64;
 
 		while(rcv_left > 0)
 		{
@@ -412,7 +414,7 @@ size_t CNetRender::receiveDataFromServer(char *command)
 			dataPointer += bytes_recvd;
 		}
 
-		unsigned int crcData = CalculateCRC((char*)dataBuffer, size);
+		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
 		unsigned int crcData2 = 0;
 		recv(socketfd, &crcData2, sizeof(crcData2), 0);
 
@@ -428,9 +430,9 @@ size_t CNetRender::receiveDataFromServer(char *command)
 			return 0;
 		}
 
-		dataSize = size;
+		dataSize = size64;
 	}
-	return size;
+	return size64;
 }
 
 size_t CNetRender::receiveDataFromClient(char *command, int index)
@@ -450,12 +452,12 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 
 	//printf("Received command: %s\n", command);
 
-	size_t size = 0;
-	recv(clients[index].socketfd, &size, sizeof(size_t), 0);
+	uint64_t size64 = 0;
+	recv(clients[index].socketfd, &size64, sizeof(size64), 0);
 
 	//printf("Will be received %d bytes\n", size);
 
-	int crc = command[0] + command[1] + command[2] + size;
+	int crc = command[0] + command[1] + command[2] + size64;
 	int crc2 = 0;
 	recv(clients[index].socketfd, &crc2, sizeof(crc2), 0);
 
@@ -471,13 +473,13 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 		return 0;
 	}
 
-	if (size > 0)
+	if (size64 > 0)
 	{
 		if(dataBuffer) delete [] dataBuffer;
-		dataBuffer = new char[size];
+		dataBuffer = new char[size64];
 
 		char *dataPointer = dataBuffer;
-		size_t rcv_left = size;
+		size_t rcv_left = size64;
 
 		while(rcv_left > 0)
 		{
@@ -493,7 +495,7 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 			dataPointer += bytes_recvd;
 		}
 
-		unsigned int crcData = CalculateCRC((char*)dataBuffer, size);
+		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
 		unsigned int crcData2 = 0;
 		recv(clients[index].socketfd, &crcData2, sizeof(crcData2), 0);
 
@@ -509,9 +511,9 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 			return 0;
 		}
 
-		dataSize = size;
+		dataSize = size64;
 	}
-	return size;
+	return size64;
 }
 
 void CNetRender::GetData(void *data)
