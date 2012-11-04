@@ -7,7 +7,9 @@
 
 #include "netrender.hpp"
 #include <stdio.h>
+#ifndef WIN32
 #include <arpa/inet.h>
+#endif
 
 CNetRender *netRender;
 
@@ -24,6 +26,22 @@ CNetRender::CNetRender(int myVersion, int CPUs)
   dataBuffer = NULL;
   dataSize = 0;
   noOfCPUs = CPUs;
+ 
+#ifdef WIN32  
+  WORD wVersionRequested;
+  WSADATA wsaData;
+  int err;
+
+/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
+    wVersionRequested = MAKEWORD(2, 2);
+
+    err = WSAStartup(wVersionRequested, &wsaData);
+    if (err != 0) {
+        /* Tell the user that we could not find a usable */
+        /* Winsock DLL.                                  */
+        printf("WSAStartup failed with error: %d\n", err);
+    }
+#endif
 }
 
 CNetRender::~CNetRender()
@@ -49,12 +67,16 @@ bool CNetRender::SetServer(char *portNo, char *statusOut)
   std::cout << "Binding socket..."  << std::endl;
   // we use to make the setsockopt() function to make sure the port is not in use
   // by a previous execution of our code. (see man page for more information)
-  int yes = 1;
-  status = setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+  char yes = 1;
+  status = setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
+#ifndef WIN32
   struct timeval timeout;
   timeout.tv_sec = 1;
   timeout.tv_usec = 0;
+#else
+  DWORD timeout = 1000;
+#endif
 
   if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
               sizeof(timeout)) < 0)
@@ -110,9 +132,13 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 	host_info_list->ai_protocol);
 	if (socketfd == -1)  std::cout << "socket error " << strerror(errno);
 
+#ifndef WIN32
   struct timeval timeout;
   timeout.tv_sec = 1;
   timeout.tv_usec = 0;
+#else
+  DWORD timeout = 1000;
+#endif
 
   if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
               sizeof(timeout)) < 0)
@@ -212,6 +238,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 	{
 		std::cout << "Connection accepted. Using new socketfd : " << newClient.socketfd << std::endl;
 
+#ifndef WIN32
 		//getting IP address
 		socklen_t len;
 		struct sockaddr_storage addr;
@@ -234,6 +261,10 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 		strcpy(newClient.ipstr, ipstr);
 		newClient.port = port;
+#else
+		strcpy(newClient.ipstr, "IP unknown");
+#endif
+		
 
 		//remembering new client
 		clients.push_back(newClient);
@@ -241,7 +272,11 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 		//preparing status
 		char stat[1000];
+#ifndef WIN32
 		sprintf(stat,"status: Client #%d has IP address: %s, port %d\n", clientIndex, ipstr, port);
+#else
+		sprintf(stat,"status: Client #%d connected\n", clientIndex);
+#endif
 		strcpy(statusOut, stat);
 		std::cout << stat;
 
@@ -296,10 +331,20 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	//printf("Sending %d bytes data with command %s...\n", size, command);
 	uint64_t size64 = size;
 	send(clients[index].socketfd, command, 4, 0);
+
+#ifdef WIN32
+	send(clients[index].socketfd, (const char*)&size64, sizeof(size64), 0);
+#else
 	send(clients[index].socketfd, &size64, sizeof(size64), 0);
+#endif
 
 	int crc = command[0] + command[1] + command[2] + size;
+	
+#ifdef WIN32
+	send(clients[index].socketfd, (const char*)&crc, sizeof(crc), 0);
+#else
 	send(clients[index].socketfd, &crc, sizeof(crc), 0);
+#endif
 
 	size_t send_left = size;
 	char *dataPointer = (char*)data;
@@ -316,7 +361,11 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	if(size > 0)
 	{
 		unsigned int crcData = CalculateCRC((char*)data, size);
+#ifdef WIN32
+		send(clients[index].socketfd, (const char*)&crcData, sizeof(crcData), 0);
+#else
 		send(clients[index].socketfd, &crcData, sizeof(crcData), 0);
+#endif
 	}
 
 	return true;
@@ -327,9 +376,20 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	//printf("Sending %d bytes data with command %s...\n", size, command);
 	uint64_t size64 = size;
 	send(socketfd, command, 4, 0);
+	
+#ifdef WIN32
+	send(socketfd, (const char*)&size64, sizeof(size64), 0);
+#else
 	send(socketfd, &size64, sizeof(size64), 0);
+#endif
 	int crc = command[0] + command[1] + command[2] + size;
+
+	
+#ifdef WIN32	
+	send(socketfd, (const char*)&crc, sizeof(crc), 0);
+#else
 	send(socketfd, &crc, sizeof(crc), 0);
+#endif
 
 	size_t send_left = size;
 	char *dataPointer = (char*)data;
@@ -346,7 +406,11 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	if(size > 0)
 	{
 		unsigned int crcData = CalculateCRC((char*)data, size);
+#ifdef WIN32	
+		send(socketfd, (const char*)&crcData, sizeof(crcData), 0);
+#else	
 		send(socketfd, &crcData, sizeof(crcData), 0);
+#endif
 	}
 
 	return true;
@@ -372,11 +436,21 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	//printf("Received command: %s\n", command);
 
 	uint64_t size64 = 0;
+
+#ifdef WIN32
+	recv(socketfd, (char*)&size64, sizeof(size64), 0);
+#else
 	recv(socketfd, &size64, sizeof(size64), 0);
+#endif
 
 	int crc = command[0] + command[1] + command[2] + size64;
 	int crc2 = 0;
+	
+#ifdef WIN32
+	recv(socketfd, (char*)&crc2, sizeof(crc2), 0);
+#else
 	recv(socketfd, &crc2, sizeof(crc2), 0);
+#endif
 
 	if(crc != crc2)
 	{
@@ -416,9 +490,14 @@ size_t CNetRender::receiveDataFromServer(char *command)
 
 		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
 		unsigned int crcData2 = 0;
+		
+#ifdef WIN32
+		recv(socketfd, (char*)&crcData2, sizeof(crcData2), 0);
+#else		
 		recv(socketfd, &crcData2, sizeof(crcData2), 0);
+#endif
 
-		if(crc != crc2)
+		if(crcData != crcData2)
 		{
 			printf("Received data crc error\n");
 			char scrapBuffer[1000];
@@ -453,13 +532,23 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 	//printf("Received command: %s\n", command);
 
 	uint64_t size64 = 0;
+	
+#ifdef WIN32
+	recv(clients[index].socketfd, (char*)&size64, sizeof(size64), 0);
+#else
 	recv(clients[index].socketfd, &size64, sizeof(size64), 0);
+#endif
 
 	//printf("Will be received %d bytes\n", size);
 
 	int crc = command[0] + command[1] + command[2] + size64;
 	int crc2 = 0;
+	
+#ifdef WIN32
+	recv(clients[index].socketfd, (char*)&crc2, sizeof(crc2), 0);
+#else
 	recv(clients[index].socketfd, &crc2, sizeof(crc2), 0);
+#endif
 
 	if(crc != crc2)
 	{
@@ -497,9 +586,14 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 
 		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
 		unsigned int crcData2 = 0;
+		
+#ifdef WIN32
+		recv(clients[index].socketfd, (char*)&crcData2, sizeof(crcData2), 0);
+#else
 		recv(clients[index].socketfd, &crcData2, sizeof(crcData2), 0);
+#endif
 
-		if(crc != crc2)
+		if(crcData != crcData2)
 		{
 			printf("Received data crc error\n");
 			char scrapBuffer[1000];

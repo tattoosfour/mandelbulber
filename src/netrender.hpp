@@ -10,8 +10,19 @@
 
 #include <iostream>
 #include <cstring>
-#include <sys/socket.h>
-#include <netdb.h>
+#ifdef WIN32
+	#undef WINVER
+	#define WINVER WindowsXP
+	#define _WIN32_WINNT 0xFFFF
+	//#include <windows.h>
+	#include <ws2tcpip.h>
+	#include <winsock2.h>
+	#define INET6_ADDRSTRLEN 46
+#else
+	#include <sys/socket.h>
+	#include <netdb.h>
+#endif
+
 #include <errno.h>
 #include <unistd.h>
 #include <vector>
