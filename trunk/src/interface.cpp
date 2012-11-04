@@ -2964,6 +2964,15 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.buAutoDEStep, "Scan for optimal DE factor for low image quality");
 	gtk_widget_set_tooltip_text(Interface.buAutoDEStepHQ, "Scan for optimal DE factor for high image quality");
 	gtk_widget_set_tooltip_text(Interface.checkConstantDEThreshold, "Switches to constant DE threshold mode\nDetail size not depends on image resolution and perspective depthness");
+
+	gtk_widget_set_tooltip_text(Interface.checkNetRenderServerEnable, "Enables server for render farm. Specified port must be not firewalled");
+	gtk_widget_set_tooltip_text(Interface.checkNetRenderServerScan, "Enables scanning for client-applications. It will wait for clients as long as it is needed\n"
+			"During scanning time all clients have to enabled\n"
+			"When the client will be found there will be displayed his IP addres\n"
+			"When looking for clients will be done, uncheck scanning icon");
+
+	gtk_widget_set_tooltip_text(Interface.checkNetRenderClientEnable, "Connects the client to specified server\n"
+			"Enabling the client have to be done when scanning function on server side is enabled");
 #endif
 }
 
