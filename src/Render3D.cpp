@@ -231,6 +231,8 @@ void *MainThread(void *ptr)
 	double tileXOffset = (tile % tiles);
 	double tileYOffset = (tile / tiles);
 
+	bool breakX = false;
+
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 3; pass++)
 	{
@@ -240,7 +242,7 @@ void *MainThread(void *ptr)
 		for (z = start; z <= height - progressive; z += progressive)
 		{
 			//checking if some another thread is not rendering the same z
-			if (parametry->thread_done[z] == 0)
+			if (parametry->thread_done[z] == 0 && !breakX)
 			{
 				//giving information for another threads that this thread renders this z value
 				parametry->thread_done[z] = thread_number + 1;
@@ -250,7 +252,7 @@ void *MainThread(void *ptr)
 				//WriteLogDouble("Started rendering line", z);
 
 				//main loop for x values
-				bool breakX = false;
+				breakX = false;
 				for (int x = 0; x <= width - progressive; x += progressive)
 				{
 					//checking if program was not closed
@@ -1055,10 +1057,12 @@ void *MainThread(void *ptr)
 			}//end if thread done
 			else
 			{
+				breakX = false;
 				if(pass < 2)
 				{
 					int firstFree = -1;
 					int lastFree = -1;
+					int maxHole = 0;
 					for(int i=z; i<height; i+=progressive)
 					{
 						if(firstFree < 0 && parametry->thread_done[i] == 0)
@@ -1068,8 +1072,15 @@ void *MainThread(void *ptr)
 						if(firstFree > 0 && parametry->thread_done[i] > 0)
 						{
 							lastFree = i;
-							z = (((firstFree+lastFree) / 2)/progressive) * progressive;
-							break;
+
+							int holeSize = lastFree - firstFree;
+							if (holeSize > maxHole)
+							{
+								z = (((firstFree+lastFree) / 2)/progressive) * progressive;
+								maxHole = holeSize;
+							}
+							firstFree = -1;
+							lastFree = -1;
 						}
 					}
 					if(firstFree > 0 && lastFree < 0)
