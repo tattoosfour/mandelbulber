@@ -546,6 +546,7 @@ void *MainThread(void *ptr)
 						else
 						{
 							breakX = true;
+							printf("BreakX, line = %d, thread = %d, thread_done[z] = %d\n", z, thread_number, parametry->thread_done[z]);
 							break;
 						}
 					}//next y
@@ -1063,7 +1064,7 @@ void *MainThread(void *ptr)
 					int firstFree = -1;
 					int lastFree = -1;
 					int maxHole = 0;
-					for(int i=z; i<height; i+=progressive)
+					for(int i=0; i<height; i+=progressive)
 					{
 						if(firstFree < 0 && parametry->thread_done[i] == 0)
 						{
@@ -1076,9 +1077,10 @@ void *MainThread(void *ptr)
 							int holeSize = lastFree - firstFree;
 							if (holeSize > maxHole)
 							{
-								z = (((firstFree+lastFree) / 2)/progressive) * progressive;
+								z = (((firstFree+lastFree) / 2)/progressive) * progressive - progressive;
 								maxHole = holeSize;
 							}
+							printf("Max hole = %d, frist = %d, last = %d, z = %d, thread = %d, thread_done[z] = %d\n", maxHole, firstFree, lastFree, z, thread_number, parametry->thread_done[z]);
 							firstFree = -1;
 							lastFree = -1;
 						}
@@ -1086,8 +1088,13 @@ void *MainThread(void *ptr)
 					if(firstFree > 0 && lastFree < 0)
 					{
 						z = (((firstFree+height) / 2)/progressive) * progressive;
+						maxHole = 1;
 					}
+					printf("Max hole = %d, frist = %d, last = %d\n", maxHole, firstFree, lastFree);
+					if(maxHole == 0) break;
 				}
+
+				if(programClosed) break;
 			}
 		}//next z
 	}// next pass
