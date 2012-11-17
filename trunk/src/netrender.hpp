@@ -29,13 +29,6 @@
 
 using namespace std;
 
-struct sClients
-{
-	int socketfd;
-	char ipstr[INET6_ADDRSTRLEN];
-	int port;
-	int noOfCPU;
-};
 
 class CNetRender
 {
@@ -57,8 +50,22 @@ public:
 	size_t receiveDataFromClient(char *command, int index);
 	void GetData(void *data);
 
+	struct sClients
+	{
+		int socketfd;
+		char ipstr[INET6_ADDRSTRLEN];
+		int port;
+		int noOfCPU;
+	};
+
+	struct sHeader
+	{
+		char command[4];
+		uint64_t size64;
+	};
+
 private:
-	unsigned int CalculateCRC(char *data, size_t len);
+	uint16_t CRC_Fletcher16( uint8_t const *data, size_t bytes);
   int status;
   struct addrinfo host_info;       // The struct that getaddrinfo() fills up with data.
   struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
@@ -72,6 +79,8 @@ private:
   size_t dataSize;
   int noOfCPUs;
 };
+
+
 
 extern CNetRender *netRender;
 

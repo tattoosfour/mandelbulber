@@ -338,7 +338,11 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	send(clients[index].socketfd, &size64, sizeof(size64), 0);
 #endif
 
-	int crc = command[0] + command[1] + command[2] + size;
+	sHeader header;
+	memset(&header,0,sizeof(header));
+	memcpy(header.command, command, sizeof(char[4]));
+	header.size64 = size64;
+	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	
 #ifdef WIN32
 	send(clients[index].socketfd, (const char*)&crc, sizeof(crc), 0);
@@ -360,7 +364,8 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 
 	if(size > 0)
 	{
-		unsigned int crcData = CalculateCRC((char*)data, size);
+		uint16_t crcData = CRC_Fletcher16((uint8_t*)data, size);
+
 #ifdef WIN32
 		send(clients[index].socketfd, (const char*)&crcData, sizeof(crcData), 0);
 #else
@@ -382,8 +387,12 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 #else
 	send(socketfd, &size64, sizeof(size64), 0);
 #endif
-	int crc = command[0] + command[1] + command[2] + size;
 
+	sHeader header;
+	memset(&header,0,sizeof(header));
+	memcpy(header.command, command, sizeof(char[4]));
+	header.size64 = size64;
+	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	
 #ifdef WIN32	
 	send(socketfd, (const char*)&crc, sizeof(crc), 0);
@@ -405,7 +414,8 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 
 	if(size > 0)
 	{
-		unsigned int crcData = CalculateCRC((char*)data, size);
+		uint16_t crcData = CRC_Fletcher16((uint8_t*)data, size);
+
 #ifdef WIN32	
 		send(socketfd, (const char*)&crcData, sizeof(crcData), 0);
 #else	
@@ -443,8 +453,12 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	recv(socketfd, &size64, sizeof(size64), 0);
 #endif
 
-	int crc = command[0] + command[1] + command[2] + size64;
-	int crc2 = 0;
+	sHeader header;
+	memset(&header,0,sizeof(header));
+	memcpy(header.command, command, sizeof(char[4]));
+	header.size64 = size64;
+	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
+	uint16_t crc2 = 0;
 	
 #ifdef WIN32
 	recv(socketfd, (char*)&crc2, sizeof(crc2), 0);
@@ -488,8 +502,8 @@ size_t CNetRender::receiveDataFromServer(char *command)
 			dataPointer += bytes_recvd;
 		}
 
-		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
-		unsigned int crcData2 = 0;
+		uint16_t crcData = CRC_Fletcher16((uint8_t*)dataBuffer, size64);
+		uint16_t crcData2 = 0;
 		
 #ifdef WIN32
 		recv(socketfd, (char*)&crcData2, sizeof(crcData2), 0);
@@ -541,8 +555,12 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 
 	//printf("Will be received %d bytes\n", size);
 
-	int crc = command[0] + command[1] + command[2] + size64;
-	int crc2 = 0;
+	sHeader header;
+	memset(&header,0,sizeof(header));
+	memcpy(header.command, command, sizeof(char[4]));
+	header.size64 = size64;
+	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
+	uint16_t crc2 = 0;
 	
 #ifdef WIN32
 	recv(clients[index].socketfd, (char*)&crc2, sizeof(crc2), 0);
@@ -584,8 +602,8 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 			dataPointer += bytes_recvd;
 		}
 
-		unsigned int crcData = CalculateCRC((char*)dataBuffer, size64);
-		unsigned int crcData2 = 0;
+		uint16_t crcData = CRC_Fletcher16((uint8_t*)dataBuffer, size64);
+		uint16_t crcData2 = 0;
 		
 #ifdef WIN32
 		recv(clients[index].socketfd, (char*)&crcData2, sizeof(crcData2), 0);
@@ -615,12 +633,24 @@ void CNetRender::GetData(void *data)
 	memcpy(data, dataBuffer, dataSize);
 }
 
-unsigned int CNetRender::CalculateCRC(char *data, size_t len)
+//source: http://en.wikipedia.org/wiki/Fletcher's_checksum
+uint16_t CNetRender::CRC_Fletcher16(uint8_t const *data, size_t bytes)
 {
-	unsigned int crc = 0;
-	for(size_t i=0; i<len; i++)
+	uint16_t sum1 = 0xff, sum2 = 0xff;
+
+	while (bytes)
 	{
-		crc+=data[i];
+		size_t tlen = bytes > 20 ? 20 : bytes;
+		bytes -= tlen;
+		do
+		{
+			sum2 += sum1 += *data++;
+		} while (--tlen);
+		sum1 = (sum1 & 0xff) + (sum1 >> 8);
+		sum2 = (sum2 & 0xff) + (sum2 >> 8);
 	}
-	return crc;
+	/* Second reduction step to reduce sums to 8 bits */
+	sum1 = (sum1 & 0xff) + (sum1 >> 8);
+	sum2 = (sum2 & 0xff) + (sum2 >> 8);
+	return sum2 << 8 | sum1;
 }
