@@ -160,8 +160,8 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 			gtk_main_iteration();
 	}
 
-	double last_time = clock() / CLOCKS_PER_SEC;
-
+	double last_time = real_clock();
+	int refreshCount = 0;
 
 	for (int i = 0; i < height * width; i++)
 	{
@@ -204,18 +204,23 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 				}
 			}
 		}
-		double time = clock() / CLOCKS_PER_SEC;
-		if (time - last_time > 5.0 && !noGUI && image->IsPreview())
+		double time = real_clock();
+		if (time - last_time > 0.1 && !noGUI && image->IsPreview())
 		{
 			char progressText[1000];
-			last_time = clock() / CLOCKS_PER_SEC;
+			last_time = real_clock();
 			double percent_done = (double) i / (height * width) * 100.0;
-			sprintf(progressText, "Rendering Depth Of Field effect. Done %.1f%%", percent_done);
+			sprintf(progressText, "Rendering Depth Of Field effect. Done %.2f%%", percent_done);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 
-			image->ConvertTo8bit();
-			image->UpdatePreview();
-			image->RedrawInWidget(renderWindow.drawingArea);
+			if(refreshCount > 600)
+			{
+				image->ConvertTo8bit();
+				image->UpdatePreview();
+				image->RedrawInWidget(renderWindow.drawingArea);
+				refreshCount = 0;
+			}
+			refreshCount++;
 
 			while (gtk_events_pending())
 				gtk_main_iteration();
