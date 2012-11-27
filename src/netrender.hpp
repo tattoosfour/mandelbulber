@@ -44,10 +44,10 @@ public:
 	bool IsClient() {return isClient;}
 	int getNoOfClients() {return clientIndex;};
 	int getCpuCount(int index) {return clients[index].noOfCPU;};
-	bool sendDataToClient(void *data, size_t size, char *command, int index);
+	bool sendDataToClient(void *data, size_t size, char *command, int index, int32_t identifier);
 	bool sendDataToServer(void *data, size_t size, char *command);
 	size_t receiveDataFromServer(char *command);
-	size_t receiveDataFromClient(char *command, int index);
+	size_t receiveDataFromClient(char *command, int index, int32_t reqIdentifier);
 	void GetData(void *data);
 
 	struct sClients
@@ -61,6 +61,7 @@ public:
 	struct sHeader
 	{
 		char command[4];
+		int32_t identifier;
 		uint64_t size64;
 	};
 
@@ -78,6 +79,7 @@ private:
   char *dataBuffer;
   size_t dataSize;
   int noOfCPUs;
+  int32_t lastIdentifier;
 };
 
 
