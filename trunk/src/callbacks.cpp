@@ -440,7 +440,7 @@ void StopRendering(GtkWidget *widget, gpointer data)
 	{
 		for (int i = 0; i < netRender->getNoOfClients(); i++)
 		{
-			netRender->sendDataToClient(NULL, 0, "stp", i);
+			netRender->sendDataToClient(NULL, 0, "stp", i, 0);
 		}
 	}
 }
@@ -2585,7 +2585,7 @@ bool SendSettingsToClients(sParamRender fractParamToSend)
 
 		for(int i=0; i<netRender->getNoOfClients(); i++)
 		{
-			netRender->sendDataToClient(buffer, lSize, (char*)"set", i);
+			netRender->sendDataToClient(buffer, lSize, (char*)"set", i, 0);
 		}
 
 		fclose(pFile);

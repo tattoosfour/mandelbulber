@@ -26,6 +26,7 @@ CNetRender::CNetRender(int myVersion, int CPUs)
   dataBuffer = NULL;
   dataSize = 0;
   noOfCPUs = CPUs;
+  lastIdentifier = 0;
  
 #ifdef WIN32  
   WORD wVersionRequested;
@@ -191,9 +192,9 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 		{
     	int serverVersion;
     	if(recvd_bytes == sizeof(int)) GetData(&serverVersion);
-			printf("Client version refused. Server version is %f\n", serverVersion/1000);
+			printf("Client version refused. Server version is %f\n", serverVersion/1000.0);
   		isClient = false;
-  		sprintf(statusOut,"status: client has wrong version. Server is %f", serverVersion/1000);
+  		sprintf(statusOut,"status: client has wrong version. Server is %f", serverVersion/1000.0);
   		printf("Client disconnected from server because client version is wrong\n");
     	return false;
 		}
@@ -282,9 +283,9 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 		//checking client version
 		int clientVersion;
-		sendDataToClient(NULL, 0, "ver", clientIndex-1);
+		sendDataToClient(NULL, 0, "ver", clientIndex-1, 0);
 		char command[4];
-		size_t recvd_bytes = receiveDataFromClient(command, clientIndex-1);
+		size_t recvd_bytes = receiveDataFromClient(command, clientIndex-1, 0);
 		if(!strcmp("VER", command) && recvd_bytes == sizeof(int))
 		{
 			GetData(&clientVersion);
@@ -295,12 +296,11 @@ bool CNetRender::WaitForClient(char *statusOut)
 			printf("Client version is correct\n");
 
 			//sending answer
-			char *accepted = (char*)"accepted";
-			sendDataToClient(NULL, 0, "ok.", clientIndex-1);
+			sendDataToClient(NULL, 0, "ok.", clientIndex-1, 0);
 
 			//ask for number of CPUs
-			sendDataToClient(NULL, 0, "cpu", clientIndex-1);
-			recvd_bytes = receiveDataFromClient(command, clientIndex-1);
+			sendDataToClient(NULL, 0, "cpu", clientIndex-1, 0);
+			recvd_bytes = receiveDataFromClient(command, clientIndex-1, 0);
 			if(!strcmp("CPU", command) && recvd_bytes == sizeof(int))
 			{
 				int noOfCpu;
@@ -316,8 +316,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 			printf("Wrong client version\n");
 
 			//sending answer
-			char *refused = (char*)"refused";
-			sendDataToClient(&version, sizeof(version), "bad", clientIndex-1);
+			sendDataToClient(&version, sizeof(version), "bad", clientIndex-1, 0);
 
 			//deleting client
 			clients.erase(clients.end()-1);
@@ -326,15 +325,17 @@ bool CNetRender::WaitForClient(char *statusOut)
 	}
 }
 
-bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index)
+bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index, int32_t identifier)
 {
 	//printf("Sending %d bytes data with command %s...\n", size, command);
 	uint64_t size64 = size;
 	send(clients[index].socketfd, command, 4, 0);
 
 #ifdef WIN32
+	send(clients[index].socketfd, (const char*)&identifier, sizeof(identifier), 0);
 	send(clients[index].socketfd, (const char*)&size64, sizeof(size64), 0);
 #else
+	send(clients[index].socketfd, &identifier, sizeof(identifier), 0);
 	send(clients[index].socketfd, &size64, sizeof(size64), 0);
 #endif
 
@@ -342,6 +343,7 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	memset(&header,0,sizeof(header));
 	memcpy(header.command, command, sizeof(char[4]));
 	header.size64 = size64;
+	header.identifier = identifier;
 	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	
 #ifdef WIN32
@@ -382,9 +384,13 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	uint64_t size64 = size;
 	send(socketfd, command, 4, 0);
 	
+	int32_t identifier = lastIdentifier;
+
 #ifdef WIN32
+	send(socketfd, (const char*)&identifier, sizeof(identifier), 0);
 	send(socketfd, (const char*)&size64, sizeof(size64), 0);
 #else
+	send(socketfd, &identifier, sizeof(identifier), 0);
 	send(socketfd, &size64, sizeof(size64), 0);
 #endif
 
@@ -392,6 +398,7 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	memset(&header,0,sizeof(header));
 	memcpy(header.command, command, sizeof(char[4]));
 	header.size64 = size64;
+	header.identifier = identifier;
 	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	
 #ifdef WIN32	
@@ -446,10 +453,13 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	//printf("Received command: %s\n", command);
 
 	uint64_t size64 = 0;
+	int32_t identifier;
 
 #ifdef WIN32
+	recv(socketfd, (char*)&identifier, sizeof(identifier), 0);
 	recv(socketfd, (char*)&size64, sizeof(size64), 0);
 #else
+	recv(socketfd, &identifier, sizeof(identifier), 0);
 	recv(socketfd, &size64, sizeof(size64), 0);
 #endif
 
@@ -457,6 +467,8 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	memset(&header,0,sizeof(header));
 	memcpy(header.command, command, sizeof(char[4]));
 	header.size64 = size64;
+	header.identifier = identifier;
+
 	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	uint16_t crc2 = 0;
 	
@@ -478,6 +490,7 @@ size_t CNetRender::receiveDataFromServer(char *command)
 		return 0;
 	}
 
+	lastIdentifier = identifier;
 	//printf("Will be received %d bytes\n", size);
 
 	if (size64 > 0)
@@ -528,7 +541,7 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	return size64;
 }
 
-size_t CNetRender::receiveDataFromClient(char *command, int index)
+size_t CNetRender::receiveDataFromClient(char *command, int index, int32_t reqIdentifier)
 {
 	//printf("Waiting for data...\n");
 	memset(command,0,4);
@@ -546,10 +559,13 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 	//printf("Received command: %s\n", command);
 
 	uint64_t size64 = 0;
+	int32_t identifier;
 	
 #ifdef WIN32
+	recv(clients[index].socketfd, (char*)&identifier, sizeof(identifier), 0);
 	recv(clients[index].socketfd, (char*)&size64, sizeof(size64), 0);
 #else
+	recv(clients[index].socketfd, &identifier, sizeof(identifier), 0);
 	recv(clients[index].socketfd, &size64, sizeof(size64), 0);
 #endif
 
@@ -559,6 +575,7 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 	memset(&header,0,sizeof(header));
 	memcpy(header.command, command, sizeof(char[4]));
 	header.size64 = size64;
+	header.identifier = identifier;
 	uint16_t crc = CRC_Fletcher16((uint8_t*)&header, sizeof(header));
 	uint16_t crc2 = 0;
 	
@@ -577,6 +594,18 @@ size_t CNetRender::receiveDataFromClient(char *command, int index)
 			bytes_recvd = recv(clients[index].socketfd, scrapBuffer, 1000, 0);
 		}
 		while(bytes_recvd > 0);
+		return 0;
+	}
+
+	if(identifier != reqIdentifier)
+	{
+		printf("Data identifier error (lost synchronization)\n");
+		char scrapBuffer[1000];
+		do
+		{
+			bytes_recvd = recv(clients[index].socketfd, scrapBuffer, 1000, 0);
+		}
+		while (bytes_recvd > 0);
 		return 0;
 	}
 

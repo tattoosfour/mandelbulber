@@ -1080,7 +1080,6 @@ void *MainThread(void *ptr)
 								z = (((firstFree+lastFree) / 2)/progressive) * progressive - progressive;
 								maxHole = holeSize;
 							}
-							printf("Max hole = %d, frist = %d, last = %d, z = %d, thread = %d, thread_done[z] = %d\n", maxHole, firstFree, lastFree, z, thread_number, parametry->thread_done[z]);
 							firstFree = -1;
 							lastFree = -1;
 						}
@@ -1090,7 +1089,6 @@ void *MainThread(void *ptr)
 						z = (((firstFree+height) / 2)/progressive) * progressive;
 						maxHole = 1;
 					}
-					printf("Max hole = %d, frist = %d, last = %d\n", maxHole, firstFree, lastFree);
 					if(maxHole == 0) break;
 				}
 
@@ -1130,7 +1128,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		{
 			for (int i = 0; i < netRender->getNoOfClients(); i++)
 			{
-				netRender->sendDataToClient(NULL, 0, "run", i);
+				netRender->sendDataToClient(NULL, 0, "run", i, param.fractal.frameNo);
 			}
 		}
 
@@ -1150,7 +1148,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				for(int i=0; i<netRender->getCpuCount(clientIndex); i++)
 				{
 					int startLine = cpuIndex * height / netCpuCount;
-					netRender->sendDataToClient(&startLine, sizeof(startLine), "stl", clientIndex);
+					netRender->sendDataToClient(&startLine, sizeof(startLine), "stl", clientIndex, 0);
 					printf("set start line = %d\n", startLine);
 					cpuIndex++;
 				}
@@ -1272,7 +1270,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						newLineRendered = false;
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							netRender->sendDataToClient(thread_done, sizeof(int)*height, "lst", i);
+							netRender->sendDataToClient(thread_done, sizeof(int)*height, "lst", i, param.fractal.frameNo);
 						}
 					}
 
@@ -1282,12 +1280,12 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					{
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							netRender->sendDataToClient(NULL, 0, "get", i);
+							netRender->sendDataToClient(NULL, 0, "get", i, param.fractal.frameNo);
 						}
 
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							size_t bytes_recvd = netRender->receiveDataFromClient(command, i);
+							size_t bytes_recvd = netRender->receiveDataFromClient(command, i, param.fractal.frameNo);
 							if(!strcmp(command, "GET"))
 							{
 								if(bytes_recvd > 0)
@@ -1375,7 +1373,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 										last = (int*)&lineOfImageLowMem[width];
 									*last = y;
 
-									size_t sizeOfLine;
 									if(!image->IsLowMemMode())
 										netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),"GET");
 									else
@@ -1511,7 +1508,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			{
 				for (int i = 0; i < netRender->getNoOfClients(); i++)
 				{
-					netRender->sendDataToClient(NULL, 0, "stp", i);
+					netRender->sendDataToClient(NULL, 0, "stp", i, param.fractal.frameNo);
 				}
 			}
 
