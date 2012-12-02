@@ -13,6 +13,7 @@
 
 CNetRender *netRender;
 
+//---------------- Constructor ---------------------
 CNetRender::CNetRender(int myVersion, int CPUs)
 {
   memset(&host_info, 0, sizeof host_info);
@@ -27,7 +28,6 @@ CNetRender::CNetRender(int myVersion, int CPUs)
   dataSize = 0;
   noOfCPUs = CPUs;
   lastIdentifier = 0;
- 
 #ifdef WIN32  
   WORD wVersionRequested;
   WSADATA wsaData;
@@ -45,11 +45,12 @@ CNetRender::CNetRender(int myVersion, int CPUs)
 #endif
 }
 
+//------------------ Destructor ---------------------
 CNetRender::~CNetRender()
 {
 	if (dataBuffer) delete [] dataBuffer;
 }
-
+//------------------- Set Server ---------------------
 bool CNetRender::SetServer(char *portNo, char *statusOut)
 {
   memset(&host_info, 0, sizeof host_info);
@@ -102,6 +103,7 @@ bool CNetRender::SetServer(char *portNo, char *statusOut)
   }
 }
 
+//------------------- Delete Server ----------------------
 void CNetRender::DeleteServer(void)
 {
 	if(host_info_list) freeaddrinfo(host_info_list);
@@ -117,6 +119,7 @@ void CNetRender::DeleteServer(void)
 	isServer = false;
 }
 
+//-------------------- Set client ---------------------------
 bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 {
 	memset(&host_info, 0, sizeof host_info);
@@ -207,12 +210,15 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   }
 }
 
+//---------------- Delete Client ------------------------
+
 void CNetRender::DeleteClient(void)
 {
 	if(host_info_list) freeaddrinfo(host_info_list);
 	if(socketfd > 0) close(socketfd);
 }
 
+//------------------ Wait for client -------------------
 bool CNetRender::WaitForClient(char *statusOut)
 {
 	//std::cout << "Listen()ing for connections..." << std::endl;
@@ -228,7 +234,31 @@ bool CNetRender::WaitForClient(char *statusOut)
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size = sizeof(their_addr);
 	sClients newClient;
-	newClient.socketfd = accept(socketfd, (struct sockaddr *) &their_addr, &addr_size);
+	memset(&newClient, 0, sizeof(newClient));
+
+	fd_set set;
+	struct timeval timeout;
+	int rv;
+	FD_ZERO(&set); // clear the set
+	FD_SET(socketfd, &set); // add file descriptor to the set
+
+	timeout.tv_sec = 1;
+	timeout.tv_usec = 0;
+
+	rv = select(socketfd + 1, &set, NULL, NULL, &timeout);
+	if (rv == -1)
+	{
+		perror("select"); // an error accured
+		strcpy(statusOut,"status: socket error");
+		return false;
+	}
+	else if (rv == 0)
+	{
+		//printf("timeout occurred (1 second) \n"); // a timeout occured
+		newClient.socketfd  = -1;
+	}
+	else newClient.socketfd = accept(socketfd, (struct sockaddr *) &their_addr, &addr_size);
+
 	if (newClient.socketfd  == -1)
 	{
 		//std::cout << "listen error" << std::endl;
@@ -325,6 +355,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 	}
 }
 
+//--------------- Send data to client ----------------------
 bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int index, int32_t identifier)
 {
 	//printf("Sending %d bytes data with command %s...\n", size, command);
@@ -378,6 +409,7 @@ bool CNetRender::sendDataToClient(void *data, size_t size, char *command, int in
 	return true;
 }
 
+//-------------- Send data to server --------------------
 bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 {
 	//printf("Sending %d bytes data with command %s...\n", size, command);
@@ -433,6 +465,7 @@ bool CNetRender::sendDataToServer(void *data, size_t size, char *command)
 	return true;
 }
 
+//------------------- Receive data from server -----------------------
 size_t CNetRender::receiveDataFromServer(char *command)
 {
 	dataSize = 0;
@@ -540,6 +573,8 @@ size_t CNetRender::receiveDataFromServer(char *command)
 	}
 	return size64;
 }
+
+//--------------- receive data from client --------------------
 
 size_t CNetRender::receiveDataFromClient(char *command, int index, int32_t reqIdentifier)
 {
@@ -657,12 +692,15 @@ size_t CNetRender::receiveDataFromClient(char *command, int index, int32_t reqId
 	return size64;
 }
 
+//--------------- Get data -----------------
+
 void CNetRender::GetData(void *data)
 {
 	memcpy(data, dataBuffer, dataSize);
 }
 
-//source: http://en.wikipedia.org/wiki/Fletcher's_checksum
+//------------------------ Fletchers checsum -----------------
+//source: http://en.wikipedia.org/wiki/Fletcher's 16-bit checksum
 uint16_t CNetRender::CRC_Fletcher16(uint8_t const *data, size_t bytes)
 {
 	uint16_t sum1 = 0xff, sum2 = 0xff;
