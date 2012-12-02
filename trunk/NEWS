@@ -1,5 +1,9 @@
 Version history
 
+v1.13-1
+- NetRender works also under Windows
+- improved CRC checking in NetRender message frame
+
 v1.13
 - added NetRender (possible to create render farms)
 - fixed bug: program crashed when in lowMem mode "iter fog" was used

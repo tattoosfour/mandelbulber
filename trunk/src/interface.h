@@ -12,8 +12,8 @@
 #include "fractparams.h"
 #include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.139
-#define MANDELBULBER_VERSION_STR "1.13"
+#define MANDELBULBER_VERSION 1.131
+#define MANDELBULBER_VERSION_STR "1.13-1"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
