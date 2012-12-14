@@ -289,6 +289,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.juliaMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkJulia));
 		params->slowShading = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading));
 		params->textured_background = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground));
+		params->background_as_fulldome = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackgroundFulldome));
 		params->fractal.doubles.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)));
 		params->fractal.doubles.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)));
 		params->fractal.doubles.julia.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_c)));
@@ -899,6 +900,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading), params->slowShading);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkLimits), params->fractal.limits_enabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground), params->textured_background);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackgroundFulldome), params->background_as_fulldome);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkColoring), params->imageSwitches.coloringEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode), params->fractal.tgladFoldingMode);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSphericalFoldingMode), params->fractal.sphericalFoldingMode);
@@ -1832,6 +1834,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkSlowShading = gtk_check_button_new_with_label("Not DE Shading mode (slow)");
 	Interface.checkLimits = gtk_check_button_new_with_label("Enable limits");
 	Interface.checkBitmapBackground = gtk_check_button_new_with_label("Textured background");
+	Interface.checkBitmapBackgroundFulldome = gtk_check_button_new_with_label("Fulldome background");
 	Interface.checkColoring = gtk_check_button_new_with_label("Coloured surface");
 	Interface.checkTgladMode = gtk_check_button_new_with_label("Tglad's folding mode      ");
 	Interface.checkSphericalFoldingMode = gtk_check_button_new_with_label("Spherical folding mode      ");
@@ -2372,6 +2375,7 @@ void CreateInterface(sParamRender *default_settings)
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxEffectsChecks2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkBitmapBackground, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkBitmapBackgroundFulldome, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsChecks2), Interface.checkIterFogEnable, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxVolumetricFog, false, false, 1);
@@ -2913,6 +2917,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.checkSlowShading,
 			"Enable calculation of light's angle of incidence based on fake gradient estimation\nVery slow but works with all fractal formulas");
 	gtk_widget_set_tooltip_text(Interface.checkBitmapBackground, "Enable spherical wrapped textured background");
+	gtk_widget_set_tooltip_text(Interface.checkBitmapBackgroundFulldome, "Beckground texture in FullDome format");
 	gtk_widget_set_tooltip_text(Interface.checkColoring, "Enable fractal coloring algorithm");
 	gtk_widget_set_tooltip_text(Interface.edit_color_seed, "Seed for random fractal colors");
 	gtk_widget_set_tooltip_text(Interface.buColorGlow1, "Glow color - low intensity area");
