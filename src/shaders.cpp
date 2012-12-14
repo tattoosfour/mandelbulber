@@ -318,16 +318,40 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 	sShaderOutput pixel2;
 	if (param->textured_background)
 	{
-		double alfaTexture = fmod(viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
-		double betaTexture = viewVector.GetBeta();
-		if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
-		if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
-		double texX = alfaTexture / (2.0 * M_PI) * param->backgroundTexture->Width();
-		double texY = (betaTexture / (M_PI) + 0.5) * param->backgroundTexture->Height();
-		sRGB8 pixel = param->backgroundTexture->Pixel(texX, texY);
-		pixel2.R = pixel.R/256.0;
-		pixel2.G = pixel.G/256.0;
-		pixel2.B = pixel.B/256.0;
+		if(param->background_as_fulldome)
+		{
+			double alfaTexture = viewVector.GetAlfa();
+			double betaTexture = viewVector.GetBeta();
+			int texWidth = param->backgroundTexture->Width()*0.5;
+			int texHeight = param->backgroundTexture->Height();
+			int offset = 0;
+
+			if(betaTexture < 0)
+			{
+				betaTexture = -betaTexture;
+				alfaTexture += M_PI;
+				offset = texWidth;
+			}
+			double texX = 0.5 * texWidth + cos(alfaTexture) * (1.0 - betaTexture / (0.5 * M_PI)) * texWidth * 0.5 + offset;
+			double texY = 0.5 * texHeight + sin(alfaTexture) * (1.0 - betaTexture / (0.5 * M_PI)) * texHeight * 0.5;
+			sRGB8 pixel = param->backgroundTexture->Pixel(texX, texY);
+			pixel2.R = pixel.R / 256.0;
+			pixel2.G = pixel.G / 256.0;
+			pixel2.B = pixel.B / 256.0;
+		}
+		else
+		{
+			double alfaTexture = fmod(viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
+			double betaTexture = viewVector.GetBeta();
+			if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
+			if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
+			double texX = alfaTexture / (2.0 * M_PI) * param->backgroundTexture->Width();
+			double texY = (betaTexture / (M_PI) + 0.5) * param->backgroundTexture->Height();
+			sRGB8 pixel = param->backgroundTexture->Pixel(texX, texY);
+			pixel2.R = pixel.R/256.0;
+			pixel2.G = pixel.G/256.0;
+			pixel2.B = pixel.B/256.0;
+		}
 	}
 	else
 	{

@@ -13,7 +13,7 @@
 #include "cl_support.hpp"
 
 #define MANDELBULBER_VERSION 1.131
-#define MANDELBULBER_VERSION_STR "1.13-1"
+#define MANDELBULBER_VERSION_STR "1.13-2"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -618,6 +618,7 @@ struct sInterface
 	GtkWidget *checkLimits;
 	GtkWidget *checkSlowShading;
 	GtkWidget *checkBitmapBackground;
+	GtkWidget *checkBitmapBackgroundFulldome;
 	GtkWidget *checkAnimationSpeedDE;
 	GtkWidget *checkColoring;
 	GtkWidget *checkTgladMode;

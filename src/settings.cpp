@@ -209,6 +209,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "background_color_1_G", params.background_color1.G, 38306, compare);
 	fprintfInt(fileSettings, "background_color_1_B", params.background_color1.B, 65535, compare);
 	fprintfInt(fileSettings, "textured_background", params.textured_background, false, compare);
+	fprintfInt(fileSettings, "background_as_fuldome", params.background_as_fulldome, false, compare);
 	fprintfInt(fileSettings, "shadows_enabled", params.shadow, true, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_enabled", params.global_ilumination, false, compare);
 	fprintfInt(fileSettings, "fast_ambient_occlusion_mode", params.fastGlobalIllumination, false, compare);
@@ -774,6 +775,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fog_colour_3_G")) params.fogColour3.G = atoi(str2);
 	else if (!strcmp(str1, "fog_colour_3_B")) params.fogColour3.B = atoi(str2);
 	else if (!strcmp(str1, "textured_background")) params.textured_background = atoi(str2);
+	else if (!strcmp(str1, "background_as_fuldome")) params.background_as_fulldome = atoi(str2);
 	else if (!strcmp(str1, "shadows_enabled")) params.shadow = atoi(str2);
 	else if (!strcmp(str1, "ambient_occlusion_enabled")) params.global_ilumination = atoi(str2);
 	else if (!strcmp(str1, "fast_ambient_occlusion_mode")) params.fastGlobalIllumination = atoi(str2);

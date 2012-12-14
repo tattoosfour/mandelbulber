@@ -91,6 +91,7 @@ struct sParamRender
 	bool fastGlobalIllumination; //enable fake global ilumination
 	bool slowShading; //enable fake gradient calculation for shading
 	bool textured_background; //enable testured background
+	bool background_as_fulldome;
 	bool recordMode; //path recording mode
 	bool continueRecord; //continue recording mode
 	bool playMode; //play mode
