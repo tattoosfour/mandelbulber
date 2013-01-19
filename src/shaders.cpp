@@ -48,7 +48,7 @@ sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 poin
 
 		if(param->imageSwitches.iterFogEnabled)
 		{
-			opacity = IterOpacity(dist * param->doubles.DE_factor,calcParam->itersOut, calcParam->N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+			opacity = IterOpacity(dist * param->doubles.DE_factor,calcParam->itersOut, calcParam->doubles.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
 		}
 		else
 		{
@@ -140,7 +140,7 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 
 			if (param->imageSwitches.iterFogEnabled)
 			{
-				opacity = IterOpacity(dist * param->doubles.DE_factor, calcParam->itersOut, calcParam->N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+				opacity = IterOpacity(dist * param->doubles.DE_factor, calcParam->itersOut, calcParam->doubles.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
 			}
 			else
 			{
@@ -182,7 +182,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 		if(calcParam->interiorMode) delta = dist_thresh * 0.2;
 
 		double s1, s2, s3, s4;
-		calcParam->N = param->fractal.N * 2;
+		calcParam->doubles.N = param->fractal.doubles.N * 2;
 		calcParam->minN = 0;
 
 		s1 = CalculateDistance(point, *calcParam);
@@ -199,7 +199,7 @@ CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 poi
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		calcParam->N = param->fractal.N;
+		calcParam->doubles.N = param->fractal.doubles.N;
 		calcParam->minN = param->fractal.minN;
 		//calcParam->DE_threshold = DEthreshold_temp;
 	}
@@ -306,9 +306,9 @@ sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture
 
 int SurfaceColour(sFractal *calcParam, CVector3 point)
 {
-	calcParam->N *= 10;
+	calcParam->doubles.N *= 10;
 	int nrKol = floor(Compute<colouring> (point, *calcParam));
-	calcParam->N /= 10;
+	calcParam->doubles.N /= 10;
 	nrKol = abs(nrKol) % (248*256);
 	return nrKol;
 }
@@ -489,7 +489,7 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 
 		if(fractParams->imageSwitches.iterFogEnabled)
 		{
-			opacity = IterOpacity(dist * stepFactor * fractParams->doubles.DE_factor, calcParam->itersOut, calcParam->N, fractParams->doubles.iterFogOpacityTrim, fractParams->doubles.iterFogOpacity);
+			opacity = IterOpacity(dist * stepFactor * fractParams->doubles.DE_factor, calcParam->itersOut, calcParam->doubles.N, fractParams->doubles.iterFogOpacityTrim, fractParams->doubles.iterFogOpacity);
 		}
 		else
 		{
@@ -906,14 +906,14 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 		tempDist = tempDist * (1.0 - Random(1000) / 2000.0);
 
 		int L = calcParam->itersOut;
-		double opacity = IterOpacity(tempDist, L, param->fractal.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+		double opacity = IterOpacity(tempDist, L, param->fractal.doubles.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
 
 		sShaderOutput newColour = { 0.0, 0.0, 0.0 };
 
 		if (opacity > 0)
 		{
 			//fog colour
-			double iterFactor = (double)2.0* (L - param->doubles.iterFogOpacityTrim)/(param->fractal.N - param->doubles.iterFogOpacityTrim);
+			double iterFactor = (double)2.0* (L - param->doubles.iterFogOpacityTrim)/(param->fractal.doubles.N - param->doubles.iterFogOpacityTrim);
 			double k = iterFactor;
 			if (k > 1) k = 1.0;
 			double kn = 1.0 - k;

@@ -12,8 +12,8 @@
 #include "fractparams.h"
 #include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.131
-#define MANDELBULBER_VERSION_STR "1.13-2"
+#define MANDELBULBER_VERSION 1.14
+#define MANDELBULBER_VERSION_STR "1.14"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -665,6 +665,7 @@ struct sInterface
 	GtkWidget *checkNetRenderServerEnable;
 	GtkWidget *checkNetRenderServerScan;
 	GtkWidget *checkNetRenderClientEnable;
+	GtkWidget *checkPrimitiveOnlyPlane;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
