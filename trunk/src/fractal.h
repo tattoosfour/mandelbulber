@@ -190,11 +190,13 @@ struct sFractalPrimitives
 	bool sphereEnable;
 	bool invertedSphereEnable;
 	bool waterEnable;
+	bool onlyPlane;
 	int waterIterations;
 };
 
 struct sFractalD
 {
+	double N;
 	double amin;  //fractal limits
 	double amax;
 	double bmin;
@@ -220,7 +222,7 @@ struct sFractal
 {
 	sFractalD doubles;
 
-	int N;		  // maximum number of iterations
+	  // maximum number of iterations
 	int minN;	  // minimum number of iterations
 
 	bool limits_enabled; // enable limits (intersections)

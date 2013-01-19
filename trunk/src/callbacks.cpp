@@ -1286,18 +1286,18 @@ void RecalculateIFSParams(sFractal &fractal)
 
 void CreateFormulaSequence(sFractal &fractal)
 {
-	fractal.formulaSequence.resize(fractal.N);
-	fractal.hybridPowerSequence.resize(fractal.N);
+	fractal.formulaSequence.resize(fractal.doubles.N);
+	fractal.hybridPowerSequence.resize(fractal.doubles.N);
 
 	int number = 0;
-	while (number < fractal.N)
+	while (number < (int)fractal.doubles.N)
 	{
 		for (int hybrid_n = 0; hybrid_n < HYBRID_COUNT - 1; ++hybrid_n)
 		{
 			if (fractal.hybridFormula[hybrid_n] == none) continue;
 			for (int i = 0; i < fractal.hybridIters[hybrid_n]; ++i)
 			{
-				if (number < fractal.N)
+				if (number < fractal.doubles.N)
 				{
 					fractal.formulaSequence[number] = fractal.hybridFormula[hybrid_n];
 					fractal.hybridPowerSequence[number] = fractal.doubles.hybridPower[hybrid_n];
@@ -1306,12 +1306,12 @@ void CreateFormulaSequence(sFractal &fractal)
 			}
 		}
 
-		int temp_end = fractal.N;
+		int temp_end = (int)fractal.doubles.N;
 		if (fractal.hybridCyclic) temp_end = fractal.hybridIters[HYBRID_COUNT - 1];
 
 		if (fractal.hybridFormula[HYBRID_COUNT - 1] != none) for (int i = 0; i < temp_end; i++)
 		{
-			if (number < fractal.N)
+			if (number < (int)fractal.doubles.N)
 			{
 				fractal.formulaSequence[number] = fractal.hybridFormula[HYBRID_COUNT - 1];
 				fractal.hybridPowerSequence[number] = fractal.doubles.hybridPower[HYBRID_COUNT - 1];
@@ -2159,7 +2159,7 @@ void AutoDEStep(bool highQuality)
 	for(int i=0; i<5; i++)
 		fractParams.volumetricLightEnabled[i] = false;
 	fractParams.imageSwitches.raytracedReflections = false;
-	if (fractParams.fractal.N < 200) fractParams.fractal.N = 200;
+	if (fractParams.fractal.doubles.N < 200) fractParams.fractal.doubles.N = 200;
 	if (fractParams.fractal.limits_enabled) return;
 
 	int scanCount = 0;

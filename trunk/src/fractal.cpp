@@ -57,6 +57,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double ph_dz = 0;
 	double th_dz = 0;
 	double p = par.doubles.power; //mandelbulb power
+	int N = par.doubles.N;
 
 	CVector3 constant;
 
@@ -91,7 +92,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double r = z.Length();
 
 	double min = 1e200;
-	for (L = 0; L < par.N; L++)
+	for (L = 0; L < N; L++)
 	{
 		if (hybridEnabled)
 		{
@@ -1157,12 +1158,24 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 			else if (Mode == colouring) //mode 1
 			{
-				distance = z.Length();
-				if (distance < min) min = distance;
-				if (distance > 1e15)
+				if(par.primitives.onlyPlane)
 				{
-					distance = min;
-					break;
+					distance = z.Length();
+					if (distance > 1e15)
+					{
+						distance = (L - log(log(r) / log(N)) / log(p))/100.0;
+						break;
+					}
+				}
+				else
+				{
+					distance = z.Length();
+					if (distance < min) min = distance;
+					if (distance > 1e15)
+					{
+						distance = min;
+						break;
+					}
 				}
 			}
 		}
@@ -1182,7 +1195,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 	if (Mode == normal)
 	{
-		if (L == par.N)
+		if (L == N)
 			distance = 0;
 		return distance;
 	}
@@ -1272,96 +1285,96 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 		}
 	}
 
-	if (params.analitycDE)
+	if(!params.primitives.onlyPlane)
 	{
-		distance = Compute<normal>(point, params, &L);
-		if (max_iter != NULL)
+		if (params.analitycDE)
 		{
-			if (L == params.N)
-				*max_iter = true;
-			else
-				*max_iter = false;
-		}
-		params.itersOut = L;
-
-		if (L < params.minN && distance < params.doubles.detailSize)
-			distance = params.doubles.detailSize;
-		
-		if (params.interiorMode)
-		{
-			if (distance < 0.5 * params.doubles.detailSize || L == params.N)
+			distance = Compute<normal>(point, params, &L);
+			if (max_iter != NULL)
 			{
-				distance = params.doubles.detailSize;
-				if (max_iter != NULL)
-					*max_iter = false;
+				if (L == (int)params.doubles.N) *max_iter = true;
+				else *max_iter = false;
+			}
+			params.itersOut = L;
+
+			if (L < params.minN && distance < params.doubles.detailSize) distance = params.doubles.detailSize;
+
+			if (params.interiorMode)
+			{
+				if (distance < 0.5 * params.doubles.detailSize || L == (int)params.doubles.N)
+				{
+					distance = params.doubles.detailSize;
+					if (max_iter != NULL) *max_iter = false;
+				}
+			}
+		}
+		else
+		{
+			double deltaDE = 1e-10;
+
+			double r = Compute<deltaDE1>(point, params, &L);
+			int retval = L;
+			params.itersOut = L;
+
+			point.x += deltaDE;
+			point.y += 0;
+			point.z += 0;
+			double r2 = Compute<deltaDE2>(point, params, &L);
+			double dr1 = fabs(r2 - r) / deltaDE;
+
+			point.x -= deltaDE;
+			point.y += deltaDE;
+			point.z += 0;
+			r2 = Compute<deltaDE2>(point, params, &L);
+			double dr2 = fabs(r2 - r) / deltaDE;
+
+			point.x += 0;
+			point.y -= deltaDE;
+			point.z += deltaDE;
+			r2 = Compute<deltaDE2>(point, params, &L);
+			double dr3 = fabs(r2 - r) / deltaDE;
+
+			double dr = sqrt(dr1 * dr1 + dr2 * dr2 + dr3 * dr3);
+
+			if (params.linearDEmode)
+			{
+				distance = 0.5 * r / dr;
+			}
+			else
+			{
+				distance = 0.5 * r * log(r) / dr;
+			}
+
+			if (retval == (int)params.doubles.N)
+			{
+				if (max_iter != NULL) *max_iter = true;
+				distance = 0;
+			}
+			else if (max_iter != NULL) *max_iter = false;
+
+			if (L < params.minN && distance < params.doubles.detailSize) distance = params.doubles.detailSize;
+
+			if (params.interiorMode)
+			{
+				if (distance < 0.5 * params.doubles.detailSize || retval == 256)
+				{
+					distance = params.doubles.detailSize;
+					if (max_iter != NULL) *max_iter = false;
+				}
 			}
 		}
 	}
 	else
 	{
-		double deltaDE = 1e-10;
-
-		double r = Compute<deltaDE1>(point, params, &L);
-		int retval = L;
-		params.itersOut = L;
-
-		point.x += deltaDE;
-		point.y += 0;
-		point.z += 0;
-		double r2 = Compute<deltaDE2>(point, params, &L);
-		double dr1 = fabs(r2 - r) / deltaDE;
-
-		point.x -= deltaDE;
-		point.y += deltaDE;
-		point.z += 0;
-		r2 = Compute<deltaDE2>(point, params, &L);
-		double dr2 = fabs(r2 - r) / deltaDE;
-
-		point.x += 0;
-		point.y -= deltaDE;
-		point.z += deltaDE;
-		r2 = Compute<deltaDE2>(point, params, &L);
-		double dr3 = fabs(r2 - r) / deltaDE;
-
-		double dr = sqrt(dr1 * dr1 + dr2 * dr2 + dr3 * dr3);
-
-		if(params.linearDEmode)
-		{
-			distance = 0.5 * r / dr;
-		}
-		else
-		{
-			distance = 0.5 * r * log(r) / dr;
-		}
-
-		if (retval == params.N)
-		{
-			if (max_iter != NULL)
-				*max_iter = true;
-			distance = 0;
-		}
-		else if (max_iter != NULL)
-			*max_iter = false;
-
-		if (L < params.minN && distance < params.doubles.detailSize)
-			distance = params.doubles.detailSize;
-
-		if (params.interiorMode)
-		{
-			if (distance < 0.5 * params.doubles.detailSize || retval == 256)
-			{
-				distance = params.doubles.detailSize;
-				if (max_iter != NULL)
-					*max_iter = false;
-			}
-		}
+		distance = 10.0;
+		if (max_iter != NULL) *max_iter = false;
 	}
 
 	//plane
 	if (params.primitives.planeEnable)
 	{
 		double planeDistance = PrimitivePlane(point, params.doubles.primitives.planeCentre, params.doubles.primitives.planeNormal);
-		if(planeDistance < distance) 	params.specialColour = 253;
+		if(!params.primitives.onlyPlane && planeDistance < distance) 	params.specialColour = 253;
 		distance = (planeDistance < distance) ? planeDistance : distance;
 
 	}

@@ -152,7 +152,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "perspective", params.doubles.persp, 0.5, compare);
 	fprintfInt(fileSettings, "formula", params.fractal.formula, trig_optim, compare);
 	fprintfDot(fileSettings, "power", params.fractal.doubles.power, 9.0, compare);
-	fprintfInt(fileSettings, "N", params.fractal.N, 250, compare);
+	fprintfInt(fileSettings, "N", params.fractal.doubles.N, 250, compare);
 	fprintfInt(fileSettings, "minN", params.fractal.minN, 1, compare);
 	fprintfDot(fileSettings, "fractal_constant_factor", params.fractal.doubles.constantFactor, 1.0, compare);
 	fprintfDot(fileSettings, "quality", params.doubles.quality, 1.0, compare);
@@ -430,6 +430,8 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "iteration_fog_enable", params.imageSwitches.iterFogEnabled, false, compare);
 	fprintfDot(fileSettings, "iteration_fog_opacity", params.doubles.iterFogOpacity, 1000.0, compare);
 	fprintfDot(fileSettings, "iteration_fog_opacity_trim", params.doubles.iterFogOpacityTrim, 4.0, compare);
+
+	fprintfInt(fileSettings, "primitive_only_plane", params.fractal.primitives.onlyPlane, false, compare);
 
 	if (!compare || params.fractal.primitives.planeEnable)
 	{
@@ -720,7 +722,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "perspective")) params.doubles.persp = atof2(str2);
 	else if (!strcmp(str1, "formula")) params.fractal.formula = (enumFractalFormula) atoi(str2);
 	else if (!strcmp(str1, "power")) params.fractal.doubles.power = atof2(str2);
-	else if (!strcmp(str1, "N")) params.fractal.N = atoi(str2);
+	else if (!strcmp(str1, "N")) params.fractal.doubles.N = atoi(str2);
 	else if (!strcmp(str1, "minN")) params.fractal.minN = atoi(str2);
 	else if (!strcmp(str1, "fractal_constant_factor")) params.fractal.doubles.constantFactor = atof2(str2);
 	else if (!strcmp(str1, "quality")) params.doubles.quality = atof2(str2);
@@ -925,6 +927,8 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "iteration_fog_enable")) params.imageSwitches.iterFogEnabled = atoi(str2);
 	else if (!strcmp(str1, "iteration_fog_opacity")) params.doubles.iterFogOpacity = atof2(str2);
 	else if (!strcmp(str1, "iteration_fog_opacity_trim")) params.doubles.iterFogOpacityTrim = atof2(str2);
+
+	else if (!strcmp(str1, "primitive_only_plane")) params.fractal.primitives.onlyPlane = atoi(str2);
 
 	else if (!strcmp(str1, "primitive_plane_enabled")) params.fractal.primitives.planeEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_plane_centre_X")) params.fractal.doubles.primitives.planeCentre.x = atof2(str2);

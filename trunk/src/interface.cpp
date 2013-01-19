@@ -265,7 +265,7 @@ void ReadInterface(sParamRender *params)
 		params->doubles.DE_factor = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_stepFactor)));
 		params->doubles.quality = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_DE_thresh)));
 		params->doubles.smoothness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_roughness)));
-		params->fractal.N = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_maxN)));
+		params->fractal.doubles.N = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_maxN)));
 		params->fractal.minN = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_minN)));
 		params->fractal.doubles.power = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_power)));
 		params->image_width = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth)));
@@ -480,6 +480,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.primitives.planeNormal.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalY)));
 		params->fractal.doubles.primitives.planeNormal.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitivePlaneNormalZ)));
 		params->fractal.primitives.planeEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitivePlaneEnabled));
+		params->fractal.primitives.onlyPlane = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveOnlyPlane));
 		params->fractal.doubles.primitives.boxCentre.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreX)));
 		params->fractal.doubles.primitives.boxCentre.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreY)));
 		params->fractal.doubles.primitives.boxCentre.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveBoxCentreZ)));
@@ -721,7 +722,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_stepFactor), DoubleToString(params->doubles.DE_factor));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), DoubleToString(params->doubles.quality));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_roughness), DoubleToString(params->doubles.smoothness));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_maxN), IntToString(params->fractal.N));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_maxN), IntToString(params->fractal.doubles.N));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_minN), IntToString(params->fractal.minN));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_power), DoubleToString(params->fractal.doubles.power));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_imageWidth), IntToString(params->image_width));
@@ -931,6 +932,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPenetratingLights), params->penetratingLights);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkRaytracedReflections), params->imageSwitches.raytracedReflections);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitivePlaneEnabled), params->fractal.primitives.planeEnable);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveOnlyPlane), params->fractal.primitives.onlyPlane);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveBoxEnabled), params->fractal.primitives.boxEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedBoxEnabled), params->fractal.primitives.invertedBoxEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveSphereEnabled), params->fractal.primitives.sphereEnable);
@@ -1870,6 +1872,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPenetratingLights = gtk_check_button_new_with_label("Penetrating lights");
 	Interface.checkRaytracedReflections = gtk_check_button_new_with_label("Ray-traced reflections");
 	Interface.checkPrimitivePlaneEnabled = gtk_check_button_new_with_label("Enabled");
+	Interface.checkPrimitiveOnlyPlane = gtk_check_button_new_with_label("Only plane (2D mode)");
 	Interface.checkPrimitiveBoxEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveInvertedBoxEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveSphereEnabled = gtk_check_button_new_with_label("Enabled");
@@ -2226,6 +2229,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.buColorPrimitivePlane, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitivePlaneEnabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitiveOnlyPlane, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitivePlane), Interface.frPrimitiveWater, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveWater), Interface.boxPrimitiveWater);
