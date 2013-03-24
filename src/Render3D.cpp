@@ -1112,6 +1112,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 	programClosed = false;
 	//getting image resolution from parameters
+	CheckPrameters(&param);
+
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 
