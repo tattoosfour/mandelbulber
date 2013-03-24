@@ -3216,6 +3216,8 @@ void CheckPrameters(sParamRender *params)
 	if(params->reflectionsMax > 10) params->reflectionsMax = 10;
 	if(params->noOfTiles < 1) params->noOfTiles = 1;
 	if(params->noOfTiles > 100) params->noOfTiles = 100;
+	if(params->doubles.fogDensity < 0.0) params->doubles.fogDensity = 0.0;
+	if(params->doubles.imageAdjustments.reflect < 0.0) params->doubles.imageAdjustments.reflect = 0.0;
 }
 
 sRGB GdkColor2sRGB(GdkColor color)
