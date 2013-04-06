@@ -240,6 +240,9 @@ struct sInterface
 	GtkWidget *boxNetRenderClientV;
 	GtkWidget *boxNetRenderServerH1;
 	GtkWidget *boxNetRenderClientH1;
+	GtkWidget *boxFakeLightsV;
+	GtkWidget *boxFakeLightsH1;
+	GtkWidget *boxFakeLightsH2;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -297,6 +300,7 @@ struct sInterface
 	GtkWidget *frOpenClInformation;
 	GtkWidget *frOpenClEngineSettings;
 	GtkWidget *frNetRender;
+	GtkWidget *frFakeLights;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -560,6 +564,13 @@ struct sInterface
 	GtkWidget *edit_netRenderServerPort;
 	GtkWidget *edit_netRenderClientPort;
 	GtkWidget *edit_netRenderClientName;
+	GtkWidget *edit_fakeLightsOrbitTrapX;
+	GtkWidget *edit_fakeLightsOrbitTrapY;
+	GtkWidget *edit_fakeLightsOrbitTrapZ;
+	GtkWidget *edit_fakeLightsIntensity;
+	GtkWidget *edit_fakeLightsVisibility;
+	GtkWidget *edit_fakeLightsMinIter;
+	GtkWidget *edit_fakeLightsMaxIter;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -666,6 +677,7 @@ struct sInterface
 	GtkWidget *checkNetRenderServerScan;
 	GtkWidget *checkNetRenderClientEnable;
 	GtkWidget *checkPrimitiveOnlyPlane;
+	GtkWidget *checkFakeLightsEnabled;;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

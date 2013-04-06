@@ -521,6 +521,15 @@ void ReadInterface(sParamRender *params)
 		params->doubles.iterFogOpacity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_iterFogOpacity)));
 		params->imageSwitches.iterFogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable));
 
+		params->fakeLightsEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFakeLightsEnabled));
+		params->fractal.doubles.fakeLightsOrbitTrap.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapX)));
+		params->fractal.doubles.fakeLightsOrbitTrap.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapY)));
+		params->fractal.doubles.fakeLightsOrbitTrap.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapZ)));
+		params->doubles.fakeLightsIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsIntensity)));
+		params->doubles.fakeLightsVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsVisibility)));
+		params->fractal.fakeLightsMinIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMinIter)));
+		params->fractal.fakeLightsMaxIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMaxIter)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1 = GdkColor2sRGB(color);
@@ -1388,6 +1397,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxNetRenderClientH1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxNetRenderServerV = gtk_vbox_new(FALSE, 1);
 	Interface.boxNetRenderServerH1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxFakeLightsV = gtk_vbox_new(FALSE, 1);
+	Interface.boxFakeLightsH1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxFakeLightsH2 = gtk_hbox_new(FALSE, 1);
 
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.boxFractal), 5);
 
@@ -1448,6 +1460,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frOpenClInformation = gtk_frame_new("OpenCL information");
 	Interface.frOpenClEngineSettings = gtk_frame_new("Engine settings");
 	Interface.frNetRender = gtk_frame_new("Rendering via network");
+	Interface.frFakeLights = gtk_frame_new("Fake lights based on orbit traps");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1751,6 +1764,14 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_netRenderClientPort = gtk_entry_new();
 	Interface.edit_netRenderServerPort = gtk_entry_new();
 
+	Interface.edit_fakeLightsOrbitTrapX = gtk_entry_new();
+	Interface.edit_fakeLightsOrbitTrapY = gtk_entry_new();
+	Interface.edit_fakeLightsOrbitTrapZ = gtk_entry_new();
+	Interface.edit_fakeLightsMinIter = gtk_entry_new();
+	Interface.edit_fakeLightsMaxIter = gtk_entry_new();
+	Interface.edit_fakeLightsIntensity = gtk_entry_new();
+	Interface.edit_fakeLightsVisibility = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1883,6 +1904,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkNetRenderClientEnable = gtk_check_button_new_with_label("Client enable");
 	Interface.checkNetRenderServerEnable = gtk_check_button_new_with_label("Server enable");
 	Interface.checkNetRenderServerScan = gtk_check_button_new_with_label("Scan for clients");
+	Interface.checkFakeLightsEnabled = gtk_check_button_new_with_label("Enable fake lights");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -2389,6 +2411,23 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), CreateEdit("1,0", "Fog distance factor:", 5, Interface.edit_volumetricFogDistanceFact), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricFog), Interface.buAutoFog, false, false, 1);
 
+	//frame fake lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frFakeLights, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFakeLights), Interface.boxFakeLightsV);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("2", "Min iter.:", 5, Interface.edit_fakeLightsMinIter), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("4", "Max iter.:", 5, Interface.edit_fakeLightsMaxIter), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Intensity:", 10, Interface.edit_fakeLightsIntensity), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Visibility:", 10, Interface.edit_fakeLightsVisibility), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), Interface.checkFakeLightsEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Orbit trap X:", 5, Interface.edit_fakeLightsOrbitTrapX), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Y:", 5, Interface.edit_fakeLightsOrbitTrapY), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Z:", 5, Interface.edit_fakeLightsOrbitTrapZ), false, false, 1);
+
+	//frame palette
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frPalette, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frPalette), Interface.boxPalette);
 
@@ -2405,6 +2444,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), Interface.boxPaletteOffset, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.label_paletteOffset, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.sliderPaletteOffset, true, true, 1);
+
+
+
 
 	//frame colors
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frColors, false, false, 1);
