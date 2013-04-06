@@ -123,6 +123,8 @@ void *MainThread(void *ptr)
 	int AO_quality = param.globalIlumQuality;
 
 
+
+
 	bool fractColor = param.imageSwitches.coloringEnabled;
 	cTexture *envmap_texture = param.envmapTexture;
 	cTexture *lightmap_texture = param.lightmapTexture;
@@ -233,6 +235,10 @@ void *MainThread(void *ptr)
 
 	bool breakX = false;
 
+	calcParam.doubles.orbitTrap.x = 5;
+	calcParam.doubles.orbitTrap.y = 0;
+	calcParam.doubles.orbitTrap.z = 0;
+
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 3; pass++)
 	{
@@ -320,6 +326,8 @@ void *MainThread(void *ptr)
 
 					calcParam.specialColour = 0;
 					int specialColour = 0;
+
+					double fakeLightVisible = 0.0;
 
 					//main loop for y values (depth)
 					for (double y = min_y; y < max_y; y += stepYpersp)
@@ -435,6 +443,11 @@ void *MainThread(void *ptr)
 									stepYpersp = stepYpersp * (1.0 - Random(1000)/10000.0);
 
 									stepBuff[buffCount] = stepYpersp * zoom;
+
+									double r = Compute<orbitTrap>(point, calcParam);
+									double fakeLight = 5.0/(pow(r,10.0) + 1e-100);
+									fakeLightVisible += fakeLight * stepYpersp * zoom;;
+
 									buffCount++;
 								}
 
@@ -638,6 +651,11 @@ void *MainThread(void *ptr)
 
 						//calculate shading from auxiliary lights
 						shadeAux = AuxLightsShader(&param, &calcParam, point, vn, viewVector, wsp_persp, dist_thresh, &shadeAuxSpec);
+
+						if(param.fakeLightsEnabled)
+						{
+							shadeAux = FakeLights(&param, &calcParam, point, vn, viewVector, dist_thresh, &shadeAuxSpec);
+						}
 
 						//calculate environment mapping reflection effect
 						envMapping = EnvMapping(vn, viewVector, envmap_texture);
@@ -949,6 +967,10 @@ void *MainThread(void *ptr)
 						{
 							double density;
 							volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
+							volFog.R += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
+							volFog.G += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
+							volFog.B += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
+							density += fakeLightVisible * param.doubles.auxLightVisibility;
 							pixelData.fogDensity16 = 65535 * density / (1.0 + density);
 						}
 					}

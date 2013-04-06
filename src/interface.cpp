@@ -3263,7 +3263,7 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->mainLightAlfa = params->doubles.mainLightAlfa;
 	clParams->mainLightBeta = params->doubles.mainLightBeta;
 
-	clFractal->N = params->fractal.N;
+	clFractal->N = params->fractal.doubles.N;
 	clFractal->power = params->fractal.doubles.power;
 	clFractal->juliaMode = params->fractal.juliaMode;
 	clFractal->mandelbox.scale = params->fractal.mandelbox.doubles.scale;
