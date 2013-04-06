@@ -235,9 +235,9 @@ void *MainThread(void *ptr)
 
 	bool breakX = false;
 
-	calcParam.doubles.fakeLightsOrbitTrap.x = 5;
-	calcParam.doubles.fakeLightsOrbitTrap.y = 0;
-	calcParam.doubles.fakeLightsOrbitTrap.z = 0;
+	//calcParam.doubles.fakeLightsOrbitTrap.x = 5;
+	//calcParam.doubles.fakeLightsOrbitTrap.y = 0;
+	//calcParam.doubles.fakeLightsOrbitTrap.z = 0;
 
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 3; pass++)
@@ -443,11 +443,12 @@ void *MainThread(void *ptr)
 									stepYpersp = stepYpersp * (1.0 - Random(1000)/10000.0);
 
 									stepBuff[buffCount] = stepYpersp * zoom;
-
-									double r = Compute<orbitTrap>(point, calcParam);
-									double fakeLight = 5.0/(pow(r,10.0) + 1e-100);
-									fakeLightVisible += fakeLight * stepYpersp * zoom;;
-
+									if(param.fakeLightsEnabled)
+									{
+										double r = Compute<orbitTrap>(point, calcParam);
+										double fakeLight = 5.0/(pow(r,10.0) + 1e-100);
+										fakeLightVisible += fakeLight * stepYpersp * zoom;
+									}
 									buffCount++;
 								}
 
@@ -973,7 +974,7 @@ void *MainThread(void *ptr)
 								volFog.R += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
 								volFog.G += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
 								volFog.B += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
-								density += fakeLightVisible * param.doubles.auxLightVisibility;
+								density += fakeLightVisible * param.doubles.fakeLightsVisibility;
 							}
 							pixelData.fogDensity16 = 65535 * density / (1.0 + density);
 						}
