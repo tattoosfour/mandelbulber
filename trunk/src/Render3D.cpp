@@ -235,9 +235,9 @@ void *MainThread(void *ptr)
 
 	bool breakX = false;
 
-	calcParam.doubles.orbitTrap.x = 5;
-	calcParam.doubles.orbitTrap.y = 0;
-	calcParam.doubles.orbitTrap.z = 0;
+	calcParam.doubles.fakeLightsOrbitTrap.x = 5;
+	calcParam.doubles.fakeLightsOrbitTrap.y = 0;
+	calcParam.doubles.fakeLightsOrbitTrap.z = 0;
 
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 3; pass++)
@@ -967,10 +967,14 @@ void *MainThread(void *ptr)
 						{
 							double density;
 							volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
-							volFog.R += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
-							volFog.G += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
-							volFog.B += fakeLightVisible * 10000.0 * param.doubles.auxLightVisibility;
-							density += fakeLightVisible * param.doubles.auxLightVisibility;
+
+							if(param.fakeLightsEnabled)
+							{
+								volFog.R += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
+								volFog.G += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
+								volFog.B += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
+								density += fakeLightVisible * param.doubles.auxLightVisibility;
+							}
 							pixelData.fogDensity16 = 65535 * density / (1.0 + density);
 						}
 					}

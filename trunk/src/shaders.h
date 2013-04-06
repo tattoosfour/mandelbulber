@@ -52,4 +52,5 @@ void RenderBuddhabrot(sParamRender *fractParam);
 double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp);
 sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
 		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel);
+sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec);
 #endif /* SHADERS_H_ */
