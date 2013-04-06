@@ -1123,7 +1123,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 		if (Mode == orbitTrap)
 		{
-			CVector3 delta = z - par.doubles.orbitTrap;
+			CVector3 delta = z - par.doubles.fakeLightsOrbitTrap;
 			distance = delta.Length();
 			if (L >= par.fakeLightsMinIter && L <= par.fakeLightsMaxIter && distance < min) min = distance;
 			if (distance > 1000)
