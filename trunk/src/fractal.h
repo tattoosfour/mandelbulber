@@ -60,7 +60,7 @@ enum enumFractalFormula
 
 enum enumCalculationMode
 {
-	normal = 0, colouring = 1, fake_AO = 2, deltaDE1 = 3, deltaDE2 = 4
+	normal = 0, colouring = 1, fake_AO = 2, deltaDE1 = 3, deltaDE2 = 4, orbitTrap = 5
 };
 
 enum enumGeneralizedFoldBoxType
@@ -215,6 +215,7 @@ struct sFractalD
 	double cadd;
 	double hybridPower[HYBRID_COUNT];
 	CVector3 julia; // Julia constant
+	CVector3 fakeLightsOrbitTrap;
 	sFractalPrimitivesD primitives;
 };
 
@@ -254,11 +255,12 @@ struct sFractal
 	int frameNo;
 
 	int itersOut;
+
+	int fakeLightsMinIter;
+	int fakeLightsMaxIter;
 };
 
-template <int Mode>
-
-double Compute(CVector3 z, const sFractal &par, int *iter_count = NULL);
+template <int Mode> double Compute(CVector3 z, const sFractal &par, int *iter_count = NULL);
 double CalculateDistance(CVector3 point, sFractal &par, bool *max_iter = NULL);
 
 #endif /* FRACTAL_H_ */

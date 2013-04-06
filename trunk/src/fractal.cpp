@@ -1121,6 +1121,18 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 		}
 
+		if (Mode == orbitTrap)
+		{
+			CVector3 delta = z - par.doubles.orbitTrap;
+			distance = delta.Length();
+			if (L >= par.fakeLightsMinIter && L <= par.fakeLightsMaxIter && distance < min) min = distance;
+			if (distance > 1000)
+			{
+				distance = min;
+				break;
+			}
+		}
+
 		if (actualFormula == menger_sponge || actualFormula == kaleidoscopic)
 		{
 			if (r > 1000)
@@ -1204,6 +1216,9 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 		return r;
 
 	if (Mode == fake_AO)
+		return distance;
+
+	if (Mode == orbitTrap)
 		return distance;
 
 	if (Mode == colouring)
@@ -1431,3 +1446,4 @@ template double Compute<colouring>(CVector3, const sFractal&, int*);
 template double Compute<fake_AO>(CVector3, const sFractal&, int*);
 template double Compute<deltaDE1>(CVector3, const sFractal&, int*);
 template double Compute<deltaDE2>(CVector3, const sFractal&, int*);
+template double Compute<orbitTrap>(CVector3, const sFractal&, int*);

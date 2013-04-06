@@ -57,6 +57,8 @@ struct sParamRenderD
 	double fastAoTune;
 	double iterFogOpacity;
 	double iterFogOpacityTrim;
+	double fakeLightsIntensity;
+	double fakeLightsVisibility;
 
 	sImageAdjustments imageAdjustments;
 };
@@ -107,6 +109,7 @@ struct sParamRender
 	bool stereoEnabled;
 	bool quiet;
 	bool fishEyeCut;
+	bool fakeLightsEnabled;
 	sImageSwitches imageSwitches;
 
 	sRGB background_color1; //background colour

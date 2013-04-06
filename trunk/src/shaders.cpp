@@ -609,9 +609,9 @@ sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distance
 		density += densityTemp;
 	}
 	density *= fogIntensity;
-	volFog.R = fogR;
-	volFog.G = fogG;
-	volFog.B = fogB;
+	volFog.R = fogR/10.0;
+	volFog.G = fogG/10.0;
+	volFog.B = fogB/10.0;
 
 	*densityOut = density;
 	return volFog;
@@ -997,6 +997,54 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 	//printf("R: %f, G: %f, B: %f\n", iterFog.R, iterFog.G, iterFog.B);
 
 	return iterFog;
+}
+
+sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec)
+{
+	sShaderOutput fakeLights;
+	int L = 0;
+	double delta = dist_thresh * param->doubles.smoothness;
+	double r = Compute<orbitTrap>(point, *calcParam);
+	double fakeLight = param->doubles.fakeLightsIntensity/(r*r + 1e-100);
+
+	CVector3 deltax(delta, 0.0, 0.0);
+	double rx = Compute<orbitTrap>(point + deltax, *calcParam);
+	CVector3 deltay(0.0, delta, 0.0);
+	double ry = Compute<orbitTrap>(point + deltay, *calcParam);
+	CVector3 deltaz(0.0, 0.0, delta);
+	double rz = Compute<orbitTrap>(point + deltaz, *calcParam);
+
+	CVector3 fakeLightNormal;
+	fakeLightNormal.x = r - rx;
+	fakeLightNormal.y = r - ry;
+	fakeLightNormal.z = r - rz;
+
+	if(fakeLightNormal.x == 0 && fakeLightNormal.y == 0 && fakeLightNormal.z == 0)
+	{
+		fakeLightNormal.x = 0.0;
+	}
+	else
+	{
+		fakeLightNormal.Normalize();
+	}
+	double fakeLight2 = fakeLight * normal.Dot(fakeLightNormal);
+	if(fakeLight2 < 0) fakeLight2 = 0;
+
+	fakeLights.R = fakeLight2;
+	fakeLights.G = fakeLight2;
+	fakeLights.B = fakeLight2;
+
+	CVector3 half = fakeLightNormal - viewVector;
+	half.Normalize();
+	double fakeSpecular = normal.Dot(half);
+	if (fakeSpecular < 0.0) fakeSpecular = 0.0;
+	fakeSpecular = pow(fakeSpecular, 30.0) * fakeLight;
+	if (fakeSpecular > 15.0) fakeSpecular = 15.0;
+	fakeSpec->R = fakeSpecular;
+	fakeSpec->G = fakeSpecular;
+	fakeSpec->B = fakeSpecular;
+
+	return fakeLights;
 }
 
 /*
