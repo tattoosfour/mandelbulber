@@ -902,6 +902,14 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacity), DoubleToString(params->doubles.iterFogOpacity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacityTrim), DoubleToString(params->doubles.iterFogOpacityTrim));
 
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsIntensity), DoubleToString(params->doubles.fakeLightsIntensity));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsVisibility), DoubleToString(params->doubles.fakeLightsVisibility));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapX), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.x));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapY), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.y));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapZ), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.z));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsMinIter), DoubleToString(params->fractal.fakeLightsMinIter));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsMaxIter), DoubleToString(params->fractal.fakeLightsMaxIter));
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkShadow), params->shadow);
@@ -948,6 +956,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveInvertedSphereEnabled), params->fractal.primitives.invertedSphereEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled), params->fractal.primitives.waterEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable), params->imageSwitches.iterFogEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFakeLightsEnabled), params->fakeLightsEnabled);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
