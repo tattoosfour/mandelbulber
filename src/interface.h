@@ -569,6 +569,7 @@ struct sInterface
 	GtkWidget *edit_fakeLightsOrbitTrapZ;
 	GtkWidget *edit_fakeLightsIntensity;
 	GtkWidget *edit_fakeLightsVisibility;
+	GtkWidget *edit_fakeLightsVisibilitySize;
 	GtkWidget *edit_fakeLightsMinIter;
 	GtkWidget *edit_fakeLightsMaxIter;
 

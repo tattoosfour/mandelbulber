@@ -517,6 +517,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "fake_lights_enabled", params.fakeLightsEnabled, false, compare);
 		fprintfDot(fileSettings, "fake_lights_intensity", params.doubles.fakeLightsIntensity, 1.0, compare);
 		fprintfDot(fileSettings, "fake_lights_visibility", params.doubles.fakeLightsVisibility, 1.0, compare);
+		fprintfDot(fileSettings, "fake_lights_visibility_size", params.doubles.fakeLightsVisibilitySize, 1.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_X", params.fractal.doubles.fakeLightsOrbitTrap.x, 2.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_Y", params.fractal.doubles.fakeLightsOrbitTrap.y, 0.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_Z", params.fractal.doubles.fakeLightsOrbitTrap.z, 0.0, compare);
@@ -1007,6 +1008,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fake_lights_min_iter")) params.fractal.fakeLightsMinIter = atoi(str2);
 	else if (!strcmp(str1, "fake_lights_max_iter")) params.fractal.fakeLightsMaxIter = atoi(str2);
 	else if (!strcmp(str1, "fake_lights_visibility")) params.doubles.fakeLightsVisibility = atof2(str2);
+	else if (!strcmp(str1, "fake_lights_visibility_size")) params.doubles.fakeLightsVisibilitySize = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_intensity")) params.doubles.fakeLightsIntensity = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_orbit_trap_X")) params.fractal.doubles.fakeLightsOrbitTrap.x = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_orbit_trap_Y")) params.fractal.doubles.fakeLightsOrbitTrap.y = atof2(str2);

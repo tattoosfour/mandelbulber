@@ -1002,7 +1002,6 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec)
 {
 	sShaderOutput fakeLights;
-	int L = 0;
 	double delta = dist_thresh * param->doubles.smoothness;
 	double r = Compute<orbitTrap>(point, *calcParam);
 	double fakeLight = param->doubles.fakeLightsIntensity/(r*r + 1e-100);
