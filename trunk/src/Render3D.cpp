@@ -446,7 +446,7 @@ void *MainThread(void *ptr)
 									if(param.fakeLightsEnabled)
 									{
 										double r = Compute<orbitTrap>(point, calcParam);
-										double fakeLight = 5.0/(pow(r,10.0) + 1e-100);
+										double fakeLight = 1.0/(pow(r,10.0/param.doubles.fakeLightsVisibilitySize)*pow(10.0, 10.0/param.doubles.fakeLightsVisibilitySize) + 1e-100);
 										fakeLightVisible += fakeLight * stepYpersp * zoom;
 									}
 									buffCount++;

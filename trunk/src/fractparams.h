@@ -59,6 +59,7 @@ struct sParamRenderD
 	double iterFogOpacityTrim;
 	double fakeLightsIntensity;
 	double fakeLightsVisibility;
+	double fakeLightsVisibilitySize;
 
 	sImageAdjustments imageAdjustments;
 };

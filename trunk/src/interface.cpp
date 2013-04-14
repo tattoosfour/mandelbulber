@@ -527,6 +527,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.fakeLightsOrbitTrap.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapZ)));
 		params->doubles.fakeLightsIntensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsIntensity)));
 		params->doubles.fakeLightsVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsVisibility)));
+		params->doubles.fakeLightsVisibilitySize = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsVisibilitySize)));
 		params->fractal.fakeLightsMinIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMinIter)));
 		params->fractal.fakeLightsMaxIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMaxIter)));
 
@@ -904,6 +905,7 @@ void WriteInterface(sParamRender *params)
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsIntensity), DoubleToString(params->doubles.fakeLightsIntensity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsVisibility), DoubleToString(params->doubles.fakeLightsVisibility));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsVisibilitySize), DoubleToString(params->doubles.fakeLightsVisibilitySize));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapX), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.x));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapY), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapZ), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.z));
@@ -1780,6 +1782,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_fakeLightsMaxIter = gtk_entry_new();
 	Interface.edit_fakeLightsIntensity = gtk_entry_new();
 	Interface.edit_fakeLightsVisibility = gtk_entry_new();
+	Interface.edit_fakeLightsVisibilitySize = gtk_entry_new();
 
 	//combo
 	//		fract type
@@ -2429,6 +2432,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("4", "Max iter.:", 5, Interface.edit_fakeLightsMaxIter), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Intensity:", 10, Interface.edit_fakeLightsIntensity), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Visibility:", 10, Interface.edit_fakeLightsVisibility), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Size:", 10, Interface.edit_fakeLightsVisibilitySize), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), Interface.checkFakeLightsEnabled, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH2, false, false, 1);
