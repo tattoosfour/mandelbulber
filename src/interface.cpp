@@ -3049,6 +3049,8 @@ bool ReadComandlineParams(int argc, char *argv[])
 	noGUIdata.startFrame = 0;
 	noGUIdata.endFrame = 99999;
 	noGUIdata.imageFormat = imgFormatJPG;
+	noGUIdata.netrenderMode = false;
+	strcpy(noGUIdata.netRenderPortString, "5555");
 	strcpy(noGUIdata.settingsFile, "default.fract");
 	bool result = true;
 
@@ -3189,6 +3191,41 @@ bool ReadComandlineParams(int argc, char *argv[])
 					goto bad_arg;
 				}
 			}
+			if (strcmp(argv[i], "-ip") == 0)
+			{
+				i++;
+				if(i < argc)
+				{
+					if(strlen(argv[i]) < 20)
+					{
+						strcpy(noGUIdata.netRenderIPString, argv[i]);
+						noGUIdata.netrenderMode = true;
+						continue;
+					}
+					else
+					{
+						printf("commandline: argument must be e.g. -ip 192.168.0.1\n");
+						goto bad_arg;
+					}
+				}
+			}
+			if (strcmp(argv[i], "-port") == 0)
+			{
+				i++;
+				if(i < argc)
+				{
+					if(strlen(argv[i]) < 6)
+					{
+						strcpy(noGUIdata.netRenderPortString, argv[i]);
+						continue;
+					}
+					else
+					{
+						printf("commandline: argument must be -port NUMBER\n");
+						goto bad_arg;
+					}
+				}
+			}
 			if (strcmp(argv[i], "-o") == 0)
 			{
 				i++;
@@ -3217,6 +3254,8 @@ bad_arg:
 				printf("  -o key=value      - override item 'key' from settings file with new value 'value'\n");
 				printf("  -res WIDTHxHEIGHT - override image resolution\n");
 				printf("  -fpk N            - override frames per key parameter\n");
+				printf("  -ip N.N.N.N       - set application as a client connected to server of given IP address\n");
+				printf("  -port      				- set network port number for Netrender (default 5555)\n");
 				printf("  -format FORMAT    - image output format\n");
 				printf("     jpg - JPEG format\n");
 				printf("     png - PNG format\n");

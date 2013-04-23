@@ -560,7 +560,7 @@ void *MainThread(void *ptr)
 						else
 						{
 							breakX = true;
-							printf("BreakX, line = %d, thread = %d, thread_done[z] = %d\n", z, thread_number, parametry->thread_done[z]);
+							//printf("BreakX, line = %d, thread = %d, thread_done[z] = %d\n", z, thread_number, parametry->thread_done[z]);
 							break;
 						}
 					}//next y
@@ -1280,9 +1280,9 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			}
 
 			//refresh GUI
-			if (!noGUI && bo_refreshing)
+			if ((!noGUI && bo_refreshing) || netRender->IsClient())
 			{
-				if (image->IsPreview())
+				if (image->IsPreview() || netRender->IsClient())
 				{
 					while (gtk_events_pending())
 						gtk_main_iteration();
@@ -1426,89 +1426,96 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 					if(!netRender->IsClient() && !netRender->IsServer()) g_usleep(100000);
 
-					if (progressive < progressiveStart || netRender->IsServer() || netRender->IsClient())
+
+					if (!noGUI)
 					{
-
-						if (real_clock() - refreshEndTime >= refresh_skip)
+						if (progressive < progressiveStart || netRender->IsServer() || netRender->IsClient())
 						{
-							double refreshStartTime = real_clock();
 
-							if (image->IsPreview())
+							if (real_clock() - refreshEndTime >= refresh_skip)
 							{
-								param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
-								if (param.SSAOEnabled && !image->IsLowMemMode() && !netRender->IsClient() && !netRender->IsServer())
-								{
-									param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
-									PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
-									WriteLog("SSAO rendered");
-								}
-								image->CompileImage();
-								WriteLog("Image compiled");
+								double refreshStartTime = real_clock();
 
-								image->ConvertTo8bit();
-								WriteLog("Image converted to 8-bit");
-								image->UpdatePreview();
-								WriteLog("Preview created");
-								if (outputDarea != NULL)
+								if (image->IsPreview())
 								{
-									DrawHistogram();
-									DrawHistogram2();
-									WriteLog("Histograms refreshed");
-									image->RedrawInWidget(outputDarea);
-									WriteLog("Image redrawn in window");
+									param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled) );
+									if (param.SSAOEnabled && !image->IsLowMemMode() && !netRender->IsClient() && !netRender->IsServer())
+									{
+										param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality) );
+										PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
+										WriteLog("SSAO rendered");
+									}
+									image->CompileImage();
+									WriteLog("Image compiled");
+
+									image->ConvertTo8bit();
+									WriteLog("Image converted to 8-bit");
+									image->UpdatePreview();
+									WriteLog("Preview created");
+									if (outputDarea != NULL)
+									{
+										DrawHistogram();
+										DrawHistogram2();
+										WriteLog("Histograms refreshed");
+										image->RedrawInWidget(outputDarea);
+										WriteLog("Image redrawn in window");
+									}
 								}
+
+								refreshEndTime = real_clock();
+								//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
+								refresh_skip = (refreshEndTime - refreshStartTime) * 10;
+								WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
+							}
+						}
+					}
+
+					if (!noGUI)
+					{
+						if (outputDarea != NULL)
+						{
+							//progress bar
+							char progressText[1000];
+							double progressiveDone, percent_done;
+							if (progressive == progressiveStart) progressiveDone = 0;
+							else progressiveDone = 0.25 / (progressive * progressive);
+							if (progressiveStart == 1)
+							{
+								percent_done = ((double) done2 / height) * 100.0;
+							}
+							else
+							{
+								percent_done = (((double) done2 / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
 							}
 
-							refreshEndTime = real_clock();
-							//printf("RefreshTime: %f\n", refreshEndTime - refreshStartTime);
-							refresh_skip = (refreshEndTime - refreshStartTime) * 10;
-							WriteLogDouble("Image refreshed", refreshEndTime - refreshStartTime);
-						}
-					}
+							if (param.noOfTiles > 1)
+							{
+								percent_done = (param.tileCount + percent_done / 100.0) / (param.noOfTiles * param.noOfTiles) * 100.0;
+							}
+							if (Interface_data.animMode)
+							{
+								percent_done = (param.fractal.frameNo - param.startFrame + percent_done / 100.0) / (param.endFrame - param.startFrame + 1) * 100.0;
+							}
 
-					if (outputDarea != NULL)
-					{
-						//progress bar
-						char progressText[1000];
-						double progressiveDone, percent_done;
-						if (progressive == progressiveStart) progressiveDone = 0;
-						else progressiveDone = 0.25 / (progressive * progressive);
-						if (progressiveStart == 1)
-						{
-							percent_done = ((double) done2 / height) * 100.0;
+							double time = real_clock() - start_time;
+							double time_to_go = (100.0 - percent_done) * time / percent_done;
+							int togo_time_s = (int) time_to_go % 60;
+							int togo_time_min = (int) (time_to_go / 60) % 60;
+							int togo_time_h = time_to_go / 3600;
+							int time_s = (int) time % 60;
+							int time_min = (int) (time / 60) % 60;
+							int time_h = time / 3600;
+							double iterations_per_sec = N_counter / time;
+							//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
+							double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
+							sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h,
+									time_min, time_s, iterations_per_sec, avgMissedDE);
+							gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+							gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
 						}
-						else
-						{
-							percent_done = (((double) done2 / height) * 3.0 / 4.0 / progressive + progressiveDone) * 100.0;
-						}
-
-						if(param.noOfTiles > 1)
-						{
-							percent_done = (param.tileCount + percent_done/100.0) / (param.noOfTiles * param.noOfTiles)*100.0;
-						}
-						if(Interface_data.animMode)
-						{
-							percent_done = (param.fractal.frameNo - param.startFrame + percent_done/100.0) / (param.endFrame - param.startFrame + 1) * 100.0;
-						}
-
-						double time = real_clock() - start_time;
-						double time_to_go = (100.0 - percent_done) * time / percent_done;
-						int togo_time_s = (int) time_to_go % 60;
-						int togo_time_min = (int) (time_to_go / 60) % 60;
-						int togo_time_h = time_to_go / 3600;
-						int time_s = (int) time % 60;
-						int time_min = (int) (time / 60) % 60;
-						int time_h = time / 3600;
-						double iterations_per_sec = N_counter / time;
-						//double avgDEerror = DEerror / DE_counterForDEerror*100.0;
-						double avgMissedDE = (double) Missed_DE_counter / Pixel_counter * 100.0;
-						sprintf(progressText, "%.3f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, iters/s %.0f, Missed DE %.3f%%", percent_done, togo_time_h, togo_time_min, togo_time_s, time_h,
-								time_min, time_s, iterations_per_sec, avgMissedDE);
-						gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-						gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent_done / 100.0);
 					}
 					//refreshing GUI
-					if (image->IsPreview())
+					if (image->IsPreview() || netRender->IsClient())
 					{
 						while (gtk_events_pending())
 							gtk_main_iteration();
@@ -1954,24 +1961,33 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			if (!noGUIsettingsLoaded)
+		  g_type_init();
+			if(!noGUIdata.netrenderMode)
 			{
-				char settingsFile2[1000];
-				sprintf(settingsFile2, "settings/%s", noGUIdata.settingsFile);
-				if (!LoadSettings(settingsFile2, noGUIdata.fractparams))
+				if (!noGUIsettingsLoaded)
 				{
-					printf("ERROR! Can't open settings file: %s\n", noGUIdata.settingsFile);
-					return -1;
+					char settingsFile2[1000];
+					sprintf(settingsFile2, "settings/%s", noGUIdata.settingsFile);
+					if (!LoadSettings(settingsFile2, noGUIdata.fractparams))
+					{
+						printf("ERROR! Can't open settings file: %s\n", noGUIdata.settingsFile);
+						return -1;
+					}
 				}
+				WriteLog("Default settings loaded");
+				Interface_data.animMode = noGUIdata.animMode;
+				Interface_data.playMode = noGUIdata.playMode;
+				Interface_data.recordMode = false;
+				Interface_data.continueRecord = false;
+				Interface_data.keyframeMode = noGUIdata.keyframeMode;
+				MainRender();
+				WriteLog("Rendering completely finished");
 			}
-			WriteLog("Default settings loaded");
-			Interface_data.animMode = noGUIdata.animMode;
-			Interface_data.playMode = noGUIdata.playMode;
-			Interface_data.recordMode = false;
-			Interface_data.continueRecord = false;
-			Interface_data.keyframeMode = noGUIdata.keyframeMode;
-			MainRender();
-			WriteLog("Rendering completely finished");
+			else
+			{
+				printf("Starting net client application\n");
+				NoGUIClientEnable();
+			}
 		}
 
 		WriteLog("Memory for parameters released");

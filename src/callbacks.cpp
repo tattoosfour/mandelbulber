@@ -43,7 +43,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 	return TRUE;
 }
 
-gboolean CallerTimerLoop(GtkWidget *widget)
+gboolean CallerTimerLoop(void)
 {
 	if (isRendering && renderRequest && !Interface_data.animMode)
 	{
@@ -59,6 +59,7 @@ gboolean CallerTimerLoop(GtkWidget *widget)
 		Interface_data.recordMode = false;
 		Interface_data.continueRecord = false;
 		gdk_threads_enter();
+		printf("Starting\n");
 		MainRender();
 		gdk_threads_leave();
 	}
@@ -2525,6 +2526,56 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 	}
 }
 
+void NoGUIClientEnable(void)
+{
+	char status[1000];
+
+	bool result = false;
+	while(!result)
+	{
+		g_usleep(1000000);
+		result = netRender->SetClient(noGUIdata.netRenderPortString, noGUIdata.netRenderIPString, status);
+		printf("NetRender status: %s\n", status);
+	}
+
+	if (result)
+	{
+		g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
+
+		while (true)
+		{
+			while (gtk_events_pending())
+				gtk_main_iteration();
+
+			if (!isRendering && !renderRequest)
+			{
+				char command[4];
+				size_t size = netRender->receiveDataFromServer(command);
+
+				if (!strcmp(command, "set"))
+				{
+					char *buffer = new char[size];
+					netRender->GetData(buffer);
+					GetSettingsfromServer(buffer, size);
+					delete buffer;
+				}
+				if (!strcmp(command, "run"))
+				{
+					Interface_data.animMode = false;
+					Interface_data.playMode = false;
+					Interface_data.recordMode = false;
+					Interface_data.continueRecord = false;
+					Interface_data.keyframeMode = false;
+
+					programClosed = true;
+					isPostRendering = false;
+					renderRequest = true;
+				}
+			}
+		}
+	}
+}
+
 void PressedServerScan(GtkWidget *widget, gpointer data)
 {
 	char status[1000];
@@ -2607,10 +2658,18 @@ bool GetSettingsfromServer(char *data, size_t size)
 		fclose(pFile);
 
 		sParamRender fractParamLoaded;
-		LoadSettings("settings/.temp_rcv", fractParamLoaded);
-		Params2InterfaceData(&fractParamLoaded);
-		WriteInterface(&fractParamLoaded);
 
+		if(noGUI)
+		{
+			LoadSettings("settings/.temp_rcv", noGUIdata.fractparams);
+			Params2InterfaceData(&noGUIdata.fractparams);
+		}
+		else
+		{
+			LoadSettings("settings/.temp_rcv", fractParamLoaded);
+			Params2InterfaceData(&fractParamLoaded);
+			WriteInterface(&fractParamLoaded);
+		}
 		//remove("settings/.temp_rcv");
 	}
 	return true;

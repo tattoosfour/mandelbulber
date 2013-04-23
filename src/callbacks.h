@@ -14,7 +14,7 @@ extern double last_navigator_step;
 extern CVector3 last_keyframe_position;
 extern bool renderRequest;
 
-gboolean CallerTimerLoop(GtkWidget *widget);
+gboolean CallerTimerLoop(void);
 gboolean CallerTimerLoopWindowRefresh(GtkWidget *widget);
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event);
@@ -111,10 +111,12 @@ void PressedServerEnable(GtkWidget *widget, gpointer data);
 void PressedClientEnable(GtkWidget *widget, gpointer data);
 void PressedServerScan(GtkWidget *widget, gpointer data);
 
+
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);
 void AutoDEStep(bool highQuality);
 bool SendSettingsToClients(sParamRender fractParamToSave);
 bool GetSettingsfromServer(char *data, size_t size);
+void NoGUIClientEnable(void);
 
 #endif /* CALLBACKS_H_ */
