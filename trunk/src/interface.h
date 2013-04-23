@@ -800,8 +800,11 @@ struct sNoGUIdata
 	bool playMode;
 	bool keyframeMode;
 	bool lowMemMode;
+	bool netrenderMode;
 	int startFrame;
 	int endFrame;
+	char netRenderIPString[20];
+	char netRenderPortString[6];
 	enumImageFormat imageFormat;
 	sParamRender fractparams;
 	std::vector<const char *> overrideStrings;
