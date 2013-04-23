@@ -46,6 +46,8 @@ options:
   -o key=value      - override item 'key' from settings file with new value 'value'
   -res WIDTHxHEIGHT - override image resolution
   -fpk N            - override frames per key parameter
+  -ip N.N.N.N       - set application as a client connected to server of given IP address
+  -port      				- set network port number for Netrender (default 5555)
   -format FORMAT    - image output format
      jpg - JPEG format
      png - PNG format

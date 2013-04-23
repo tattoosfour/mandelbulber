@@ -1,5 +1,12 @@
 Version history
 
+v1.15
+- added light sources based on orbit traps
+- added NetRender client in noGUI mode
+
+v1.14 - not released
+- trial to activate again OpenCL rendering - a lot of stability problems
+
 v1.13-1
 - NetRender works also under Windows
 - improved CRC checking in NetRender message frame
