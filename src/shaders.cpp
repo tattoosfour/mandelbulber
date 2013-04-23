@@ -306,11 +306,46 @@ sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture
 
 int SurfaceColour(sFractal *calcParam, CVector3 point)
 {
+#ifdef FAST_MAND
+	double zx = point.x;
+	double zy = point.y;
+	int N = calcParam->doubles.N * 10.0;
+	double p = 2.0;
+	double smooth = 0.0;
+	int L = 0;
+	double r = 0.0;
+	int nrKol = 253 * 256;
+  for(L=0; L<N; L++)
+  {
+  	double temp = zx * zx - zy * zy + point.x;
+  	zy = 2.0 * zx * zy + point.y;
+  	zx = temp;
+  	r = zx * zx + zy * zy;
+  	if(r > 1e20)
+  	{
+    	smooth = (L - log(log(sqrt(r)) / log(N)) / log(p));
+      nrKol = smooth * 50.0;
+      nrKol = abs(nrKol) % (248*256);
+  		break;
+  	}
+  }
+
+	N_counter += L + 1;
+	Loop_counter++;
+
+	if (L/10 < 64)
+		histogram[L/10]++;
+	else
+		histogram[63]++;
+  return nrKol;
+
+#else
 	calcParam->doubles.N *= 10;
 	int nrKol = floor(Compute<colouring> (point, *calcParam));
 	calcParam->doubles.N /= 10;
 	nrKol = abs(nrKol) % (248*256);
 	return nrKol;
+#endif
 }
 
 sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
