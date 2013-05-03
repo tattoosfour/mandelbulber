@@ -77,7 +77,7 @@ double real_clock(void)
 }
 
 
-CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, sStep *stepBuff, double *distThreshOut, double *lastDistOut,
+CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, double *distThreshOut, double *lastDistOut,
 		bool *foundOut)
 {
 	CVector3 point;
@@ -87,9 +87,12 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	double dist = 0;
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
+	int counter = 0;
 
 	for (int i = 0; i < 10000; i++)
 	{
+		counter++;
+
 		point = start + direction * scan;
 		bool max_iter = false;
 
@@ -115,11 +118,12 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 
 	}
 
-	if (found)
+	if (found && binaryEnable)
 	{
 		double step = distThresh * 0.5;
 		for (int i = 0; i < 10; i++)
 		{
+			DE_counter++;
 			if (dist < distThresh && dist > distThresh * search_limit)
 			{
 				break;
@@ -140,6 +144,13 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 			step *= 0.5;
 		}
 	}
+
+	DE_counter += counter;
+	Pixel_counter++;
+	//counters for drawing histogram
+	int counter2 = counter / 4;
+	if (counter2 < 256) histogram2[counter2]++;
+	else histogram2[255]++;
 
 	*foundOut = found;
 	*distThreshOut = distThresh;
@@ -292,9 +303,6 @@ void *MainThread(void *ptr)
 		start = vp - baseY * (1.0 / fov * zoom + param.doubles.viewDistanceMin);
 	}
 
-	//distance value after raymarching
-	double last_distance = 0;
-
 	//parameters for iteration functions
 	sFractal calcParam = param.fractal;
 	bool max_iter = false;
@@ -308,10 +316,6 @@ void *MainThread(void *ptr)
 	double tileYOffset = (tile / tiles);
 
 	bool breakX = false;
-
-	//calcParam.doubles.fakeLightsOrbitTrap.x = 5;
-	//calcParam.doubles.fakeLightsOrbitTrap.y = 0;
-	//calcParam.doubles.fakeLightsOrbitTrap.z = 0;
 
 	//2-pass loop (for multi-threading)
 	for (int pass = 0; pass < 3; pass++)
@@ -354,10 +358,9 @@ void *MainThread(void *ptr)
 						//------------- finding fractal surface ---------------------------
 
 						//calculating of viewVector
+						CVector3 viewVector;
 						double x2 = ((double) xScr / width / tiles - 0.5 + tileXOffset / tiles) * aspectRatio;
 						double z2 = ((double) yScr / height / tiles - 0.5 + tileYOffset / tiles);
-
-						CVector3 viewVector;
 
 						bool hemisphereCut = false;
 						if (perspectiveType == fishEye || perspectiveType == equirectangular)
@@ -394,79 +397,40 @@ void *MainThread(void *ptr)
 						 }
 						 */
 
-						//preparing variables
+						//Ray marching
 						bool found = false;
-						double dist = delta;
-						counter = 0;
-						buffCount = 0;
-
-						CVector3 viewVectorStart(0, 0, 0);
-						CVector3 viewVectorEnd(0, 0, 0);
-
-						if (perspectiveType == fishEye || perspectiveType == equirectangular)
-						{
-							minDepth = 1e-15;
-							maxDepth = 100;
-						}
-
-						calcParam.specialColour = 0;
-						int specialColour = 0;
-
-						double fakeLightVisible = 0.0;
 						double distThresh = 0.0;
 						double lastDist = 0.0;
-
 						CVector3 point;
 
 						if (!hemisphereCut)
 						{
-							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, stepBuff, &distThresh, &lastDist, &found);
+							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, &distThresh, &lastDist, &found);
 						}
 						else
 						{
 							found = false;
-							last_distance = dist;
 						}
-
-						//if(thread_number == 0) printf("next y\n");
-
-						DE_counter += counter;
-						Pixel_counter++;
-						//counters for drawing histogram
-						int counter2 = counter / 4;
-						if (counter2 < 256) histogram2[counter2]++;
-						else histogram2[255]++;
-
-						if (calcParam.specialColour != 0) specialColour = calcParam.specialColour;
-
-						sComplexImage pixelData;
-						memset(&pixelData, 0, sizeof(sComplexImage));
 
 						CVector3 lightVector = shadowVector;
 
-						//double y = depthFound;
-						//CVector3 point = Projection3D(CVector3(x2, y, z2), vp, mRot, perspectiveType, fov, zoom);
-						double wsp_persp = distThresh; //----------------------------------------------------------------- to tak tymczasowo !!!
+						sShaderInputData ShaderInputData;
+						ShaderInputData.calcParam = &calcParam;
+						ShaderInputData.param = &param;
+						ShaderInputData.dist_thresh = distThresh;
+						ShaderInputData.lightVect =lightVector;
+						ShaderInputData.point = point;
+						ShaderInputData.viewVector = viewVector;
 
-						//viewVectorEnd = point;
-						//CVector3 viewVector = viewVectorEnd - viewVectorStart;
-						//viewVector.Normalize();
-
-						//delta for all shading algorithms depended on depth and resolution (dynamic shaders resolution)
-						if (perspectiveType == fishEye || perspectiveType == equirectangular)
-						{
-							delta = distThresh;
-							//wsp_persp = 2.0 * y;
-							zoom = param.doubles.zoom = 1.0;
-						}
-						else
-						{
-							delta = resolution * zoom * wsp_persp;
-						}
+						sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
+						sShaderOutput objectColour = { 0.0, 0.0, 0.0 };
 
 						//if fractal surface was found
 						if (found)
 						{
+							objectShader = ObjectShader(ShaderInputData, &objectColour);
+
+							/*
 							//-------------------- SHADING ----------------------
 
 							//initial values
@@ -501,7 +465,7 @@ void *MainThread(void *ptr)
 								//ambient occlusion based on many rays in spherical directions
 								else
 								{
-									AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, distThresh, last_distance, vectorsAround, vectorsCount);
+									AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, distThresh, lastDist, vectorsAround, vectorsCount);
 								}
 							}
 
@@ -591,7 +555,7 @@ void *MainThread(void *ptr)
 												{
 													ambientBuff[i] = FastAmbientOcclusion2(&calcParam, pointTemp, vnTemp, distThresh, param.doubles.fastAoTune, param.globalIlumQuality);
 												}
-												else ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, distThresh, last_distance, vectorsAround, vectorsCount);
+												else ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, distThresh, lastDist, vectorsAround, vectorsCount);
 											}
 
 											auxLightsBuff[i] = AuxLightsShader(&param, &calcParam, pointTemp, vnTemp, viewTemp, wsp_persp, distThresh, &auxSpecBuff[i]);
@@ -779,11 +743,13 @@ void *MainThread(void *ptr)
 							pixelData.auxSpecular = specularAux16;
 							pixelData.reflectBuf16 = reflection;
 							pixelData.backgroundBuf16 = black16;
+							*/
 
 						}					//end if found
 
 						else
 						{
+							/*
 							sShaderOutput background = { 0.0, 0.0, 0.0 };
 
 							//------------- render 3D background
@@ -806,7 +772,10 @@ void *MainThread(void *ptr)
 							}
 
 							image->PutPixelZBuffer(xScr, yScr, 1e20);
+							*/
 						}
+
+						/*
 
 						//drawing transparent glow
 						if (!image->IsLowMemMode()) image->PutPixelGlow(xScr, yScr, counter);
@@ -881,10 +850,19 @@ void *MainThread(void *ptr)
 							image->PutPixelImage(xScr, yScr, newPixel16);
 							image->PutPixelAlpha(xScr, yScr, alpha2);
 						}
+						*/
+
+						sRGBfloat pixel;
+						pixel.R = objectShader.R;
+						pixel.G = objectShader.G;
+						pixel.B = objectShader.B;
+
+						image->PutPixelImage(xScr, yScr, pixel);
 					}
 
 					else
 					{
+						breakX = true;
 						break;
 					}
 
@@ -892,7 +870,7 @@ void *MainThread(void *ptr)
 
 				if (!breakX) linesToSend[yScr] = true;
 
-				if (!image->IsLowMemMode()) image->Squares(yScr, progressive);
+				image->Squares(yScr, progressive);
 
 				(*threadParameters->done)++;
 
@@ -1072,11 +1050,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		//initialise send/receive buffer
 		sAllImageData *lineOfImage = NULL;
-		sAllImageDataLowMem *lineOfImageLowMem = NULL;
-		if(!image->IsLowMemMode())
-			lineOfImage = new sAllImageData[width+1];
-		else
-			lineOfImageLowMem = new sAllImageDataLowMem[width+1];
+		lineOfImage = new sAllImageData[width+1];
 
 		int progressiveStart = 8;
 		if (param.recordMode || noGUI || netRender->IsServer() || netRender->IsClient()) progressiveStart = 1;
@@ -1182,36 +1156,18 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 								if(bytes_recvd > 0)
 								{
 									int *last;
-									if(!image->IsLowMemMode())
-									{
-										netRender->GetData(lineOfImage);
-										last = (int*)&lineOfImage[width];
-									}
-									else
-									{
-										netRender->GetData(lineOfImageLowMem);
-										last = (int*)&lineOfImageLowMem[width];
-									}
+									netRender->GetData(lineOfImage);
+									last = (int*)&lineOfImage[width];
 
 									int y = *last;
 									if(y<height)
 									{
 										for(int x=0; x<width; x++)
 										{
-											if(!image->IsLowMemMode())
-											{
-												image->GetComplexImagePtr()[x+y*width] = lineOfImage[x].complex;
+												//image->GetImage16Ptr()[x+y*width] = lineOfImage[x].image16;
 												image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
 												image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
-												image->PutPixelColor(x,y,lineOfImage[x].colorIndexBuf16);
-											}
-											else
-											{
-												image->GetImage16Ptr()[x+y*width] = lineOfImageLowMem[x].image16;
-												image->PutPixelAlpha(x,y,lineOfImageLowMem[x].alpha);
-												image->PutPixelZBuffer(x,y,lineOfImageLowMem[x].zBuffer);
-												image->PutPixelColor(x,y,lineOfImageLowMem[x].colorIndexBuf16);
-											}
+												//image->PutPixelColor(x,y,lineOfImageLowMem[x].colorIndexBuf16); //----------------- do poprawienia
 										}
 										thread_done[y] = 99;
 										newLineRendered = true;
@@ -1242,32 +1198,17 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									linesToSend[y] = false;
 									for(int x=0; x<width; x++)
 									{
-										if(!image->IsLowMemMode())
-										{
-											lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width];
+											//lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width]; -------------- do poprawienia
 											lineOfImage[x].alpha = image->GetPixelAlpha(x,y);
-											lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y);
+											//lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y); ----------- do poprawienia
 											lineOfImage[x].zBuffer = image->GetPixelZBuffer(x,y);
-										}
-										else
-										{
-											lineOfImageLowMem[x].image16 = image->GetImage16Ptr()[x+y*width];
-											lineOfImageLowMem[x].alpha = image->GetPixelAlpha(x,y);
-											lineOfImageLowMem[x].colorIndexBuf16 = image->GetPixelColor(x,y);
-											lineOfImageLowMem[x].zBuffer = image->GetPixelZBuffer(x,y);
-										}
 									}
 									int *last;
-									if(!image->IsLowMemMode())
-										last = (int*)&lineOfImage[width];
-									else
-										last = (int*)&lineOfImageLowMem[width];
+
+									last = (int*)&lineOfImage[width];
 									*last = y;
 
-									if(!image->IsLowMemMode())
-										netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),"GET");
-									else
-										netRender->sendDataToServer(lineOfImageLowMem, sizeof(sAllImageDataLowMem)*(width+1),"GET");
+									netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),"GET");
 
 									sentSomething = true;
 									break;
@@ -1301,7 +1242,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 								if (image->IsPreview())
 								{
 									param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled) );
-									if (param.SSAOEnabled && !image->IsLowMemMode() && !netRender->IsClient() && !netRender->IsServer())
+									if (param.SSAOEnabled && !netRender->IsClient() && !netRender->IsServer())
 									{
 										param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality) );
 										PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
@@ -1484,7 +1425,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		delete[] err;
 		delete[] linesToSend;
 		if (lineOfImage) delete[] lineOfImage;
-		if (lineOfImageLowMem) delete[] lineOfImageLowMem;
 	}
 	else
 	{
@@ -1637,8 +1577,6 @@ int main(int argc, char *argv[])
 		gtk_init(&argc, &argv);
 		WriteLog("GTK initialised");
 	}
-
-	mainImage.SetLowMem(noGUIdata.lowMemMode);
 
 	//detecting number of CPU cores
 	NR_THREADS = get_cpu_count();
@@ -2027,7 +1965,7 @@ void MainRender(void)
 
 	if (noGUI)
 	{
-		mainImage.SetPalette(noGUIdata.fractparams.palette);
+		memcpy(Interface_data.palette, noGUIdata.fractparams.palette, sizeof(sRGB)*256);
 	}
 
 	InitMainParameters(&fractParam);
@@ -2176,9 +2114,8 @@ void MainRender(void)
 	{
 		autoSaveImage = true;
 		secondEyeImage = new cImage(width, height);
-		secondEyeImage->SetPalette(mainImage.GetPalettePtr());
 		secondEyeImage->CreatePreview(Interface_data.imageScale);
-		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments, fractParam.effectColours, fractParam.imageSwitches);
+		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments);
 		stereoImage = new unsigned char[width * height * 3 * 2];
 	}
 
@@ -2288,7 +2225,7 @@ void MainRender(void)
 			if (fractParam.doubles.zoom < 1e-15) fractParam.doubles.zoom = 1e-15;
 			fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 			sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
-			mainImage.SetImageAdjustments(imageAdjustments);
+			mainImage.SetImageParameters(imageAdjustments);
 
 			sprintf(label_text, "Frame: %d, Keyframe %f", index, (double) index / fractParam.framesPerKeyframe);
 			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_keyframeInfo), label_text);
@@ -2546,8 +2483,8 @@ void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage)
 	CreateFormulaSequence(fractParamLoaded.fractal);
 
 	miniImage->ClearImage();
-	miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.effectColours, fractParamLoaded.imageSwitches);
-	miniImage->SetPalette(fractParamLoaded.palette);
+	miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments);
+	memcpy(Interface_data.palette, fractParamLoaded.palette, sizeof(sRGB)*256);
 
 	LoadTextures(&fractParamLoaded);
 

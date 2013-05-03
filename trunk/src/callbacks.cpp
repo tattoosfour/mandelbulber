@@ -340,7 +340,8 @@ gboolean on_dareaPalette_expose(GtkWidget *widget, GdkEventExpose *event, gpoint
 	paletteViewCreated = true;
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
-	DrawPalette(mainImage.GetPalettePtr());
+
+	DrawPalette(Interface_data.palette);
 	return TRUE;
 }
 
@@ -462,7 +463,8 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 	//generating color palette
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
-	DrawPalette(mainImage.GetPalettePtr());
+
+	//DrawPalette(mainImage.GetPalettePtr()); -------------- do poprawienia
 
 	//if (!isRendering)
 	//{
@@ -1074,6 +1076,7 @@ void ChangedMandelboxRotations(GtkWidget *widget, gpointer data)
 
 void ChangedSliderFog(GtkWidget *widget, gpointer data)
 {
+	/*
 	if (Interface_data.disableInitRefresh) return;
 	GdkColor color;
 
@@ -1090,6 +1093,7 @@ void ChangedSliderFog(GtkWidget *widget, gpointer data)
 
 	imageCompileNeeded = true;
 	refreshNeeded = true;
+	*/
 
 	/*
 	if (!isRendering)
@@ -1729,7 +1733,8 @@ void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 	adj->paletteOffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
-	DrawPalette(mainImage.GetPalettePtr());
+
+	DrawPalette(Interface_data.palette);
 
 	imageCompileNeeded = true;
 	refreshNeeded = true;
@@ -1745,8 +1750,8 @@ void PressedRandomPalette(GtkWidget *widget, gpointer data)
 
 	double saturation = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_colour_saturation)));
 
-	NewPalette(mainImage.GetPalettePtr(), saturation);
-	DrawPalette(mainImage.GetPalettePtr());
+	NewPalette(Interface_data.palette, saturation);
+	DrawPalette(Interface_data.palette);
 	if (!isRendering && !Interface_data.disableInitRefresh)
 	{
 		mainImage.CompileImage();
@@ -1795,7 +1800,7 @@ void PressedGetPaletteFromImage(GtkWidget *widget, gpointer data)
 				palette[i].B = pixel.B;
 			}
 			DrawPalette(palette);
-			mainImage.SetPalette(palette);
+			memcpy(Interface_data.palette, palette, sizeof(sRGB)*256);
 		}
 		strcpy(lastFilenamePalette, filename);
 	}
@@ -2438,6 +2443,7 @@ void ChangedIterFogEnable(GtkWidget *widget, gpointer data)
 
 void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
 {
+	/*
 	GtkWidget *dialog;
 	dialog = gtk_file_chooser_dialog_new("Save all layers image as...", GTK_WINDOW(window_interface), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE,
 			GTK_RESPONSE_ACCEPT, NULL);
@@ -2452,6 +2458,7 @@ void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data)
 		strcpy(lastFilenameImage, filename);
 	}
 	gtk_widget_destroy(dialog);
+	*/
 }
 
 void PressedServerEnable(GtkWidget *widget, gpointer data)

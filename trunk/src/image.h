@@ -38,7 +38,6 @@ void DrawHistogram2(void);
 void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet);
 void PostRendering_DOF(cImage *image, double deep, double neutral, double persp);
 void DrawPalette(sRGB *palette);
-void StoreImage8(sComplexImage *image, sRGB8 *image8);
 void MakeStereoImage(cImage *left, cImage *right, guchar *stereoImage);
 void StereoPreview(cImage *temoraryImage, guchar *stereoImage);
 

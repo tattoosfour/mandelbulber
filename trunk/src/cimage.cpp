@@ -21,47 +21,33 @@ cImage::cImage(int w, int h, bool low_mem)
 	lowMem = low_mem;
 	AllocMem();
 	gammaTable = new int[65536];
-	palette = new sRGB[256];
 	progressiveFactor = 1;
 }
 
 cImage::~cImage()
 {
 	if(!lowMem)
-		delete[] complexImage;
+	delete[] imageFloat;
 	delete[] image16;
 	delete[] image8;
-	delete[] alpha;
+	delete[] alphaBuffer;
+	delete[] colourBuffer;
 	delete[] zBuffer;
-	delete[] colorIndexBuf16;
 	delete[] gammaTable;
-	delete[] palette;
 	if (previewAllocated)
 		delete[] preview;
 }
-
-void cImage::SetLowMem(bool low_mem) {
-	if (lowMem != low_mem) {
-		if (lowMem)
-			delete[] complexImage;
-		else
-			complexImage = new sComplexImage[width * height];
-		lowMem = low_mem;
-	}
-}
-
 
 void cImage::AllocMem(void)
 {
 	if (width > 0 && height > 0)
 	{
-		if(!lowMem)
-			complexImage = new sComplexImage[width * height];
+		imageFloat =  new sRGBfloat[width * height];
 		image16 = new sRGB16[width * height];
 		image8 = new sRGB8[width * height];
 		zBuffer = new double[width * height];
-		alpha = new unsigned short[width * height];
-		colorIndexBuf16 = new unsigned short[width * height];
+		alphaBuffer = new unsigned short[width * height];
+		colourBuffer = new sRGB8[width * height];
 		ClearImage();
 	}
 	else
@@ -79,12 +65,12 @@ void cImage::AllocMem(void)
 void cImage::ChangeSize(int w, int h)
 {
 	if(!lowMem)
-		delete[] complexImage;
+	delete[] imageFloat;
 	delete[] image16;
 	delete[] image8;
-	delete[] alpha;
+	delete[] alphaBuffer;
+	delete[] colourBuffer;
 	delete[] zBuffer;
-	delete[] colorIndexBuf16;
 	width = w;
 	height = h;
 	AllocMem();
@@ -92,161 +78,42 @@ void cImage::ChangeSize(int w, int h)
 
 void cImage::ClearImage(void)
 {
+	memset(imageFloat, 0, (unsigned long int)sizeof(sRGBfloat) * width * height);
 	memset(image16, 0, (unsigned long int)sizeof(sRGB16) * width * height);
 	memset(image8, 0, (unsigned long int)sizeof(sRGB8) * width * height);
-	memset(alpha, 0, (unsigned long int)sizeof(unsigned short) * width * height);
-	memset(colorIndexBuf16, 0, (unsigned long int)sizeof(unsigned short) * width * height);
-
-	if (!lowMem)
-		memset(complexImage, 0, (unsigned long int)sizeof(sComplexImage) * width * height);
+	memset(alphaBuffer, 0, (unsigned long int)sizeof(unsigned short) * width * height);
+	memset(colourBuffer, 0, (unsigned long int)sizeof(unsigned short) * width * height);
 
 	for (long int i = 0; i < width * height; ++i)
 		zBuffer[i] = 1e20;
 }
 
-sRGB16 cImage::CalculatePixel(sComplexImage &pixel, unsigned short &alpha_, float &zBuf, unsigned short colorIndex, double fogVisBack, double fogVisFront)
+sRGB16 cImage::CalculatePixel(sRGBfloat pixel)
 {
-	double mLightR = ecol.mainLightColour.R / 65536.0;
-	double mLightG = ecol.mainLightColour.G / 65536.0;
-	double mLightB = ecol.mainLightColour.B / 65536.0;
 
-	double R=0.0;
-	double G=0.0;
-	double B=0.0;
+	float R = pixel.R * adj.brightness;
+	float G = pixel.G * adj.brightness;
+	float B = pixel.B * adj.brightness;
 
-	int alpha2 = 65535;
-	if (zBuf > 1e19) alpha2 = 0;
-
-	sRGB color = { 256, 256, 256 };
-	if (sw.coloringEnabled)
-	{
-		int color_number;
-		if(colorIndex>=248*256)
-		{
-			color_number = colorIndex;
-		}
-		else
-		{
-			color_number = (int) (colorIndex * adj.coloring_speed + 256 * adj.paletteOffset) % 65536;
-		}
-		color = IndexToColour(color_number);
-	}
-
-	double jasSuma1 = ((1.0 - adj.shading) + adj.shading * pixel.shadingBuf16 / 4096.0) * (pixel.shadowsBuf16 / 4096.0 * adj.directLight) * (1.0 - adj.ambient) + adj.ambient;
-	if (zBuf > 1e19) jasSuma1 = 0;
-
-	double jasSuma2 = (adj.specular * pixel.specularBuf16 / 4096.0) * ((1.0 - adj.ambient) * pixel.shadowsBuf16 / 4096.0 * adj.directLight + adj.ambient);
-
-	jasSuma1 *= adj.mainLightIntensity;
-	jasSuma2 *= adj.mainLightIntensity;
-
-	if(sw.raytracedReflections)
-	{
-		R = (double)pixel.backgroundBuf16.R + (adj.reflect * pixel.reflectBuf16.R / 256.0 + color.R / 256.0 * (jasSuma1 * mLightR
-				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		G = (double)pixel.backgroundBuf16.G + (adj.reflect * pixel.reflectBuf16.G / 256.0 + color.G / 256.0 * (jasSuma1 * mLightG
-				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		B = (double)pixel.backgroundBuf16.B + (adj.reflect * pixel.reflectBuf16.B / 256.0 + color.B / 256.0 * (jasSuma1 * mLightB
-				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
-	}
-	else
-	{
-		R = (double)pixel.backgroundBuf16.R + (adj.reflect * pixel.reflectBuf16.R / 256.0 * pixel.ambientBuf16.R / 4096.0 + color.R / 256.0 * (jasSuma1 * mLightR
-				+ adj.globalIlum * pixel.ambientBuf16.R / 4096.0 + pixel.auxLight.R / 4096.0) + jasSuma2 * mLightR + pixel.auxSpecular.R / 4096.0) * 65536.0;
-		G = (double)pixel.backgroundBuf16.G + (adj.reflect * pixel.reflectBuf16.G / 256.0 * pixel.ambientBuf16.G / 4096.0 + color.G / 256.0 * (jasSuma1 * mLightG
-				+ adj.globalIlum * pixel.ambientBuf16.G / 4096.0 + pixel.auxLight.G / 4096.0) + jasSuma2 * mLightG + pixel.auxSpecular.G / 4096.0) * 65336.0;
-		B = (double)pixel.backgroundBuf16.B + (adj.reflect * pixel.reflectBuf16.B / 256.0 * pixel.ambientBuf16.B / 4096.0 + color.B / 256.0 * (jasSuma1 * mLightB
-				+ adj.globalIlum * pixel.ambientBuf16.B / 4096.0 + pixel.auxLight.B / 4096.0) + jasSuma2 * mLightB + pixel.auxSpecular.B / 4096.0) * 65536.0;
-	}
-
-	sRGB col = { R, G, B };
-	if (sw.fogEnabled)
-	{
-		col = PostRendering_Fog(zBuf, fogVisFront, fogVisBack + fogVisFront, ecol.fogColor, col);
-	}
-	R = col.R;
-	G = col.G;
-	B = col.B;
-
-	//volumetric fog
-	double fogDensity = pixel.fogDensity16 / 65535.0;
-	double fogN = 1.0 - fogDensity;
-	alpha2 += pixel.fogDensity16;
-
-
-	R = R * fogN + pixel.volumetricLight.R * fogDensity * 10;
-	G = G * fogN + pixel.volumetricLight.G * fogDensity * 10;
-	B = B * fogN + pixel.volumetricLight.B * fogDensity * 10;
-
-
-	//glow
-	double glow = pixel.glowBuf16 * adj.glow_intensity / 512.0;
-	double glowN = 1.0 - glow;
-	if (glowN < 0.0) glowN = 0.0;
-
-	double glowR = (ecol.glow_color1.R * glowN + ecol.glow_color2.R * glow);
-	double glowG = (ecol.glow_color1.G * glowN + ecol.glow_color2.G * glow);
-	double glowB = (ecol.glow_color1.B * glowN + ecol.glow_color2.B * glow);
-
-	if(sw.volumetricLightEnabled)
-	{
-		R = R * glowN + glowR * glow + pixel.volumetricLight.R * 16.0 * adj.volumetricLightIntensity;
-		G = G * glowN + glowG * glow + pixel.volumetricLight.G * 16.0 * adj.volumetricLightIntensity;
-		B = B * glowN + glowB * glow + pixel.volumetricLight.B * 16.0 * adj.volumetricLightIntensity;
-	}
-	else
-	{
-		R = R * glowN + glowR * glow;
-		G = G * glowN + glowG * glow;
-		B = B * glowN + glowB * glow;
-	}
-
-	R *= adj.brightness;
-	G *= adj.brightness;
-	B *= adj.brightness;
-
-	alpha2 += 65535.0 * glow;
-	if (alpha2 > 65535) alpha2 = 65535;
-
-	if (R > 65535) R = 65535;
-	if (R < 0) R = 0;
-	if (G > 65535) G = 65535;
-	if (G < 0) G = 0;
-	if (B > 65535) B = 65535;
-	if (B < 0) B = 0;
+	if (R > 1.0) R = 1.0;
+	if (R < 0.0) R = 0.0;
+	if (G > 1.0) G = 1.0;
+	if (G < 0.0) G = 0.0;
+	if (B > 1.0) B = 1.0;
+	if (B < 0.0) B = 0.0;
 
 	sRGB16 newPixel16;
-	newPixel16.R = gammaTable[(unsigned int)R];
-	newPixel16.G = gammaTable[(unsigned int)G];
-	newPixel16.B = gammaTable[(unsigned int)B];
-	alpha_ = alpha2;
+
+	newPixel16.R = R * 65535.0;
+	newPixel16.G = G * 65535.0;
+	newPixel16.B = B * 65535.0;
+	newPixel16.R = gammaTable[newPixel16.R];
+	newPixel16.G = gammaTable[newPixel16.G];
+	newPixel16.B = gammaTable[newPixel16.B];
 
 	return newPixel16;
 }
 
-sRGB16 cImage::CalculateAmbientPixel(sRGB16 ambient16, unsigned short colorIndex, sRGB16 oldPixel16)
-{
-	sRGB color = { 256, 256, 256 };
-	if (sw.coloringEnabled)
-	{
-		int color_number = (int) (colorIndex * adj.coloring_speed + 256 * adj.paletteOffset) % 65536;
-		color = IndexToColour(color_number);
-	}
-	sRGB ambientAdd = {0,0,0};
-	ambientAdd.R = adj.brightness * color.R / 256.0 * adj.globalIlum * ambient16.R / 4096.0 * 65536;
-	ambientAdd.G = adj.brightness * color.G / 256.0 * adj.globalIlum * ambient16.G / 4096.0 * 65536;
-	ambientAdd.B = adj.brightness * color.B / 256.0 * adj.globalIlum * ambient16.B / 4096.0 * 65536;
-	int newR = oldPixel16.R + ambientAdd.R;
-	int newG = oldPixel16.G + ambientAdd.G;
-	int newB = oldPixel16.B + ambientAdd.B;
-	if(newR > 65535) newR = 65535;
-	if(newG > 65535) newG = 65535;
-	if(newB > 65535) newB = 65535;
-
-	sRGB16 newPixel = {newR, newG, newB};
-	//sRGB16 newPixel = {color.R, color.G, color.B};
-	return newPixel;
-}
 
 void cImage::CalculateGammaTable(void)
 {
@@ -262,37 +129,26 @@ void cImage::CompileImage(void)
 	{
 		CalculateGammaTable();
 
-		double fog_visibility = pow(10, adj.fogVisibility / 10 - 2.0);
-		double fog_visibility_front = pow(10, adj.fogVisibilityFront / 10 - 2.0) - 10.0;
-
 		for (int y = 0; y < height; y += progressiveFactor)
 		{
 			for (int x = 0; x < width; x += progressiveFactor)
 			{
 				unsigned long int address = x + y * width;
-				sComplexImage pixel = complexImage[address];
-				unsigned short alpha2 = alpha[address];
-				float zBuf = zBuffer[address];
-				unsigned short colorIndex = colorIndexBuf16[address];
-
-				sRGB16 newPixel16 = CalculatePixel(pixel, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
-
-				complexImage[address] = pixel;
+				sRGBfloat pixel = imageFloat[address];
+				sRGB16 newPixel16 = CalculatePixel(pixel);
 				image16[address] = newPixel16;
-				alpha[address] = alpha2;
-				zBuffer[address] = zBuf;
 			}
 			for (int x = 0; x <= width - progressiveFactor; x += progressiveFactor)
 			{
 				sRGB16 pixel = image16[x + y * width];
-				int alpha2 = alpha[x + y * width];
+				int alpha2 = alphaBuffer[x + y * width];
 				for (int yy = 0; yy < progressiveFactor; yy++)
 				{
 					for (int xx = 0; xx < progressiveFactor; xx++)
 					{
 						if (xx == 0 && yy == 0) continue;
 						image16[x + xx + (y + yy) * width] = pixel;
-						alpha[x + xx + (y + yy) * width] = alpha2;
+						alphaBuffer[x + xx + (y + yy) * width] = alpha2;
 					}
 				}
 			}
@@ -300,76 +156,24 @@ void cImage::CompileImage(void)
 	}
 }
 
-void cImage::SetPalette(sRGB *newPalette)
-{
-	for (int i = 0; i < 256; i++)
-	{
-		palette[i] = newPalette[i];
-	}
-}
-
-sRGB cImage::IndexToColour(int index)
-{
-	double R1, R2, G1, G2, B1, B2;
-	double RK, GK, BK;
-	sRGB colour = { 255, 255, 255 };
-	int kol, delta;
-	if (index < 0)
-	{
-		colour = palette[255];
-	}
-	else
-	{
-		index = index % (255 * 256);
-		kol = index / 256;
-		if (kol < 255)
-		{
-			R1 = palette[kol].R;
-			G1 = palette[kol].G;
-			B1 = palette[kol].B;
-			R2 = palette[kol + 1].R;
-			G2 = palette[kol + 1].G;
-			B2 = palette[kol + 1].B;
-			RK = (R2 - R1) / 256.0;
-			GK = (G2 - G1) / 256.0;
-			BK = (B2 - B1) / 256.0;
-			delta = index % 256;
-			colour.R = R1 + (RK * delta);
-			colour.G = G1 + (GK * delta);
-			colour.B = B1 + (BK * delta);
-		}
-	}
-	return colour;
-}
-
 int cImage::GetUsedMB(void)
 {
 	long int mb = 0;
-	if (lowMem)
-	{
-		long int zBufferSize = (long int)width * height * sizeof(float);
-		long int alphaSize = (long int)width * height * sizeof(unsigned short);
-		long int image16Size = (long int)width * height * sizeof(sRGB16);
-		long int colorSize = (long int)width * height * sizeof(unsigned short);
-		mb = (zBufferSize + alphaSize + image16Size + colorSize) / 1024 / 1024;
-	}
-	else
-	{
-		long int zBufferSize = (long int)width * height * sizeof(float);
-		long int alphaSize = (long int)width * height * sizeof(unsigned short);
-		long int image16Size = (long int)width * height * sizeof(sRGB16);
-		long int complexSize = (long int)width * height * sizeof(sComplexImage);
-		long int colorSize = (long int)width * height * sizeof(unsigned short);
-		mb = (long int)(zBufferSize + alphaSize + image16Size + complexSize + colorSize) / 1024 / 1024;
-	}
+
+	long int zBufferSize = (long int) width * height * sizeof(double);
+	long int alphaSize = (long int) width * height * sizeof(unsigned short);
+	long int imageFloatSize = (long int) width * height * sizeof(sRGBfloat);
+	long int image16Size = (long int) width * height * sizeof(sRGB16);
+	long int image8Size = (long int) width * height * sizeof(sRGB8);
+	long int colorSize = (long int) width * height * sizeof(sRGB8);
+	mb = (long int) (zBufferSize + alphaSize + image16Size + image8Size + imageFloatSize + colorSize) / 1024 / 1024;
+
 	return mb;
 }
 
-void cImage::SetImageParameters(sImageAdjustments adjustments, sEffectColours effectColours, sImageSwitches switches)
+void cImage::SetImageParameters(sImageAdjustments adjustments)
 {
 	adj = adjustments;
-	ecol = effectColours;
-	sw = switches;
 }
 
 unsigned char* cImage::ConvertTo8bit(void)
@@ -516,43 +320,23 @@ void cImage::Squares(int y, int pFactor)
 	progressiveFactor = pFactor;
 	for (int x = 0; x <= width - pFactor; x += pFactor)
 	{
-		sComplexImage pixel = complexImage[x + y * width];
-		float zBufferTemp = zBuffer[x + y * width];
-		unsigned short colorTemp = colorIndexBuf16[x + y * width];
+		sRGBfloat pixelTemp = imageFloat[x + y * width];
+		double zBufferTemp = zBuffer[x + y * width];
+		sRGB8 colourTemp = colourBuffer[x + y * width];
+		unsigned short alphaTemp = alphaBuffer[x + y * width];
 
 		for (int yy = 0; yy < pFactor; yy++)
 		{
 			for (int xx = 0; xx < pFactor; xx++)
 			{
 				if (xx == 0 && yy == 0) continue;
-				complexImage[x + xx + (y + yy) * width] = pixel;
+				imageFloat[x + xx + (y + yy) * width] = pixelTemp;
 				zBuffer[x + xx + (y + yy) * width] = zBufferTemp;
-				colorIndexBuf16[x + xx + (y + yy) * width] = colorTemp;
+				colourBuffer[x + xx + (y + yy) * width] = colourTemp;
+				alphaBuffer[x + xx + (y + yy) * width] = alphaTemp;
 			}
 		}
 	}
 }
 
-sRGB PostRendering_Fog(double z, double min, double max, sRGB fog_color, sRGB color_before)
-{
-	sRGB color;
 
-	int R = fog_color.R;
-	int G = fog_color.G;
-	int B = fog_color.B;
-
-	double dist = max - min;
-
-	double fog = (z - min) / dist;
-	if (fog < 0.0) fog = 0.0;
-	if (fog > 1.0) fog = 1.0;
-
-	double a = fog;
-	double aN = 1.0 - a;
-
-	color.R = (color_before.R * aN + R * a);
-	color.G = (color_before.G * aN + G * a);
-	color.B = (color_before.B * aN + B * a);
-
-	return color;
-}

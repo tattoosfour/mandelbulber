@@ -474,7 +474,7 @@ void SavePNG16Alpha(const char *filename, int /*quality*/, int width, int height
 		for (int x = 0; x < width; x++)
 		{
 			unsigned long int ptr = x+y*width;
-			sRGB16 pixel = image->GetPixelImage(x,y);
+			sRGB16 pixel = image->GetPixelImage16(x,y);
 			image16[ptr].R = pixel.R;
 			image16[ptr].G = pixel.G;
 			image16[ptr].B = pixel.B;
@@ -602,6 +602,7 @@ void BufferNormalize16(sRGB16 *buffer, unsigned int size)
 	}
 }
 
+/*
 void SaveAllImageLayers(const char *filename, cImage *image)
 {
 	unsigned int width = image->GetWidth();
@@ -703,6 +704,8 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 
 	delete [] buffer16;
 }
+*/
+
 
 string removeFileExtension(const string &filename)
 {

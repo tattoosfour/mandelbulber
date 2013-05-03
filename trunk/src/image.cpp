@@ -18,6 +18,7 @@
 #include "image.h"
 #include "Render3D.h"
 #include "interface.h"
+#include "shaders.h"
 
 sRGB *buddhabrotImg;
 bool isBuddhabrot = false;
@@ -63,7 +64,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 
-	sRGB16 *temp_image = new sRGB16[width * height];
+	sRGBfloat *temp_image = new sRGBfloat[width * height];
 	unsigned short *temp_alpha = new unsigned short[width * height];
 	sSortZ *temp_sort = new sSortZ[width * height];
 	for (int y = 0; y < height; y++)
@@ -172,7 +173,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		double blur = fabs((double) z - neutral) / (z - min) * deep;
 		if (blur > 100) blur = 100.0;
 		int size = blur;
-		sRGB16 center = temp_image[x + y * width];
+		sRGBfloat center = temp_image[x + y * width];
 		unsigned short center_alpha = temp_alpha[x + y * width];
 		double factor = blur * blur * sqrt(blur)* M_PI/3.0;
 
@@ -191,9 +192,9 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 					if (op > 0.0)
 					{
 						double opN = 1.0 - op;
-						sRGB16 old = image->GetPixelImage(xx, yy);
+						sRGBfloat old = image->GetPixelImage(xx, yy);
 						unsigned short old_alpha = image->GetPixelAlpha(xx, yy);
-						sRGB16 pixel;
+						sRGBfloat pixel;
 						pixel.R = old.R * opN + center.R * op;
 						pixel.G = old.G * opN + center.G * op;
 						pixel.B = old.B * opN + center.B * op;
@@ -215,6 +216,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 			if(refreshCount > 600)
 			{
+				image->CompileImage();
 				image->ConvertTo8bit();
 				image->UpdatePreview();
 				image->RedrawInWidget(renderWindow.drawingArea);
@@ -251,6 +253,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 void ThreadSSAO(void *ptr)
 {
+	/*
 	sSSAOparams *param;
 	param = (sSSAOparams*) ptr;
 
@@ -409,7 +412,7 @@ void ThreadSSAO(void *ptr)
 	}
 	delete[] sinus;
 	delete[] cosinus;
-
+	*/
 }
 
 void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet)
@@ -436,7 +439,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiv
 
 	int progressive = image->progressiveFactor;
 
-	if(image->IsLowMemMode()) progressive = 1;
+	progressive = 1;
 
 	for (int i = 0; i < NR_THREADS; i++)
 	{
@@ -556,7 +559,7 @@ void DrawHistogram2(void)
 
 void DrawPalette(sRGB *palette)
 {
-	mainImage.SetPalette(palette);
+	memcpy(Interface_data.palette, palette, sizeof(sRGB)*256);
 
 	if (paletteViewCreated)
 	{
@@ -566,7 +569,7 @@ void DrawPalette(sRGB *palette)
 		for (int i = 0; i < 640; i++)
 		{
 			int number = (int) (i * 256.0 / colWidth + paletteOffset * 256.0);
-			sRGB color = mainImage.IndexToColour(number);
+			sRGB color = IndexToColour(number, palette);
 			GdkColor gdk_color = { 0, color.R * 256, color.G * 256, color.B * 256 };
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
 			gdk_draw_line(dareaPalette->window, GC, i, 0, i, 30);
