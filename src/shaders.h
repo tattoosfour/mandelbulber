@@ -25,19 +25,33 @@ struct sLight
 	bool enabled;
 };
 
+struct sShaderInputData
+{
+	sParamRender *param;
+	sFractal *calcParam;
+	CVector3 point;
+	CVector3 viewVector;
+	CVector3 normal;
+	CVector3 lightVect;
+	double dist_thresh;
+	double lastDist;
+};
+
 extern sLight *Lights;
 extern int lightsPlaced;
 
-sShaderOutput MainShadow(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 lightVect, double wsp_persp, double dist_thresh);
+sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour);
+
+sShaderOutput MainShadow(sShaderInputData &input);
 sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
 		int vectorsCount);
 sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point);
 sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality);
-CVector3 CalculateNormals(sParamRender *param, sFractal *calcParam, CVector3 point, double dist_thresh);
-sShaderOutput MainShading(CVector3 normal, CVector3 lightVector);
-sShaderOutput MainSpecular(CVector3 normal, CVector3 lightVector, CVector3 viewVector);
+CVector3 CalculateNormals(sShaderInputData input);
+sShaderOutput MainShading(sShaderInputData &input);
+sShaderOutput MainSpecular(sShaderInputData &input);
 sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture);
-int SurfaceColour(sFractal *calcParam, CVector3 point);
+sShaderOutput SurfaceColour(sShaderInputData &input);
 sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector);
 sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, sLight light, double wsp_persp, double dist_thresh,
 		int number, sShaderOutput *outSpecular);
@@ -53,4 +67,5 @@ double IterOpacity(double step, double iters, double maxN, double trim, double o
 sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
 		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel);
 sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec);
+sRGB IndexToColour(int index, sRGB *palette);
 #endif /* SHADERS_H_ */

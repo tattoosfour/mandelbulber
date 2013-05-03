@@ -791,6 +791,8 @@ struct sInterface_data
 	char file_lightmap[1000];
 	char file_path[1000];
 	char file_keyframes[1000];
+
+	sRGB palette[256];
 };
 
 struct sNoGUIdata

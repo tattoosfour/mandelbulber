@@ -682,12 +682,12 @@ void ReadInterface(sParamRender *params)
 
 	Interface_data.imageFormat = (enumImageFormat) params->imageFormat;
 
-	mainImage.SetImageParameters(params->doubles.imageAdjustments,params->effectColours,params->imageSwitches);
+	mainImage.SetImageParameters(params->doubles.imageAdjustments);
 
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
 
-	sRGB *palette2 = mainImage.GetPalettePtr();
+	sRGB *palette2 = Interface_data.palette;
 	for (int i = 0; i < 256; i++)
 	{
 		params->palette[i] = palette2[i];

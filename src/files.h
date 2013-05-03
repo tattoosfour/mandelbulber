@@ -50,6 +50,6 @@ void WriteLog(const char *text);
 void WriteLogDouble(const char *text, double value);
 int fcopy(const char *source, const char *dest);
 void BufferNormalize16(sRGB16 *buffer, unsigned int size);
-void SaveAllImageLayers(const char *filename, cImage *image);
+//void SaveAllImageLayers(const char *filename, cImage *image);
 std::string removeFileExtension(const std::string &filename);
 #endif /* FILES_H_ */
