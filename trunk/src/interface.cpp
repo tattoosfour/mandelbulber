@@ -257,7 +257,7 @@ void ReadInterface(sParamRender *params)
 		params->doubles.vp.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_va)));
 		params->doubles.vp.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vb)));
 		params->doubles.vp.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vc)));
-		params->doubles.alfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_alfa))) / 180.0 * M_PI;
+		params->doubles.alpha = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_alfa))) / 180.0 * M_PI;
 		params->doubles.beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_beta))) / 180.0 * M_PI;
 		params->doubles.gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gammaAngle))) / 180.0 * M_PI;
 		params->doubles.zoom = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_zoom)));
@@ -346,7 +346,7 @@ void ReadInterface(sParamRender *params)
 		params->auxLightPre3Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre3Enabled));
 		params->auxLightPre4Enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkAuxLightPre4Enabled));
 		params->doubles.auxLightVisibility = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightVisibility)));
-		params->doubles.mainLightAlfa = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa))) / 180.0 * M_PI;
+		params->doubles.mainLightAlpha = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightAlfa))) / 180.0 * M_PI;
 		params->doubles.mainLightBeta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mainLightBeta))) / 180.0 * M_PI;
 		params->doubles.auxLightRandomCenter.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX)));
 		params->doubles.auxLightRandomCenter.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreY)));
@@ -667,7 +667,7 @@ void ReadInterface(sParamRender *params)
 			|| params->fractal.formula == generalizedFoldBox) params->fractal.analitycDE = true;
 	else params->fractal.analitycDE = false;
 
-	params->doubles.resolution = 1.0 / params->image_width;
+	params->doubles.resolution = 1.0 / params->image_width / params->noOfTiles;
 
 	bool volLightEnabled = false;
 	for (int i = 0; i < 5; i++)
@@ -724,7 +724,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_va), DoubleToString(params->doubles.vp.x));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vb), DoubleToString(params->doubles.vp.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_vc), DoubleToString(params->doubles.vp.z));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_alfa), DoubleToString(params->doubles.alfa * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_alfa), DoubleToString(params->doubles.alpha * 180.0 / M_PI));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_beta), DoubleToString(params->doubles.beta * 180.0 / M_PI));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_gammaAngle), DoubleToString(params->doubles.gamma * 180.0 / M_PI));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_zoom), DoubleToString(params->doubles.zoom));
@@ -786,7 +786,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4y), DoubleToString(params->doubles.auxLightPre4.y));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4z), DoubleToString(params->doubles.auxLightPre4.z));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightPre4intensity), DoubleToString(params->doubles.auxLightPre4intensity));
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlfa * 180.0 / M_PI));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightAlfa), DoubleToString(params->doubles.mainLightAlpha * 180.0 / M_PI));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mainLightBeta), DoubleToString(params->doubles.mainLightBeta * 180.0 / M_PI));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightVisibility), DoubleToString(params->doubles.auxLightVisibility));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_auxLightRandomCentreX), DoubleToString(params->doubles.auxLightRandomCenter.x));
@@ -3345,7 +3345,7 @@ sRGB sRGBDiv256(sRGB color)
 #ifdef CLSUPPORT
 void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal, sClInBuff *clInBuff)
 {
-	clParams->alpha = params->doubles.alfa;
+	clParams->alpha = params->doubles.alpha;
 	clParams->beta = params->doubles.beta;
 	clParams->gamma = params->doubles.gamma;
 	clParams->height = clSupport->GetHeight();
@@ -3385,7 +3385,7 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 		clFractal->ifs.enabled[i] = params->fractal.IFS.enabled[i];
 		clFractal->ifs.rot[i] = RotMatrix2matrix33(params->fractal.IFS.rot[i]);
 		clFractal->ifs.distance[i] = params->fractal.IFS.doubles.distance[i];
-		clFractal->ifs.alpha[i] = params->fractal.IFS.doubles.alfa[i];
+		clFractal->ifs.alpha[i] = params->fractal.IFS.doubles.alpha[i];
 		clFractal->ifs.beta[i] = params->fractal.IFS.doubles.beta[i];
 		clFractal->ifs.gamma[i] = params->fractal.IFS.doubles.gamma[i];
 		clFractal->ifs.intensity[i] = params->fractal.IFS.doubles.intensity[i];

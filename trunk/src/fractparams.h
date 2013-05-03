@@ -21,20 +21,19 @@ struct sParamRenderD
 	CVector3 auxLightRandomCenter;
 
 	double zoom; //zoom
-	double min_y; //range of depth;
-	double max_y;
+	double minDepth; //range of depth;
+	double maxDepth;
 	double DE_factor; //factor for distance estimation steps
-	double dist_thresh; //distance treshold
 	double resolution; //resolution of image in fractal coordinates
 	double persp; //perspective factor
 	double quality; //DE threshold factor
 	double smoothness;
-	double alfa; //rotation of fractal
+	double alpha; //rotation of fractal
 	double beta; //
 	double gamma;
 	double DOFFocus;
 	double DOFRadius;
-	double mainLightAlfa;
+	double mainLightAlpha;
 	double mainLightBeta;
 	double auxLightIntensity;
 	double auxLightMaxDist;

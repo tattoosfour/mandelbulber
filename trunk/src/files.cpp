@@ -680,7 +680,7 @@ void SaveAllImageLayers(const char *filename, cImage *image)
 	SavePNG16((file+"_alpha.png").c_str(), 100, width, height, buffer16);
 
 	//normalize zBuffer
-	float *zbuffer = image->GetZBufferPtr();
+	double *zbuffer = image->GetZBufferPtr();
 	float minZ = 1.0e50;
 	float maxZ = 0.0;
 	for (unsigned int i = 0; i < size; i++)

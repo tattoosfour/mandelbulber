@@ -59,7 +59,7 @@ void cImage::AllocMem(void)
 			complexImage = new sComplexImage[width * height];
 		image16 = new sRGB16[width * height];
 		image8 = new sRGB8[width * height];
-		zBuffer = new float[width * height];
+		zBuffer = new double[width * height];
 		alpha = new unsigned short[width * height];
 		colorIndexBuf16 = new unsigned short[width * height];
 		ClearImage();
