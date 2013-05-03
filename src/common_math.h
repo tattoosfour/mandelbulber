@@ -12,7 +12,7 @@
 
 struct sVectorsAround
 {
-	double alfa;
+	double alpha;
 	double beta;
 	CVector3 v;
 	int R;

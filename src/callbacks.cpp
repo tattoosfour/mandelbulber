@@ -162,7 +162,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				}
 				//rotation matrix
 				CRotationMatrix mRot;
-				mRot.RotateZ(params.doubles.alfa);
+				mRot.RotateZ(params.doubles.alpha);
 				mRot.RotateX(params.doubles.beta);
 				mRot.RotateY(params.doubles.gamma);
 
@@ -643,23 +643,23 @@ static void Navigate(int x, int y, int r)
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStraightRotation)))
 	{
-		params.doubles.alfa += x * rotation_step;
+		params.doubles.alpha += x * rotation_step;
 		params.doubles.beta += y * rotation_step;
 	}
 	else
 	{
-		double alfa_old = params.doubles.alfa;
+		double alfa_old = params.doubles.alpha;
 		double beta_old = params.doubles.beta;
 		double gamma_old = params.doubles.gamma;
 
 		CRotationMatrix mRot;
-		mRot.RotateZ(params.doubles.alfa);
+		mRot.RotateZ(params.doubles.alpha);
 		mRot.RotateX(params.doubles.beta);
 		mRot.RotateY(params.doubles.gamma);
 		mRot.RotateX(y * rotation_step);
 		mRot.RotateZ(x * rotation_step);
 
-		params.doubles.alfa = -mRot.GetAlfa();
+		params.doubles.alpha = -mRot.GetAlfa();
 		params.doubles.beta = -mRot.GetBeta();
 		params.doubles.gamma = -mRot.GetGamma();
 
@@ -668,13 +668,13 @@ static void Navigate(int x, int y, int r)
 		//Fix by mintaka (fractalforums.com/mandelbulber/mandelbulber-1-06-patch/)
 		if (rotation_step < M_PI) //does not work if we turn more than 180°
 		{
-			if ((alfa_old - params.doubles.alfa) > M_PI) //angle jump over +180° to negative value
+			if ((alfa_old - params.doubles.alpha) > M_PI) //angle jump over +180° to negative value
 			{
-				params.doubles.alfa = params.doubles.alfa + 2 * M_PI;
+				params.doubles.alpha = params.doubles.alpha + 2 * M_PI;
 			}
-			if ((params.doubles.alfa - alfa_old) > M_PI) //angle jump over -180° to positive value
+			if ((params.doubles.alpha - alfa_old) > M_PI) //angle jump over -180° to positive value
 			{
-				params.doubles.alfa = params.doubles.alfa - 2 * M_PI;
+				params.doubles.alpha = params.doubles.alpha - 2 * M_PI;
 			}
 			if ((beta_old - params.doubles.beta) > M_PI)
 			{
@@ -773,7 +773,7 @@ static void Move(int x, int y, int z)
 
 	CVector3 vDelta;
 	CRotationMatrix mRot;
-	mRot.RotateZ(params.doubles.alfa);
+	mRot.RotateZ(params.doubles.alpha);
 	mRot.RotateX(params.doubles.beta);
 	mRot.RotateY(params.doubles.gamma);
 	CVector3 directionVector(x * distance, abs(z) * distance, y * distance);
@@ -856,7 +856,7 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 
 	CVector3 initVector(0,-initCameraDistance,0);
 	CRotationMatrix mRot;
-	mRot.RotateZ(params.doubles.alfa);
+	mRot.RotateZ(params.doubles.alpha);
 	mRot.RotateX(params.doubles.beta);
 	initVector = mRot.RotateVector(initVector);
 

@@ -561,7 +561,7 @@ sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3
 	double quality = param->doubles.quality;
 	CVector3 vp = param->doubles.vp;
 	CRotationMatrix mRot;
-	mRot.RotateZ(param->doubles.alfa);
+	mRot.RotateZ(param->doubles.alpha);
 	mRot.RotateX(param->doubles.beta);
 	mRot.RotateY(param->doubles.gamma);
 	bool max_iter;
@@ -775,7 +775,7 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam)
 	CRotationMatrix mRot;
 	mRot.RotateY(-fractParam->doubles.gamma);
 	mRot.RotateX(-fractParam->doubles.beta);
-	mRot.RotateZ(-fractParam->doubles.alfa);
+	mRot.RotateZ(-fractParam->doubles.alpha);
 
 	CVector3 point3D1, point3D2;
 
@@ -925,7 +925,7 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 	double quality = param->doubles.quality;
 	CVector3 vp = param->doubles.vp;
 	CRotationMatrix mRot;
-	mRot.RotateZ(param->doubles.alfa);
+	mRot.RotateZ(param->doubles.alpha);
 	mRot.RotateX(param->doubles.beta);
 	mRot.RotateY(param->doubles.gamma);
 	bool max_iter;

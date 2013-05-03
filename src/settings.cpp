@@ -145,7 +145,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "view_point_x", params.doubles.vp.x, 0.0, compare);
 	fprintfDot(fileSettings, "view_point_y", params.doubles.vp.y, 0.0, compare);
 	fprintfDot(fileSettings, "view_point_z", params.doubles.vp.z, 0.0, compare);
-	fprintfDot(fileSettings, "angle_alfa", params.doubles.alfa * 180.0 / M_PI, -20, compare);
+	fprintfDot(fileSettings, "angle_alfa", params.doubles.alpha * 180.0 / M_PI, -20, compare);
 	fprintfDot(fileSettings, "angle_beta", params.doubles.beta * 180.0 / M_PI, 30, compare);
 	fprintfDot(fileSettings, "angle_gamma", params.doubles.gamma * 180.0 / M_PI, 0.0, compare);
 	fprintfDot(fileSettings, "zoom", params.doubles.zoom, 2.5, compare);
@@ -232,7 +232,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "post_DOF_focus", params.doubles.DOFFocus, 21.7, compare);
 	fprintfDot(fileSettings, "post_DOF_radius", params.doubles.DOFRadius, 10.0, compare);
 	fprintfDot(fileSettings, "main_light_intensity", params.doubles.imageAdjustments.mainLightIntensity, 1.0, compare);
-	fprintfDot(fileSettings, "main_light_alfa", params.doubles.mainLightAlfa, -45 * M_PI / 180.0, compare);
+	fprintfDot(fileSettings, "main_light_alfa", params.doubles.mainLightAlpha, -45 * M_PI / 180.0, compare);
 	fprintfDot(fileSettings, "main_light_beta", params.doubles.mainLightBeta, 45 * M_PI / 180.0, compare);
 	fprintfInt(fileSettings, "main_light_colour_R", params.effectColours.mainLightColour.R, 0xFFFF, compare);
 	fprintfInt(fileSettings, "main_light_colour_G", params.effectColours.mainLightColour.G, 0xFFFF, compare);
@@ -728,7 +728,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "view_point_x")) params.doubles.vp.x = atof2(str2);
 	else if (!strcmp(str1, "view_point_y")) params.doubles.vp.y = atof2(str2);
 	else if (!strcmp(str1, "view_point_z")) params.doubles.vp.z = atof2(str2);
-	else if (!strcmp(str1, "angle_alfa")) params.doubles.alfa = atof2(str2) / 180.0 * M_PI;
+	else if (!strcmp(str1, "angle_alfa")) params.doubles.alpha = atof2(str2) / 180.0 * M_PI;
 	else if (!strcmp(str1, "angle_beta")) params.doubles.beta = atof2(str2) / 180.0 * M_PI;
 	else if (!strcmp(str1, "angle_gamma")) params.doubles.gamma = atof2(str2) / 180.0 * M_PI;
 	else if (!strcmp(str1, "zoom")) params.doubles.zoom = atof2(str2);
@@ -813,7 +813,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "post_DOF_focus")) params.doubles.DOFFocus = atof2(str2);
 	else if (!strcmp(str1, "post_DOF_radius")) params.doubles.DOFRadius = atof2(str2);
 	else if (!strcmp(str1, "main_light_intensity")) params.doubles.imageAdjustments.mainLightIntensity = atof2(str2);
-	else if (!strcmp(str1, "main_light_alfa")) params.doubles.mainLightAlfa = atof2(str2);
+	else if (!strcmp(str1, "main_light_alfa")) params.doubles.mainLightAlpha = atof2(str2);
 	else if (!strcmp(str1, "main_light_beta")) params.doubles.mainLightBeta = atof2(str2);
 	else if (!strcmp(str1, "main_light_colour_R")) params.effectColours.mainLightColour.R = atoi(str2);
 	else if (!strcmp(str1, "main_light_colour_G")) params.effectColours.mainLightColour.G = atoi(str2);

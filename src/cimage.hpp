@@ -94,7 +94,7 @@ struct sAllImageData
 struct sAllImageDataLowMem
 {
 	unsigned short alpha;
-	float zBuffer;
+	double zBuffer;
 	unsigned short colorIndexBuf16;
 	sRGB16 image16;
 };
@@ -131,7 +131,7 @@ public:
   sComplexImage* GetComplexImagePtr(void) {return complexImage;}
   unsigned short* GetColourIndexBufPtr(void) {return colorIndexBuf16;}
   unsigned short* GetAlphaBufPtr(void) {return alpha;}
-  float* GetZBufferPtr(void) {return zBuffer;}
+  double* GetZBufferPtr(void) {return zBuffer;}
 
   void CompileImage(void);
   void SetPalette(sRGB *palette);
@@ -169,7 +169,7 @@ private:
 	sRGB16 *image16;
 	sRGB8 *image8;
 	unsigned short *alpha;
-	float *zBuffer;
+	double *zBuffer;
 	unsigned short *colorIndexBuf16;
 
 	sRGB8 *preview;

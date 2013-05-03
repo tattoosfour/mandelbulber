@@ -26,6 +26,12 @@ struct sParam
   int *thread_done;
 };
 
+struct sStep
+{
+	double distance;
+	double step;
+};
+
 //global
 extern guint64 N_counter;
 extern guint64 Loop_counter;
@@ -52,5 +58,6 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 bool LoadTextures(sParamRender *params);
 void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode);
 void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage);
+CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, sStep *stepBuff, double *distThreshOut, double *lastDistOut, bool *foundOut);
 
 #endif /* RENDER3D_H_ */
