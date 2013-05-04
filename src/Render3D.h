@@ -58,6 +58,6 @@ void InitMainImage(cImage *image, int width, int height, double previewScale, Gt
 bool LoadTextures(sParamRender *params);
 void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode);
 void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage);
-CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, double *distThreshOut, double *lastDistOut,
-		bool *foundOut);
+CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, int buffCount,
+		double *distThreshOut, double *lastDistOut, bool *foundOut, double *depthOut);
 #endif /* RENDER3D_H_ */

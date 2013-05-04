@@ -67,7 +67,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
 	ambient2.B = ambient.B * input.param->doubles.imageAdjustments.globalIlum;
 
 	//environment mapping
-	sShaderOutput envMapping;
+	sShaderOutput envMapping = {0.0, 0.0, 0.0};
 	if(!input.param->imageSwitches.raytracedReflections && input.param->doubles.imageAdjustments.reflect > 0)
 	{
 		envMapping = EnvMapping(input);
@@ -81,14 +81,22 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
 	sShaderOutput auxLightsSpecular;
 	auxLights = AuxLightsShader(input, &auxLightsSpecular);
 
+	//fake orbit trap lights
+	sShaderOutput fakeLights = {0.0, 0.0, 0.0};
+	sShaderOutput fakeLightsSpecular = {0.0, 0.0, 0.0};
+	if(input.param->fakeLightsEnabled)
+	{
+		fakeLights = FakeLights(input, &fakeLightsSpecular);
+	}
+
 	//total shader
 	output.R = envMapping.R * ambient.R + (ambient2.R + mainLight.R * shade.R * shadow.R) * colour.R + mainLight.R * specular.R * shadow.R;
 	output.G = envMapping.G * ambient.G + (ambient2.G + mainLight.G * shade.G * shadow.G) * colour.G + mainLight.G * specular.G * shadow.G;
 	output.B = envMapping.B * ambient.B + (ambient2.B + mainLight.B * shade.B * shadow.B) * colour.B + mainLight.B * specular.B * shadow.B;
 
-	output.R += auxLights.R * colour.R + auxLightsSpecular.R;
-	output.G += auxLights.G * colour.G + auxLightsSpecular.G;
-	output.B += auxLights.B * colour.B + auxLightsSpecular.B;
+	output.R += (auxLights.R + fakeLights.R) * colour.R + auxLightsSpecular.R + fakeLightsSpecular.R;
+	output.G += (auxLights.G + fakeLights.G) * colour.G + auxLightsSpecular.G + fakeLightsSpecular.G;
+	output.B += (auxLights.B + fakeLights.B) * colour.B + auxLightsSpecular.B + fakeLightsSpecular.B;
 
 	return output;
 }
@@ -1114,19 +1122,19 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 	return iterFog;
 }
 
-sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec)
+sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec)
 {
 	sShaderOutput fakeLights;
-	double delta = dist_thresh * param->doubles.smoothness;
-	double r = Compute<orbitTrap>(point, *calcParam);
-	double fakeLight = param->doubles.fakeLightsIntensity/(r*r + 1e-100);
+	double delta = input.dist_thresh * input.param->doubles.smoothness;
+	double r = Compute<orbitTrap>(input.point, *input.calcParam);
+	double fakeLight = input.param->doubles.fakeLightsIntensity/(r*r + 1e-100);
 
 	CVector3 deltax(delta, 0.0, 0.0);
-	double rx = Compute<orbitTrap>(point + deltax, *calcParam);
+	double rx = Compute<orbitTrap>(input.point + deltax, *input.calcParam);
 	CVector3 deltay(0.0, delta, 0.0);
-	double ry = Compute<orbitTrap>(point + deltay, *calcParam);
+	double ry = Compute<orbitTrap>(input.point + deltay, *input.calcParam);
 	CVector3 deltaz(0.0, 0.0, delta);
-	double rz = Compute<orbitTrap>(point + deltaz, *calcParam);
+	double rz = Compute<orbitTrap>(input.point + deltaz, *input.calcParam);
 
 	CVector3 fakeLightNormal;
 	fakeLightNormal.x = r - rx;
@@ -1141,16 +1149,16 @@ sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 poin
 	{
 		fakeLightNormal.Normalize();
 	}
-	double fakeLight2 = fakeLight * normal.Dot(fakeLightNormal);
+	double fakeLight2 = fakeLight * input.normal.Dot(fakeLightNormal);
 	if(fakeLight2 < 0) fakeLight2 = 0;
 
 	fakeLights.R = fakeLight2;
 	fakeLights.G = fakeLight2;
 	fakeLights.B = fakeLight2;
 
-	CVector3 half = fakeLightNormal - viewVector;
+	CVector3 half = fakeLightNormal - input.viewVector;
 	half.Normalize();
-	double fakeSpecular = normal.Dot(half);
+	double fakeSpecular = input.normal.Dot(half);
 	if (fakeSpecular < 0.0) fakeSpecular = 0.0;
 	fakeSpecular = pow(fakeSpecular, 30.0) * fakeLight;
 	if (fakeSpecular > 15.0) fakeSpecular = 15.0;
