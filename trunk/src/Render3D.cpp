@@ -99,11 +99,15 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality;
 		calcParam->doubles.detailSize = distThresh;
 		dist = CalculateDistance(point, *calcParam, &max_iter);
+
+		//printf("Distance = %g\n", dist/distThresh);
+
 		if (dist > 2.0) dist = 2.0;
 		stepBuff[i].distance = dist;
 
 		if (dist < distThresh)
 		{
+			if (dist < 0.1 * distThresh) Missed_DE_counter++;
 			found = true;
 			break;
 		}
@@ -141,6 +145,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 			}
 			bool max_iter = false;
 			dist = CalculateDistance(point, *calcParam, &max_iter);
+			//printf("Distance binary = %g\n", dist/distThresh);
 			step *= 0.5;
 		}
 	}
@@ -421,6 +426,10 @@ void *MainThread(void *ptr)
 						ShaderInputData.lightVect =lightVector;
 						ShaderInputData.point = point;
 						ShaderInputData.viewVector = viewVector;
+						ShaderInputData.vectorsCount = vectorsCount;
+						ShaderInputData.vectorsAround = vectorsAround;
+						ShaderInputData.lastDist = lastDist;
+						ShaderInputData.envMappingTexture = param.envmapTexture;
 
 						sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
 						sShaderOutput objectColour = { 0.0, 0.0, 0.0 };
