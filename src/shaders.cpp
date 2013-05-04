@@ -45,10 +45,50 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
 
 	//calculate colour surface
 	sShaderOutput colour = SurfaceColour(input);
+	*surfaceColour = colour;
 
-	output.R = mainLight.R * shade.R * shadow.R * colour.R + mainLight.R * specular.R * shadow.R;
-	output.G = mainLight.G * shade.G * shadow.G * colour.G + mainLight.G * specular.G * shadow.G;
-	output.B = mainLight.B * shade.B * shadow.B * colour.B + mainLight.B * specular.B * shadow.B;
+	//ambient occlusion
+	sShaderOutput ambient = {0.0, 0.0, 0.0};
+	if(input.param->global_ilumination)
+	{
+		//fast mode
+		if(input.param->fastGlobalIllumination)
+		{
+			ambient = FastAmbientOcclusion2(input);
+		}
+		else
+		{
+			ambient = AmbientOcclusion(input);
+		}
+	}
+	sShaderOutput ambient2;
+	ambient2.R = ambient.R * input.param->doubles.imageAdjustments.globalIlum;
+	ambient2.G = ambient.G * input.param->doubles.imageAdjustments.globalIlum;
+	ambient2.B = ambient.B * input.param->doubles.imageAdjustments.globalIlum;
+
+	//environment mapping
+	sShaderOutput envMapping;
+	if(!input.param->imageSwitches.raytracedReflections && input.param->doubles.imageAdjustments.reflect > 0)
+	{
+		envMapping = EnvMapping(input);
+	}
+	envMapping.R *= input.param->doubles.imageAdjustments.reflect;
+	envMapping.G *= input.param->doubles.imageAdjustments.reflect;
+	envMapping.B *= input.param->doubles.imageAdjustments.reflect;
+
+	//additional lights
+	sShaderOutput auxLights;
+	sShaderOutput auxLightsSpecular;
+	auxLights = AuxLightsShader(input, &auxLightsSpecular);
+
+	//total shader
+	output.R = envMapping.R * ambient.R + (ambient2.R + mainLight.R * shade.R * shadow.R) * colour.R + mainLight.R * specular.R * shadow.R;
+	output.G = envMapping.G * ambient.G + (ambient2.G + mainLight.G * shade.G * shadow.G) * colour.G + mainLight.G * specular.G * shadow.G;
+	output.B = envMapping.B * ambient.B + (ambient2.B + mainLight.B * shade.B * shadow.B) * colour.B + mainLight.B * specular.B * shadow.B;
+
+	output.R += auxLights.R * colour.R + auxLightsSpecular.R;
+	output.G += auxLights.G * colour.G + auxLightsSpecular.G;
+	output.B += auxLights.B * colour.B + auxLightsSpecular.B;
 
 	return output;
 }
@@ -102,10 +142,10 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	return shadow;
 }
 
-sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point)
+sShaderOutput FastAmbientOcclusion(sShaderInputData &input)
 {
 	sShaderOutput output;
-	double min_radius = Compute<fake_AO>(point, *calcParam);
+	double min_radius = Compute<fake_AO>(input.point, *input.calcParam);
 	double j = (min_radius - 0.65) * 1.0; //0.65
 	if (j > 1.0) j = 1.0;
 	if (j < 0) j = 0;
@@ -115,64 +155,56 @@ sShaderOutput FastAmbientOcclusion(sFractal *calcParam, CVector3 point)
 	return output;
 }
 
-sShaderOutput FastAmbientOcclusion2(sFractal *calcParam, CVector3 point, CVector3 normal, double dist_thresh, double tune, int quality)
+sShaderOutput FastAmbientOcclusion2(sShaderInputData &input)
 {
 	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
 
-	double delta = dist_thresh;
+	double delta = input.dist_thresh;
 	double aoTemp = 0;
-	for(int i=1; i<quality*quality; i++)
+	double quality = input.param->globalIlumQuality;
+	for (int i = 1; i < quality * quality; i++)
 	{
-		double scan = i*i*delta;
-		CVector3 pointTemp = point + normal * scan;
+		double scan = i * i * delta;
+		CVector3 pointTemp = input.point + input.normal * scan;
 		bool max_iter;
-		double dist = CalculateDistance(pointTemp, *calcParam, &max_iter);
-		aoTemp += 1.0/(pow(2.0,i)) * (scan - tune*dist)/dist_thresh;
+		double dist = CalculateDistance(pointTemp, *input.calcParam, &max_iter);
+		aoTemp += 1.0 / (pow(2.0, i)) * (scan - input.param->doubles.fastAoTune * dist) / input.dist_thresh;
 		//if(dist < 0.5*dist_thresh) break;
 	}
-	double ao = 1.0 - 0.2*aoTemp;
-	if(ao < 0) ao = 0;
-	sShaderOutput output = {ao,ao,ao};
+	double ao = 1.0 - 0.2 * aoTemp;
+	if (ao < 0) ao = 0;
+	sShaderOutput output = { ao, ao, ao };
 	return output;
 }
 
-sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector3 point, double wsp_persp, double dist_thresh, double last_distance, sVectorsAround *vectorsAround,
-		int vectorsCount)
+sShaderOutput AmbientOcclusion(sShaderInputData &input)
 {
 	sShaderOutput AO = { 0, 0, 0 };
 
-	double delta = param->doubles.resolution * param->doubles.zoom * wsp_persp;
-
 	bool max_iter;
-	double start_dist = dist_thresh;
-	double end_dist = param->doubles.zoom * wsp_persp;
+	double start_dist = input.dist_thresh;
+	double end_dist = input.dist_thresh / input.param->doubles.resolution;
 	double intense = 0;
-	if (start_dist < delta) start_dist = delta;
-	for (int i = 0; i < vectorsCount; i++)
-	{
-		sVectorsAround v = vectorsAround[i];
 
-		double dist = last_distance;
+	for (int i = 0; i < input.vectorsCount; i++)
+	{
+		sVectorsAround v = input.vectorsAround[i];
+
+		double dist = input.lastDist;
 
 		double opacity = 0.0;
 		double shadowTemp = 1.0;
 
 		for (double r = start_dist; r < end_dist; r += dist * 2.0)
 		{
-			CVector3 point2 = point + v.v * r;
+			CVector3 point2 = input.point + v.v * r;
 
-			dist = CalculateDistance(point2, *calcParam, &max_iter);
-			if (param->fractal.iterThresh)
-			{
-				if (dist < dist_thresh && !max_iter)
-				{
-					dist = dist_thresh * 1.01;
-				}
-			}
+			dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
-			if (param->imageSwitches.iterFogEnabled)
+			if (input.param->imageSwitches.iterFogEnabled)
 			{
-				opacity = IterOpacity(dist * param->doubles.DE_factor, calcParam->itersOut, calcParam->doubles.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
+				opacity = IterOpacity(dist * input.param->doubles.DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+						input.param->doubles.iterFogOpacity);
 			}
 			else
 			{
@@ -180,10 +212,10 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 			}
 			shadowTemp -= opacity * (end_dist - r) / end_dist;
 
-			if (dist < dist_thresh || max_iter || shadowTemp < 0.0)
+			if (dist < input.dist_thresh || max_iter || shadowTemp < 0.0)
 			{
 				shadowTemp -= (end_dist - r) / end_dist;
-				if(shadowTemp < 0.0) shadowTemp = 0.0;
+				if (shadowTemp < 0.0) shadowTemp = 0.0;
 				break;
 			}
 		}
@@ -195,9 +227,9 @@ sShaderOutput AmbientOcclusion(sParamRender *param, sFractal *calcParam, CVector
 		AO.B += intense * v.B;
 
 	}
-	AO.R /= (vectorsCount * 256.0);
-	AO.G /= (vectorsCount * 256.0);
-	AO.B /= (vectorsCount * 256.0);
+	AO.R /= (input.vectorsCount * 256.0);
+	AO.G /= (input.vectorsCount * 256.0);
+	AO.B /= (input.vectorsCount * 256.0);
 
 	return AO;
 }
@@ -217,16 +249,18 @@ CVector3 CalculateNormals(sShaderInputData input)
 		input.calcParam->doubles.N = input.param->fractal.doubles.N * 2;
 		input.calcParam->minN = 0;
 
-		s1 = CalculateDistance(input.point, *input.calcParam);
+		bool maxIter;
+
+		s1 = CalculateDistance(input.point, *input.calcParam, &maxIter);
 
 		CVector3 deltax(delta, 0.0, 0.0);
-		s2 = CalculateDistance(input.point + deltax, *input.calcParam);
+		s2 = CalculateDistance(input.point + deltax, *input.calcParam, &maxIter);
 
 		CVector3 deltay(0.0, delta, 0.0);
-		s3 = CalculateDistance(input.point + deltay, *input.calcParam);
+		s3 = CalculateDistance(input.point + deltay, *input.calcParam, &maxIter);
 
 		CVector3 deltaz(0.0, 0.0, delta);
-		s4 = CalculateDistance(input.point + deltaz, *input.calcParam);
+		s4 = CalculateDistance(input.point + deltaz, *input.calcParam, &maxIter);
 
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
@@ -308,17 +342,17 @@ sShaderOutput MainSpecular(sShaderInputData &input)
 	return specular;
 }
 
-sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture)
+sShaderOutput EnvMapping(sShaderInputData &input)
 {
 	sShaderOutput envReflect;
 	CVector3 reflect;
-	double dot = -viewVector.Dot(normal);
-	reflect = normal * 2.0 * dot + viewVector;
+	double dot = -input.viewVector.Dot(input.normal);
+	reflect = input.normal * 2.0 * dot + input.viewVector;
 
 	double alfaTexture = reflect.GetAlfa() + M_PI;
 	double betaTexture = reflect.GetBeta();
-	double texWidth = texture->Width();
-	double texHeight = texture->Height();
+	double texWidth = input.envMappingTexture->Width();
+	double texHeight = input.envMappingTexture->Height();
 
 	if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
 
@@ -330,9 +364,9 @@ sShaderOutput EnvMapping(CVector3 normal, CVector3 viewVector, cTexture *texture
 	dty = fmod(dty, texHeight);
 	if (dtx < 0) dtx = 0;
 	if (dty < 0) dty = 0;
-	envReflect.R = texture->Pixel(dtx, dty).R / 256.0;
-	envReflect.G = texture->Pixel(dtx, dty).G / 256.0;
-	envReflect.B = texture->Pixel(dtx, dty).B / 256.0;
+	envReflect.R = input.envMappingTexture->Pixel(dtx, dty).R / 256.0;
+	envReflect.G = input.envMappingTexture->Pixel(dtx, dty).G / 256.0;
+	envReflect.B = input.envMappingTexture->Pixel(dtx, dty).B / 256.0;
 	return envReflect;
 }
 
@@ -469,12 +503,11 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 	return pixel2;
 }
 
-sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, sLight light, double wsp_persp,
-		double dist_thresh, int number, sShaderOutput *outSpecular)
+sShaderOutput LightShading(sShaderInputData &input, sLight light, int number, sShaderOutput *outSpecular)
 {
 	sShaderOutput shading;
 
-	CVector3 d = light.position - point;
+	CVector3 d = light.position - input.point;
 
 	double distance = d.Length();
 
@@ -482,31 +515,31 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	CVector3 lightVector = d;
 	lightVector.Normalize();
 
-	double intensity = fractParams->doubles.auxLightIntensity * 100.0 * light.intensity / (distance * distance) / number;
-	double shade = normal.Dot(lightVector);
+	double intensity = input.param->doubles.auxLightIntensity * 100.0 * light.intensity / (distance * distance) / number;
+	double shade = input.normal.Dot(lightVector);
 	if (shade < 0) shade = 0;
 	shade = shade * intensity;
 	if (shade > 5.0) shade = 5.0;
 
 	//specular
-	CVector3 half = lightVector - viewVector;
+	CVector3 half = lightVector - input.viewVector;
 	half.Normalize();
-	double shade2 = normal.Dot(half);
+	double shade2 = input.normal.Dot(half);
 	if (shade2 < 0.0) shade2 = 0.0;
 	shade2 = pow(shade2, 30.0) * 1.0;
-	shade2 *= intensity * fractParams->doubles.imageAdjustments.specular;
+	shade2 *= intensity * input.param->doubles.imageAdjustments.specular;
 	if (shade2 > 15.0) shade2 = 15.0;
 
 	//calculate shadow
-	if ((shade > 0.01 || shade2 > 0.01) && fractParams->shadow)
+	if ((shade > 0.01 || shade2 > 0.01) && input.param->shadow)
 	{
-		double light = AuxShadow(fractParams, calcParam, wsp_persp, dist_thresh, distance, point, lightVector, fractParams->penetratingLights);
+		double light = AuxShadow(input, distance, lightVector);
 		shade *= light;
 		shade2 *= light;
 	}
 	else
 	{
-		if(fractParams->shadow)
+		if (input.param->shadow)
 		{
 			shade = 0;
 			shade2 = 0;
@@ -524,8 +557,7 @@ sShaderOutput LightShading(sParamRender *fractParams, sFractal *calcParam, CVect
 	return shading;
 }
 
-sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double wsp_persp, double dist_thresh,
-		sShaderOutput *specularAuxOut)
+sShaderOutput AuxLightsShader(sShaderInputData &input, sShaderOutput *specularOut)
 {
 	int numberOfLights = lightsPlaced;
 	if (numberOfLights < 4) numberOfLights = 4;
@@ -533,10 +565,10 @@ sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3
 	sShaderOutput specularAuxSum = { 0, 0, 0 };
 	for (int i = 0; i < numberOfLights; i++)
 	{
-		if (i < param->auxLightNumber || Lights[i].enabled)
+		if (i < input.param->auxLightNumber || Lights[i].enabled)
 		{
 			sShaderOutput specularAuxOutTemp;
-			sShaderOutput shadeAux = LightShading(param, calcParam, point, normal, viewVector, Lights[i], wsp_persp, dist_thresh, numberOfLights, &specularAuxOutTemp);
+			sShaderOutput shadeAux = LightShading(input, Lights[i], numberOfLights, &specularAuxOutTemp);
 			shadeAuxSum.R += shadeAux.R;
 			shadeAuxSum.G += shadeAux.G;
 			shadeAuxSum.B += shadeAux.B;
@@ -545,38 +577,32 @@ sShaderOutput AuxLightsShader(sParamRender *param, sFractal *calcParam, CVector3
 			specularAuxSum.B += specularAuxOutTemp.B;
 		}
 	}
-	*specularAuxOut = specularAuxSum;
+	*specularOut = specularAuxSum;
 	return shadeAuxSum;
 }
 
-double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_persp, double dist_thresh, double distance, CVector3 point, CVector3 lightVector, bool linear)
+double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 {
-	double delta = fractParams->doubles.resolution * fractParams->doubles.zoom * wsp_persp;
+	double delta = input.dist_thresh;
 	double stepFactor = 1.0;
-	double step = delta * fractParams->doubles.DE_factor * stepFactor;
+	double step = delta * input.param->doubles.DE_factor * stepFactor;
 	double dist = step;
 	double light = 1.0;
 
 	double opacity = 0.0;
 	double shadowTemp = 1.0;
 
-	for (double i = dist_thresh; i < distance; i += dist * stepFactor * fractParams->doubles.DE_factor)
+	for (double i = input.dist_thresh; i < distance; i += dist * stepFactor * input.param->doubles.DE_factor)
 	{
-		CVector3 point2 = point + lightVector * i;
+		CVector3 point2 = input.point + lightVector * i;
 
 		bool max_iter;
-		dist = CalculateDistance(point2, *calcParam, &max_iter);
-		if (fractParams->fractal.iterThresh)
-		{
-			if (dist < dist_thresh && !max_iter)
-			{
-				dist = dist_thresh * 1.01;
-			}
-		}
+		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
-		if(fractParams->imageSwitches.iterFogEnabled)
+		if (input.param->imageSwitches.iterFogEnabled)
 		{
-			opacity = IterOpacity(dist * stepFactor * fractParams->doubles.DE_factor, calcParam->itersOut, calcParam->doubles.N, fractParams->doubles.iterFogOpacityTrim, fractParams->doubles.iterFogOpacity);
+			opacity = IterOpacity(dist * stepFactor * input.param->doubles.DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+					input.param->doubles.iterFogOpacity);
 		}
 		else
 		{
@@ -584,12 +610,12 @@ double AuxShadow(sParamRender *fractParams, sFractal *calcParam, double wsp_pers
 		}
 		shadowTemp -= opacity * (distance - i) / distance;
 
-		if (dist < 0.5 * dist_thresh || max_iter || shadowTemp < 0.0)
+		if (dist < 0.5 * input.dist_thresh || max_iter || shadowTemp < 0.0)
 		{
-			if(linear)
+			if (input.param->penetratingLights)
 			{
 				shadowTemp -= (distance - i) / distance;
-				if(shadowTemp < 0.0) shadowTemp = 0.0;
+				if (shadowTemp < 0.0) shadowTemp = 0.0;
 			}
 			else
 			{
@@ -646,10 +672,10 @@ sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3
 					double distance2 = distance * distance;
 					CVector3 lightVectorTemp = d;
 					lightVectorTemp.Normalize();
-					double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
-					volFog.R += 1000.0 * light * Lights[i - 1].colour.R / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
-					volFog.G += 1000.0 * light * Lights[i - 1].colour.G / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
-					volFog.B += 1000.0 * light * Lights[i - 1].colour.B / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+					//double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
+					//volFog.R += 1000.0 * light * Lights[i - 1].colour.R / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+					//volFog.G += 1000.0 * light * Lights[i - 1].colour.G / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
+					//volFog.B += 1000.0 * light * Lights[i - 1].colour.B / 65536.0 * param->doubles.volumetricLightIntensity[i] * tempDist / distance2;
 				}
 			}
 		}
@@ -1041,11 +1067,11 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 						double distance2 = distance * distance;
 						CVector3 lightVectorTemp = d;
 						lightVectorTemp.Normalize();
-						double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
+						//double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
 						double intensity = Lights[i - 1].intensity * 100.0;
-						newColour.R += light * Lights[i - 1].colour.R / 65536.0 / distance2 * intensity;
-						newColour.G += light * Lights[i - 1].colour.G / 65536.0 / distance2 * intensity;
-						newColour.B += light * Lights[i - 1].colour.B / 65536.0 / distance2 * intensity;
+						//newColour.R += light * Lights[i - 1].colour.R / 65536.0 / distance2 * intensity;
+						//newColour.G += light * Lights[i - 1].colour.G / 65536.0 / distance2 * intensity;
+						//newColour.B += light * Lights[i - 1].colour.B / 65536.0 / distance2 * intensity;
 					}
 				}
 
@@ -1053,10 +1079,10 @@ sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 po
 
 			if(param->global_ilumination && !param->fastGlobalIllumination)
 			{
-				sShaderOutput AO = AmbientOcclusion(param, calcParam, pointTemp, wsp_perspTemp, dist_threshTemp, last_distance, vectorsAround, vectorsCount);
-				newColour.R += AO.R * param->doubles.imageAdjustments.globalIlum;
-				newColour.G += AO.G * param->doubles.imageAdjustments.globalIlum;
-				newColour.B += AO.B * param->doubles.imageAdjustments.globalIlum;
+				//sShaderOutput AO = AmbientOcclusion(param, calcParam, pointTemp, wsp_perspTemp, dist_threshTemp, last_distance, vectorsAround, vectorsCount);
+				//newColour.R += AO.R * param->doubles.imageAdjustments.globalIlum;
+				//newColour.G += AO.G * param->doubles.imageAdjustments.globalIlum;
+				//newColour.B += AO.B * param->doubles.imageAdjustments.globalIlum;
 			}
 
 			if(opacity > 1.0) opacity = 1.0;
