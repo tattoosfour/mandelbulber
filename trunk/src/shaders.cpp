@@ -119,11 +119,25 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	double opacity = 0.0;
 	double shadowTemp = 1.0;
 
+	double softRange = 0.1;
+	double maxSoft = 0.0;
+
 	for (double i = start; i < factor; i += dist * input.param->doubles.DE_factor)
 	{
 		point2 = input.point + input.lightVect * i;
 
 		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
+
+		if (!input.param->imageSwitches.iterFogEnabled)
+		{
+			double angle = (dist - input.dist_thresh) / i;
+			if (angle < 0) angle = 0;
+			if (dist < input.dist_thresh) angle = 0;
+			double softShadow = (1.0 - angle / softRange);
+			if (input.param->penetratingLights) softShadow *= (factor - i) / factor;
+			if (softShadow < 0) softShadow = 0;
+			if (softShadow > maxSoft) maxSoft = softShadow;
+		}
 
 		if (input.param->imageSwitches.iterFogEnabled)
 		{
@@ -144,9 +158,18 @@ sShaderOutput MainShadow(sShaderInputData &input)
 			break;
 		}
 	}
-	shadow.R = shadowTemp;
-	shadow.G = shadowTemp;
-	shadow.B = shadowTemp;
+	if (input.param->imageSwitches.iterFogEnabled)
+	{
+		shadow.R = shadowTemp;
+		shadow.G = shadowTemp;
+		shadow.B = shadowTemp;
+	}
+	else
+	{
+		shadow.R = (1.0 - maxSoft);
+		shadow.G = (1.0 - maxSoft);
+		shadow.B = (1.0 - maxSoft);
+	}
 	return shadow;
 }
 
