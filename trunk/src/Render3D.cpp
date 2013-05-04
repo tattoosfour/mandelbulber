@@ -77,8 +77,8 @@ double real_clock(void)
 }
 
 
-CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, double *distThreshOut, double *lastDistOut,
-		bool *foundOut)
+CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, int buffCount,
+		double *distThreshOut, double *lastDistOut, bool *foundOut, double *depthOut)
 {
 	CVector3 point;
 	bool found = false;
@@ -88,6 +88,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
 	int counter = 0;
+	buffCount = 0;
 
 	for (int i = 0; i < 10000; i++)
 	{
@@ -114,6 +115,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 
 		double step = (dist - 0.5 * distThresh) * param->doubles.DE_factor;
 		stepBuff[i].step = step;
+		buffCount++;
 		scan += step;
 		if (scan > maxScan)
 		{
@@ -136,11 +138,13 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 			{
 				if (dist > distThresh)
 				{
-					point += direction * step;
+					scan += step;
+					point = start + direction * scan;
 				}
 				else if (dist < distThresh * search_limit)
 				{
-					point -= direction * step;
+					scan -= step;
+					point = start + direction * scan;
 				}
 			}
 			bool max_iter = false;
@@ -160,6 +164,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	*foundOut = found;
 	*distThreshOut = distThresh;
 	*lastDistOut = dist;
+	*depthOut = scan;
 	return point;
 }
 
@@ -184,32 +189,19 @@ void *MainThread(void *ptr)
 	int height = image->GetHeight();
 	WriteLogDouble("Thread started", thread_number);
 
-	//sRGB8 black8 = { 0, 0, 0 };
-	const sRGB16 black16 = { 0, 0, 0 };
-
 	//printf("Thread #%d started\n", z + 1);
 	sParamRender param = threadParameters->param;
 
 	int tiles = param.noOfTiles;
 	int tile = param.tileCount;
-	double DE_factor = param.doubles.DE_factor;
 	CVector3 vp = param.doubles.vp;
-	double minDepth = param.doubles.viewDistanceMin;
 	double maxDepth = param.doubles.viewDistanceMax;
 	double resolution = param.doubles.resolution;
 	double zoom = param.doubles.zoom;
 	double alpha = param.doubles.alpha;
 	double beta = param.doubles.beta;
 	double gamma = param.doubles.gamma;
-	double persp = param.doubles.persp;
-	double quality = param.doubles.quality;
-	bool shadow = param.shadow;
-	bool global_ilumination = param.global_ilumination;
-	bool fastGlobalIllumination = param.fastGlobalIllumination;
 	int AO_quality = param.globalIlumQuality;
-
-	bool coloringEnabled = param.imageSwitches.coloringEnabled;
-	cTexture *envmap_texture = param.envmapTexture;
 	cTexture *lightmap_texture = param.lightmapTexture;
 
 	//preparing rotation matrix
@@ -233,10 +225,6 @@ void *MainThread(void *ptr)
 	vector.y = sin(param.doubles.mainLightAlpha - 0.5 * M_PI) * cos(-param.doubles.mainLightBeta);
 	vector.z = sin(-param.doubles.mainLightBeta);
 	shadowVector = mRot.RotateVector(vector);
-
-	//raymarching step depends on resolution
-	double stepY = resolution;
-	double delta = resolution * zoom;
 
 	//distance buffer
 	sStep *stepBuff = new sStep[10002];
@@ -407,10 +395,11 @@ void *MainThread(void *ptr)
 						double distThresh = 0.0;
 						double lastDist = 0.0;
 						CVector3 point;
+						double depth;
 
 						if (!hemisphereCut)
 						{
-							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, &distThresh, &lastDist, &found);
+							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, buffCount, &distThresh, &lastDist, &found, &depth);
 						}
 						else
 						{
@@ -438,435 +427,26 @@ void *MainThread(void *ptr)
 						if (found)
 						{
 							objectShader = ObjectShader(ShaderInputData, &objectColour);
-
-							/*
-							//-------------------- SHADING ----------------------
-
-							//initial values
-							sShaderOutput shadowOutput = { 1.0, 1.0, 1.0 };
-							sShaderOutput AO;
-							sRGB16 oldAO = { 0, 0, 0 };
-							if (!image->IsLowMemMode()) oldAO = image->GetPixelAmbient(xScr, yScr);
-							AO.R = oldAO.R / 4096.0;
-							AO.G = oldAO.G / 4096.0;
-							AO.B = oldAO.B / 4096.0;
-							sShaderOutput shade;
-							sShaderOutput shadeAux;
-							sShaderOutput shadeAuxSpec;
-							sShaderOutput envMapping;
-							int colorIndex = 0;
-
-							//normal vector
-							CVector3 vn = CalculateNormals(&param, &calcParam, point, distThresh);
-
-							//********* calculate hard shadow
-							if (shadow) shadowOutput = MainShadow(&param, &calcParam, point, lightVector, wsp_persp, distThresh);
-
-							//******* calculate global illumination (ambient occlusion)
-							if (global_ilumination)
-							{
-								//ambient occlusion based on orbit traps
-								if (fastGlobalIllumination)
-								{
-									//AO = FastAmbientOcclusion(&calcParam, point);
-									AO = FastAmbientOcclusion2(&calcParam, point, vn, distThresh, param.doubles.fastAoTune, param.globalIlumQuality);
-								}
-								//ambient occlusion based on many rays in spherical directions
-								else
-								{
-									AO = AmbientOcclusion(&param, &calcParam, point, wsp_persp, distThresh, lastDist, vectorsAround, vectorsCount);
-								}
-							}
-
-							//calculate shading based on angle of incidence
-							shade = MainShading(vn, lightVector);
-
-							//calculate specular reflection effect
-							sShaderOutput specular = MainSpecular(vn, lightVector, viewVector);
-
-							//calculate shading from auxiliary lights
-							shadeAux = AuxLightsShader(&param, &calcParam, point, vn, viewVector, wsp_persp, distThresh, &shadeAuxSpec);
-
-							if (param.fakeLightsEnabled)
-							{
-								shadeAux = FakeLights(&param, &calcParam, point, vn, viewVector, distThresh, &shadeAuxSpec);
-							}
-
-							//calculate environment mapping reflection effect
-							envMapping = EnvMapping(vn, viewVector, envmap_texture);
-
-							//coloured surface of fractal
-							if (coloringEnabled) colorIndex = SurfaceColour(&calcParam, point);
-							if (specialColour != 0) colorIndex = specialColour * 256;
-
-							//--------------- raytraced reflection
-							if (param.imageSwitches.raytracedReflections)
-							{
-								CVector3 pointTemp = point;
-								CVector3 viewTemp = viewVector;
-								CVector3 vnTemp = vn;
-								bool maxIterTemp;
-
-								double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0) * zoom;
-
-								envMapping.R = envMapping.G = envMapping.B = 0;
-								sShaderOutput shadeBuff[10];
-								sShaderOutput shadowBuff[10];
-								sShaderOutput specularBuff[10];
-								sShaderOutput colorBuff[10];
-								sShaderOutput ambientBuff[10];
-								sShaderOutput auxLightsBuff[10];
-								sShaderOutput auxSpecBuff[10];
-								sShaderOutput volFogBuff[10];
-								double fogDensityBuff[10];
-								double fogBuff[10];
-								sShaderOutput finishBackgroud;
-								double glowBuff1 = 0.0;
-								int numberOfReflections = -1;
-								int maxReflections = param.reflectionsMax;
-								double totalFog = 0;
-								for (int i = 0; i < maxReflections; i++)
-								{
-									viewTemp = viewTemp - vnTemp * viewTemp.Dot(vnTemp) * 2.0;
-									double distTemp = distThresh;
-									bool surfaceFound = false;
-									double glowBuff2 = 0.0;
-									bool binary = false;
-									double step = distThresh;
-									int binarySearchCount = 0;
-									int buffCountRefl = 0;
-									for (double scan = distThresh * 2.0; scan < 100.0; scan += step)
-									{
-										glowBuff2++;
-										CVector3 pointScan = pointTemp + viewTemp * scan;
-										distTemp = CalculateDistance(pointScan, calcParam, &maxIterTemp);
-										specialColour = calcParam.specialColour;
-										if (!binary)
-										{
-											distanceBuffRefl[buffCountRefl] = distTemp;
-											stepBuffRefl[buffCountRefl] = step;
-											buffCountRefl++;
-											if (buffCountRefl >= 10000) break;
-										}
-										if ((distTemp < distThresh && distTemp > distThresh * search_limit) || binarySearchCount > 20)
-										{
-											surfaceFound = true;
-											pointTemp = pointScan;
-											vnTemp = CalculateNormals(&param, &calcParam, pointTemp, distThresh);
-											shadeBuff[i] = MainShading(vnTemp, lightVector);
-											specularBuff[i] = MainSpecular(vnTemp, lightVector, viewTemp);
-											shadowBuff[i].R = shadowBuff[i].G = shadowBuff[i].B = 1.0;
-											if (shadow) shadowBuff[i] = MainShadow(&param, &calcParam, pointTemp, lightVector, wsp_persp, distThresh);
-											ambientBuff[i].R = ambientBuff[i].G = ambientBuff[i].B = 0;
-											if (global_ilumination)
-											{
-												if (fastGlobalIllumination)
-												{
-													ambientBuff[i] = FastAmbientOcclusion2(&calcParam, pointTemp, vnTemp, distThresh, param.doubles.fastAoTune, param.globalIlumQuality);
-												}
-												else ambientBuff[i] = AmbientOcclusion(&param, &calcParam, pointTemp, wsp_persp, distThresh, lastDist, vectorsAround, vectorsCount);
-											}
-
-											auxLightsBuff[i] = AuxLightsShader(&param, &calcParam, pointTemp, vnTemp, viewTemp, wsp_persp, distThresh, &auxSpecBuff[i]);
-
-											int colorIndexTemp = SurfaceColour(&calcParam, pointTemp);
-											if (specialColour != 0) colorIndexTemp = specialColour * 256;
-											sRGB color;
-											color.R = color.G = color.B = 256;
-											if (param.imageSwitches.coloringEnabled)
-											{
-												int color_number;
-												if (colorIndexTemp >= 248 * 256)
-												{
-													color_number = colorIndexTemp;
-												}
-												else
-												{
-													color_number = (int) (colorIndexTemp * param.doubles.imageAdjustments.coloring_speed + 256 * param.doubles.imageAdjustments.paletteOffset) % 65536;
-												}
-												color = image->IndexToColour(color_number);
-											}
-											colorBuff[i].R = color.R / 256.0;
-											colorBuff[i].G = color.G / 256.0;
-											colorBuff[i].B = color.B / 256.0;
-
-											totalFog += scan;
-											fogBuff[i] = totalFog;
-											;
-
-											numberOfReflections = i;
-											break;
-										}
-
-										if (distTemp < distThresh * search_limit)
-										{
-											binary = true;
-											scan -= step;
-										}
-										if (!binary) step = (distTemp - 0.5 * distThresh) * DE_factor;
-										else
-										{
-											step = step * 0.5;
-											binarySearchCount++;
-										}
-									}
-									glowBuff1 += glowBuff2 * pow(param.doubles.imageAdjustments.reflect, i + 1.0);
-
-									double density = 0;
-									volFogBuff[i] = VolumetricFog(&param, buffCountRefl, distanceBuffRefl, stepBuffRefl, &density);
-									fogDensityBuff[i] = density / (1.0 + density);
-
-									if (!surfaceFound)
-									{
-										finishBackgroud = TexturedBackground(&param, viewTemp);
-										break;
-									}
-								}
-
-								double reflect = param.doubles.imageAdjustments.reflect;
-
-								bool wasMaxReflections = true;
-								if (numberOfReflections < maxReflections - 1)
-								{
-									wasMaxReflections = false;
-									if (param.imageSwitches.fogEnabled)
-									{
-										envMapping.R = param.effectColours.fogColor.R / 65536.0 * reflect;
-										envMapping.G = param.effectColours.fogColor.G / 65536.0 * reflect;
-										envMapping.B = param.effectColours.fogColor.B / 65536.0 * reflect;
-									}
-									else
-									{
-										envMapping.R = finishBackgroud.R * reflect;
-										envMapping.G = finishBackgroud.G * reflect;
-										envMapping.B = finishBackgroud.B * reflect;
-									}
-
-									double fogN = 1.0 - fogDensityBuff[0];
-									if (fogN < 0) fogN = 0;
-									envMapping.R = envMapping.R * fogN + volFogBuff[0].R / 65536.0 * fogDensityBuff[0];
-									envMapping.G = envMapping.G * fogN + volFogBuff[0].G / 65536.0 * fogDensityBuff[0];
-									envMapping.B = envMapping.B * fogN + volFogBuff[0].B / 65536.0 * fogDensityBuff[0];
-								}
-
-								for (int i = numberOfReflections; i >= 0; i--)
-								{
-									sShaderOutput reflectTemp;
-									double mainIntensity = param.doubles.imageAdjustments.mainLightIntensity * param.doubles.imageAdjustments.directLight;
-									reflectTemp.R = (shadeBuff[i].R * param.doubles.imageAdjustments.shading + 1.0 - param.doubles.imageAdjustments.shading) * shadowBuff[i].R
-											* (1.0 - param.doubles.imageAdjustments.ambient) * colorBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity
-											+ (param.doubles.imageAdjustments.ambient + ambientBuff[i].R + auxLightsBuff[i].R) * colorBuff[i].R;
-									reflectTemp.G = (shadeBuff[i].G * param.doubles.imageAdjustments.shading + 1.0 - param.doubles.imageAdjustments.shading) * shadowBuff[i].G
-											* (1.0 - param.doubles.imageAdjustments.ambient) * colorBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity
-											+ (param.doubles.imageAdjustments.ambient + ambientBuff[i].G + auxLightsBuff[i].G) * colorBuff[i].G;
-									reflectTemp.B = (shadeBuff[i].B * param.doubles.imageAdjustments.shading + 1.0 - param.doubles.imageAdjustments.shading) * shadowBuff[i].B
-											* (1.0 - param.doubles.imageAdjustments.ambient) * colorBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity
-											+ (param.doubles.imageAdjustments.ambient + ambientBuff[i].B + auxLightsBuff[i].B) * colorBuff[i].B;
-
-									double fogTransparency = 1.0;
-									if (param.imageSwitches.fogEnabled)
-									{
-										double fog = fogBuff[i] / fog_visibility;
-										if (fog > 1.0) fog = 1.0;
-										if (fog < 0) fog = 0;
-										double a = fog;
-										double aN = 1.0 - a;
-										reflectTemp.R = (reflectTemp.R * aN + param.effectColours.fogColor.R / 65536.0 * a);
-										reflectTemp.G = (reflectTemp.G * aN + param.effectColours.fogColor.G / 65536.0 * a);
-										reflectTemp.B = (reflectTemp.B * aN + param.effectColours.fogColor.B / 65536.0 * a);
-										fogTransparency = aN;
-									}
-
-									if (wasMaxReflections && i == numberOfReflections)
-									{
-										envMapping = reflectTemp;
-									}
-
-									envMapping.R = reflectTemp.R + (reflect) * envMapping.R
-											+ (specularBuff[i].R * shadowBuff[i].R * param.effectColours.mainLightColour.R / 65536.0 * mainIntensity * param.doubles.imageAdjustments.specular
-													+ auxSpecBuff[i].R * param.doubles.imageAdjustments.specular) * reflect * fogTransparency;
-									envMapping.G = reflectTemp.G + (reflect) * envMapping.G
-											+ (specularBuff[i].G * shadowBuff[i].G * param.effectColours.mainLightColour.G / 65536.0 * mainIntensity * param.doubles.imageAdjustments.specular
-													+ auxSpecBuff[i].G * param.doubles.imageAdjustments.specular) * reflect * fogTransparency;
-									envMapping.B = reflectTemp.B + (reflect) * envMapping.B
-											+ (specularBuff[i].B * shadowBuff[i].B * param.effectColours.mainLightColour.B / 65536.0 * mainIntensity * param.doubles.imageAdjustments.specular
-													+ auxSpecBuff[i].B * param.doubles.imageAdjustments.specular) * reflect * fogTransparency;
-
-									double fogN = 1.0 - fogDensityBuff[i];
-									if (fogN < 0) fogN = 0;
-									envMapping.R = envMapping.R * fogN + volFogBuff[i].R / 65536.0 * fogDensityBuff[i];
-									envMapping.G = envMapping.G * fogN + volFogBuff[i].G / 65536.0 * fogDensityBuff[i];
-									envMapping.B = envMapping.B * fogN + volFogBuff[i].B / 65536.0 * fogDensityBuff[i];
-								}
-								double glow = glowBuff1 * param.doubles.imageAdjustments.glow_intensity / 512.0;
-								double glowN = 1.0 - glow;
-								if (glowN < 0.0) glowN = 0.0;
-								double glowR = (param.effectColours.glow_color1.R * glowN / 65536.0 + param.effectColours.glow_color2.R * glow / 65536.0);
-								double glowG = (param.effectColours.glow_color1.G * glowN / 65536.0 + param.effectColours.glow_color2.G * glow / 65536.0);
-								double glowB = (param.effectColours.glow_color1.B * glowN / 65536.0 + param.effectColours.glow_color2.B * glow / 65536.0);
-
-								envMapping.R = envMapping.R * glowN + glowR * glow;
-								envMapping.G = envMapping.G * glowN + glowG * glow;
-								envMapping.B = envMapping.B * glowN + glowB * glow;
-
-								if (envMapping.R > 10.0) envMapping.R = 10.0;
-								if (envMapping.G > 10.0) envMapping.G = 10.0;
-								if (envMapping.B > 10.0) envMapping.B = 10.0;
-							}
-							//---------- end of raytraced reflection
-
-							unsigned short shadow16 = shadowOutput.R * 4096.0;
-							sRGB16 globalLight = { AO.R * 4096.0, AO.G * 4096.0, AO.B * 4096.0 };
-							unsigned short shade16 = shade.R * 4096.0;
-							sRGB16 shadeAux16 = { shadeAux.R * 4096.0, shadeAux.G * 4096.0, shadeAux.B * 4096.0 };
-							sRGB16 specularAux16 = { shadeAuxSpec.R * 4096.0, shadeAuxSpec.G * 4096.0, shadeAuxSpec.B * 4096.0 };
-							sRGB16 reflection = { envMapping.R * 256.0, envMapping.G * 256.0, envMapping.B * 256.0 };
-
-							if (!image->IsLowMemMode())
-							{
-								image->PutPixelShadow(xScr, yScr, shadow16);
-								image->PutPixelAmbient(xScr, yScr, globalLight);
-								image->PutPixelShading(xScr, yScr, shade16);
-								image->PutPixelSpecular(xScr, yScr, specular.R * 4096.0);
-								image->PutPixelAuxLight(xScr, yScr, shadeAux16);
-								image->PutPixelAuxSpecular(xScr, yScr, specularAux16);
-								image->PutPixelReflect(xScr, yScr, reflection);
-								image->PutPixelBackground(xScr, yScr, black16);
-							}
-
-							image->PutPixelColor(xScr, yScr, colorIndex);
-
-							if (perspectiveType == fishEye || perspectiveType == equirectangular)
-							{
-								image->PutPixelZBuffer(xScr, yScr, point.z * 1.0e12);
-							}
-							else
-							{
-								image->PutPixelZBuffer(xScr, yScr, point.z);
-							}
-							pixelData.shadowsBuf16 = shadow16;
-							pixelData.ambientBuf16 = globalLight;
-							pixelData.shadingBuf16 = shade16;
-							pixelData.specularBuf16 = specular.R * 4096.0;
-							pixelData.auxLight = shadeAux16;
-							pixelData.auxSpecular = specularAux16;
-							pixelData.reflectBuf16 = reflection;
-							pixelData.backgroundBuf16 = black16;
-							*/
-
-						}					//end if found
-
+						}//end if found
 						else
 						{
-							/*
-							sShaderOutput background = { 0.0, 0.0, 0.0 };
-
-							//------------- render 3D background
-							background = TexturedBackground(&param, viewVector);
-
-							sRGB16 background16 = { background.R * 65536.0, background.G * 65536.0, background.B * 65536.0 };
-							pixelData.backgroundBuf16 = background16;
-
-							if (!image->IsLowMemMode())
-							{
-								image->PutPixelBackground(xScr, yScr, background16);
-								image->PutPixelAmbient(xScr, yScr, black16);
-								image->PutPixelAuxLight(xScr, yScr, black16);
-								image->PutPixelAuxSpecular(xScr, yScr, black16);
-								image->PutPixelColor(xScr, yScr, 0);
-								image->PutPixelReflect(xScr, yScr, black16);
-								image->PutPixelShading(xScr, yScr, 0);
-								image->PutPixelShadow(xScr, yScr, 0);
-								image->PutPixelSpecular(xScr, yScr, 0);
-							}
-
-							image->PutPixelZBuffer(xScr, yScr, 1e20);
-							*/
+							// ------------------- to do
+							depth = 1e100;
 						}
-
-						/*
-
-						//drawing transparent glow
-						if (!image->IsLowMemMode()) image->PutPixelGlow(xScr, yScr, counter);
-						pixelData.glowBuf16 = counter;
-
-						//************* volumetric fog / light
-						sShaderOutput volFog;
-						volFog.R = volFog.G = volFog.B = 0.0;
-						if (!param.imageSwitches.iterFogEnabled)
-						{
-							if (param.imageSwitches.volumetricLightEnabled)
-							{
-								//volFog = VolumetricLight(&param, &calcParam, CVector3(x2, y, z2), y, minDepth, last_distance, zoom, lightVector);
-							}
-							else
-							{
-								double density;
-								//volFog = VolumetricFog(&param, buffCount, distanceBuff, stepBuff, &density);
-
-								if (param.fakeLightsEnabled)
-								{
-									volFog.R += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
-									volFog.G += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
-									volFog.B += fakeLightVisible * 10000.0 * param.doubles.fakeLightsVisibility;
-									density += fakeLightVisible * param.doubles.fakeLightsVisibility;
-								}
-								pixelData.fogDensity16 = 65535 * density / (1.0 + density);
-							}
-						}
-						else
-						{
-							//iteration fog
-
-							unsigned short alpha2 = 0;
-							float zBuf = image->GetPixelZBuffer(xScr, yScr);
-							unsigned short colorIndex = image->GetPixelColor(xScr, yScr);
-							double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0);
-							double fog_visibility_front = pow(10, param.doubles.imageAdjustments.fogVisibilityFront / 10 - 2.0) - 10.0;
-							pixelData.volumetricLight.R = 0;
-							pixelData.volumetricLight.G = 0;
-							pixelData.volumetricLight.B = 0;
-							pixelData.fogDensity16 = 0;
-							sRGB16 oldPixel16 = image->CalculatePixel(pixelData, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
-							double density;
-							//volFog = IterationFog(&param, &calcParam, CVector3(x2, y, z2), y, minDepth, last_distance, zoom, lightVector, found, &density, vectorsAround, vectorsCount, oldPixel16);
-							pixelData.fogDensity16 = 65535;
-							//end of iteration fog
-						}
-
-						if (volFog.R > 65535.0) volFog.R = 65535.0;
-						if (volFog.G > 65535.0) volFog.G = 65535.0;
-						if (volFog.B > 65535.0) volFog.B = 65535.0;
-
-						pixelData.volumetricLight.R = volFog.R;
-						pixelData.volumetricLight.G = volFog.G;
-						pixelData.volumetricLight.B = volFog.B;
-
-						if (!image->IsLowMemMode())
-						{
-							image->PutPixelVolumetricFog(xScr, yScr, pixelData.volumetricLight);
-							image->PutPixelFogDensity(xScr, yScr, pixelData.fogDensity16);
-						}
-
-						if (image->IsLowMemMode())
-						{
-							unsigned short alpha2 = 0;
-							float zBuf = image->GetPixelZBuffer(xScr, yScr);
-							unsigned short colorIndex = image->GetPixelColor(xScr, yScr);
-							double fog_visibility = pow(10, param.doubles.imageAdjustments.fogVisibility / 10 - 2.0);
-							double fog_visibility_front = pow(10, param.doubles.imageAdjustments.fogVisibilityFront / 10 - 2.0) - 10.0;
-							sRGB16 newPixel16 = image->CalculatePixel(pixelData, alpha2, zBuf, colorIndex, fog_visibility, fog_visibility_front);
-							image->PutPixelImage(xScr, yScr, newPixel16);
-							image->PutPixelAlpha(xScr, yScr, alpha2);
-						}
-						*/
 
 						sRGBfloat pixel;
 						pixel.R = objectShader.R;
 						pixel.G = objectShader.G;
 						pixel.B = objectShader.B;
 
+						sRGB8 colour;
+						colour.R = objectColour.R * 255;
+						colour.G = objectColour.G * 255;
+						colour.B = objectColour.B * 255;
+
 						image->PutPixelImage(xScr, yScr, pixel);
+						image->PutPixelColour(xScr, yScr, colour);
+						image->PutPixelZBuffer(xScr, yScr, depth);
 					}
 
 					else
@@ -1250,13 +830,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 								if (image->IsPreview())
 								{
-									param.SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled) );
-									if (param.SSAOEnabled && !netRender->IsClient() && !netRender->IsServer())
-									{
-										param.SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality) );
-										PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality / 2, param.perspectiveType, param.quiet);
-										WriteLog("SSAO rendered");
-									}
 									image->CompileImage();
 									WriteLog("Image compiled");
 

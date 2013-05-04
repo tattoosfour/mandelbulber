@@ -253,7 +253,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 void ThreadSSAO(void *ptr)
 {
-	/*
+
 	sSSAOparams *param;
 	param = (sSSAOparams*) ptr;
 
@@ -280,6 +280,9 @@ void ThreadSSAO(void *ptr)
 	enumPerspectiveType perspectiveType = param->perspectiveType;
 	double fov = param->persp;
 
+	sImageAdjustments *imageAdjustments = image->GetImageAdjustments();
+	double intensity = imageAdjustments->globalIlum;
+
 	for (int y = threadNo * progressive; y < height; y += NR_THREADS * progressive)
 	{
 
@@ -294,14 +297,14 @@ void ThreadSSAO(void *ptr)
 				double x2, y2;
 				if (perspectiveType == fishEye)
 				{
-					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
+					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; //------ do sprawdzenia
 					y2 = M_PI * ((double) y / height - 0.5);
 					x2 = sin(fov * x2) * z;
 					y2 = sin(fov * y2) * z;
 				}
 				else if(perspectiveType == equirectangular)
 				{
-					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
+					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; //--------- do sprawdzenia
 					y2 = M_PI * ((double) y / height - 0.5);
 					x2 = sin(fov * x2) * cos(fov * y2) * z;
 					y2 = sin(fov * y2) * z;
@@ -310,8 +313,8 @@ void ThreadSSAO(void *ptr)
 				{
 					x2 = ((double) x / width - 0.5) * aspectRatio;
 					y2 = ((double) y / height - 0.5);
-					x2 = x2 * (1.0 + z * persp);
-					y2 = y2 * (1.0 + z * persp);
+					x2 = x2 * z * persp;
+					y2 = y2 * z * persp;
 				}
 
 				double ambient = 0;
@@ -336,14 +339,14 @@ void ThreadSSAO(void *ptr)
 						double xx2, yy2;
 						if (perspectiveType == fishEye)
 						{
-							xx2 = M_PI * (xx / width - 0.5) * aspectRatio;
+							xx2 = M_PI * (xx / width - 0.5) * aspectRatio; //--------- do sprawdzenia
 							yy2 = M_PI * (yy / height - 0.5);
 							xx2 = sin(fov * xx2) * z2;
 							yy2 = sin(fov * yy2) * z2;
 						}
 						else if (perspectiveType == equirectangular)
 						{
-							xx2 = M_PI * (xx / width - 0.5) * aspectRatio;
+							xx2 = M_PI * (xx / width - 0.5) * aspectRatio; //--------- do sprawdzenia
 							yy2 = M_PI * (yy / height - 0.5);
 							xx2 = sin(fov * xx2) * cos(fov * yy2) * z2;
 							yy2 = sin(fov * yy2) * z2;
@@ -352,8 +355,8 @@ void ThreadSSAO(void *ptr)
 						{
 							xx2 = (xx / width - 0.5) * aspectRatio;
 							yy2 = (yy / height - 0.5);
-							xx2 = xx2 * (1.0 + z2 * persp);
-							yy2 = yy2 * (1.0 + z2 * persp);
+							xx2 = xx2 * (z2 * persp);
+							yy2 = yy2 * (z2 * persp);
 						}
 
 						double dx = xx2 - x2;
@@ -376,32 +379,15 @@ void ThreadSSAO(void *ptr)
 
 			}
 
-			sRGB16 ambient = { total_ambient * 4096.0, total_ambient * 4096.0, total_ambient * 4096.0 };
-			if (!image->IsLowMemMode()) image->PutPixelAmbient(x, y, ambient);
-			else
-			{
-				unsigned short colorIndex = image->GetPixelColor(x,y);
-				sRGB16 oldPixel16 = image->GetPixelImage(x,y);
-				sRGB16 newPixel16 = image->CalculateAmbientPixel(ambient,colorIndex,oldPixel16);
-				image->PutPixelImage(x,y,newPixel16);
-			}
+			sRGBfloat pixel = image->GetPixelImage(x, y);
+			sRGB8 colour = image->GetPixelColor(x, y);
+			pixel.R += colour.R / 256.0 * total_ambient * intensity;
+			pixel.G += colour.G / 256.0 * total_ambient * intensity;
+			pixel.B += colour.B / 256.0 * total_ambient * intensity;
+
+			image->PutPixelImage(x, y, pixel);
 		}
 
-		if (!image->IsLowMemMode())
-		{
-			for (int x = 0; x <= width - progressive; x += progressive)
-			{
-				sRGB16 pixel = image->GetPixelAmbient(x, y);
-				for (int yy = 0; yy < progressive; yy++)
-				{
-					for (int xx = 0; xx < progressive; xx++)
-					{
-						if (xx == 0 && yy == 0) continue;
-						image->PutPixelAmbient(x + xx, y + yy, pixel);
-					}
-				}
-			}
-		}
 		double percentDone = (double) y / height * 100.0;
 		if(!quiet) printf("Rendering Screen Space Ambient Occlusion. Done %.2f%%       \r", percentDone);
 		fflush(stdout);
@@ -412,7 +398,7 @@ void ThreadSSAO(void *ptr)
 	}
 	delete[] sinus;
 	delete[] cosinus;
-	*/
+
 }
 
 void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiveType perspectiveType, bool quiet)

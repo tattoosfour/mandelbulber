@@ -58,7 +58,7 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector);
 sShaderOutput LightShading(sShaderInputData &input, sLight light, int number, sShaderOutput *specular);
 sShaderOutput AuxLightsShader(sShaderInputData &input, sShaderOutput *specularOut);
 double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector);
-
+sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec);
 
 sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom, CVector3 lightVector);
 sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distanceBuff, double *stepBuff, double *densityOut);
@@ -67,6 +67,6 @@ void PostRenderingLights(cImage *image, sParamRender *fractParam);
 double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp);
 sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
 		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel);
-sShaderOutput FakeLights(sParamRender *param, sFractal *calcParam, CVector3 point, CVector3 normal, CVector3 viewVector, double dist_thresh, sShaderOutput *fakeSpec);
+
 sRGB IndexToColour(int index, sRGB *palette);
 #endif /* SHADERS_H_ */
