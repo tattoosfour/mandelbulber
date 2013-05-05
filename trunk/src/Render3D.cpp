@@ -356,7 +356,7 @@ void *MainThread(void *ptr)
 						double z2 = ((double) yScr / height / tiles - 0.5 + tileYOffset / tiles);
 
 						bool hemisphereCut = false;
-						if (perspectiveType == fishEye || perspectiveType == equirectangular)
+						if (perspectiveType == fishEye)
 						{
 							if (param.fishEyeCut && sqrt(x2 * x2 + z2 * z2) > 0.5 / fov)
 							{
@@ -380,6 +380,15 @@ void *MainThread(void *ptr)
 								viewVector.z = z3 / r * sin(r * fov);
 								viewVector.y = cos(r * fov);
 							}
+						}
+						else if(perspectiveType == equirectangular)
+						{
+							double x3 = x2 * M_PI;
+							double z3 = z2 * M_PI;
+
+							viewVector.x = sin(fov * x3) * cos(fov * z3);
+							viewVector.z = sin(fov * z3);
+							viewVector.y = cos(fov * x3) * cos(fov * z3);
 						}
 						else //3-point perspective
 						{
