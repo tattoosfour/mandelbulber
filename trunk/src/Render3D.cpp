@@ -362,8 +362,26 @@ void *MainThread(void *ptr)
 							{
 								hemisphereCut = true;
 							}
+
+							double x3 = x2 * M_PI;
+							double z3 = z2 * M_PI;
+
+							double r = sqrt(x3 * x3 + z3 * z3);
+
+							if(r == 0)
+							{
+								viewVector.x = 0.0;
+								viewVector.z = 0.0;
+								viewVector.y = 1.0;
+							}
+							else
+							{
+								viewVector.x = x3 / r * sin(r * fov);
+								viewVector.z = z3 / r * sin(r * fov);
+								viewVector.y = cos(r * fov);
+							}
 						}
-						else
+						else //3-point perspective
 						{
 							viewVector.x = x2 * fov;
 							viewVector.y = 1.0;

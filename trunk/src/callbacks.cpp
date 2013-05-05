@@ -150,9 +150,23 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			CVector3 viewVector;
 			if (perspectiveType == fishEye || perspectiveType == equirectangular)
 			{
-				y /= 1e12;
 				x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; // --------- do sprawdzenia
 				z2 = M_PI * ((double) z / height - 0.5);
+
+				double r = sqrt(x2 * x2 + z2 * z2);
+
+				if(r == 0)
+				{
+					viewVector.x = 0.0;
+					viewVector.z = 0.0;
+					viewVector.y = 1.0;
+				}
+				else
+				{
+					viewVector.x = x2 / r * sin(r * params.doubles.persp);
+					viewVector.z = z2 / r * sin(r * params.doubles.persp);
+					viewVector.y = cos(r * params.doubles.persp);
+				}
 			}
 			else
 			{
@@ -187,30 +201,24 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				{
 					CVector3 vector, vector2;
 
-					if (perspectiveType == fishEye || perspectiveType == equirectangular)
-					{
-						//if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
-						//else if(clickMode >= 5) y2 = y - lightPlacementDistance;
-					}
-					else
-					{
-						double delta_y;
-						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = 0;
-						else delta_y = y / closeUpRatio;
 
-						if (clickMode == 1)
-						{
-							point = start + viewVector * delta_y;
-						}
-						else if (clickMode >= 5 && clickMode < 10)
-						{
-							point = start + viewVector * (y - lightPlacementDistance); //lights placement
-						}
-						else if (clickMode == 10 || clickMode == 11) //julia constant, measurements
-						{
-							point = start + viewVector * y;
-						}
+					double delta_y;
+					if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = 0;
+					else delta_y = y / closeUpRatio;
+
+					if (clickMode == 1)
+					{
+						point = start + viewVector * delta_y;
 					}
+					else if (clickMode >= 5 && clickMode < 10)
+					{
+						point = start + viewVector * (y - lightPlacementDistance); //lights placement
+					}
+					else if (clickMode == 10 || clickMode == 11) //julia constant, measurements
+					{
+						point = start + viewVector * y;
+					}
+
 
 					if(clickMode == 1) //move the camera
 					{

@@ -297,10 +297,14 @@ void ThreadSSAO(void *ptr)
 				double x2, y2;
 				if (perspectiveType == fishEye)
 				{
-					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; //------ do sprawdzenia
+					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
 					y2 = M_PI * ((double) y / height - 0.5);
-					x2 = sin(fov * x2) * z;
-					y2 = sin(fov * y2) * z;
+					double r = sqrt(x2 * x2 + y2 * y2);
+					if(r != 0.0)
+					{
+						x2 = x2 / r * sin(r * fov) * z;
+						y2 = y2 / r * sin(r * fov) * z;
+					}
 				}
 				else if(perspectiveType == equirectangular)
 				{
@@ -339,10 +343,14 @@ void ThreadSSAO(void *ptr)
 						double xx2, yy2;
 						if (perspectiveType == fishEye)
 						{
-							xx2 = M_PI * (xx / width - 0.5) * aspectRatio; //--------- do sprawdzenia
-							yy2 = M_PI * (yy / height - 0.5);
-							xx2 = sin(fov * xx2) * z2;
-							yy2 = sin(fov * yy2) * z2;
+							xx2 = M_PI * ((double) xx / width - 0.5) * aspectRatio;
+							yy2 = M_PI * ((double) yy / height - 0.5);
+							double r2 = sqrt(xx2 * xx2 + yy2 * yy2);
+							if(r != 0.0)
+							{
+								xx2 = xx2 / r2 * sin(r2 * fov) * z2;
+								yy2 = yy2 / r2 * sin(r2 * fov) * z2;
+							}
 						}
 						else if (perspectiveType == equirectangular)
 						{
