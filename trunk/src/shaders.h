@@ -44,6 +44,7 @@ extern sLight *Lights;
 extern int lightsPlaced;
 
 sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour);
+sShaderOutput BackgroundShader(sShaderInputData input);
 
 sShaderOutput MainShadow(sShaderInputData &input);
 sShaderOutput AmbientOcclusion(sShaderInputData &input);

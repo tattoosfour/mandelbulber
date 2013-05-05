@@ -101,6 +101,76 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
 	return output;
 }
 
+sShaderOutput BackgroundShader(sShaderInputData input)
+{
+	sShaderOutput pixel2;
+
+	if (input.param->textured_background)
+	{
+		if(input.param->background_as_fulldome)
+		{
+			double alfaTexture = input.viewVector.GetAlfa();
+			double betaTexture = input.viewVector.GetBeta();
+			int texWidth = input.param->backgroundTexture->Width()*0.5;
+			int texHeight = input.param->backgroundTexture->Height();
+			int offset = 0;
+
+			if(betaTexture < 0)
+			{
+				betaTexture = -betaTexture;
+				alfaTexture += M_PI;
+				offset = texWidth;
+			}
+			double texX = 0.5 * texWidth + cos(alfaTexture) * (1.0 - betaTexture / (0.5 * M_PI)) * texWidth * 0.5 + offset;
+			double texY = 0.5 * texHeight + sin(alfaTexture) * (1.0 - betaTexture / (0.5 * M_PI)) * texHeight * 0.5;
+			sRGB8 pixel = input.param->backgroundTexture->Pixel(texX, texY);
+			pixel2.R = pixel.R / 256.0;
+			pixel2.G = pixel.G / 256.0;
+			pixel2.B = pixel.B / 256.0;
+		}
+		else
+		{
+			double alfaTexture = fmod(input.viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
+			double betaTexture = input.viewVector.GetBeta();
+			if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
+			if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
+			double texX = alfaTexture / (2.0 * M_PI) * input.param->backgroundTexture->Width();
+			double texY = (betaTexture / (M_PI) + 0.5) * input.param->backgroundTexture->Height();
+			sRGB8 pixel = input.param->backgroundTexture->Pixel(texX, texY);
+			pixel2.R = pixel.R/256.0;
+			pixel2.G = pixel.G/256.0;
+			pixel2.B = pixel.B/256.0;
+		}
+	}
+	else
+	{
+		CVector3 vector(0.5, 0.5, -0.5);
+		vector.Normalize();
+		double grad = (input.viewVector.Dot(vector)+1.0);
+		sRGB16 pixel;
+		if(grad < 1)
+		{
+			double Ngrad = 1.0 - grad;
+			pixel.R = (input.param->background_color3.R * Ngrad + input.param->background_color2.R * grad);
+			pixel.G = (input.param->background_color3.G * Ngrad + input.param->background_color2.G * grad);
+			pixel.B = (input.param->background_color3.B * Ngrad + input.param->background_color2.B * grad);
+		}
+		else
+		{
+			grad = grad - 1;
+			double Ngrad = 1.0 - grad;
+			pixel.R = (input.param->background_color2.R * Ngrad + input.param->background_color1.R * grad);
+			pixel.G = (input.param->background_color2.G * Ngrad + input.param->background_color1.G * grad);
+			pixel.B = (input.param->background_color2.B * Ngrad + input.param->background_color1.B * grad);
+		}
+
+		pixel2.R = pixel.R/65536.0;
+		pixel2.G = pixel.G/65536.0;
+		pixel2.B = pixel.B/65536.0;
+	}
+	return pixel2;
+}
+
 sShaderOutput MainShadow(sShaderInputData &input)
 {
 	sShaderOutput shadow = { 1.0, 1.0, 1.0 };
