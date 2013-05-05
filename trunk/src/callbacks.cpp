@@ -119,17 +119,59 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 		}
 		else
 		{
+			//------------ calculation of 3D pixel position
+
 			int x = event->x;
 			int z = event->y;
 			x = x / mainImage.GetPreviewScale();
 			z = z / mainImage.GetPreviewScale();
 			double y = mainImage.GetPixelZBuffer(x, z);
 
+			sParamRender params;
+			ReadInterface(&params);
+
+			int width = mainImage.GetWidth();
+			int height = mainImage.GetHeight();
+
+			//rotation matrix
+			CRotationMatrix mRot;
+			mRot.RotateZ(params.doubles.alpha);
+			mRot.RotateX(params.doubles.beta);
+			mRot.RotateY(params.doubles.gamma);
+			CVector3 baseY(0.0, 1.0, 0.0);
+			baseY = mRot.RotateVector(baseY);
+
+			double x2, z2;
+			double aspectRatio = (double) width / height;
+
+			enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+			if(perspectiveType == fishEyeCut) perspectiveType = fishEye;
+
+			CVector3 viewVector;
+			if (perspectiveType == fishEye || perspectiveType == equirectangular)
+			{
+				y /= 1e12;
+				x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; // --------- do sprawdzenia
+				z2 = M_PI * ((double) z / height - 0.5);
+			}
+			else
+			{
+				x2 = ((double) x / width - 0.5) * aspectRatio;
+				z2 = ((double) z / height - 0.5);
+				viewVector.x = x2 * params.doubles.persp;
+				viewVector.y = 1.0;
+				viewVector.z = z2 * params.doubles.persp;
+			}
+
+			viewVector.Normalize();
+			viewVector = mRot.RotateVector(viewVector);
+
+			CVector3 start = params.doubles.vp - baseY * (1.0 / params.doubles.persp * params.doubles.zoom);
+			CVector3 point = start + viewVector * y;
+
+			//difference behavior depends on selected mode
 			if(clickMode ==1 || clickMode >= 5) //camera move or light position setup
 			{
-				int width = mainImage.GetWidth();
-				int height = mainImage.GetHeight();
-
 				double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
 				double lightPlacementDistance = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPlacementDistance)));
 				if(clickMode == 9) lightPlacementDistance = 0; //random light center
@@ -139,66 +181,40 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 					closeUpRatio = 1.0 / closeUpRatio;
 				}
 
-				sParamRender params;
-				ReadInterface(&params);
 				undoBuffer.SaveUndo(&params);
-
-				double x2, z2;
-				double aspectRatio = (double) width / height;
-
-				enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
-				if(perspectiveType == fishEyeCut) perspectiveType = fishEye;
-
-				if (perspectiveType == fishEye || perspectiveType == equirectangular)
-				{
-					y /= 1e12;
-					x2 = M_PI * ((double) x / width - 0.5) * aspectRatio;
-					z2 = M_PI * ((double) z / height - 0.5);
-				}
-				else
-				{
-					x2 = ((double) x / width - 0.5) * params.doubles.zoom * aspectRatio;
-					z2 = ((double) z / height - 0.5) * params.doubles.zoom;
-				}
-				//rotation matrix
-				CRotationMatrix mRot;
-				mRot.RotateZ(params.doubles.alpha);
-				mRot.RotateX(params.doubles.beta);
-				mRot.RotateY(params.doubles.gamma);
 
 				if (y < 1e19)
 				{
 					CVector3 vector, vector2;
-					double y2 = 0;
-					double perspFactor1 = y * params.doubles.persp + 1.0;
 
-					if(perspectiveType == fishEye || perspectiveType == equirectangular)
+					if (perspectiveType == fishEye || perspectiveType == equirectangular)
 					{
-						if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
-						else if(clickMode >= 5) y2 = y - lightPlacementDistance;
+						//if(clickMode == 1) y2 = y * (1.0 - 1.0 / closeUpRatio);
+						//else if(clickMode >= 5) y2 = y - lightPlacementDistance;
 					}
 					else
 					{
 						double delta_y;
-						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface))) delta_y = 0;
-						else delta_y = (y + (1.0 / params.doubles.persp)) / closeUpRatio;
+						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = 0;
+						else delta_y = y / closeUpRatio;
 
 						if (clickMode == 1)
 						{
-							y2 = y - delta_y;
-							double perspFactor2 = y2 * params.doubles.persp + 1.0;
-							x2 *= perspFactor1/perspFactor2;
-							z2 *= perspFactor1/perspFactor2;
+							point = start + viewVector * delta_y;
 						}
-						else if (clickMode >= 5 && clickMode < 10) y2 = y - lightPlacementDistance/params.doubles.zoom; //lights placement
-						else if (clickMode == 10 || clickMode == 11) y2 = y; //julia constant
+						else if (clickMode >= 5 && clickMode < 10)
+						{
+							point = start + viewVector * (y - lightPlacementDistance); //lights placement
+						}
+						else if (clickMode == 10 || clickMode == 11) //julia constant, measurements
+						{
+							point = start + viewVector * y;
+						}
 					}
-
-					CVector3 point = Projection3D(CVector3(x2, y2, z2), params.doubles.vp, mRot, perspectiveType, params.doubles.persp, params.doubles.zoom);
 
 					if(clickMode == 1) //move the camera
 					{
-					  params.doubles.vp = point;
+						params.doubles.vp = point;
 						params.doubles.zoom /= closeUpRatio;
 
 						char distanceString[1000];
