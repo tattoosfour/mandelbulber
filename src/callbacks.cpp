@@ -148,7 +148,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			if(perspectiveType == fishEyeCut) perspectiveType = fishEye;
 
 			CVector3 viewVector;
-			if (perspectiveType == fishEye || perspectiveType == equirectangular)
+			if (perspectiveType == fishEye)
 			{
 				x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; // --------- do sprawdzenia
 				z2 = M_PI * ((double) z / height - 0.5);
@@ -167,6 +167,14 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 					viewVector.z = z2 / r * sin(r * params.doubles.persp);
 					viewVector.y = cos(r * params.doubles.persp);
 				}
+			}
+			else if (perspectiveType == equirectangular)
+			{
+				x2 = M_PI * ((double) x / width - 0.5) * aspectRatio; // --------- do sprawdzenia
+				z2 = M_PI * ((double) z / height - 0.5);
+				viewVector.x = sin(params.doubles.persp * x2) * cos(params.doubles.persp * z2);
+				viewVector.z = sin(params.doubles.persp * z2);
+				viewVector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2);
 			}
 			else
 			{
