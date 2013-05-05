@@ -421,23 +421,26 @@ void *MainThread(void *ptr)
 						ShaderInputData.envMappingTexture = param.envmapTexture;
 
 						sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
+						sShaderOutput backgroudShader = { 0.0, 0.0, 0.0 };
 						sShaderOutput objectColour = { 0.0, 0.0, 0.0 };
 
 						//if fractal surface was found
 						if (found)
 						{
 							objectShader = ObjectShader(ShaderInputData, &objectColour);
+
 						}//end if found
 						else
 						{
+							backgroudShader = BackgroundShader(ShaderInputData);
 							// ------------------- to do
 							depth = 1e100;
 						}
 
 						sRGBfloat pixel;
-						pixel.R = objectShader.R;
-						pixel.G = objectShader.G;
-						pixel.B = objectShader.B;
+						pixel.R = objectShader.R + backgroudShader.R;
+						pixel.G = objectShader.G + backgroudShader.G;
+						pixel.B = objectShader.B + backgroudShader.B;
 
 						sRGB8 colour;
 						colour.R = objectColour.R * 255;
