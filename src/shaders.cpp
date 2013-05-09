@@ -171,6 +171,97 @@ sShaderOutput BackgroundShader(sShaderInputData input)
 	return pixel2;
 }
 
+sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
+{
+	sShaderOutput output;
+
+	output.R = oldPixel.R;
+	output.G = oldPixel.G;
+	output.B = oldPixel.B;
+
+	//basic fog init
+  double fogVisibility = pow(10.0, input.param->doubles.imageAdjustments.fogVisibility / 10 - 18.0);
+
+  //volumetric fog init
+	double colourThresh = input.param->doubles.fogColour1Distance;
+	double colourThresh2 = input.param->doubles.fogColour2Distance;
+	double fogReduce = input.param->doubles.fogDistanceFactor;
+	double fogIntensity = input.param->doubles.fogDensity;
+
+	//visible lights init
+	int numberOfLights = lightsPlaced;
+	if (numberOfLights < 4) numberOfLights = 4;
+
+	for(int i = input.stepCount-1; i >=0; i--)
+	{
+		double step = input.stepBuff[i].step;
+		double distance = input.stepBuff[i].distance;
+		CVector3 point = input.stepBuff[i].point;
+
+		//basic fog
+		if(input.param->imageSwitches.fogEnabled)
+		{
+			double fogDensity = step / fogVisibility;
+			if(fogDensity > 1.0) fogDensity = 1.0;
+			output.R = fogDensity * input.param->effectColours.fogColor.R / 65536.0 + (1.0 - fogDensity) * output.R;
+			output.G = fogDensity * input.param->effectColours.fogColor.G / 65536.0 + (1.0 - fogDensity) * output.G;
+			output.B = fogDensity * input.param->effectColours.fogColor.B / 65536.0 + (1.0 - fogDensity) * output.B;
+		}
+
+		//volumetric fog
+		if(fogIntensity > 0.0)
+		{
+			double densityTemp = (step * fogReduce) / (distance * distance + fogReduce * fogReduce);
+
+			double k = distance / colourThresh;
+			if (k > 1) k = 1.0;
+			double kn = 1.0 - k;
+			double fogRtemp = (input.param->fogColour1.R * kn + input.param->fogColour2.R * k);
+			double fogGtemp = (input.param->fogColour1.G * kn + input.param->fogColour2.G * k);
+			double fogBtemp = (input.param->fogColour1.B * kn + input.param->fogColour2.B * k);
+
+			double k2 = distance / colourThresh2 * k;
+			if (k2 > 1) k2 = 1.0;
+			kn = 1.0 - k2;
+			fogRtemp = (fogRtemp * kn + input.param->fogColour3.R * k2);
+			fogGtemp = (fogGtemp * kn + input.param->fogColour3.G * k2);
+			fogBtemp = (fogBtemp * kn + input.param->fogColour3.B * k2);
+
+			double fogDensity = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
+			if(fogDensity > 1) fogDensity = 1.0;
+
+			output.R = fogDensity * fogRtemp / 65536.0 + (1.0 - fogDensity) * output.R;
+			output.G = fogDensity * fogGtemp / 65536.0 + (1.0 - fogDensity) * output.G;
+			output.B = fogDensity * fogBtemp / 65536.0 + (1.0 - fogDensity) * output.B;
+		}
+
+		//visible light
+
+		for (int i = 0; i < numberOfLights; ++i)
+		{
+			if (i < input.param->auxLightNumber || Lights[i].enabled)
+			{
+				CVector3 lightDistVect = point - Lights[i].position;
+				double lightDist = lightDistVect.Length();
+				double lightSize = Lights[i].intensity * input.param->doubles.auxLightIntensity * input.param->doubles.auxLightVisibility;
+				double r2 = lightDist;
+				if (r2 > lightSize) r2 = lightSize;
+				double bellFunction = (cos(r2 * M_PI/(lightSize)) + 1.0) / (r2 * r2 / (lightSize * lightSize) + 0.02) *0.3;
+				double lightDensity = step * bellFunction / lightSize;
+
+
+
+				output.R += lightDensity * Lights[i].colour.R / 65536.0;
+				output.G += lightDensity * Lights[i].colour.G / 65536.0;
+				output.B += lightDensity * Lights[i].colour.B / 65536.0;
+			}
+		}
+	}
+
+
+	return output;
+}
+
 sShaderOutput MainShadow(sShaderInputData &input)
 {
 	sShaderOutput shadow = { 1.0, 1.0, 1.0 };

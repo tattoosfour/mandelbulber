@@ -77,7 +77,7 @@ double real_clock(void)
 }
 
 
-CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, int buffCount,
+CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, int *buffCount,
 		double *distThreshOut, double *lastDistOut, bool *foundOut, double *depthOut)
 {
 	CVector3 point;
@@ -88,7 +88,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
 	int counter = 0;
-	buffCount = 0;
+	*buffCount = 0;
 
 	for (int i = 0; i < 10000; i++)
 	{
@@ -102,10 +102,9 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		dist = CalculateDistance(point, *calcParam, &max_iter);
 
 		//printf("Distance = %g\n", dist/distThresh);
-
-		if (dist > 2.0) dist = 2.0;
 		stepBuff[i].distance = dist;
 
+		if (dist > 3.0) dist = 3.0;
 		if (dist < distThresh)
 		{
 			if (dist < 0.1 * distThresh) Missed_DE_counter++;
@@ -113,9 +112,10 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 			break;
 		}
 
-		double step = (dist - 0.5 * distThresh) * param->doubles.DE_factor;
+		double step = (dist - 0.5 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
 		stepBuff[i].step = step;
-		buffCount++;
+		stepBuff[i].point = point;
+		(*buffCount)++;
 		scan += step;
 		if (scan > maxScan)
 		{
@@ -426,7 +426,7 @@ void *MainThread(void *ptr)
 
 						if (!hemisphereCut)
 						{
-							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, buffCount, &distThresh, &lastDist, &found, &depth);
+							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, &buffCount, &distThresh, &lastDist, &found, &depth);
 						}
 						else
 						{
@@ -435,46 +435,57 @@ void *MainThread(void *ptr)
 
 						CVector3 lightVector = shadowVector;
 
-						sShaderInputData ShaderInputData;
-						ShaderInputData.calcParam = &calcParam;
-						ShaderInputData.param = &param;
-						ShaderInputData.dist_thresh = distThresh;
-						ShaderInputData.lightVect =lightVector;
-						ShaderInputData.point = point;
-						ShaderInputData.viewVector = viewVector;
-						ShaderInputData.vectorsCount = vectorsCount;
-						ShaderInputData.vectorsAround = vectorsAround;
-						ShaderInputData.lastDist = lastDist;
-						ShaderInputData.envMappingTexture = param.envmapTexture;
+						sShaderInputData shaderInputData;
+						shaderInputData.calcParam = &calcParam;
+						shaderInputData.param = &param;
+						shaderInputData.dist_thresh = distThresh;
+						shaderInputData.lightVect =lightVector;
+						shaderInputData.point = point;
+						shaderInputData.viewVector = viewVector;
+						shaderInputData.vectorsCount = vectorsCount;
+						shaderInputData.vectorsAround = vectorsAround;
+						shaderInputData.lastDist = lastDist;
+						shaderInputData.envMappingTexture = param.envmapTexture;
+						shaderInputData.depth = depth;
+						shaderInputData.stepCount = buffCount;
+						shaderInputData.stepBuff = stepBuff;
 
 						sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
 						sShaderOutput backgroudShader = { 0.0, 0.0, 0.0 };
 						sShaderOutput objectColour = { 0.0, 0.0, 0.0 };
+						sShaderOutput volumetricShader  = { 0.0, 0.0, 0.0 };
 
 						//if fractal surface was found
 						if (found)
 						{
-							objectShader = ObjectShader(ShaderInputData, &objectColour);
+							objectShader = ObjectShader(shaderInputData, &objectColour);
 
 						}//end if found
 						else
 						{
-							backgroudShader = BackgroundShader(ShaderInputData);
+							backgroudShader = BackgroundShader(shaderInputData);
 							// ------------------- to do
 							depth = 1e100;
 						}
 
-						sRGBfloat pixel;
+						sShaderOutput pixel;
 						pixel.R = objectShader.R + backgroudShader.R;
 						pixel.G = objectShader.G + backgroudShader.G;
 						pixel.B = objectShader.B + backgroudShader.B;
+
+						volumetricShader = VolumetricShader(shaderInputData, pixel);
+
+						sRGBfloat pixel2;
+						pixel2.R = volumetricShader.R;
+						pixel2.G = volumetricShader.G;
+						pixel2.B = volumetricShader.B;
 
 						sRGB8 colour;
 						colour.R = objectColour.R * 255;
 						colour.G = objectColour.G * 255;
 						colour.B = objectColour.B * 255;
 
-						image->PutPixelImage(xScr, yScr, pixel);
+						image->PutPixelImage(xScr, yScr, pixel2);
 						image->PutPixelColour(xScr, yScr, colour);
 						image->PutPixelZBuffer(xScr, yScr, depth);
 					}

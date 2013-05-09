@@ -38,6 +38,9 @@ struct sShaderInputData
 	sVectorsAround *vectorsAround;
 	int vectorsCount;
 	cTexture *envMappingTexture;
+	double depth;
+	sStep *stepBuff;
+	int stepCount;
 };
 
 extern sLight *Lights;
@@ -45,6 +48,7 @@ extern int lightsPlaced;
 
 sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour);
 sShaderOutput BackgroundShader(sShaderInputData input);
+sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel);
 
 sShaderOutput MainShadow(sShaderInputData &input);
 sShaderOutput AmbientOcclusion(sShaderInputData &input);
