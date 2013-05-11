@@ -33,6 +33,20 @@ struct sStep
 	CVector3 point;
 };
 
+struct sReflect
+{
+	CVector3 start;
+	CVector3 point;
+	CVector3 viewVector;
+	CVector3 distance;
+	sStep *stepBuff;
+	int buffCount;
+	double depth;
+	double lastDist;
+	bool found;
+	double distThresh;
+};
+
 //global
 extern guint64 N_counter;
 extern guint64 Loop_counter;

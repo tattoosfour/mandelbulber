@@ -83,13 +83,14 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	CVector3 point;
 	bool found = false;
 	double scan = 0;
-	double distThresh = 0;
+	double distThresh = *distThreshOut;
 	double dist = 0;
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
 	int counter = 0;
 	double step = 0;
 	*buffCount = 0;
+	double distThreshInit = *distThreshOut;
 
 	for (int i = 0; i < 10000; i++)
 	{
@@ -98,7 +99,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		point = start + direction * scan;
 		bool max_iter = false;
 
-		distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality;
+		distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality + distThreshInit;
 		calcParam->doubles.detailSize = distThresh;
 		dist = CalculateDistance(point, *calcParam, &max_iter);
 
@@ -227,11 +228,18 @@ void *MainThread(void *ptr)
 	vector.z = sin(-param.doubles.mainLightBeta);
 	shadowVector = mRot.RotateVector(vector);
 
-	//distance buffer
-	sStep *stepBuff = new sStep[10002];
-	double *distanceBuffRefl = new double[10002];
-	double *stepBuffRefl = new double[10002];
-	int buffCount = 0;
+
+	//reflection data
+	int maxRay = param.reflectionsMax;
+	if (!param.imageSwitches.raytracedReflections) maxRay = 0;
+	sReflect *reflectBuff = new sReflect[maxRay + 2];
+
+	for(int i = 0; i < maxRay + 1; i++)
+	{
+		//rayMarching buffers
+		reflectBuff[i].stepBuff = new sStep[10002];
+		reflectBuff[i].buffCount = 0;
+	}
 
 	//calculating vectors for AmbientOcclusion
 	sVectorsAround *vectorsAround = new sVectorsAround[10000];
@@ -337,9 +345,11 @@ void *MainThread(void *ptr)
 					if (programClosed)
 					{
 						delete[] vectorsAround;
-						delete[] stepBuff;
-						delete[] distanceBuffRefl;
-						delete[] stepBuffRefl;
+						for(int i = 0; i < maxRay + 1; i++)
+						{
+							delete[] reflectBuff[i].stepBuff;
+						}
+						delete[] reflectBuff;
 						return NULL;
 					}
 
@@ -425,61 +435,115 @@ void *MainThread(void *ptr)
 						CVector3 point;
 						double depth;
 
-						if (!hemisphereCut)
-						{
-							point = RayMarching(&param, &calcParam, start, viewVector, maxDepth, true, stepBuff, &buffCount, &distThresh, &lastDist, &found, &depth);
-						}
-						else
-						{
-							found = false;
-						}
+						CVector3 startRay = start;
 
-						CVector3 lightVector = shadowVector;
-
-						sShaderInputData shaderInputData;
-						shaderInputData.calcParam = &calcParam;
-						shaderInputData.param = &param;
-						shaderInputData.dist_thresh = distThresh;
-						shaderInputData.lightVect =lightVector;
-						shaderInputData.point = point;
-						shaderInputData.viewVector = viewVector;
-						shaderInputData.vectorsCount = vectorsCount;
-						shaderInputData.vectorsAround = vectorsAround;
-						shaderInputData.lastDist = lastDist;
-						shaderInputData.envMappingTexture = param.envmapTexture;
-						shaderInputData.depth = depth;
-						shaderInputData.stepCount = buffCount;
-						shaderInputData.stepBuff = stepBuff;
-
-						sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
-						sShaderOutput backgroudShader = { 0.0, 0.0, 0.0 };
+						sShaderOutput resultShader = { 0.0, 0.0, 0.0 };
 						sShaderOutput objectColour = { 0.0, 0.0, 0.0 };
-						sShaderOutput volumetricShader  = { 0.0, 0.0, 0.0 };
 
-						//if fractal surface was found
-						if (found)
+						int rayEnd = 0;
+						for (int ray = 0; ray <= maxRay; ray++)
 						{
-							objectShader = ObjectShader(shaderInputData, &objectColour);
+							reflectBuff[ray].start = startRay;
+							reflectBuff[ray].viewVector = viewVector;
 
-						}//end if found
-						else
-						{
-							backgroudShader = BackgroundShader(shaderInputData);
-							// ------------------- to do
-							depth = 1e100;
+							reflectBuff[ray].found = false;
+							reflectBuff[ray].buffCount = 0;
+
+							if (!hemisphereCut)
+							{
+								point = RayMarching(&param, &calcParam, startRay, viewVector, maxDepth, true, reflectBuff[ray].stepBuff, &reflectBuff[ray].buffCount, &distThresh,
+										&reflectBuff[ray].lastDist, &reflectBuff[ray].found, &reflectBuff[ray].depth);
+							}
+							else
+							{
+								reflectBuff[ray].found = false;
+							}
+							reflectBuff[ray].point = point;
+							reflectBuff[ray].distThresh = distThresh;
+
+							rayEnd = ray;
+							if(!reflectBuff[ray].found) break;
+
+							//calculate new ray direction and start point
+							startRay = point;
+							sShaderInputData shaderInputData;
+							shaderInputData.calcParam = &calcParam;
+							shaderInputData.param = &param;
+							shaderInputData.dist_thresh = reflectBuff[ray].distThresh;
+							shaderInputData.lightVect = shadowVector;
+							shaderInputData.point = point;
+							shaderInputData.viewVector = viewVector;
+							CVector3 vn = CalculateNormals(shaderInputData);
+							viewVector = viewVector - vn * viewVector.Dot(vn)*2.0;
+							startRay = startRay + viewVector * reflectBuff[ray].distThresh;
 						}
 
-						sShaderOutput pixel;
-						pixel.R = objectShader.R + backgroudShader.R;
-						pixel.G = objectShader.G + backgroudShader.G;
-						pixel.B = objectShader.B + backgroudShader.B;
+						for(int ray = rayEnd; ray >= 0; ray--)
+						{
 
-						volumetricShader = VolumetricShader(shaderInputData, pixel);
+							sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
+							sShaderOutput backgroudShader = { 0.0, 0.0, 0.0 };
+							sShaderOutput volumetricShader  = { 0.0, 0.0, 0.0 };
+							sShaderOutput specular  = { 0.0, 0.0, 0.0 };
+
+							CVector3 lightVector = shadowVector;
+
+							sShaderInputData shaderInputData;
+							shaderInputData.calcParam = &calcParam;
+							shaderInputData.param = &param;
+							shaderInputData.dist_thresh = reflectBuff[ray].distThresh;
+							shaderInputData.lightVect = lightVector;
+							shaderInputData.point = reflectBuff[ray].point;
+							shaderInputData.viewVector = reflectBuff[ray].viewVector;
+							shaderInputData.vectorsCount = vectorsCount;
+							shaderInputData.vectorsAround = vectorsAround;
+							shaderInputData.lastDist = reflectBuff[ray].lastDist;
+							shaderInputData.envMappingTexture = param.envmapTexture;
+							shaderInputData.depth = reflectBuff[ray].depth;
+							shaderInputData.stepCount = reflectBuff[ray].buffCount;
+							shaderInputData.stepBuff = reflectBuff[ray].stepBuff;
+
+							//if fractal surface was found
+							if (reflectBuff[ray].found)
+							{
+								objectShader = ObjectShader(shaderInputData, &objectColour, &specular);
+
+							} //end if found
+							else
+							{
+								backgroudShader = BackgroundShader(shaderInputData);
+								// ------------------- to do
+								reflectBuff[ray].depth = 1e100;
+							}
+
+							sShaderOutput pixel;
+
+							if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
+							{
+
+								pixel.R = resultShader.R * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.R + backgroudShader.R) + specular.R;
+								pixel.G = resultShader.G * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.G + backgroudShader.G) + specular.G;
+								pixel.B = resultShader.B * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.B + backgroudShader.B) + specular.B;
+
+							}
+							else
+							{
+								pixel.R = objectShader.R + backgroudShader.R + specular.R;
+								pixel.G = objectShader.G + backgroudShader.G + specular.G;
+								pixel.B = objectShader.B + backgroudShader.B + specular.B;
+							}
+
+							volumetricShader = VolumetricShader(shaderInputData, pixel);
+							resultShader.R = volumetricShader.R;
+							resultShader.G = volumetricShader.G;
+							resultShader.B = volumetricShader.B;
+
+						}
 
 						sRGBfloat pixel2;
-						pixel2.R = volumetricShader.R;
-						pixel2.G = volumetricShader.G;
-						pixel2.B = volumetricShader.B;
+						pixel2.R = resultShader.R;
+						pixel2.G = resultShader.G;
+						pixel2.B = resultShader.B;
 
 						sRGB8 colour;
 						colour.R = objectColour.R * 255;
@@ -488,7 +552,7 @@ void *MainThread(void *ptr)
 
 						image->PutPixelImage(xScr, yScr, pixel2);
 						image->PutPixelColour(xScr, yScr, colour);
-						image->PutPixelZBuffer(xScr, yScr, depth);
+						image->PutPixelZBuffer(xScr, yScr, reflectBuff[0].depth);
 					}
 
 					else
@@ -597,9 +661,12 @@ void *MainThread(void *ptr)
 	}					// next pass
 	WriteLogDouble("Thread finished", thread_number);
 	delete[] vectorsAround;
-	delete[] stepBuff;
-	delete[] distanceBuffRefl;
-	delete[] stepBuffRefl;
+
+	for(int i = 0; i < maxRay + 1; i++)
+	{
+		delete[] reflectBuff[i].stepBuff;
+	}
+	delete[] reflectBuff;
 
 	return 0;
 }
