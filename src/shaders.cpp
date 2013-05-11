@@ -14,7 +14,7 @@ sLight *Lights;
 int lightsPlaced = 0;
 
 
-sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
+sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour, sShaderOutput *specularOut)
 {
 	sShaderOutput output;
 
@@ -90,13 +90,17 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour)
 	}
 
 	//total shader
-	output.R = envMapping.R * ambient.R + (ambient2.R + mainLight.R * shade.R * shadow.R) * colour.R + mainLight.R * specular.R * shadow.R;
-	output.G = envMapping.G * ambient.G + (ambient2.G + mainLight.G * shade.G * shadow.G) * colour.G + mainLight.G * specular.G * shadow.G;
-	output.B = envMapping.B * ambient.B + (ambient2.B + mainLight.B * shade.B * shadow.B) * colour.B + mainLight.B * specular.B * shadow.B;
+	output.R = envMapping.R * ambient.R + (ambient2.R + mainLight.R * shade.R * shadow.R) * colour.R;
+	output.G = envMapping.G * ambient.G + (ambient2.G + mainLight.G * shade.G * shadow.G) * colour.G;
+	output.B = envMapping.B * ambient.B + (ambient2.B + mainLight.B * shade.B * shadow.B) * colour.B;
 
-	output.R += (auxLights.R + fakeLights.R) * colour.R + auxLightsSpecular.R + fakeLightsSpecular.R;
-	output.G += (auxLights.G + fakeLights.G) * colour.G + auxLightsSpecular.G + fakeLightsSpecular.G;
-	output.B += (auxLights.B + fakeLights.B) * colour.B + auxLightsSpecular.B + fakeLightsSpecular.B;
+	output.R += (auxLights.R + fakeLights.R) * colour.R;
+	output.G += (auxLights.G + fakeLights.G) * colour.G;
+	output.B += (auxLights.B + fakeLights.B) * colour.B;
+
+	(*specularOut).R = auxLightsSpecular.R + fakeLightsSpecular.R + mainLight.R * specular.R * shadow.R;
+	(*specularOut).G = auxLightsSpecular.G + fakeLightsSpecular.G + mainLight.G * specular.G * shadow.G;
+	(*specularOut).B = auxLightsSpecular.B + fakeLightsSpecular.B + mainLight.B * specular.B * shadow.B;
 
 	return output;
 }
@@ -228,7 +232,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 			fogGtemp = (fogGtemp * kn + input.param->fogColour3.G * k2);
 			fogBtemp = (fogBtemp * kn + input.param->fogColour3.B * k2);
 
-			double fogDensity = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
+			double fogDensity = 0.3 * fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
 			if(fogDensity > 1) fogDensity = 1.0;
 
 			output.R = fogDensity * fogRtemp / 65536.0 + (1.0 - fogDensity) * output.R;
@@ -316,6 +320,9 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 				}
 			}
 		}
+
+		//iteration fog
+
 
 	} //next stepCount
 

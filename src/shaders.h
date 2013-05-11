@@ -46,7 +46,7 @@ struct sShaderInputData
 extern sLight *Lights;
 extern int lightsPlaced;
 
-sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour);
+sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour, sShaderOutput *specularOut);
 sShaderOutput BackgroundShader(sShaderInputData input);
 sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel);
 
