@@ -192,11 +192,12 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 	int numberOfLights = lightsPlaced;
 	if (numberOfLights < 4) numberOfLights = 4;
 
-	for(int i = input.stepCount-1; i >=0; i--)
+	for(int index = input.stepCount-1; index >=0; index--)
 	{
-		double step = input.stepBuff[i].step;
-		double distance = input.stepBuff[i].distance;
-		CVector3 point = input.stepBuff[i].point;
+		double step = input.stepBuff[index].step;
+		double distance = input.stepBuff[index].distance;
+		CVector3 point = input.stepBuff[index].point;
+		input.point = point;
 
 		//----------------------- basic fog
 		if(input.param->imageSwitches.fogEnabled)
@@ -236,56 +237,87 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 		}
 
 		//------------------ visible light
-		double lowestLightDist = 1e10;
-		for (int i = 0; i < numberOfLights; ++i)
+		if (input.param->doubles.auxLightVisibility > 0)
 		{
-			if (i < input.param->auxLightNumber || Lights[i].enabled)
-			{
-				CVector3 lightDistVect = point - Lights[i].position;
-				double lightDist = lightDistVect.Length();
-				double lightSize = Lights[i].intensity * input.param->doubles.auxLightIntensity * input.param->doubles.auxLightVisibility;
-				double r2 = lightDist / lightSize;
-				if(r2 < lowestLightDist) lowestLightDist = r2;
-			}
-		}
-
-		//small steps close to light source to improve accuracy
-		int smallSteps = 0;
-		int smallStep_start = 0;
-		int smallStep_end = 1;
-		double step2 = step;
-
-		smallSteps = 10.0 * step / (lowestLightDist + 0.1);
-		if(smallSteps > 0)
-		{
-			smallStep_start = 1;
-			smallStep_end = smallSteps + 1;
-			step2 = step / (smallSteps + 1.0);
-		}
-
-		for(int smallStep = smallStep_start; smallStep < smallStep_end; smallStep++)
-		{
-			CVector3 point2 = point - input.viewVector * step2 * smallStep;
-
+			double lowestLightDist = 1e10;
 			for (int i = 0; i < numberOfLights; ++i)
 			{
 				if (i < input.param->auxLightNumber || Lights[i].enabled)
 				{
-					CVector3 lightDistVect = point2 - Lights[i].position;
+					CVector3 lightDistVect = point - Lights[i].position;
 					double lightDist = lightDistVect.Length();
 					double lightSize = Lights[i].intensity * input.param->doubles.auxLightIntensity * input.param->doubles.auxLightVisibility;
 					double r2 = lightDist / lightSize;
-					if (r2 > 1.0) r2 = 1.0;
-					double bellFunction = (cos(r2 * M_PI) + 1.0) / (r2 * r2 + 0.02) *0.3;
-					double lightDensity = step2 * bellFunction / lightSize;
+					if (r2 < lowestLightDist) lowestLightDist = r2;
+				}
+			}
 
-					output.R += lightDensity * Lights[i].colour.R / 65536.0;
-					output.G += lightDensity * Lights[i].colour.G / 65536.0;
-					output.B += lightDensity * Lights[i].colour.B / 65536.0;
+			//small steps close to light source to improve accuracy
+			int smallSteps = 0;
+			int smallStep_start = 0;
+			int smallStep_end = 1;
+			double step2 = step;
+
+			smallSteps = 10.0 * step / (lowestLightDist + 0.1);
+			if (smallSteps > 0)
+			{
+				smallStep_start = 1;
+				smallStep_end = smallSteps + 1;
+				step2 = step / (smallSteps + 1.0);
+			}
+
+			for (int smallStep = smallStep_start; smallStep < smallStep_end; smallStep++)
+			{
+				CVector3 point2 = point - input.viewVector * step2 * smallStep;
+
+				for (int i = 0; i < numberOfLights; ++i)
+				{
+					if (i < input.param->auxLightNumber || Lights[i].enabled)
+					{
+						CVector3 lightDistVect = point2 - Lights[i].position;
+						double lightDist = lightDistVect.Length();
+						double lightSize = Lights[i].intensity * input.param->doubles.auxLightIntensity * input.param->doubles.auxLightVisibility;
+						double r2 = lightDist / lightSize;
+						if (r2 > 1.0) r2 = 1.0;
+						double bellFunction = (cos(r2 * M_PI) + 1.0) / (r2 * r2 + 0.02) * 0.3;
+						double lightDensity = step2 * bellFunction / lightSize;
+
+						output.R += lightDensity * Lights[i].colour.R / 65536.0;
+						output.G += lightDensity * Lights[i].colour.G / 65536.0;
+						output.B += lightDensity * Lights[i].colour.B / 65536.0;
+					}
 				}
 			}
 		}
-	}
+		//---------------------- volumetric lights with shadows in fog
+
+		for (int i = 0; i < 5; i++)
+		{
+			if (i == 0 && input.param->volumetricLightEnabled[0])
+			{
+				sShaderOutput shadowOutputTemp = MainShadow(input);
+				output.R += shadowOutputTemp.R * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.R / 65536.0;
+				output.G += shadowOutputTemp.G * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.G / 65536.0;
+				output.B += shadowOutputTemp.B * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.B / 65536.0;
+			}
+			if (i > 0)
+			{
+				if (Lights[i - 1].enabled && input.param->volumetricLightEnabled[i])
+				{
+					CVector3 d = Lights[i - 1].position - point;
+					double distance = d.Length();
+					double distance2 = distance * distance;
+					CVector3 lightVectorTemp = d;
+					lightVectorTemp.Normalize();
+					double light = AuxShadow(input, distance, lightVectorTemp);
+					output.R += light * Lights[i - 1].colour.R / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
+					output.G += light * Lights[i - 1].colour.G / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
+					output.B += light * Lights[i - 1].colour.B / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
+				}
+			}
+		}
+
+	} //next stepCount
 
 
 	return output;
