@@ -88,6 +88,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
 	int counter = 0;
+	double step = 0;
 	*buffCount = 0;
 
 	for (int i = 0; i < 10000; i++)
@@ -112,8 +113,8 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 			break;
 		}
 
-		double step = (dist - 0.5 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
 		stepBuff[i].step = step;
+		step = (dist - 0.5 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
 		stepBuff[i].point = point;
 		(*buffCount)++;
 		scan += step;
