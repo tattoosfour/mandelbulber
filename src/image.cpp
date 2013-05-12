@@ -57,14 +57,14 @@ void NewPalette(sRGB *p, double saturation)
 
 }
 
-void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
+void PostRendering_DOF(cImage *image, double deep, double neutral)
 {
 	isPostRendering = true;
 
 	int width = image->GetWidth();
 	int height = image->GetHeight();
 
-	sRGBfloat *temp_image = new sRGBfloat[width * height];
+	sRGB16 *temp_image = new sRGB16[width * height];
 	unsigned short *temp_alpha = new unsigned short[width * height];
 	sSortZ *temp_sort = new sSortZ[width * height];
 	for (int y = 0; y < height; y++)
@@ -72,7 +72,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		for (int x = 0; x < width; x++)
 		{
 			int ptr = x + y * width;
-			temp_image[ptr] = image->GetPixelImage(x, y);
+			temp_image[ptr] = image->GetPixelImage16(x, y);
 			temp_alpha[ptr] = image->GetPixelAlpha(x, y);
 			temp_sort[ptr].z = image->GetPixelZBuffer(x, y);
 			temp_sort[ptr].i = ptr;
@@ -95,8 +95,6 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 			gtk_main_iteration();
 	}
 
-	double min = -1.0 / persp;
-
 	//Randomize Z-buffer
 	int imgSize = height*width;
 	for(int i=imgSize-1; i>=0; i--)
@@ -104,7 +102,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		sSortZ temp;
 		temp = temp_sort[i];
 		double z1 = temp.z;
-		double size1 = (z1 - neutral) / (z1 - min) * deep;
+		double size1 = (z1 - neutral) / z1 * deep;
 
 		int randomStep = i;
 
@@ -116,7 +114,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 			if (ii <= 0) ii = 0;
 			sSortZ temp2 = temp_sort[ii];
 			double z2 = temp2.z;
-			double size2 = (z2 - neutral) / (z2 - min) * deep;
+			double size2 = (z2 - neutral) / z2 * deep;
 
 			if(size1 == 0 && size2 ==0) done = true;
 
@@ -170,10 +168,10 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 		int x = ii % width;
 		int y = ii / width;
 		double z = image->GetPixelZBuffer(x, y);
-		double blur = fabs((double) z - neutral) / (z - min) * deep;
+		double blur = fabs((double) z - neutral) / z * deep;
 		if (blur > 100) blur = 100.0;
 		int size = blur;
-		sRGBfloat center = temp_image[x + y * width];
+		sRGB16 center = temp_image[x + y * width];
 		unsigned short center_alpha = temp_alpha[x + y * width];
 		double factor = blur * blur * sqrt(blur)* M_PI/3.0;
 
@@ -192,14 +190,14 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 					if (op > 0.0)
 					{
 						double opN = 1.0 - op;
-						sRGBfloat old = image->GetPixelImage(xx, yy);
+						sRGB16 old = image->GetPixelImage16(xx, yy);
 						unsigned short old_alpha = image->GetPixelAlpha(xx, yy);
-						sRGBfloat pixel;
+						sRGB16 pixel;
 						pixel.R = old.R * opN + center.R * op;
 						pixel.G = old.G * opN + center.G * op;
 						pixel.B = old.B * opN + center.B * op;
 						unsigned short alpha = old_alpha * opN + center_alpha * op;
-						image->PutPixelImage(xx, yy, pixel);
+						image->PutPixelImage16(xx, yy, pixel);
 						image->PutPixelAlpha(xx, yy, alpha);
 					}
 				}
@@ -216,7 +214,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral, double persp)
 
 			if(refreshCount > 600)
 			{
-				image->CompileImage();
+				//image->CompileImage();
 				image->ConvertTo8bit();
 				image->UpdatePreview();
 				image->RedrawInWidget(renderWindow.drawingArea);
