@@ -357,7 +357,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 
 		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
-		if (!input.param->imageSwitches.iterFogEnabled)
+		if (!input.param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled)
 		{
 			double angle = (dist - input.dist_thresh) / i;
 			if (angle < 0) angle = 0;
@@ -379,7 +379,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 		}
 		shadowTemp -= opacity * (factor - i) / factor;
 
-		if (dist < input.dist_thresh || max_iter || shadowTemp < 0.0)
+		if (dist < input.dist_thresh || shadowTemp < 0.0)
 		{
 			shadowTemp -= (factor - i) / factor;
 			if (!input.param->penetratingLights) shadowTemp = 0.0;
@@ -387,7 +387,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 			break;
 		}
 	}
-	if (input.param->imageSwitches.iterFogEnabled)
+	if (input.param->imageSwitches.iterFogEnabled || input.calcParam->limits_enabled)
 	{
 		shadow.R = shadowTemp;
 		shadow.G = shadowTemp;
