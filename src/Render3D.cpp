@@ -99,7 +99,14 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		point = start + direction * scan;
 		bool max_iter = false;
 
-		distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality + distThreshInit;
+		if (calcParam->constantDEThreshold)
+		{
+			distThresh = param->doubles.quality;
+		}
+		else
+		{
+			distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality + distThreshInit;
+		}
 		calcParam->doubles.detailSize = distThresh;
 		dist = CalculateDistance(point, *calcParam, &max_iter);
 

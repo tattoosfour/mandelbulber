@@ -196,6 +196,14 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 	int numberOfLights = lightsPlaced;
 	if (numberOfLights < 4) numberOfLights = 4;
 
+	//glow init
+  double glow = input.stepCount * input.param->doubles.imageAdjustments.glow_intensity / 512.0;
+  double glowN = 1.0 - glow;
+  if (glowN < 0.0) glowN = 0.0;
+  double glowR = (input.param->effectColours.glow_color1.R * glowN + input.param->effectColours.glow_color2.R * glow) / 65536.0;
+  double glowG = (input.param->effectColours.glow_color1.G * glowN + input.param->effectColours.glow_color2.G * glow) / 65536.0;
+  double glowB = (input.param->effectColours.glow_color1.B * glowN + input.param->effectColours.glow_color2.B * glow) / 65536.0;
+
 	for(int index = input.stepCount-1; index >=0; index--)
 	{
 		double step = input.stepBuff[index].step;
@@ -321,7 +329,10 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 			}
 		}
 
-		//iteration fog
+		//------------------- glow
+		output.R += glow * step / input.depth * glowR;
+		output.G += glow * step / input.depth * glowG;
+		output.B += glow * step / input.depth * glowB;
 
 
 	} //next stepCount
