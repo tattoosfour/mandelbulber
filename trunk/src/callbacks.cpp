@@ -306,27 +306,13 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			}
 			else if(clickMode == 3) //fog visibility distance
 			{
-				double fogFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
-				double fogFront2 = pow(10, fogFront / 10 - 2.0) - 10.0;
-
-				if(y > fogFront2)
-				{
-					double fog = (log10(y - fogFront2) + 2.0) * 10.0;
+					double fog = (log10(y*0.5) + 16.0) * 10.0;
 					gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), fog);
-				}
-				else
-				{
-					gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), 0.1);
-				}
 			}
 			else if(clickMode == 4) //DOF point
 			{
-				double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
-
-				//double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / persp;
-
-				double dof = (log10(y + 1.0/persp) + 2.0) * 10;
-				gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus),dof);
+				double dof = (log10(y) + 16.0) * 10.0;
+				gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus), dof);
 			}
 		}
 	}
@@ -1168,14 +1154,13 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 	double DOFFocus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
 	double DOFRadius = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius));
 	bool DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
-	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
 	if (!isRendering)
 	{
 		mainImage.CompileImage();
 		if (DOFEnabled)
 		{
-			double DOF_focus = pow(10, DOFFocus / 10.0 - 2.0) - 1.0 / persp;
-			PostRendering_DOF(&mainImage, DOFRadius * mainImage.GetWidth() / 1000.0, DOF_focus, persp);
+			double DOF_focus = pow(10, DOFFocus / 10.0 - 16.0);
+			PostRendering_DOF(&mainImage, DOFRadius * mainImage.GetWidth() / 1000.0, DOF_focus);
 		}
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();

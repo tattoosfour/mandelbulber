@@ -520,7 +520,7 @@ void *MainThread(void *ptr)
 							{
 								backgroudShader = BackgroundShader(shaderInputData);
 								// ------------------- to do
-								reflectBuff[ray].depth = 1e100;
+								reflectBuff[ray].depth = 1e20;
 							}
 
 							sShaderOutput pixel;
@@ -559,7 +559,7 @@ void *MainThread(void *ptr)
 
 						image->PutPixelImage(xScr, yScr, pixel2);
 						image->PutPixelColour(xScr, yScr, colour);
-						image->PutPixelZBuffer(xScr, yScr, reflectBuff[0].depth);
+						image->PutPixelZBuffer(xScr, yScr, (float)reflectBuff[0].depth);
 					}
 
 					else
@@ -1066,12 +1066,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		WriteLog("Image compiled");
 		if (param.DOFEnabled && !programClosed && !netRender->IsClient())
 		{
-			double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 2.0) - 1.0 / param.doubles.persp;
-			PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus, param.doubles.persp);
+			double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 16.0);
+			PostRendering_DOF(image, param.doubles.DOFRadius * width / 1000.0, DOF_focus);
 			WriteLog("DOF rendered");
 		}
-		PostRenderingLights(image, &param);
-		WriteLog("Lights rendered");
 
 		if (!noGUI)
 		{

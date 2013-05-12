@@ -184,7 +184,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 	output.B = oldPixel.B;
 
 	//basic fog init
-  double fogVisibility = pow(10.0, input.param->doubles.imageAdjustments.fogVisibility / 10 - 18.0);
+  double fogVisibility = pow(10.0, input.param->doubles.imageAdjustments.fogVisibility / 10 - 16.0);
 
   //volumetric fog init
 	double colourThresh = input.param->doubles.fogColour1Distance;
@@ -197,7 +197,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 	if (numberOfLights < 4) numberOfLights = 4;
 
 	//glow init
-  double glow = input.stepCount * input.param->doubles.imageAdjustments.glow_intensity / 512.0;
+  double glow = input.stepCount * input.param->doubles.imageAdjustments.glow_intensity / 512.0 * input.param->doubles.DE_factor;
   double glowN = 1.0 - glow;
   if (glowN < 0.0) glowN = 0.0;
   double glowR = (input.param->effectColours.glow_color1.R * glowN + input.param->effectColours.glow_color2.R * glow) / 65536.0;
@@ -251,6 +251,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 		//------------------ visible light
 		if (input.param->doubles.auxLightVisibility > 0)
 		{
+			double lowestLightSize = 1e10;
 			double lowestLightDist = 1e10;
 			for (int i = 0; i < numberOfLights; ++i)
 			{
@@ -260,7 +261,11 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 					double lightDist = lightDistVect.Length();
 					double lightSize = Lights[i].intensity * input.param->doubles.auxLightIntensity * input.param->doubles.auxLightVisibility;
 					double r2 = lightDist / lightSize;
-					if (r2 < lowestLightDist) lowestLightDist = r2;
+					if (r2 < lowestLightSize)
+					{
+							lowestLightSize = r2;
+							lowestLightDist = lightDist;
+					}
 				}
 			}
 
@@ -270,7 +275,8 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel)
 			int smallStep_end = 1;
 			double step2 = step;
 
-			smallSteps = 10.0 * step / (lowestLightDist + 0.1);
+			smallSteps = 10.0 * step / (lowestLightDist + 1.0e-20);
+			if(smallSteps > 50) smallSteps = 50;
 			if (smallSteps > 0)
 			{
 				smallStep_start = 1;

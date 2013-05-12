@@ -45,7 +45,7 @@ void cImage::AllocMem(void)
 		imageFloat =  new sRGBfloat[width * height];
 		image16 = new sRGB16[width * height];
 		image8 = new sRGB8[width * height];
-		zBuffer = new double[width * height];
+		zBuffer = new float[width * height];
 		alphaBuffer = new unsigned short[width * height];
 		colourBuffer = new sRGB8[width * height];
 		ClearImage();
@@ -160,7 +160,7 @@ int cImage::GetUsedMB(void)
 {
 	long int mb = 0;
 
-	long int zBufferSize = (long int) width * height * sizeof(double);
+	long int zBufferSize = (long int) width * height * sizeof(float);
 	long int alphaSize = (long int) width * height * sizeof(unsigned short);
 	long int imageFloatSize = (long int) width * height * sizeof(sRGBfloat);
 	long int image16Size = (long int) width * height * sizeof(sRGB16);
@@ -321,7 +321,7 @@ void cImage::Squares(int y, int pFactor)
 	for (int x = 0; x <= width - pFactor; x += pFactor)
 	{
 		sRGBfloat pixelTemp = imageFloat[x + y * width];
-		double zBufferTemp = zBuffer[x + y * width];
+		float zBufferTemp = zBuffer[x + y * width];
 		sRGB8 colourTemp = colourBuffer[x + y * width];
 		unsigned short alphaTemp = alphaBuffer[x + y * width];
 

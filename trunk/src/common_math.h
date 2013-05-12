@@ -30,7 +30,7 @@ struct sVector
 
 struct sSortZ
 {
-	double z;
+	float z;
 	int i;
 };
 
