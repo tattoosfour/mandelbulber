@@ -31,6 +31,8 @@ struct sStep
 	double distance;
 	double step;
 	CVector3 point;
+	int iters;
+	double distThresh;
 };
 
 struct sReflect

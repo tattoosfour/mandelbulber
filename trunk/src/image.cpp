@@ -287,6 +287,8 @@ void ThreadSSAO(void *ptr)
 		for (int x = 0; x < width; x += progressive)
 		{
 			double z = image->GetPixelZBuffer(x, y);
+			unsigned short opacity16 = image->GetPixelOpacity(x, y);
+			double opacity = opacity16 / 65535.0;
 			double total_ambient = 0;
 
 			if (z < 1e19)
@@ -387,9 +389,9 @@ void ThreadSSAO(void *ptr)
 
 			sRGBfloat pixel = image->GetPixelImage(x, y);
 			sRGB8 colour = image->GetPixelColor(x, y);
-			pixel.R += colour.R / 256.0 * total_ambient * intensity;
-			pixel.G += colour.G / 256.0 * total_ambient * intensity;
-			pixel.B += colour.B / 256.0 * total_ambient * intensity;
+			pixel.R += colour.R / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			pixel.G += colour.G / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			pixel.B += colour.B / 256.0 * total_ambient * intensity * (1.0 - opacity);
 
 			image->PutPixelImage(x, y, pixel);
 		}
@@ -562,7 +564,11 @@ void DrawPalette(sRGB *palette)
 		{
 			int number = (int) (i * 256.0 / colWidth + paletteOffset * 256.0);
 			sRGB color = IndexToColour(number, palette);
-			GdkColor gdk_color = { 0, color.R * 256, color.G * 256, color.B * 256 };
+			GdkColor gdk_color;
+			gdk_color.red = color.R * 256;
+			gdk_color.green = color.G * 256;
+			gdk_color.blue = color.B * 256;
+			gdk_color.pixel = 0;
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
 			gdk_draw_line(dareaPalette->window, GC, i, 0, i, 30);
 		}

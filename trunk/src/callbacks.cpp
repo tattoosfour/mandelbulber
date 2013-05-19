@@ -460,7 +460,7 @@ void StopRendering(GtkWidget *widget, gpointer data)
 	{
 		for (int i = 0; i < netRender->getNoOfClients(); i++)
 		{
-			netRender->sendDataToClient(NULL, 0, "stp", i, 0);
+			netRender->sendDataToClient(NULL, 0, (char*)"stp", i, 0);
 		}
 	}
 }
@@ -487,7 +487,6 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 	//if (!isRendering)
 	//{
 		mainImage.CompileImage();
-		PostRenderingLights(&mainImage, &params);
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
