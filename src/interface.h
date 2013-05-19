@@ -572,6 +572,7 @@ struct sInterface
 	GtkWidget *edit_fakeLightsVisibilitySize;
 	GtkWidget *edit_fakeLightsMinIter;
 	GtkWidget *edit_fakeLightsMaxIter;
+	GtkWidget *edit_shadowConeAngle;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

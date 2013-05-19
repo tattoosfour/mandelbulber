@@ -59,6 +59,7 @@ struct sParamRenderD
 	double fakeLightsIntensity;
 	double fakeLightsVisibility;
 	double fakeLightsVisibilitySize;
+	double shadowConeAngle;
 
 	sImageAdjustments imageAdjustments;
 };

@@ -176,6 +176,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "ambient", params.doubles.imageAdjustments.ambient, 0.0, compare);
 	fprintfDot(fileSettings, "reflect", params.doubles.imageAdjustments.reflect, 0.0, compare);
 	fprintfDot(fileSettings, "shadows_intensity", params.doubles.imageAdjustments.directLight, 0.7, compare);
+	fprintfDot(fileSettings, "shadows_cone_angle", params.doubles.shadowConeAngle, 1.0, compare);
 	fprintfDot(fileSettings, "ambient_occlusion", params.doubles.imageAdjustments.globalIlum, 1.0, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_quality", params.globalIlumQuality, 4, compare);
 	fprintfDot(fileSettings, "ambient_occlusion_fast_tune", params.doubles.fastAoTune, 1.0, compare);
@@ -759,6 +760,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "ambient")) params.doubles.imageAdjustments.ambient = atof2(str2);
 	else if (!strcmp(str1, "reflect")) params.doubles.imageAdjustments.reflect = atof2(str2);
 	else if (!strcmp(str1, "shadows_intensity")) params.doubles.imageAdjustments.directLight = atof2(str2);
+	else if (!strcmp(str1, "shadows_cone_angle")) params.doubles.shadowConeAngle = atof2(str2);
 	else if (!strcmp(str1, "ambient_occlusion")) params.doubles.imageAdjustments.globalIlum = atof2(str2);
 	else if (!strcmp(str1, "ambient_occlusion_quality")) params.globalIlumQuality = atoi(str2);
 	else if (!strcmp(str1, "ambient_occlusion_fast_tune")) params.doubles.fastAoTune = atof2(str2);

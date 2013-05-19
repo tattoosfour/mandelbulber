@@ -531,6 +531,8 @@ void ReadInterface(sParamRender *params)
 		params->fractal.fakeLightsMinIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMinIter)));
 		params->fractal.fakeLightsMaxIter = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_fakeLightsMaxIter)));
 
+		params->doubles.shadowConeAngle = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shadowConeAngle)));
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1 = GdkColor2sRGB(color);
@@ -911,6 +913,8 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsOrbitTrapZ), DoubleToString(params->fractal.doubles.fakeLightsOrbitTrap.z));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsMinIter), DoubleToString(params->fractal.fakeLightsMinIter));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_fakeLightsMaxIter), DoubleToString(params->fractal.fakeLightsMaxIter));
+
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_shadowConeAngle), DoubleToString(params->doubles.shadowConeAngle));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkAmbientOcclusion), params->global_ilumination);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFastAmbientOcclusion), params->fastGlobalIllumination);
@@ -1784,6 +1788,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_fakeLightsVisibility = gtk_entry_new();
 	Interface.edit_fakeLightsVisibilitySize = gtk_entry_new();
 
+	Interface.edit_shadowConeAngle = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -2396,6 +2402,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("2,0", "ambient occlusion:", 5, Interface.edit_ambient_occlusion), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("4", "AO quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("1,0", "Fast AO tune:", 5, Interface.edit_fastAoTune), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShading), CreateEdit("10,0", "Shadow cone angle:", 5, Interface.edit_shadowConeAngle), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxEffects), Interface.boxShading2, false, false, 1);
 
