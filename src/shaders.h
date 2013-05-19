@@ -48,7 +48,7 @@ extern int lightsPlaced;
 
 sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour, sShaderOutput *specularOut);
 sShaderOutput BackgroundShader(sShaderInputData input);
-sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel);
+sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, sShaderOutput *opacityOut);
 
 sShaderOutput MainShadow(sShaderInputData &input);
 sShaderOutput AmbientOcclusion(sShaderInputData &input);
@@ -64,11 +64,7 @@ sShaderOutput LightShading(sShaderInputData &input, sLight light, int number, sS
 sShaderOutput AuxLightsShader(sShaderInputData &input, sShaderOutput *specularOut);
 double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector);
 sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec);
-
-sShaderOutput VolumetricLight(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom, CVector3 lightVector);
-sShaderOutput VolumetricFog(sParamRender *param, int buffCount, double *distanceBuff, double *stepBuff, double *densityOut);
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
-void PostRenderingLights(cImage *image, sParamRender *fractParam);
 double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp);
 sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
 		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel);

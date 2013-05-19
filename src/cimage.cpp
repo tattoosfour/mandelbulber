@@ -31,6 +31,7 @@ cImage::~cImage()
 	delete[] image16;
 	delete[] image8;
 	delete[] alphaBuffer;
+	delete[] opacityBuffer;
 	delete[] colourBuffer;
 	delete[] zBuffer;
 	delete[] gammaTable;
@@ -47,6 +48,7 @@ void cImage::AllocMem(void)
 		image8 = new sRGB8[width * height];
 		zBuffer = new float[width * height];
 		alphaBuffer = new unsigned short[width * height];
+		opacityBuffer = new unsigned short[width * height];
 		colourBuffer = new sRGB8[width * height];
 		ClearImage();
 	}
@@ -69,6 +71,7 @@ void cImage::ChangeSize(int w, int h)
 	delete[] image16;
 	delete[] image8;
 	delete[] alphaBuffer;
+	delete[] opacityBuffer;
 	delete[] colourBuffer;
 	delete[] zBuffer;
 	width = w;
@@ -82,7 +85,8 @@ void cImage::ClearImage(void)
 	memset(image16, 0, (unsigned long int)sizeof(sRGB16) * width * height);
 	memset(image8, 0, (unsigned long int)sizeof(sRGB8) * width * height);
 	memset(alphaBuffer, 0, (unsigned long int)sizeof(unsigned short) * width * height);
-	memset(colourBuffer, 0, (unsigned long int)sizeof(unsigned short) * width * height);
+	memset(opacityBuffer, 0, (unsigned long int)sizeof(unsigned short) * width * height);
+	memset(colourBuffer, 0, (unsigned long int)sizeof(sRGB8) * width * height);
 
 	for (long int i = 0; i < width * height; ++i)
 		zBuffer[i] = 1e20;
@@ -166,7 +170,8 @@ int cImage::GetUsedMB(void)
 	long int image16Size = (long int) width * height * sizeof(sRGB16);
 	long int image8Size = (long int) width * height * sizeof(sRGB8);
 	long int colorSize = (long int) width * height * sizeof(sRGB8);
-	mb = (long int) (zBufferSize + alphaSize + image16Size + image8Size + imageFloatSize + colorSize) / 1024 / 1024;
+	long int opacitySize = (long int) width * height * sizeof(unsigned short);
+	mb = (long int) (zBufferSize + alphaSize + image16Size + image8Size + imageFloatSize + colorSize + opacitySize) / 1024 / 1024;
 
 	return mb;
 }

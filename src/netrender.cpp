@@ -173,7 +173,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 		if(!strcmp("ver", command))
 		{
 	  	size_t len = sizeof(version);
-	  	sendDataToServer(&version, len, "VER");
+	  	sendDataToServer(&version, len, (char*)"VER");
 		}
 
   	//checking aswer regarding version
@@ -186,7 +186,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
   		recvd_bytes = receiveDataFromServer(command);
   		if(!strcmp("cpu", command))
   		{
-  			sendDataToServer(&noOfCPUs, sizeof(noOfCPUs), "CPU");
+  			sendDataToServer(&noOfCPUs, sizeof(noOfCPUs), (char*)"CPU");
   		}
 
     	return true;
@@ -313,7 +313,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 
 		//checking client version
 		int clientVersion;
-		sendDataToClient(NULL, 0, "ver", clientIndex-1, 0);
+		sendDataToClient(NULL, 0, (char*)"ver", clientIndex-1, 0);
 		char command[4];
 		size_t recvd_bytes = receiveDataFromClient(command, clientIndex-1, 0);
 		if(!strcmp("VER", command) && recvd_bytes == sizeof(int))
@@ -326,10 +326,10 @@ bool CNetRender::WaitForClient(char *statusOut)
 			printf("Client version is correct\n");
 
 			//sending answer
-			sendDataToClient(NULL, 0, "ok.", clientIndex-1, 0);
+			sendDataToClient(NULL, 0, (char*)"ok.", clientIndex-1, 0);
 
 			//ask for number of CPUs
-			sendDataToClient(NULL, 0, "cpu", clientIndex-1, 0);
+			sendDataToClient(NULL, 0, (char*)"cpu", clientIndex-1, 0);
 			recvd_bytes = receiveDataFromClient(command, clientIndex-1, 0);
 			if(!strcmp("CPU", command) && recvd_bytes == sizeof(int))
 			{
@@ -346,7 +346,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 			printf("Wrong client version\n");
 
 			//sending answer
-			sendDataToClient(&version, sizeof(version), "bad", clientIndex-1, 0);
+			sendDataToClient(&version, sizeof(version), (char*)"bad", clientIndex-1, 0);
 
 			//deleting client
 			clients.erase(clients.end()-1);

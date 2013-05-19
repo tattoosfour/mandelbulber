@@ -112,6 +112,8 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 
 		//printf("Distance = %g\n", dist/distThresh);
 		stepBuff[i].distance = dist;
+		stepBuff[i].iters = calcParam->itersOut;
+		stepBuff[i].distThresh = distThresh;
 
 		if (dist > 3.0) dist = 3.0;
 		if (dist < distThresh)
@@ -205,7 +207,6 @@ void *MainThread(void *ptr)
 	int tile = param.tileCount;
 	CVector3 vp = param.doubles.vp;
 	double maxDepth = param.doubles.viewDistanceMax;
-	double resolution = param.doubles.resolution;
 	double zoom = param.doubles.zoom;
 	double alpha = param.doubles.alpha;
 	double beta = param.doubles.beta;
@@ -314,10 +315,6 @@ void *MainThread(void *ptr)
 
 	//parameters for iteration functions
 	sFractal calcParam = param.fractal;
-	bool max_iter = false;
-
-	double search_accuracy = 0.01;
-	double search_limit = 1.0 - search_accuracy;
 
 	WriteLogDouble("All vectors and matrices prepared", thread_number);
 
@@ -417,30 +414,12 @@ void *MainThread(void *ptr)
 						viewVector.Normalize();
 						viewVector = mRot.RotateVector(viewVector);
 
-						/*
-						 double x2,z2;
-
-						 if (perspectiveType == fishEye || perspectiveType == equirectangular)
-						 {
-						 x2 = ((double) xScr / width / tiles - 0.5 + tileXOffset/tiles) * aspectRatio;
-						 z2 = ((double) yScr / height / tiles  - 0.5 + tileYOffset/tiles);
-
-						 x2*=M_PI;
-						 z2*=M_PI;
-						 }
-						 else
-						 {
-						 x2 = ((double) xScr / width / tiles - 0.5 + tileXOffset/tiles) * zoom * aspectRatio;
-						 z2 = ((double) yScr / height / tiles - 0.5 + tileYOffset/tiles) * zoom;
-						 }
-						 */
-
 						//Ray marching
-						bool found = false;
+
 						double distThresh = 0.0;
-						double lastDist = 0.0;
+
 						CVector3 point;
-						double depth;
+
 
 						CVector3 startRay = start;
 
@@ -540,10 +519,16 @@ void *MainThread(void *ptr)
 								pixel.B = objectShader.B + backgroudShader.B + specular.B;
 							}
 
-							volumetricShader = VolumetricShader(shaderInputData, pixel);
+							sShaderOutput opacityOut;
+							volumetricShader = VolumetricShader(shaderInputData, pixel, &opacityOut);
 							resultShader.R = volumetricShader.R;
 							resultShader.G = volumetricShader.G;
 							resultShader.B = volumetricShader.B;
+
+							if(ray == 0)
+							{
+								image->PutPixelOpacity(xScr, yScr, (unsigned short)(opacityOut.R * 65535.0));
+							}
 
 						}
 
@@ -702,7 +687,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		{
 			for (int i = 0; i < netRender->getNoOfClients(); i++)
 			{
-				netRender->sendDataToClient(NULL, 0, "run", i, param.fractal.frameNo);
+				netRender->sendDataToClient(NULL, 0, (char*)"run", i, param.fractal.frameNo);
 			}
 		}
 
@@ -722,7 +707,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				for(int i=0; i<netRender->getCpuCount(clientIndex); i++)
 				{
 					int startLine = cpuIndex * height / netCpuCount;
-					netRender->sendDataToClient(&startLine, sizeof(startLine), "stl", clientIndex, 0);
+					netRender->sendDataToClient(&startLine, sizeof(startLine), (char*)"stl", clientIndex, 0);
 					printf("set start line = %d\n", startLine);
 					cpuIndex++;
 				}
@@ -840,7 +825,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						newLineRendered = false;
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							netRender->sendDataToClient(thread_done, sizeof(int)*height, "lst", i, param.fractal.frameNo);
+							netRender->sendDataToClient(thread_done, sizeof(int)*height, (char*)"lst", i, param.fractal.frameNo);
 						}
 					}
 
@@ -850,7 +835,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 					{
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
 						{
-							netRender->sendDataToClient(NULL, 0, "get", i, param.fractal.frameNo);
+							netRender->sendDataToClient(NULL, 0, (char*)"get", i, param.fractal.frameNo);
 						}
 
 						for (int i = 0; i < netRender->getNoOfClients(); i++)
@@ -913,7 +898,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									last = (int*)&lineOfImage[width];
 									*last = y;
 
-									netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),"GET");
+									netRender->sendDataToServer(lineOfImage, sizeof(sAllImageData)*(width+1),(char*)"GET");
 
 									sentSomething = true;
 									break;
@@ -922,7 +907,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 							if(!sentSomething)
 							{
 								//sending null answer when there si nothing to send
-								netRender->sendDataToServer(NULL,0,"GET");
+								netRender->sendDataToServer(NULL,0,(char*)"GET");
 							}
 						}
 
@@ -1045,7 +1030,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			{
 				for (int i = 0; i < netRender->getNoOfClients(); i++)
 				{
-					netRender->sendDataToClient(NULL, 0, "stp", i, param.fractal.frameNo);
+					netRender->sendDataToClient(NULL, 0, (char*)"stp", i, param.fractal.frameNo);
 				}
 			}
 
