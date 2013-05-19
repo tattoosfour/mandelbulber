@@ -471,7 +471,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	double opacity = 0.0;
 	double shadowTemp = 1.0;
 
-	double softRange = 0.1;
+	double softRange = tan(input.param->doubles.shadowConeAngle / 180.0 * M_PI);
 	double maxSoft = 0.0;
 
 	for (double i = start; i < factor; i += dist * DE_factor)
@@ -480,7 +480,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 
 		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
-		if (!input.param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled)
+		if ((!input.param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled) && softRange > 0.0)
 		{
 			double angle = (dist - input.dist_thresh) / i;
 			if (angle < 0) angle = 0;
