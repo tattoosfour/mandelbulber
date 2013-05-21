@@ -467,10 +467,10 @@ void *MainThread(void *ptr)
 						for(int ray = rayEnd; ray >= 0; ray--)
 						{
 
-							sShaderOutput objectShader = { 0.0, 0.0, 0.0 };
-							sShaderOutput backgroudShader = { 0.0, 0.0, 0.0 };
-							sShaderOutput volumetricShader  = { 0.0, 0.0, 0.0 };
-							sShaderOutput specular  = { 0.0, 0.0, 0.0 };
+							sShaderOutput objectShader = { 0.0, 0.0, 0.0, 0.0 };
+							sShaderOutput backgroudShader = { 0.0, 0.0, 0.0, 0.0 };
+							sShaderOutput volumetricShader  = { 0.0, 0.0, 0.0, 0.0 };
+							sShaderOutput specular  = { 0.0, 0.0, 0.0, 0.0 };
 
 							CVector3 lightVector = shadowVector;
 
@@ -519,6 +519,7 @@ void *MainThread(void *ptr)
 								pixel.B = objectShader.B + backgroudShader.B + specular.B;
 							}
 
+							pixel.alpha = objectShader.alpha + backgroudShader.alpha;
 							sShaderOutput opacityOut;
 							volumetricShader = VolumetricShader(shaderInputData, pixel, &opacityOut);
 							resultShader.R = volumetricShader.R;
@@ -528,6 +529,7 @@ void *MainThread(void *ptr)
 							if(ray == 0)
 							{
 								image->PutPixelOpacity(xScr, yScr, (unsigned short)(opacityOut.R * 65535.0));
+								image->PutPixelAlpha(xScr, yScr, (unsigned short)(volumetricShader.alpha * 65535.0));
 							}
 
 						}
