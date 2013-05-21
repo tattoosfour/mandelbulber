@@ -15,6 +15,7 @@ struct sShaderOutput
 	double R;
 	double G;
 	double B;
+	double alpha;
 };
 
 struct sLight

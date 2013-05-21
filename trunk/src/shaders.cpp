@@ -34,7 +34,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	shade.B = input.param->doubles.imageAdjustments.directLight * ((1.0 - input.param->doubles.imageAdjustments.shading) + input.param->doubles.imageAdjustments.shading * shade.B);
 
 	//calculate shading based on angle of incidence
-	sShaderOutput shadow = {1.0, 1.0, 1.0};
+	sShaderOutput shadow = {1.0, 1.0, 1.0, 0.0};
 	if(input.param->shadow)	shadow = MainShadow(input);
 
 	//calculate specular highlight
@@ -48,7 +48,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	*surfaceColour = colour;
 
 	//ambient occlusion
-	sShaderOutput ambient = {0.0, 0.0, 0.0};
+	sShaderOutput ambient = {0.0, 0.0, 0.0, 0.0};
 	if(input.param->global_ilumination)
 	{
 		//fast mode
@@ -67,7 +67,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	ambient2.B = ambient.B * input.param->doubles.imageAdjustments.globalIlum;
 
 	//environment mapping
-	sShaderOutput envMapping = {0.0, 0.0, 0.0};
+	sShaderOutput envMapping = {0.0, 0.0, 0.0, 0.0};
 	if(!input.param->imageSwitches.raytracedReflections && input.param->doubles.imageAdjustments.reflect > 0)
 	{
 		envMapping = EnvMapping(input);
@@ -82,8 +82,8 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	auxLights = AuxLightsShader(input, &auxLightsSpecular);
 
 	//fake orbit trap lights
-	sShaderOutput fakeLights = {0.0, 0.0, 0.0};
-	sShaderOutput fakeLightsSpecular = {0.0, 0.0, 0.0};
+	sShaderOutput fakeLights = {0.0, 0.0, 0.0, 0.0};
+	sShaderOutput fakeLightsSpecular = {0.0, 0.0, 0.0, 0.0};
 	if(input.param->fakeLightsEnabled)
 	{
 		fakeLights = FakeLights(input, &fakeLightsSpecular);
@@ -97,10 +97,12 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	output.R += (auxLights.R + fakeLights.R) * colour.R;
 	output.G += (auxLights.G + fakeLights.G) * colour.G;
 	output.B += (auxLights.B + fakeLights.B) * colour.B;
+	output.alpha = 1.0;
 
 	(*specularOut).R = auxLightsSpecular.R + fakeLightsSpecular.R + mainLight.R * specular.R * shadow.R;
 	(*specularOut).G = auxLightsSpecular.G + fakeLightsSpecular.G + mainLight.G * specular.G * shadow.G;
 	(*specularOut).B = auxLightsSpecular.B + fakeLightsSpecular.B + mainLight.B * specular.B * shadow.B;
+	(*specularOut).alpha = output.alpha;
 
 	return output;
 }
@@ -171,6 +173,7 @@ sShaderOutput BackgroundShader(sShaderInputData input)
 		pixel2.R = pixel.R/65536.0;
 		pixel2.G = pixel.G/65536.0;
 		pixel2.B = pixel.B/65536.0;
+		pixel2.alpha = 0.0;
 	}
 	return pixel2;
 }
@@ -183,6 +186,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 	output.R = oldPixel.R;
 	output.G = oldPixel.G;
 	output.B = oldPixel.B;
+	output.alpha = oldPixel.alpha;
 
 	//basic fog init
   double fogVisibility = pow(10.0, input.param->doubles.imageAdjustments.fogVisibility / 10 - 16.0);
@@ -219,6 +223,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 		output.R = glowOpacity * glowR + (1.0 - glowOpacity) * output.R;
 		output.G = glowOpacity * glowG + (1.0 - glowOpacity) * output.G;
 		output.B = glowOpacity * glowB + (1.0 - glowOpacity) * output.B;
+		output.alpha += glowOpacity;
 
 		//------------------ visible light
 		if (input.param->doubles.auxLightVisibility > 0)
@@ -275,6 +280,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 						output.R += lightDensity * Lights[i].colour.R / 65536.0;
 						output.G += lightDensity * Lights[i].colour.G / 65536.0;
 						output.B += lightDensity * Lights[i].colour.B / 65536.0;
+						output.alpha += lightDensity;
 					}
 				}
 			}
@@ -288,6 +294,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 			output.R += fakeLight * step * input.param->doubles.fakeLightsVisibility;
 			output.G += fakeLight * step * input.param->doubles.fakeLightsVisibility;
 			output.B += fakeLight * step * input.param->doubles.fakeLightsVisibility;
+			output.alpha += fakeLight * step * input.param->doubles.fakeLightsVisibility;
 		}
 
 		//---------------------- volumetric lights with shadows in fog
@@ -300,6 +307,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 				output.R += shadowOutputTemp.R * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.R / 65536.0;
 				output.G += shadowOutputTemp.G * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.G / 65536.0;
 				output.B += shadowOutputTemp.B * step * input.param->doubles.volumetricLightIntensity[0] * input.param->effectColours.mainLightColour.B / 65536.0;
+				output.alpha += (shadowOutputTemp.R + shadowOutputTemp.G + shadowOutputTemp.B)/3.0 * step * input.param->doubles.volumetricLightIntensity[0];
 			}
 			if (i > 0)
 			{
@@ -314,6 +322,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 					output.R += light * Lights[i - 1].colour.R / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
 					output.G += light * Lights[i - 1].colour.G / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
 					output.B += light * Lights[i - 1].colour.B / 65536.0 * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
+					output.alpha += light * input.param->doubles.volumetricLightIntensity[i] * step / distance2;
 				}
 			}
 		}
@@ -327,6 +336,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 			output.G = fogDensity * input.param->effectColours.fogColor.G / 65536.0 + (1.0 - fogDensity) * output.G;
 			output.B = fogDensity * input.param->effectColours.fogColor.B / 65536.0 + (1.0 - fogDensity) * output.B;
 			totalOpacity = fogDensity + (1.0 - fogDensity) * totalOpacity;
+			output.alpha = fogDensity + (1.0 - fogDensity) * output.alpha;
 		}
 
 		//-------------------- volumetric fog
@@ -356,6 +366,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 			output.B = fogDensity * fogBtemp / 65536.0 + (1.0 - fogDensity) * output.B;
 
 			totalOpacity = fogDensity + (1.0 - fogDensity) * totalOpacity;
+			output.alpha = fogDensity + (1.0 - fogDensity) * output.alpha;
 		}
 
 		//iter fog
@@ -435,11 +446,13 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 				output.G = output.G * (1.0 - opacity) + newColour.G * opacity * fogColG / 65536.0;
 				output.B = output.B * (1.0 - opacity) + newColour.B * opacity * fogColB / 65536.0;
 				totalOpacity = opacity + (1.0 - opacity) * totalOpacity;
+				output.alpha = opacity + (1.0 - opacity) * output.alpha;
 			}
 		}
 
 
 		if(totalOpacity > 1.0) totalOpacity = 1.0;
+		if(output.alpha > 1.0) output.alpha = 1.0;
 		(*opacityOut).R = totalOpacity;
 		(*opacityOut).G = totalOpacity;
 		(*opacityOut).B = totalOpacity;
