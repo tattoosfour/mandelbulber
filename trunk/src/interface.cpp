@@ -3074,7 +3074,6 @@ void CreateTooltips(void)
 
 bool ReadComandlineParams(int argc, char *argv[])
 {
-	noGUIdata.lowMemMode = false;
 	noGUIdata.animMode = false;
 	noGUIdata.keyframeMode = false;
 	noGUIdata.playMode = false;
@@ -3095,12 +3094,6 @@ bool ReadComandlineParams(int argc, char *argv[])
 			{
 				noGUI = true;
 				printf("commandline: no GUI mode\n");
-				continue;
-			}
-			if (strcmp(argv[i], "-lowmem") == 0)
-			{
-				noGUIdata.lowMemMode = true;
-				printf("commandline: Low memory mode\n");
 				continue;
 			}
 			if (strcmp(argv[i], "-flight") == 0)
@@ -3278,7 +3271,6 @@ bad_arg:
 				printf("Syntax:\nmandelbulber [options...] [settings_file]\n");
 				printf("options:\n");
 				printf("  -nogui            - start program without GUI\n");
-				printf("  -lowmem           - low memory usage mode\n");
 				printf("  -flight           - render flight animation\n");
 				printf("  -keyframe         - render keyframe animation\n");
 				printf("  -start N          - start renderig from frame number N\n");
