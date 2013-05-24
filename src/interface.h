@@ -808,7 +808,6 @@ struct sNoGUIdata
 	bool animMode;
 	bool playMode;
 	bool keyframeMode;
-	bool lowMemMode;
 	bool netrenderMode;
 	int startFrame;
 	int endFrame;
