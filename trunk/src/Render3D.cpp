@@ -446,9 +446,19 @@ void *MainThread(void *ptr)
 							}
 							reflectBuff[ray].point = point;
 							reflectBuff[ray].distThresh = distThresh;
+							reflectBuff[ray].objectType = calcParam.objectOut;
+
+							if(calcParam.objectOut == objFractal) reflectBuff[ray].reflect = param.doubles.imageAdjustments.reflect;
+							if(calcParam.objectOut == objWater) reflectBuff[ray].reflect = param.doubles.primitiveWaterReflect;
+							if(calcParam.objectOut == objPlane) reflectBuff[ray].reflect = param.doubles.primitivePlaneReflect;
+							if(calcParam.objectOut == objBox) reflectBuff[ray].reflect = param.doubles.primitiveBoxReflect;
+							if(calcParam.objectOut == objBoxInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedBoxReflect;
+							if(calcParam.objectOut == objSphere) reflectBuff[ray].reflect = param.doubles.primitiveSphereReflect;
+							if(calcParam.objectOut == objSphereInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedSphereReflect;
 
 							rayEnd = ray;
 							if(!reflectBuff[ray].found) break;
+							if(reflectBuff[ray].reflect == 0) break;
 
 							//calculate new ray direction and start point
 							startRay = point;
@@ -488,6 +498,7 @@ void *MainThread(void *ptr)
 							shaderInputData.depth = reflectBuff[ray].depth;
 							shaderInputData.stepCount = reflectBuff[ray].buffCount;
 							shaderInputData.stepBuff = reflectBuff[ray].stepBuff;
+							shaderInputData.objectType = reflectBuff[ray].objectType;
 
 							//if fractal surface was found
 							if (reflectBuff[ray].found)
@@ -502,14 +513,16 @@ void *MainThread(void *ptr)
 								reflectBuff[ray].depth = 1e20;
 							}
 
+							double reflect = reflectBuff[ray].reflect;
+
 							sShaderOutput pixel;
 
 							if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
 							{
 
-								pixel.R = resultShader.R * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.R + backgroudShader.R) + specular.R;
-								pixel.G = resultShader.G * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.G + backgroudShader.G) + specular.G;
-								pixel.B = resultShader.B * param.doubles.imageAdjustments.reflect + (1.0 - param.doubles.imageAdjustments.reflect) * (objectShader.B + backgroudShader.B) + specular.B;
+								pixel.R = resultShader.R * reflect + (1.0 - reflect) * (objectShader.R + backgroudShader.R) + specular.R;
+								pixel.G = resultShader.G * reflect + (1.0 - reflect) * (objectShader.G + backgroudShader.G) + specular.G;
+								pixel.B = resultShader.B * reflect + (1.0 - reflect) * (objectShader.B + backgroudShader.B) + specular.B;
 
 							}
 							else

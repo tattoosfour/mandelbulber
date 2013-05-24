@@ -1249,7 +1249,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 {
 	int L;
 	double distance;
-	params.specialColour = 0;
+	params.objectOut = objFractal;
 
 	if (params.limits_enabled)
 	{
@@ -1405,7 +1405,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.planeEnable)
 	{
 		double planeDistance = PrimitivePlane(point, params.doubles.primitives.planeCentre, params.doubles.primitives.planeNormal);
-		if(!params.primitives.onlyPlane && planeDistance < distance) 	params.specialColour = 253;
+		if(!params.primitives.onlyPlane && planeDistance < distance) 	params.objectOut = objPlane;
 		distance = (planeDistance < distance) ? planeDistance : distance;
 
 	}
@@ -1414,7 +1414,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.boxEnable)
 	{
 		double boxDistance = PrimitiveBox(point, params.doubles.primitives.boxCentre, params.doubles.primitives.boxSize);
-		if(boxDistance < distance) 	params.specialColour = 252;
+		if(boxDistance < distance) 	params.objectOut = objBox;
 		distance = (boxDistance < distance) ? boxDistance : distance;
 	}
 
@@ -1422,7 +1422,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.invertedBoxEnable)
 	{
 		double boxDistance = PrimitiveInvertedBox(point, params.doubles.primitives.invertedBoxCentre, params.doubles.primitives.invertedBoxSize);
-		if(boxDistance < distance) 	params.specialColour = 251;
+		if(boxDistance < distance) 	params.objectOut = objBoxInv;
 		distance = (boxDistance < distance) ? boxDistance : distance;
 	}
 
@@ -1430,7 +1430,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.sphereEnable)
 	{
 		double sphereDistance = PrimitiveSphere(point, params.doubles.primitives.sphereCentre, params.doubles.primitives.sphereRadius);
-		if(sphereDistance < distance) 	params.specialColour = 250;
+		if(sphereDistance < distance) 	params.objectOut = objSphere;
 		distance = (sphereDistance < distance) ? sphereDistance : distance;
 	}
 
@@ -1438,7 +1438,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.invertedSphereEnable)
 	{
 		double sphereDistance = PrimitiveInvertedSphere(point, params.doubles.primitives.invertedSphereCentre, params.doubles.primitives.invertedSphereRadius);
-		if(sphereDistance < distance) 	params.specialColour = 249;
+		if(sphereDistance < distance) 	params.objectOut = objSphereInv;
 		distance = (sphereDistance < distance) ? sphereDistance : distance;
 	}
 
@@ -1447,7 +1447,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	{
 		double waterDistance = PrimitiveWater(point, params.doubles.primitives.waterHeight, params.doubles.primitives.waterAmplitude,
 				params.doubles.primitives.waterLength, params.doubles.primitives.waterRotation, params.primitives.waterIterations, 0.1, params.frameNo);
-		if(waterDistance < distance) 	params.specialColour = 248;
+		if(waterDistance < distance) 	params.objectOut = objWater;
 		distance = (waterDistance < distance) ? waterDistance : distance;
 	}
 

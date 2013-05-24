@@ -47,6 +47,8 @@ struct sReflect
 	double lastDist;
 	bool found;
 	double distThresh;
+	enumObjectType objectType;
+	double reflect;
 };
 
 //global
