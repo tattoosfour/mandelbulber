@@ -60,6 +60,12 @@ struct sParamRenderD
 	double fakeLightsVisibility;
 	double fakeLightsVisibilitySize;
 	double shadowConeAngle;
+	double primitivePlaneReflect;
+	double primitiveBoxReflect;
+	double primitiveInvertedBoxReflect;
+	double primitiveSphereReflect;
+	double primitiveInvertedSphereReflect;
+	double primitiveWaterReflect;
 
 	sImageAdjustments imageAdjustments;
 };

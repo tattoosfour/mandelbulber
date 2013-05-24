@@ -75,6 +75,17 @@ enum enumGeneralizedFoldBoxType
 	foldBox5 = 7
 };
 
+enum enumObjectType
+{
+	objFractal = 0,
+	objPlane = 1,
+	objWater = 2,
+	objSphere = 3,
+	objSphereInv = 4,
+	objBox = 5,
+	objBoxInv = 6
+};
+
 struct sFractalIFSD
 {
 	double rotationGamma;
@@ -251,10 +262,10 @@ struct sFractal
 	sFractalGeneralizedFoldBox genFoldBox;
 	sFractalPrimitives primitives;
 
-	int specialColour;
 	int frameNo;
 
 	int itersOut;
+	enumObjectType objectOut;
 
 	int fakeLightsMinIter;
 	int fakeLightsMaxIter;

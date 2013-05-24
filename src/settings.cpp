@@ -446,6 +446,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_plane_colour_R", params.primitivePlaneColour.R, 20000, compare);
 		fprintfInt(fileSettings, "primitive_plane_colour_G", params.primitivePlaneColour.G, 20000, compare);
 		fprintfInt(fileSettings, "primitive_plane_colour_B", params.primitivePlaneColour.B, 20000, compare);
+		fprintfDot(fileSettings, "primitive_plane_reflect", params.doubles.primitivePlaneReflect, 0.0, compare);
 	}
 
 	if (!compare || params.fractal.primitives.boxEnable)
@@ -460,6 +461,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_box_colour_R", params.primitiveBoxColour.R, 20000, compare);
 		fprintfInt(fileSettings, "primitive_box_colour_G", params.primitiveBoxColour.G, 20000, compare);
 		fprintfInt(fileSettings, "primitive_box_colour_B", params.primitiveBoxColour.B, 20000, compare);
+		fprintfDot(fileSettings, "primitive_box_reflect", params.doubles.primitiveBoxReflect, 0.0, compare);
 	}
 
 	if (!compare || params.fractal.primitives.invertedBoxEnable)
@@ -474,6 +476,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_invertedBox_colour_R", params.primitiveInvertedBoxColour.R, 20000, compare);
 		fprintfInt(fileSettings, "primitive_invertedBox_colour_G", params.primitiveInvertedBoxColour.G, 20000, compare);
 		fprintfInt(fileSettings, "primitive_invertedBox_colour_B", params.primitiveInvertedBoxColour.B, 20000, compare);
+		fprintfDot(fileSettings, "primitive_invertedBox_reflect", params.doubles.primitiveInvertedBoxReflect, 0.0, compare);
 	}
 
 	if (!compare || params.fractal.primitives.sphereEnable)
@@ -486,6 +489,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_sphere_colour_R", params.primitiveSphereColour.R, 20000, compare);
 		fprintfInt(fileSettings, "primitive_sphere_colour_G", params.primitiveSphereColour.G, 20000, compare);
 		fprintfInt(fileSettings, "primitive_sphere_colour_B", params.primitiveSphereColour.B, 20000, compare);
+		fprintfDot(fileSettings, "primitive_sphere_reflect", params.doubles.primitiveSphereReflect, 0.0, compare);
 	}
 
 	if (!compare || params.fractal.primitives.invertedSphereEnable)
@@ -498,6 +502,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_invertedSphere_colour_R", params.primitiveInvertedSphereColour.R, 20000, compare);
 		fprintfInt(fileSettings, "primitive_invertedSphere_colour_G", params.primitiveInvertedSphereColour.G, 20000, compare);
 		fprintfInt(fileSettings, "primitive_invertedSphere_colour_B", params.primitiveInvertedSphereColour.B, 20000, compare);
+		fprintfDot(fileSettings, "primitive_invertedSphere_reflect", params.doubles.primitiveInvertedSphereReflect, 0.0, compare);
 	}
 
 	if (!compare || params.fractal.primitives.waterEnable)
@@ -511,6 +516,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "primitive_water_colour_R", params.primitiveWaterColour.R, 0, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_G", params.primitiveWaterColour.G, 5000, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_B", params.primitiveWaterColour.B, 10000, compare);
+		fprintfDot(fileSettings, "primitive_water_reflect", params.doubles.primitiveWaterReflect, 0.7, compare);
 	}
 
 	if (!compare || params.fakeLightsEnabled)
@@ -955,6 +961,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_plane_colour_R")) params.primitivePlaneColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_plane_colour_G")) params.primitivePlaneColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_plane_colour_B")) params.primitivePlaneColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_plane_reflect")) params.doubles.primitivePlaneReflect = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_box_enabled")) params.fractal.primitives.boxEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_box_centre_X")) params.fractal.doubles.primitives.boxCentre.x = atof2(str2);
@@ -966,6 +973,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_box_colour_R")) params.primitiveBoxColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_box_colour_G")) params.primitiveBoxColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_box_colour_B")) params.primitiveBoxColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_box_reflect")) params.doubles.primitiveBoxReflect = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_invertedBox_enabled")) params.fractal.primitives.invertedBoxEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedBox_centre_X")) params.fractal.doubles.primitives.invertedBoxCentre.x = atof2(str2);
@@ -977,6 +985,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_invertedBox_colour_R")) params.primitiveInvertedBoxColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedBox_colour_G")) params.primitiveInvertedBoxColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedBox_colour_B")) params.primitiveInvertedBoxColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_invertedBox_reflect")) params.doubles.primitiveInvertedBoxReflect = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_sphere_enabled")) params.fractal.primitives.sphereEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_sphere_centre_X")) params.fractal.doubles.primitives.sphereCentre.x = atof2(str2);
@@ -986,6 +995,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_sphere_colour_R")) params.primitiveSphereColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_sphere_colour_G")) params.primitiveSphereColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_sphere_colour_B")) params.primitiveSphereColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_sphere_reflect")) params.doubles.primitiveSphereReflect = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_invertedSphere_enabled")) params.fractal.primitives.invertedSphereEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedSphere_centre_X")) params.fractal.doubles.primitives.invertedSphereCentre.x = atof2(str2);
@@ -995,6 +1005,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_invertedSphere_colour_R")) params.primitiveInvertedSphereColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedSphere_colour_G")) params.primitiveInvertedSphereColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_invertedSphere_colour_B")) params.primitiveInvertedSphereColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_invertedSphere_reflect")) params.doubles.primitiveInvertedSphereReflect = atof2(str2);
 
 	else if (!strcmp(str1, "primitive_water_enabled")) params.fractal.primitives.waterEnable = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_level")) params.fractal.doubles.primitives.waterHeight = atof2(str2);
@@ -1005,6 +1016,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_water_colour_R")) params.primitiveWaterColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_G")) params.primitiveWaterColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_B")) params.primitiveWaterColour.B = atoi(str2);
+	else if (!strcmp(str1, "primitive_water_reflect")) params.doubles.primitiveWaterReflect = atof2(str2);
 
 	else if (!strcmp(str1, "fake_lights_enabled")) params.fakeLightsEnabled = atoi(str2);
 	else if (!strcmp(str1, "fake_lights_min_iter")) params.fractal.fakeLightsMinIter = atoi(str2);

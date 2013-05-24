@@ -43,7 +43,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	specular.G *= input.param->doubles.imageAdjustments.specular;
 	specular.B *= input.param->doubles.imageAdjustments.specular;
 
-	//calculate colour surface
+	//calculate surface colour
 	sShaderOutput colour = SurfaceColour(input);
 	*surfaceColour = colour;
 
@@ -523,7 +523,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 			break;
 		}
 	}
-	if (input.param->imageSwitches.iterFogEnabled || input.calcParam->limits_enabled)
+	if (input.param->imageSwitches.iterFogEnabled || input.calcParam->limits_enabled || softRange == 0.0)
 	{
 		shadow.R = shadowTemp;
 		shadow.G = shadowTemp;
@@ -803,29 +803,80 @@ sShaderOutput SurfaceColour(sShaderInputData &input)
 
 #else
 	sShaderOutput out;
-	input.calcParam->doubles.N *= 10;
-	int nrCol = floor(Compute<colouring>(input.point, *input.calcParam));
-	input.calcParam->doubles.N /= 10;
-	nrCol = abs(nrCol) % (248 * 256);
 
-	sRGB colour = { 256, 256, 256 };
-	if (input.param->imageSwitches.coloringEnabled)
+	switch(input.objectType)
 	{
-		int color_number;
-		if (nrCol >= 248 * 256)
+		case objFractal:
 		{
-			color_number = nrCol;
-		}
-		else
-		{
-			color_number = (int) (nrCol * input.param->doubles.imageAdjustments.coloring_speed + 256 * input.param->doubles.imageAdjustments.paletteOffset) % 65536;
-		}
-		colour = IndexToColour(color_number, input.param->palette);
-	}
+			input.calcParam->doubles.N *= 10;
+			int nrCol = floor(Compute<colouring>(input.point, *input.calcParam));
+			input.calcParam->doubles.N /= 10;
+			nrCol = abs(nrCol) % (248 * 256);
 
-	out.R = colour.R / 256.0;
-	out.G = colour.G / 256.0;
-	out.B = colour.B / 256.0;
+			sRGB colour = { 256, 256, 256 };
+			if (input.param->imageSwitches.coloringEnabled)
+			{
+				int color_number;
+				if (nrCol >= 248 * 256)
+				{
+					color_number = nrCol;
+				}
+				else
+				{
+					color_number = (int) (nrCol * input.param->doubles.imageAdjustments.coloring_speed + 256 * input.param->doubles.imageAdjustments.paletteOffset) % 65536;
+				}
+				colour = IndexToColour(color_number, input.param->palette);
+			}
+
+			out.R = colour.R / 256.0;
+			out.G = colour.G / 256.0;
+			out.B = colour.B / 256.0;
+			break;
+		}
+		case objWater:
+		{
+			out.R = input.param->primitiveWaterColour.R / 65536.0;
+			out.G = input.param->primitiveWaterColour.G / 65536.0;
+			out.B = input.param->primitiveWaterColour.B / 65536.0;
+			break;
+		}
+		case objBox:
+		{
+			out.R = input.param->primitiveBoxColour.R / 65536.0;
+			out.G = input.param->primitiveBoxColour.G / 65536.0;
+			out.B = input.param->primitiveBoxColour.B / 65536.0;
+			break;
+		}
+		case objBoxInv:
+		{
+			out.R = input.param->primitiveInvertedBoxColour.R / 65536.0;
+			out.G = input.param->primitiveInvertedBoxColour.G / 65536.0;
+			out.B = input.param->primitiveInvertedBoxColour.B / 65536.0;
+			break;
+		}
+		case objSphere:
+		{
+			out.R = input.param->primitiveSphereColour.R / 65536.0;
+			out.G = input.param->primitiveSphereColour.G / 65536.0;
+			out.B = input.param->primitiveSphereColour.B / 65536.0;
+			break;
+		}
+		case objSphereInv:
+		{
+			out.R = input.param->primitiveInvertedSphereColour.R / 65536.0;
+			out.G = input.param->primitiveInvertedSphereColour.G / 65536.0;
+			out.B = input.param->primitiveInvertedSphereColour.B / 65536.0;
+			break;
+		}
+		case objPlane:
+		{
+			out.R = input.param->primitivePlaneColour.R / 65536.0;
+			out.G = input.param->primitivePlaneColour.G / 65536.0;
+			out.B = input.param->primitivePlaneColour.B / 65536.0;
+			break;
+		}
+	};
+
 	return out;
 #endif
 }
@@ -1150,125 +1201,6 @@ double IterOpacity(double step, double iters, double maxN, double trim, double o
 	return opacity;
 }
 
-sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
-		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel)
-{
-	double density = 0.0;
-	double tempDist = last_distance;
-	sShaderOutput iterFog = {oldPixel.R/65536.0, oldPixel.G/65536.0, oldPixel.B/65536.0};
-	enumPerspectiveType perspectiveType = param->perspectiveType;
-	double fov = param->doubles.persp;
-	double quality = param->doubles.quality;
-	CVector3 vp = param->doubles.vp;
-	CRotationMatrix mRot;
-	mRot.RotateZ(param->doubles.alpha);
-	mRot.RotateX(param->doubles.beta);
-	mRot.RotateY(param->doubles.gamma);
-	bool max_iter;
-	double DE_factor = param->doubles.DE_factor;
-	double resolution = param->doubles.resolution;
-
-	for (double scan = yStart; scan > min_y; scan -= tempDist / zoom)
-	{
-		CVector3 pointTemp = Projection3D(CVector3(point.x, scan, point.z), vp, mRot, perspectiveType, fov, zoom);
-		double wsp_perspTemp = 1.0 + scan * fov;
-		double dist_threshTemp = zoom * resolution * wsp_perspTemp / quality;
-		tempDist = CalculateDistance(pointTemp, *calcParam, &max_iter) * DE_factor / param->doubles.volumetricLightQuality + dist_threshTemp;
-		tempDist = tempDist * (1.0 - Random(1000) / 2000.0);
-
-		int L = calcParam->itersOut;
-		double opacity = IterOpacity(tempDist, L, param->fractal.doubles.N, param->doubles.iterFogOpacityTrim, param->doubles.iterFogOpacity);
-
-		sShaderOutput newColour = { 0.0, 0.0, 0.0 };
-
-		if (opacity > 0)
-		{
-			//fog colour
-			double iterFactor = (double)2.0* (L - param->doubles.iterFogOpacityTrim)/(param->fractal.doubles.N - param->doubles.iterFogOpacityTrim);
-			double k = iterFactor;
-			if (k > 1) k = 1.0;
-			double kn = 1.0 - k;
-			double fogColR = (param->fogColour1.R * kn + param->fogColour2.R * k);
-			double fogColG = (param->fogColour1.G * kn + param->fogColour2.G * k);
-			double fogColB = (param->fogColour1.B * kn + param->fogColour2.B * k);
-
-			double k2 = iterFactor - 1.0;
-			if (k2 < 0.0) k2 = 0.0;
-			if (k2 > 1.0) k2 = 1.0;
-			kn = 1.0 - k2;
-			fogColR = (fogColR * kn + param->fogColour3.R * k2);
-			fogColG = (fogColG * kn + param->fogColour3.G * k2);
-			fogColB = (fogColB * kn + param->fogColour3.B * k2);
-			//----
-
-			for (int i = 0; i < 5; i++)
-			{
-				if (i == 0)
-				{
-					if(param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight > 0.0)
-					{
-						//sShaderOutput shadowOutputTemp = MainShadow(param, calcParam, pointTemp, lightVector, wsp_perspTemp, dist_threshTemp);
-						//newColour.R += shadowOutputTemp.R * param->effectColours.mainLightColour.R / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
-						//newColour.G += shadowOutputTemp.G * param->effectColours.mainLightColour.G / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
-						//newColour.B += shadowOutputTemp.B * param->effectColours.mainLightColour.B / 65536.0 * param->doubles.imageAdjustments.mainLightIntensity * param->doubles.imageAdjustments.directLight;
-					}
-				}
-
-				if (i > 0)
-				{
-					if (Lights[i - 1].enabled)
-					{
-						CVector3 d = Lights[i - 1].position - pointTemp;
-						double distance = d.Length();
-						double distance2 = distance * distance;
-						CVector3 lightVectorTemp = d;
-						lightVectorTemp.Normalize();
-						//double light = AuxShadow(param, calcParam, wsp_perspTemp, dist_threshTemp, distance, pointTemp, lightVectorTemp, param->penetratingLights);
-						double intensity = Lights[i - 1].intensity * 100.0;
-						//newColour.R += light * Lights[i - 1].colour.R / 65536.0 / distance2 * intensity;
-						//newColour.G += light * Lights[i - 1].colour.G / 65536.0 / distance2 * intensity;
-						//newColour.B += light * Lights[i - 1].colour.B / 65536.0 / distance2 * intensity;
-					}
-				}
-
-			}
-
-			if(param->global_ilumination && !param->fastGlobalIllumination)
-			{
-				//sShaderOutput AO = AmbientOcclusion(param, calcParam, pointTemp, wsp_perspTemp, dist_threshTemp, last_distance, vectorsAround, vectorsCount);
-				//newColour.R += AO.R * param->doubles.imageAdjustments.globalIlum;
-				//newColour.G += AO.G * param->doubles.imageAdjustments.globalIlum;
-				//newColour.B += AO.B * param->doubles.imageAdjustments.globalIlum;
-			}
-
-			if(opacity > 1.0) opacity = 1.0;
-			{
-				iterFog.R = iterFog.R * (1.0 - opacity) + newColour.R * opacity * fogColR/65536.0;
-				iterFog.G = iterFog.G * (1.0 - opacity) + newColour.G * opacity * fogColG/65536.0;
-				iterFog.B = iterFog.B * (1.0 - opacity) + newColour.B * opacity * fogColB/65536.0;
-			}
-
-			density+=opacity;
-
-			//printf("iF.R=%g, dens=%g\n", iterFog.R, density);
-
-			if(density>1.0) density = 1.0;
-		}
-	}
-
-	iterFog.R *= 6553.0;
-	iterFog.G *= 6553.0;
-	iterFog.B *= 6553.0;
-	if(iterFog.R > 65535) iterFog.R = 65535;
-	if(iterFog.G > 65535) iterFog.G = 65535;
-	if(iterFog.B > 65535) iterFog.B = 65535;
-
-	*densityOut = density;
-
-	//printf("R: %f, G: %f, B: %f\n", iterFog.R, iterFog.G, iterFog.B);
-
-	return iterFog;
-}
 
 sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec)
 {

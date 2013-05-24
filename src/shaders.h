@@ -42,6 +42,7 @@ struct sShaderInputData
 	double depth;
 	sStep *stepBuff;
 	int stepCount;
+	enumObjectType objectType;
 };
 
 extern sLight *Lights;
@@ -67,8 +68,6 @@ double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec);
 void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined);
 double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp);
-sShaderOutput IterationFog(sParamRender *param, sFractal *calcParam, CVector3 point, double yStart, double min_y, double last_distance, double zoom,
-		CVector3 lightVector, bool found, double *densityOut, sVectorsAround *vectorsAround, int vectorsCount, sRGB16 oldPixel);
 
 sRGB IndexToColour(int index, sRGB *palette);
 #endif /* SHADERS_H_ */
