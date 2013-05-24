@@ -77,9 +77,11 @@ struct sImageSwitches
 
 struct sAllImageData
 {
-	unsigned short alpha;
+	sRGBfloat imageFloat;
+	unsigned short alphaBuffer;
+	unsigned short opacityBuffer;
+	sRGB8 colourBuffer;
 	float zBuffer;
-	unsigned short colorIndexBuf16;
 };
 
 class cImage

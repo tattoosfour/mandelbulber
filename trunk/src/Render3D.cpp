@@ -869,10 +869,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									{
 										for(int x=0; x<width; x++)
 										{
-												//image->GetImage16Ptr()[x+y*width] = lineOfImage[x].image16;
-												image->PutPixelAlpha(x,y,lineOfImage[x].alpha);
-												image->PutPixelZBuffer(x,y,lineOfImage[x].zBuffer);
-												//image->PutPixelColor(x,y,lineOfImageLowMem[x].colorIndexBuf16); //----------------- do poprawienia
+												image->PutPixelImage(x,y, lineOfImage[x].imageFloat);
+												image->PutPixelAlpha(x,y, lineOfImage[x].alphaBuffer);
+												image->PutPixelZBuffer(x,y, lineOfImage[x].zBuffer);
+												image->PutPixelColour(x,y, lineOfImage[x].colourBuffer);
+												image->PutPixelOpacity(x,y, lineOfImage[x].opacityBuffer);
 										}
 										thread_done[y] = 99;
 										newLineRendered = true;
@@ -903,10 +904,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									linesToSend[y] = false;
 									for(int x=0; x<width; x++)
 									{
-											//lineOfImage[x].complex = image->GetComplexImagePtr()[x+y*width]; -------------- do poprawienia
-											lineOfImage[x].alpha = image->GetPixelAlpha(x,y);
-											//lineOfImage[x].colorIndexBuf16 = image->GetPixelColor(x,y); ----------- do poprawienia
-											lineOfImage[x].zBuffer = image->GetPixelZBuffer(x,y);
+											lineOfImage[x].imageFloat = image->GetPixelImage(x, y);
+											lineOfImage[x].alphaBuffer = image->GetPixelAlpha(x, y);
+											lineOfImage[x].colourBuffer = image->GetPixelColor(x, y);
+											lineOfImage[x].zBuffer = image->GetPixelZBuffer(x, y);
+											lineOfImage[x].opacityBuffer = image->GetPixelOpacity(x, y);
 									}
 									int *last;
 
