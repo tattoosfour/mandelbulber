@@ -212,7 +212,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 
 					double delta_y;
 					if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = 0;
-					else delta_y = y / closeUpRatio;
+					else delta_y = y * (1.0 - 1.0/closeUpRatio);
 
 					if (clickMode == 1)
 					{
@@ -301,8 +301,6 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			}
 			else if(clickMode == 2) //fog distance front
 			{
-				double fog = (log10(y + 10.0) + 2.0)*10.0;
-				gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront),fog);
 			}
 			else if(clickMode == 3) //fog visibility distance
 			{

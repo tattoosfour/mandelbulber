@@ -50,7 +50,6 @@ struct sImageAdjustments
   double brightness;
   double glow_intensity;
   double fogVisibility;
-  double fogVisibilityFront;
   double coloring_speed;
   double imageGamma;
   double paletteOffset;

@@ -82,13 +82,13 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 {
 	CVector3 point;
 	bool found = false;
-	double scan = 0;
+	double scan = param->doubles.viewDistanceMin;
 	double distThresh = *distThreshOut;
 	double dist = 0;
 	double search_accuracy = 0.01 * param->doubles.quality;
 	double search_limit = 1.0 - search_accuracy;
 	int counter = 0;
-	double step = 0;
+	double step = param->doubles.viewDistanceMin;
 	*buffCount = 0;
 	double distThreshInit = *distThreshOut;
 
@@ -509,7 +509,6 @@ void *MainThread(void *ptr)
 							else
 							{
 								backgroudShader = BackgroundShader(shaderInputData);
-								// ------------------- to do
 								reflectBuff[ray].depth = 1e20;
 							}
 

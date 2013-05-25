@@ -12,8 +12,8 @@
 #include "fractparams.h"
 #include "cl_support.hpp"
 
-#define MANDELBULBER_VERSION 1.15
-#define MANDELBULBER_VERSION_STR "1.15"
+#define MANDELBULBER_VERSION 1.16
+#define MANDELBULBER_VERSION_STR "1.16"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -584,7 +584,6 @@ struct sInterface
 	GtkWidget *label_animationSpeed;
 	GtkWidget *label_animationDistance;
 	GtkWidget *label_fog_visibility;
-	GtkWidget *label_fog_visibility_front;
 	GtkWidget *label_SSAO_quality;
 	GtkWidget *label_DOF_focus;
 	GtkWidget *label_DOF_radius;
@@ -702,14 +701,12 @@ struct sInterface
 	GtkWidget *pixmap_move_right;
 
 	GtkWidget *sliderFogDepth;
-	GtkWidget *sliderFogDepthFront;
 	GtkWidget *sliderSSAOQuality;
 	GtkWidget *sliderDOFFocus;
 	GtkWidget *sliderDOFRadius;
 	GtkWidget *sliderPaletteOffset;
 
 	GtkObject *adjustmentFogDepth;
-	GtkObject *adjustmentFogDepthFront;
 	GtkObject *adjustmentSSAOQuality;
 	GtkObject *adjustmentDOFFocus;
 	GtkObject *adjustmentDOFRadius;
