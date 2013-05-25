@@ -209,7 +209,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
   double glowG = (input.param->effectColours.glow_color1.G * glowN + input.param->effectColours.glow_color2.G * glow) / 65536.0;
   double glowB = (input.param->effectColours.glow_color1.B * glowN + input.param->effectColours.glow_color2.B * glow) / 65536.0;
 
-	for(int index = input.stepCount-1; index >=0; index--)
+	for(int index = input.stepCount-1; index >0; index--)
 	{
 		double step = input.stepBuff[index].step;
 		double distance = input.stepBuff[index].distance;

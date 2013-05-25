@@ -223,7 +223,6 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "limits_enabled", params.fractal.limits_enabled, false, compare);
 	fprintfInt(fileSettings, "post_fog_enabled", params.imageSwitches.fogEnabled, false, compare);
 	fprintfDot(fileSettings, "post_fog_visibility", params.doubles.imageAdjustments.fogVisibility, 20.0, compare);
-	fprintfDot(fileSettings, "post_fog_visibility_front", params.doubles.imageAdjustments.fogVisibilityFront, 29.0, compare);
 	fprintfInt(fileSettings, "post_fog_color_R", params.effectColours.fogColor.R, 59399, compare);
 	fprintfInt(fileSettings, "post_fog_color_G", params.effectColours.fogColor.G, 61202, compare);
 	fprintfInt(fileSettings, "post_fog_color_B", params.effectColours.fogColor.B, 65535, compare);
@@ -811,7 +810,6 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "limits_enabled")) params.fractal.limits_enabled = atoi(str2);
 	else if (!strcmp(str1, "post_fog_enabled")) params.imageSwitches.fogEnabled = atoi(str2);
 	else if (!strcmp(str1, "post_fog_visibility")) params.doubles.imageAdjustments.fogVisibility = atof2(str2);
-	else if (!strcmp(str1, "post_fog_visibility_front")) params.doubles.imageAdjustments.fogVisibilityFront = atof2(str2);
 	else if (!strcmp(str1, "post_fog_color_R")) params.effectColours.fogColor.R = atoi(str2);
 	else if (!strcmp(str1, "post_fog_color_G")) params.effectColours.fogColor.G = atoi(str2);
 	else if (!strcmp(str1, "post_fog_color_B")) params.effectColours.fogColor.B = atoi(str2);

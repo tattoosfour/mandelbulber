@@ -313,7 +313,6 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.foldingSphericalMin = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_spherical_folding_2)));
 		params->imageSwitches.fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
 		params->doubles.imageAdjustments.fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
-		params->doubles.imageAdjustments.fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
 		params->SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
 		params->SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
 		params->DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
@@ -978,7 +977,6 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFakeLightsEnabled), params->fakeLightsEnabled);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
-	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront), params->doubles.imageAdjustments.fogVisibilityFront);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality), params->SSAOQuality);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus), params->doubles.DOFFocus);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius), params->doubles.DOFRadius);
@@ -1961,7 +1959,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_animationSpeed = gtk_label_new("Flight speed:");
 	Interface.label_keyframeInfo = gtk_label_new("Frame: ,keyframe: ");
 	Interface.label_fog_visibility = gtk_label_new("Visibility:");
-	Interface.label_fog_visibility_front = gtk_label_new("Front:");
 	Interface.label_SSAO_quality = gtk_label_new("Quality:");
 	Interface.label_DOF_focus = gtk_label_new("Focus:");
 	Interface.label_DOF_radius = gtk_label_new("Radius:");
@@ -2006,8 +2003,6 @@ void CreateInterface(sParamRender *default_settings)
 	//sliders
 	Interface.adjustmentFogDepth = gtk_adjustment_new(30.0, 0.1, 200.0, 0.1, 10.0, 0.1);
 	Interface.sliderFogDepth = gtk_hscale_new(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
-	Interface.adjustmentFogDepthFront = gtk_adjustment_new(20.0, 0.1, 200.0, 0.1, 10.0, 0.1);
-	Interface.sliderFogDepthFront = gtk_hscale_new(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
 	Interface.adjustmentSSAOQuality = gtk_adjustment_new(20, 1, 100, 1, 10, 1);
 	Interface.sliderSSAOQuality = gtk_hscale_new(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
 	Interface.adjustmentDOFFocus = gtk_adjustment_new(20.0, 0.1, 200.0, 0.1, 10.0, 0.1);
@@ -2049,7 +2044,6 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAnimationContinueRecord, PressedAnimationContinueRecording);
 	CONNECT_SIGNAL_CLICKED(Interface.buAnimationRenderTrack, PressedAnimationRender);
 	CONNECT_SIGNAL(Interface.adjustmentFogDepth, ChangedSliderFog, "value-changed");
-	CONNECT_SIGNAL(Interface.adjustmentFogDepthFront, ChangedSliderFog, "value-changed");
 	CONNECT_SIGNAL_CLICKED(Interface.checkFogEnabled, ChangedSliderFog);
 	CONNECT_SIGNAL_CLICKED(Interface.checkSSAOEnabled, PressedSSAOUpdate);
 	CONNECT_SIGNAL_CLICKED(Interface.buUpdateSSAO, PressedSSAOUpdate);
@@ -2555,9 +2549,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.sliderFogDepth, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider2), Interface.label_fog_visibility_front, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider2), Interface.sliderFogDepthFront, true, true, 1);
-
 
 	//frame SSAO
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_posteffects), Interface.frPostSSAO, false, false, 1);
