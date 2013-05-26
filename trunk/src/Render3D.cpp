@@ -1764,7 +1764,14 @@ void MainRender(void)
 	bool autoSaveImage = false;
 	if (noGUI)
 	{
-		autoSaveImage = true;
+		if(netRender->IsClient())
+		{
+			autoSaveImage = false;
+		}
+		else
+		{
+			autoSaveImage = true;
+		}
 	}
 	else
 	{
@@ -1832,8 +1839,10 @@ void MainRender(void)
 		//animation with recorded flight path
 		double speed = 0.02;
 
-		fractParam.fractal.frameNo = index;
-
+		if(!netRender->IsClient())
+		{
+			fractParam.fractal.frameNo = index;
+		}
 		if (fractParam.animMode && !Interface_data.keyframeMode)
 		{
 			sprintf(label_text, "Frame: %d", index);
