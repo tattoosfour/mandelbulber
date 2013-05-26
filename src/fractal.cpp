@@ -1471,7 +1471,6 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 				if(min < params.doubles.detailSize)
 				{
 					distance = min;
-					printf("distance min = %g\n", min/params.doubles.detailSize);
 				}
 			}
 			else

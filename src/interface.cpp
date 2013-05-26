@@ -666,7 +666,7 @@ void ReadInterface(sParamRender *params)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled), params->SSAOEnabled);
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled), params->DOFEnabled);
 		}
-
+		params->fractal.frameNo = 0;
 	}
 
 	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
@@ -3300,6 +3300,7 @@ void Params2InterfaceData(sParamRender *source)
 	strcpy(Interface_data.file_lightmap, source->file_lightmap);
 	strcpy(Interface_data.file_path, source->file_path);
 	strcpy(Interface_data.file_keyframes, source->file_keyframes);
+	Interface_data.franeNo = source->fractal.frameNo;
 }
 
 void InterfaceData2Params(sParamRender *dest)
@@ -3310,6 +3311,7 @@ void InterfaceData2Params(sParamRender *dest)
 	strcpy(dest->file_lightmap, Interface_data.file_lightmap);
 	strcpy(dest->file_path, Interface_data.file_path);
 	strcpy(dest->file_keyframes, Interface_data.file_keyframes);
+	dest->fractal.frameNo = Interface_data.franeNo;
 }
 
 void CheckPrameters(sParamRender *params)

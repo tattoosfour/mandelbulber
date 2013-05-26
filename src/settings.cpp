@@ -531,6 +531,8 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "fake_lights_max_iter", params.fractal.fakeLightsMaxIter, 2, compare);
 	}
 
+	fprintfInt(fileSettings, "frame_no", params.fractal.frameNo, 0, compare);
+
 	if(strcmp(filename,"settings/.clipboard"))
 	{
 		if(!compare)
@@ -1025,6 +1027,8 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fake_lights_orbit_trap_X")) params.fractal.doubles.fakeLightsOrbitTrap.x = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_orbit_trap_Y")) params.fractal.doubles.fakeLightsOrbitTrap.y = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_orbit_trap_Z")) params.fractal.doubles.fakeLightsOrbitTrap.z = atof2(str2);
+
+	else if (!strcmp(str1, "frame_no")) params.fractal.frameNo = atoi(str2);
 
 	else if (!strcmp(str1, "file_destination")) strcpy(params.file_destination, str2);
 	else if (!strcmp(str1, "file_background")) strcpy(params.file_background, str2);
