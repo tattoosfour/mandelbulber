@@ -616,6 +616,8 @@ struct sInterface
 	GtkWidget *label_OpenClStatus;
 	GtkWidget *label_serverStatus;
 	GtkWidget *label_clientStatus;
+	GtkWidget *label_sliderFog;
+	GtkWidget *label_sliderDOF;
 
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;

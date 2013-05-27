@@ -1475,7 +1475,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 			}
 			else
 			{
-				distance = params.doubles.detailSize * 0.9999999;
+				distance = params.doubles.detailSize * 0.5;
 			}
 		}
 
