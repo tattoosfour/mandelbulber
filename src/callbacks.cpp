@@ -210,10 +210,16 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				{
 					CVector3 vector, vector2;
 
-
 					double delta_y;
-					if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = 0;
-					else delta_y = y * (1.0 - 1.0/closeUpRatio);
+					if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorAbsoluteDistance)))
+					{
+						delta_y = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_NavigatorAbsoluteDistance)));
+					}
+					else
+					{
+						if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface) )) delta_y = y;
+						else delta_y = y * (1.0 - 1.0/closeUpRatio);
+					}
 
 					if (clickMode == 1)
 					{
