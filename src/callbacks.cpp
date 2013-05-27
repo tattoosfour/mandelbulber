@@ -1091,36 +1091,18 @@ void ChangedMandelboxRotations(GtkWidget *widget, gpointer data)
 
 void ChangedSliderFog(GtkWidget *widget, gpointer data)
 {
-	/*
-	if (Interface_data.disableInitRefresh) return;
-	GdkColor color;
+	double visibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
+	char text[100];
+	sprintf(text, "visibility = %g", pow(10.0, visibility / 10 - 16.0));
+	gtk_label_set_text(GTK_LABEL(Interface.label_sliderFog), text);
+}
 
-	gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorFog), &color);
-	sRGB color2 = { color.red, color.green, color.blue };
-
-	sImageAdjustments *adj = mainImage.GetImageAdjustments();
-	adj->fogVisibility = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth));
-	adj->fogVisibilityFront = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepthFront));
-	sImageSwitches *sw = mainImage.GetImageSwitches();
-	sw->fogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkFogEnabled));
-	sEffectColours *ecol = mainImage.GetEffectColours();
-	ecol->fogColor = color2;
-
-	imageCompileNeeded = true;
-	refreshNeeded = true;
-	*/
-
-	/*
-	if (!isRendering)
-	{
-		mainImage.CompileImage();
-		mainImage.ConvertTo8bit();
-		mainImage.UpdatePreview();
-		mainImage.RedrawInWidget(renderWindow.drawingArea);
-		while (gtk_events_pending())
-			gtk_main_iteration();
-	}
-	*/
+void ChangedSliderDOF(GtkWidget *widget, gpointer data)
+{
+	double focus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
+	char text[100];
+	sprintf(text, "DOF focus distance = %g", pow(10.0, focus / 10 - 16.0));
+	gtk_label_set_text(GTK_LABEL(Interface.label_sliderDOF), text);
 }
 
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data)

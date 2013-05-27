@@ -1987,6 +1987,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_OpenClWorkgroupSize = gtk_label_new("");
 	Interface.label_serverStatus = gtk_label_new("status: not enabled");
 	Interface.label_clientStatus = gtk_label_new("status: not enabled");
+	Interface.label_sliderFog = gtk_label_new("visibility = ");
+	Interface.label_sliderDOF = gtk_label_new("fog focus distance = ");
 
 	for (int i = 1; i <= HYBRID_COUNT; ++i)
 		Interface.label_HybridFormula[i-1] = gtk_label_new(g_strdup_printf("Formula #%d:", i));
@@ -2044,6 +2046,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAnimationContinueRecord, PressedAnimationContinueRecording);
 	CONNECT_SIGNAL_CLICKED(Interface.buAnimationRenderTrack, PressedAnimationRender);
 	CONNECT_SIGNAL(Interface.adjustmentFogDepth, ChangedSliderFog, "value-changed");
+	CONNECT_SIGNAL(Interface.adjustmentDOFFocus, ChangedSliderDOF, "value-changed");
 	CONNECT_SIGNAL_CLICKED(Interface.checkFogEnabled, ChangedSliderFog);
 	CONNECT_SIGNAL_CLICKED(Interface.checkSSAOEnabled, PressedSSAOUpdate);
 	CONNECT_SIGNAL_CLICKED(Interface.buUpdateSSAO, PressedSSAOUpdate);
@@ -2545,6 +2548,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.checkFogEnabled, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", Interface.buColorFog), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.label_sliderFog, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.sliderFogDepth, true, true, 1);
@@ -2566,6 +2570,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.checkDOFEnabled, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.buUpdateDOF, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.label_sliderDOF, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFSlider1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.label_DOF_focus, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.sliderDOFFocus, true, true, 1);

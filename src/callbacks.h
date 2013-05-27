@@ -60,6 +60,7 @@ void ChangedFastAmbientOcclusion(GtkWidget *widget, gpointer data);
 void ChangedMandelboxRotations(GtkWidget *widget, gpointer data);
 void ChangedIFSFoldingMode(GtkWidget *widget, gpointer data);
 void ChangedSliderFog(GtkWidget *widget, gpointer data);
+void ChangedSliderDOF(GtkWidget *widget, gpointer data);
 void PressedSSAOUpdate(GtkWidget *widget, gpointer data);
 void PressedDOFUpdate(GtkWidget *widget, gpointer data);
 void PressedDistributeLights(GtkWidget *widget, gpointer data);

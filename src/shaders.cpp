@@ -642,7 +642,7 @@ CVector3 CalculateNormals(sShaderInputData input)
 		if(input.calcParam->interiorMode) delta = input.dist_thresh * 0.2;
 
 		double s1, s2, s3, s4;
-		input.calcParam->doubles.N = input.param->fractal.doubles.N * 2;
+		input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
 		input.calcParam->minN = 0;
 
 		bool maxIter;
@@ -684,13 +684,6 @@ CVector3 CalculateNormals(sShaderInputData input)
 
 					double dist = CalculateDistance(point3, *input.calcParam, &max_iter);
 
-					if (input.param->fractal.iterThresh)
-					{
-						if (dist < input.dist_thresh && !max_iter)
-						{
-							dist = input.dist_thresh * 1.01;
-						}
-					}
 					if (dist < input.dist_thresh || max_iter) result2 = 0.0;
 					else result2 = 1.0;
 
