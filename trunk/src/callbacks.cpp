@@ -186,6 +186,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			}
 
 			viewVector.Normalize();
+			CVector3 viewVectorNotRotated = viewVector;
 			viewVector = mRot.RotateVector(viewVector);
 
 			CVector3 start = params.doubles.vp - baseY * (1.0 / params.doubles.persp * params.doubles.zoom);
@@ -238,6 +239,50 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						double key_distance = (params.doubles.vp - last_keyframe_position).Length();
 						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", distance, key_distance);
 						gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
+
+
+						double rotationX = atan2(viewVectorNotRotated.z, viewVectorNotRotated.y);
+						double rotationZ = -atan2(viewVectorNotRotated.x, viewVectorNotRotated.y);
+						double alfa_old = params.doubles.alpha;
+						double beta_old = params.doubles.beta;
+						double gamma_old = params.doubles.gamma;
+						CRotationMatrix mRot2;
+						mRot2.RotateZ(params.doubles.alpha);
+						mRot2.RotateX(params.doubles.beta);
+						mRot2.RotateY(params.doubles.gamma);
+						mRot2.RotateX(rotationX);
+						mRot2.RotateZ(rotationZ);
+						params.doubles.alpha = -mRot2.GetAlfa();
+						params.doubles.beta = -mRot2.GetBeta();
+						params.doubles.gamma = -mRot2.GetGamma();
+
+						//Fix view angle jumps +180°/-180° due to asin and atan functions. These are nasty with keyframes. This test may not be accurate in every case. (Mintaka 20111005)
+						//Fix by mintaka (fractalforums.com/mandelbulber/mandelbulber-1-06-patch/)
+
+						if ((alfa_old - params.doubles.alpha) > M_PI) //angle jump over +180° to negative value
+						{
+							params.doubles.alpha = params.doubles.alpha + 2 * M_PI;
+						}
+						if ((params.doubles.alpha - alfa_old) > M_PI) //angle jump over -180° to positive value
+						{
+							params.doubles.alpha = params.doubles.alpha - 2 * M_PI;
+						}
+						if ((beta_old - params.doubles.beta) > M_PI)
+						{
+							params.doubles.beta = params.doubles.beta + 2 * M_PI;
+						}
+						if ((params.doubles.beta - beta_old) > M_PI)
+						{
+							params.doubles.beta = params.doubles.beta - 2 * M_PI;
+						}
+						if ((gamma_old - params.doubles.gamma) > M_PI)
+						{
+							params.doubles.gamma = params.doubles.gamma + 2 * M_PI;
+						}
+						if ((params.doubles.gamma - gamma_old) > M_PI)
+						{
+							params.doubles.gamma = params.doubles.gamma - 2 * M_PI;
+						}
 
 						WriteInterface(&params);
 						Interface_data.animMode = false;
