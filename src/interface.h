@@ -71,7 +71,7 @@ struct sInterface
 	GtkWidget *tab_label_fractal;
 	GtkWidget *tab_label_image;
 	GtkWidget *tab_label_animation;
-	GtkWidget *tab_label_posteffects;
+	GtkWidget *tab_label_shaders2;
 	GtkWidget *tab_label_lights;
 	GtkWidget *tab_label_IFS;
 	GtkWidget *tab_label_about;
@@ -81,8 +81,11 @@ struct sInterface
 	GtkWidget *tab_label_engine;
 	GtkWidget *tabsPrimitives;
 	GtkWidget *tab_label_primitivePlane;
+	GtkWidget *tab_label_primitiveWater;
 	GtkWidget *tab_label_primitiveBox;
+	GtkWidget *tab_label_primitiveBoxInv;
 	GtkWidget *tab_label_primitiveSphere;
+	GtkWidget *tab_label_primitiveSphereInv;
 	GtkWidget *tab_label_openCL;
 	GtkWidget *tabsNetRender;
 	GtkWidget *tab_label_server;
@@ -92,7 +95,7 @@ struct sInterface
 	GtkWidget *tab_box_fractal;
 	GtkWidget *tab_box_image;
 	GtkWidget *tab_box_animation;
-	GtkWidget *tab_box_posteffects;
+	GtkWidget *tab_box_shaders2;
 	GtkWidget *tab_box_lights;
 	GtkWidget *tab_box_IFS;
 	GtkWidget *tab_box_about;
@@ -101,8 +104,11 @@ struct sInterface
 	GtkWidget *tab_box_mandelbox;
 	GtkWidget *tab_box_engine;
 	GtkWidget *tab_box_primitivePlane;
+	GtkWidget *tab_box_primitiveWater;
 	GtkWidget *tab_box_primitiveBox;
+	GtkWidget *tab_box_primitiveBoxInv;
 	GtkWidget *tab_box_primitiveSphere;
+	GtkWidget *tab_box_primitiveSphereInv;
 	GtkWidget *tab_box_openCL;
 	GtkWidget *tab_box_server;
 	GtkWidget *tab_box_client;
@@ -119,7 +125,6 @@ struct sInterface
 	GtkWidget *boxNavigation;
 	GtkWidget *boxNavigationButtons;
 	GtkWidget *boxNavigationZooming;
-	GtkWidget *boxFractal;
 	GtkWidget *boxFractalFormula;
 	GtkWidget *boxFractalFolding;
 	GtkWidget *boxFractalRayMarching;
@@ -243,6 +248,18 @@ struct sInterface
 	GtkWidget *boxFakeLightsV;
 	GtkWidget *boxFakeLightsH1;
 	GtkWidget *boxFakeLightsH2;
+	GtkWidget *boxImageAdjustmentsV;
+	GtkWidget *boxImageAdjustmentsH1;
+	GtkWidget *boxShadersSurfaceV;
+	GtkWidget *boxShadersSurfaceH1;
+	GtkWidget *boxShadersSurfaceH2;
+	GtkWidget *boxShadersSurfaceH3;
+	GtkWidget *boxShadersSurfaceH4;
+	GtkWidget *boxShadersVolumetricV;
+	GtkWidget *boxShadersVolumetricH1;
+	GtkWidget *boxShadersVolumetricH2;
+	GtkWidget *boxShadersVolumetricH3;
+	GtkWidget *boxShadersVolumetricH4;
 
 	GtkWidget *tableLimits;
 	GtkWidget *tableArrows;
@@ -253,7 +270,6 @@ struct sInterface
 
 	GtkWidget *frCoordinates;
 	GtkWidget *fr3Dnavigator;
-	GtkWidget *frFractal;
 	GtkWidget *frLimits;
 	GtkWidget *frImage;
 	GtkWidget *frEffects;
@@ -301,6 +317,9 @@ struct sInterface
 	GtkWidget *frOpenClEngineSettings;
 	GtkWidget *frNetRender;
 	GtkWidget *frFakeLights;
+	GtkWidget *frImageAdjustments;
+	GtkWidget *frShadersSurface;
+	GtkWidget *frShadersVolumetric;
 
 	GtkWidget *hSeparator1;
 	GtkWidget *hSeparator2;
@@ -318,7 +337,7 @@ struct sInterface
 	GtkWidget *buColorFog1;
 	GtkWidget *buColorFog2;
 	GtkWidget *buColorFog3;
-	GtkWidget *buApplyBrighness;
+	GtkWidget *buApplyImageAdjustments;
 	GtkWidget *buSaveImage;
 	GtkWidget *buSavePNG;
 	GtkWidget *buSavePNG16;
@@ -414,6 +433,7 @@ struct sInterface
 	GtkWidget *edit_ambient;
 	GtkWidget *edit_brightness;
 	GtkWidget *edit_gamma;
+	GtkWidget *edit_contrast;
 	GtkWidget *edit_specular;
 	GtkWidget *edit_reflect;
 	GtkWidget *edit_AmbientOcclusionQuality;
@@ -504,8 +524,6 @@ struct sInterface
 	GtkWidget *edit_FoldingIntPowZFactor;
 	GtkWidget *edit_FoldingIntPowFoldingFactor;
 	GtkWidget *edit_roughness;
-	GtkWidget *edit_volumetricLightQuality;
-	GtkWidget *edit_volumetricLightIntensity;
 	GtkWidget *edit_volumetricLightMainIntensity;
 	GtkWidget *edit_volumetricLightAux1Intensity;
 	GtkWidget *edit_volumetricLightAux2Intensity;
@@ -664,7 +682,6 @@ struct sInterface
 	GtkWidget *checkStereoEnabled;
 	GtkWidget *checkMandelboxRotationsEnable;
 	GtkWidget *checkInteriorMode;
-	GtkWidget *checkDECorrectionMode;
 	GtkWidget *checkDELinearMode;
 	GtkWidget *checkConstantDEThreshold;
 	GtkWidget *checkVolumetricLightMainEnabled;

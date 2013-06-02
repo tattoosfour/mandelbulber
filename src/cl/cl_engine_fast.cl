@@ -157,7 +157,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 			if(scan > 50) break;
 		}
 		
-		float zBuff = scan / params.zoom - 1.0;
+		float zBuff = scan;
 		
 		float4 colour = 0.0f;
 		if(found)

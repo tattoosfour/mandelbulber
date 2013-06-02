@@ -172,6 +172,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "analityc_DE_mode", params.fractal.analitycDE, true, compare);
 	fprintfDot(fileSettings, "DE_factor", params.doubles.DE_factor, 1.0, compare);
 	fprintfDot(fileSettings, "brightness", params.doubles.imageAdjustments.brightness, 1.0, compare);
+	fprintfDot(fileSettings, "contrast", params.doubles.imageAdjustments.contrast, 1.0, compare);
 	fprintfDot(fileSettings, "gamma", params.doubles.imageAdjustments.imageGamma, 1.0, compare);
 	fprintfDot(fileSettings, "ambient", params.doubles.imageAdjustments.ambient, 0.0, compare);
 	fprintfDot(fileSettings, "reflect", params.doubles.imageAdjustments.reflect, 0.0, compare);
@@ -397,12 +398,9 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "interior_mode", params.fractal.interiorMode, false, compare);
 	fprintfDot(fileSettings, "FoldingIntPow_folding_factor", params.fractal.doubles.FoldingIntPowFoldFactor, 2.0, compare);
 	fprintfDot(fileSettings, "FoldingIntPow_z_factor", params.fractal.doubles.FoldingIntPowZfactor, 5, compare);
-	fprintfInt(fileSettings, "dynamic_DE_correction", params.fractal.dynamicDEcorrection, false, compare);
 	fprintfInt(fileSettings, "linear_DE_mode", params.fractal.linearDEmode, false, compare);
 	fprintfInt(fileSettings, "constant_DE_threshold", params.fractal.constantDEThreshold, false, compare);
 
-	fprintfDot(fileSettings, "volumetric_light_intensity", params.doubles.imageAdjustments.volumetricLightIntensity, 1, compare);
-	fprintfDot(fileSettings, "volumetric_light_quality", params.doubles.volumetricLightQuality, 5, compare);
 	for(int i=0; i<5; i++)
 	{
 		sprintf(parameterName, "volumetric_light_intensity_%d", i);
@@ -763,6 +761,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "analityc_DE_mode")) params.fractal.analitycDE = atoi(str2);
 	else if (!strcmp(str1, "DE_factor")) params.doubles.DE_factor = atof2(str2);
 	else if (!strcmp(str1, "brightness")) params.doubles.imageAdjustments.brightness = atof2(str2);
+	else if (!strcmp(str1, "contrast")) params.doubles.imageAdjustments.contrast = atof2(str2);
 	else if (!strcmp(str1, "gamma")) params.doubles.imageAdjustments.imageGamma = atof2(str2);
 	else if (!strcmp(str1, "ambient")) params.doubles.imageAdjustments.ambient = atof2(str2);
 	else if (!strcmp(str1, "reflect")) params.doubles.imageAdjustments.reflect = atof2(str2);
@@ -918,16 +917,12 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "view_distance_max")) params.doubles.viewDistanceMax = atof2(str2);
 	else if (!strcmp(str1, "view_distance_min")) params.doubles.viewDistanceMin = atof2(str2);
 	else if (!strcmp(str1, "interior_mode")) params.fractal.interiorMode = atoi(str2);
-	else if (!strcmp(str1, "dynamic_DE_correction")) params.fractal.dynamicDEcorrection = atoi(str2);
 	else if (!strcmp(str1, "linear_DE_mode")) params.fractal.linearDEmode = atoi(str2);
 	else if (!strcmp(str1, "constant_DE_threshold")) params.fractal.constantDEThreshold = atoi(str2);
 
 	else if (!strcmp(str1, "FoldingIntPow_folding_factor")) params.fractal.doubles.FoldingIntPowFoldFactor = atof2(str2);
 	else if (!strcmp(str1, "FoldingIntPow_z_factor")) params.fractal.doubles.FoldingIntPowZfactor = atof2(str2);
 	else if (!strcmp(str1, "penetrating_lights")) params.penetratingLights = atoi(str2);
-
-	else if (!strcmp(str1, "volumetric_light_intensity")) params.doubles.imageAdjustments.volumetricLightIntensity = atof2(str2);
-	else if (!strcmp(str1, "volumetric_light_quality")) params.doubles.volumetricLightQuality = atof2(str2);
 
 	else if (!strcmp(str1, "raytraced_reflections")) params.imageSwitches.raytracedReflections = atoi(str2);
 	else if (!strcmp(str1, "reflections_max")) params.reflectionsMax = atoi(str2);

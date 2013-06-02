@@ -270,7 +270,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			sRGB16 pixel = {rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B};
 			int x = a % width;
 			int y = a / width;
-			image->PutPixelImage(x,y,pixel);
+			image->PutPixelImage16(x,y,pixel);
 			image->PutPixelZBuffer(x,y,rgbbuff[i].zBuffer);
 		}
 

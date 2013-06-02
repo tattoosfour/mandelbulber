@@ -245,7 +245,6 @@ struct sFractal
 	bool sphericalFoldingMode;  // spherical folding mode
 	bool interiorMode;
 	bool hybridCyclic;
-	bool dynamicDEcorrection;
 	bool linearDEmode;
 	bool constantDEThreshold;
 
