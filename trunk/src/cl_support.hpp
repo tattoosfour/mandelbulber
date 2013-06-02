@@ -8,13 +8,13 @@
 #ifndef CL_SUPPORT_HPP_
 #define CL_SUPPORT_HPP_
 
-#define __NO_STD_VECTOR // Use cl::vector instead of STL version
+//#define __NO_STD_VECTOR // Use cl::vector instead of STL version
 
 //#define CLSUPPORT
 
 #ifdef CLSUPPORT
 
-#include <CL/opencl.h>
+//#include <CL/opencl.h>
 #include <CL/cl.hpp>
 #include <cstdio>
 #include <cstdlib>
@@ -53,12 +53,12 @@ private:
 	bool recompileRequest;
 	sClPixel *rgbbuff;
 	sClInBuff *inBuffer1;
-	cl::vector<cl::Platform> platformList;
+	std::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
 	cl::Buffer *outCL;
 	cl::Buffer *inCLBuffer1;
-	cl::vector<cl::Device> devices;
+	std::vector<cl::Device> devices;
 	cl::Program::Sources *source;
 	cl::Program::Sources *source2;
 	cl::Program *program;

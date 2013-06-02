@@ -99,6 +99,10 @@ sRGB16 cImage::CalculatePixel(sRGBfloat pixel)
 	float G = pixel.G * adj.brightness;
 	float B = pixel.B * adj.brightness;
 
+	R = (R - 0.5) * adj.contrast + 0.5;
+	G = (G - 0.5) * adj.contrast + 0.5;
+	B = (B - 0.5) * adj.contrast + 0.5;
+
 	if (R > 1.0) R = 1.0;
 	if (R < 0.0) R = 0.0;
 	if (G > 1.0) G = 1.0;

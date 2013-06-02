@@ -46,7 +46,6 @@ struct sParamRenderD
 	double stereoEyeDistance;
 	double viewDistanceMin;
 	double viewDistanceMax;
-	double volumetricLightQuality;
 	double volumetricLightIntensity[5];
 	double fogDensity;
 	double fogColour1Distance;

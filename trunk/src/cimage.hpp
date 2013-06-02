@@ -54,7 +54,7 @@ struct sImageAdjustments
   double imageGamma;
   double paletteOffset;
   double mainLightIntensity;
-  double volumetricLightIntensity;
+  double contrast;
 };
 
 struct sEffectColours
