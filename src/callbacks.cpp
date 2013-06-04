@@ -2285,8 +2285,6 @@ void AutoDEStep(bool highQuality)
 
 	ReadInterface(&fractParams);
 	fractParams.doubles.DE_factor = DEfactor;
-	fractParams.doubles.imageAdjustments.glow_intensity = 0.5 * DEfactor;
-	if(fractParams.doubles.imageAdjustments.glow_intensity > 1.0) fractParams.doubles.imageAdjustments.glow_intensity = 0.5;
 	WriteInterface(&fractParams);
 }
 
