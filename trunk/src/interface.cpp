@@ -2062,7 +2062,6 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL(Interface.adjustmentFogDepth, ChangedSliderFog, "value-changed");
 	CONNECT_SIGNAL(Interface.adjustmentDOFFocus, ChangedSliderDOF, "value-changed");
 	CONNECT_SIGNAL_CLICKED(Interface.checkFogEnabled, ChangedSliderFog);
-	CONNECT_SIGNAL_CLICKED(Interface.checkSSAOEnabled, PressedSSAOUpdate);
 	CONNECT_SIGNAL_CLICKED(Interface.buUpdateSSAO, PressedSSAOUpdate);
 	CONNECT_SIGNAL_CLICKED(Interface.buUpdateDOF, PressedDOFUpdate);
 	CONNECT_SIGNAL_CLICKED(Interface.buDistributeLights, PressedDistributeLights);
@@ -2434,7 +2433,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "direct light:", 5, Interface.edit_shadows), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "specularity:", 5, Interface.edit_specular), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("0,0", "ambient:", 5, Interface.edit_ambient), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("10,0", "Shadow cone angle:", 5, Interface.edit_shadowConeAngle), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("10,0", "Soft shadow cone angle:", 5, Interface.edit_shadowConeAngle), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("2,0", "ambient occlusion:", 5, Interface.edit_ambient_occlusion), false, false, 1);
@@ -2981,7 +2980,7 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(Interface.edit_maxN, "Maximum number of iterations");
 	gtk_widget_set_tooltip_text(Interface.edit_minN, "Minimum number of iterations");
 	gtk_widget_set_tooltip_text(Interface.edit_DE_thresh, "Dynamic DE threshold factor.\n1 = DE threshold equals to 1 screen pixel\nHigher value gives more details");
-	gtk_widget_set_tooltip_text(Interface.edit_DE_stepFactor, "DE steps fractor.\n1 -> step = Estimated Distance\nHigher value gives higher accuracy of finding fractal surface");
+	gtk_widget_set_tooltip_text(Interface.edit_DE_stepFactor, "DE steps fractor.\n1 -> step = Estimated Distance\nLower value gives higher accuracy of finding fractal surface");
 	gtk_widget_set_tooltip_text(Interface.checkIterThresh, "Iteration count threshold mode");
 	gtk_widget_set_tooltip_text(Interface.checkLimits, "Enables cross-sections of fractal");
 	gtk_widget_set_tooltip_text(Interface.boxLimits, "Coordinates of cross-sections (limit box)");
@@ -3001,20 +3000,21 @@ void CreateTooltips(void)
 	gtk_widget_set_tooltip_text(renderWindow.comboImageScale, "Image scale in render window\nSmaller value <-> smaller render window");
 	gtk_widget_set_tooltip_text(Interface.edit_brightness, "Image brightness");
 	gtk_widget_set_tooltip_text(Interface.edit_gamma, "Image gamma");
-	gtk_widget_set_tooltip_text(Interface.buApplyImageAdjustments, "Applying all shader changes during rendering and after rendering");
+	gtk_widget_set_tooltip_text(Interface.edit_contrast, "Image contrast");
+	gtk_widget_set_tooltip_text(Interface.buApplyImageAdjustments, "Applying all image adjustment changes during or after rendering");
 	gtk_widget_set_tooltip_text(Interface.edit_shading, "angle of incidence of light effect intensity");
 	gtk_widget_set_tooltip_text(Interface.edit_shadows, "shadow intensity");
 	gtk_widget_set_tooltip_text(Interface.edit_specular, "intensity of specularity effect");
 	gtk_widget_set_tooltip_text(Interface.edit_ambient, "intensity of global ambient light");
 	gtk_widget_set_tooltip_text(Interface.edit_ambient_occlusion, "intensity of ambient occlusion effect");
 	gtk_widget_set_tooltip_text(Interface.edit_glow, "intensity of glow effect");
-	gtk_widget_set_tooltip_text(Interface.edit_reflect, "intensity of texture reflection (environment mapping effect)");
+	gtk_widget_set_tooltip_text(Interface.edit_reflect, "intensity of texture reflection (environment mapping effect)\nor intersity of raytraced reflections\n");
 	gtk_widget_set_tooltip_text(Interface.edit_AmbientOcclusionQuality,
 			"ambient occlusion quality\n1 -> 8 rays\n3 -> 64 rays\n5 -> 165 rays\n10 -> 645 rays\n30 -> 5702 rays (hardcore!!!)");
-	gtk_widget_set_tooltip_text(Interface.checkShadow, "Enable shadow");
+	gtk_widget_set_tooltip_text(Interface.checkShadow, "Enable shadows");
 	gtk_widget_set_tooltip_text(Interface.checkAmbientOcclusion, "Enable ambient occlusion effect");
 	gtk_widget_set_tooltip_text(Interface.checkFastAmbientOcclusion,
-			"Switch to ambient occlusion based on orbit traps. Very fast but works properly only with trigonometric Mandelbulbs");
+			"Switch to ambient occlusion based on distance estimation");
 	gtk_widget_set_tooltip_text(Interface.checkSlowShading,
 			"Enable calculation of light's angle of incidence based on fake gradient estimation\nVery slow but works with all fractal formulas");
 	gtk_widget_set_tooltip_text(Interface.checkBitmapBackground, "Enable spherical wrapped textured background");
@@ -3343,7 +3343,7 @@ void CheckPrameters(sParamRender *params)
 	if(params->globalIlumQuality <=1) params->globalIlumQuality = 1;
 	if(params->image_width < 32) params->image_width = 32;
 	if(params->image_height < 32) params->image_height = 32;
-	if(params->reflectionsMax > 10) params->reflectionsMax = 10;
+	if(params->reflectionsMax > 100) params->reflectionsMax = 100;
 	if(params->noOfTiles < 1) params->noOfTiles = 1;
 	if(params->noOfTiles > 100) params->noOfTiles = 100;
 	if(params->doubles.fogDensity < 0.0) params->doubles.fogDensity = 0.0;

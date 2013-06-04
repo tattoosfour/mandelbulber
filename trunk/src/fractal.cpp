@@ -1326,7 +1326,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 			{
 				if(distance < params.doubles.detailSize)
 				{
-					distance = params.doubles.detailSize;
+					distance = params.doubles.detailSize * 1.01;
 				}
 			}
 		}
@@ -1389,7 +1389,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 			{
 				if(distance < params.doubles.detailSize)
 				{
-					distance = params.doubles.detailSize;
+					distance = params.doubles.detailSize * 1.01;
 				}
 			}
 
@@ -1475,7 +1475,8 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 			}
 			else
 			{
-				distance = params.doubles.detailSize * 0.5;
+				//distance = params.doubles.detailSize * 0.5;
+				distance = 0.0;
 			}
 		}
 
