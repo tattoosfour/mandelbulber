@@ -63,8 +63,6 @@ bool newLineRendered = false;
 
 cImage mainImage(800, 600);
 
-bool *linesToSend = NULL;
-
 double real_clock(void)
 {
 #ifdef WIN32 /* WINDOWS */
@@ -569,7 +567,7 @@ void *MainThread(void *ptr)
 
 				}					//next x
 
-				if (!breakX) linesToSend[yScr] = true;
+				if (!breakX) threadParameters->linesToSend[yScr] = true;
 
 				image->Squares(yScr, progressive);
 
@@ -747,7 +745,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//initialising threads
 		int *thread_done = new int[height];
 		int *thread_done_from_server = new int[height];
-		linesToSend = new bool[height];
+		bool *linesToSend = new bool[height];
 		GThread **Thread = new GThread *[NR_THREADS + 1];
 		GError **err = new GError *[NR_THREADS + 1];
 		sParam *thread_param = new sParam[NR_THREADS];
@@ -813,6 +811,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 				thread_param[i].progressiveStart = progressiveStart;
 				thread_param[i].done = &done;
 				thread_param[i].thread_done = thread_done;
+				thread_param[i].linesToSend = linesToSend;
 				//creating thread
 				Thread[i] = g_thread_create((GThreadFunc) MainThread, &thread_param[i], TRUE, &err[i]);
 				WriteLogDouble("Thread created", i);

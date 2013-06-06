@@ -24,6 +24,7 @@ struct sParam
   cImage *image;
   int *done;
   int *thread_done;
+  bool *linesToSend;
 };
 
 struct sStep
