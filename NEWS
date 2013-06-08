@@ -1,5 +1,22 @@
 Version history
 
+v1.16
+- all shaders and rendering engine rewritten from the beginning
+- light sources are rendered as a volumetric objects
+- introduced soft shadows
+- raytracing works with all shaders and is much more accurate
+- glow and all fog shaders now are volumetric effects and can be used simultanously
+- possible to set different reflection factor for each primitive object
+- zoom by click works much more accurate and rotates the camera towards to selected point
+- added option for using constant step length for zoom by click (useful for animations)
+- added contrast adjustment for image
+- user interface reorganized
+- internal image buffer is now floating point type (better HDR efects)
+- fixed bug: crashed when animation keyframe thumbnail was refrshed during image rendering
+- fixed bug: NetRender client saved partially rendered images
+- fixed bug: animated water wasn't rendered properly with NetRender
+- remark: some shaders settings are not compatible with older setting files (fog and DOF distance, reflection factor)
+
 v1.15
 - added light sources based on orbit traps
 - added NetRender client in noGUI mode

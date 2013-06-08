@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 image_height 800;
 view_point_x -0.40348724364265348;
 view_point_y -0.71355769784665479;
@@ -15,8 +15,10 @@ background_color_1_B 57898;
 background_color_2_R 54473;
 background_color_2_G 57812;
 background_color_2_B 59901;
+background_color_1_G 37121;
+background_color_1_B 57898;
 post_DOF_enabled 1;
-post_DOF_focus 20.730780260223568;
+post_DOF_focus 131.06586416840898;
 post_DOF_radius 10.300000000000001;
 IFS_offsetY 1;
 IFS_offsetZ 1;

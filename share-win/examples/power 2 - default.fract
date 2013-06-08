@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 image_height 592;
 view_point_x -0.5;
 formula 3;
@@ -17,6 +17,8 @@ background_color_1_B 0;
 background_color_2_R 23418;
 background_color_2_G 0;
 background_color_2_B 18239;
+background_color_1_G 0;
+background_color_1_B 0;
 coloring_random_seed 1123456;
 file_destination images/image;
 file_animation_path paths/path.txt;
