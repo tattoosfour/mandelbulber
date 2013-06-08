@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 image_width 592;
 image_height 592;
 view_point_x -0.018435515863492281;
@@ -25,6 +25,8 @@ background_color_1_B 36716;
 background_color_2_R 36112;
 background_color_2_G 15909;
 background_color_2_B 10495;
+background_color_1_G 49727;
+background_color_1_B 36716;
 coloring_random_seed 213898;
 coloring_speed 0.10000000000000001;
 coloring_palette_offset 151.59999999999999;

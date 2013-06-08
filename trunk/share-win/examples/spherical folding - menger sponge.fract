@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 angle_alfa -29.999999999999996;
 formula 7;
 spherical_folding_mode 1;
@@ -15,6 +15,7 @@ background_color_1_G 20550;
 background_color_2_R 0;
 background_color_2_G 0;
 background_color_2_B 0;
+background_color_1_G 20550;
 coloring_speed 2;
 coloring_palette_offset 21.800000000000001;
 file_destination images/image;

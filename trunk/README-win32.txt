@@ -1,4 +1,4 @@
-MANDELBULBER 1.13-1 - Windows
+MANDELBULBER 1.16 - Windows
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
@@ -30,7 +30,7 @@ Mandelbulber-Setup.exe
 
 5. USAGE
 
-Please visit: http://sites.google.com/site/mandelbulber/user-manual
+Please visit: http://wiki.mandelbulber.com/index.php?title=Main_Page
 
 command-line mode:
 
@@ -38,7 +38,6 @@ Syntax:
 mandelbulber [options...] [settings_file]
 options:
   -nogui            - start program without GUI
-  -lowmem           - low memory usage mode
   -flight           - render flight animation
   -keyframe         - render keyframe animation
   -start N          - start renderig from frame number N

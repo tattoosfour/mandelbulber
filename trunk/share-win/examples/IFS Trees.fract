@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 image_width 592;
 image_height 592;
 view_point_x 0.20771801765757561;
@@ -9,6 +9,11 @@ angle_beta -10;
 zoom 0.059999999999999998;
 formula 10;
 smoothness 2;
+background_color_1_R 13567;
+background_color_1_G 43541;
+background_color_1_B 64847;
+background_color_1_G 43541;
+background_color_1_B 64847;
 coloring_random_seed 706976977;
 IFS_scale 1.3200000000000001;
 IFS_offsetX 0.38462958684577397;

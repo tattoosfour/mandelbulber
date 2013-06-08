@@ -1,4 +1,4 @@
-Mandelbulber 1.05;
+Mandelbulber 1.1599999999999999;
 image_height 800;
 view_point_x 1.6372781064899551;
 view_point_y -1.637423371490901;
@@ -23,7 +23,7 @@ coloring_random_seed 345;
 coloring_speed 2;
 coloring_palette_offset 57;
 post_DOF_enabled 1;
-post_DOF_focus 24.5;
+post_DOF_focus 132.81838590255677;
 mandelbox_scale -1.73;
 file_destination images/image;
 file_animation_path paths/path.txt;

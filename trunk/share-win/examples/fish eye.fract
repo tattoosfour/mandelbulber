@@ -1,4 +1,4 @@
-Mandelbulber 1.0800000000000001;
+Mandelbulber 1.1599999999999999;
 view_point_x 0.39500352565961561;
 view_point_y -0.85378131251278577;
 view_point_z -0.64349668879448074;
@@ -41,7 +41,8 @@ coloring_speed 3;
 coloring_palette_offset 155.69999999999999;
 post_SSAO_enabled 0;
 fish_eye 1;
-volumetric_fog_density 0.5;
+reflections_max 2;
+volumetric_fog_density 1;
 volumetric_fog_colour_1_distance 0.0052729670737512932;
 volumetric_fog_colour_2_distance 0.01054593414750259;
 volumetric_fog_distance_factor 0.01054593414750259;
