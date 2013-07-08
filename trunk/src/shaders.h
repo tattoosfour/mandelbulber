@@ -36,6 +36,7 @@ struct sShaderInputData
 	CVector3 lightVect;
 	double dist_thresh;
 	double lastDist;
+	double delta;
 	sVectorsAround *vectorsAround;
 	int vectorsCount;
 	cTexture *envMappingTexture;

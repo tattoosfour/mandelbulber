@@ -467,6 +467,8 @@ void *MainThread(void *ptr)
 							shaderInputData.lightVect = shadowVector;
 							shaderInputData.point = point;
 							shaderInputData.viewVector = viewVector;
+							if(param.fractal.constantDEThreshold)	shaderInputData.delta = reflectBuff[ray].depth * param.doubles.resolution * param.doubles.persp;
+							else shaderInputData.delta = reflectBuff[ray].distThresh * param.doubles.quality;
 							CVector3 vn = CalculateNormals(shaderInputData);
 							viewVector = viewVector - vn * viewVector.Dot(vn)*2.0;
 							startRay = startRay + viewVector * reflectBuff[ray].distThresh;
@@ -486,6 +488,8 @@ void *MainThread(void *ptr)
 							shaderInputData.calcParam = &calcParam;
 							shaderInputData.param = &param;
 							shaderInputData.dist_thresh = reflectBuff[ray].distThresh;
+							if(param.fractal.constantDEThreshold)	shaderInputData.delta = reflectBuff[ray].depth * param.doubles.resolution * param.doubles.persp;
+							else shaderInputData.delta = reflectBuff[ray].distThresh * param.doubles.quality;
 							shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
 							shaderInputData.lightVect = lightVector;
 							shaderInputData.point = reflectBuff[ray].point;
