@@ -35,6 +35,7 @@ CclSupport::CclSupport(void)
 	lastFormula = trig_optim;
 	lastEngineNumber = 0;
 	lastStepSize = 0;
+	inBuffer1 = new sClInBuff;
 }
 
 void CclSupport::Init(void)
@@ -155,7 +156,10 @@ void CclSupport::Init(void)
 
 	chdir(clDir.c_str());
 
-	err = program->build(devices, "-w");
+	std::string buildParams;
+	buildParams = "-w ";
+	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled";
+	err = program->build(devices, buildParams.c_str());
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 	checkErr(err, "Program::build()");
 	printf("OpenCL program built done\n");
@@ -177,7 +181,6 @@ void CclSupport::Init(void)
 
 	rgbbuff = new sClPixel[buffSize];
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
-	inBuffer1 = new sClInBuff;
 	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
@@ -207,10 +210,11 @@ void CclSupport::Init(void)
 	ready = true;
 }
 
-void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal, enumFractalFormula formula)
+void CclSupport::SetParams(sClInBuff *inBuff, enumFractalFormula formula)
 {
-	if(ClFractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
+	if(inBuff->fractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
 	if(formula != lastFormula) recompileRequest = true;
+	if(inBuff->params.DOFEnabled != lastParams.DOFEnabled) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -220,8 +224,8 @@ void CclSupport::SetParams(sClParams ClParams, sClFractal ClFractal, enumFractal
 	if(pixelsPerJob != lastStepSize) recompileRequest = true;
 	lastStepSize = pixelsPerJob;
 
-	lastParams = ClParams;
-	lastFractal = ClFractal;
+	lastParams = inBuff->params;
+	lastFractal = inBuff->fractal;
 	lastFormula = formula;
 }
 
@@ -231,13 +235,9 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 	if(recompileRequest)
 	{
-		sClInBuff *tempInBuff = new sClInBuff;
-		memcpy(tempInBuff, inBuffer1, sizeof(sClInBuff));
 		Disable();
 		Enable();
 		Init();
-		memcpy(inBuffer1, tempInBuff, sizeof(sClInBuff));
-		delete tempInBuff;
 		recompileRequest = false;
 	}
 
@@ -246,9 +246,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	{
 		err = kernel->setArg(0, *outCL);
 		err = kernel->setArg(1, *inCLBuffer1);
-		err = kernel->setArg(2, lastParams);
-		err = kernel->setArg(3, lastFractal);
-		err = kernel->setArg(4, stepSize * loop);
+		err = kernel->setArg(2, stepSize * loop);
 
 		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
@@ -303,7 +301,6 @@ void CclSupport::Disable(void)
 	delete kernel;
 	delete queue;
 	delete inCLBuffer1;
-	delete inBuffer1;
 	enabled = false;
 	ready = false;
 }

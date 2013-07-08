@@ -7,7 +7,7 @@
 		float cth = native_cos(th);
 		r_dz = rp * r_dz * power + 1.0f;
 		rp *= r;
-		z = (float4) {cth * native_cos(ph), cth * native_sin(ph), native_sin(th), 0.0f};
+		z = (float3) {cth * native_cos(ph), cth * native_sin(ph), native_sin(th)};
 		z*=rp;
 		z+=c;
 		r = fast_length(z);

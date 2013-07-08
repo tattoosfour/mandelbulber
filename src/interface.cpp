@@ -3379,17 +3379,22 @@ sRGB sRGBDiv256(sRGB color)
 
 //#define CLSUPPORT
 #ifdef CLSUPPORT
-void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal, sClInBuff *clInBuff)
+void Params2Cl(const sParamRender *params, sClInBuff *clInBuff)
 {
+
+	sClParams *clParams = &clInBuff->params;
+	sClFractal *clFractal = &clInBuff->fractal;
 	clParams->alpha = params->doubles.alpha;
 	clParams->beta = params->doubles.beta;
 	clParams->gamma = params->doubles.gamma;
 	clParams->height = clSupport->GetHeight();
 	clParams->width = clSupport->GetWidth();
 	clParams->persp = params->doubles.persp;
-	clParams->vp = CVector2float4(params->doubles.vp);
+	clParams->vp = CVector2float3(params->doubles.vp);
 	clParams->zoom = params->doubles.zoom;
 	clParams->DEfactor = params->doubles.DE_factor;
+	clParams->quality = params->doubles.quality;
+
 	clParams->mainLightAlfa = params->doubles.mainLightAlpha;
 	clParams->mainLightBeta = params->doubles.mainLightBeta;
 
@@ -3403,7 +3408,8 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clFractal->mandelbox.fixedRadius = params->fractal.mandelbox.doubles.foldingSphericalFixed;
 	clFractal->mandelbox.mainRot = RotMatrix2matrix33(params->fractal.mandelbox.mainRot);
 	clFractal->formula = params->fractal.formula;
-	clFractal->julia = CVector2float4(params->fractal.doubles.julia);
+	clFractal->julia = CVector2float3(params->fractal.doubles.julia);
+	clFractal->constantDEThreshold = params->fractal.constantDEThreshold;
 
 	clFractal->ifs.absX = params->fractal.IFS.absX;
 	clFractal->ifs.absY = params->fractal.IFS.absY;
@@ -3413,8 +3419,8 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clFractal->ifs.rotationBeta = params->fractal.IFS.doubles.rotationBeta;
 	clFractal->ifs.rotationGamma = params->fractal.IFS.doubles.rotationGamma;
 	clFractal->ifs.scale = params->fractal.IFS.doubles.scale;
-	clFractal->ifs.offset = CVector2float4(params->fractal.IFS.doubles.offset);
-	clFractal->ifs.edge = CVector2float4(params->fractal.IFS.doubles.edge);
+	clFractal->ifs.offset = CVector2float3(params->fractal.IFS.doubles.offset);
+	clFractal->ifs.edge = CVector2float3(params->fractal.IFS.doubles.edge);
 	clFractal->ifs.mainRot = RotMatrix2matrix33(params->fractal.IFS.mainRot);
 	for(int i=0; i<9; i++)
 	{
@@ -3425,7 +3431,7 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 		clFractal->ifs.beta[i] = params->fractal.IFS.doubles.beta[i];
 		clFractal->ifs.gamma[i] = params->fractal.IFS.doubles.gamma[i];
 		clFractal->ifs.intensity[i] = params->fractal.IFS.doubles.intensity[i];
-		clFractal->ifs.direction[i] = CVector2float4(params->fractal.IFS.doubles.direction[i]);
+		clFractal->ifs.direction[i] = CVector2float3(params->fractal.IFS.doubles.direction[i]);
 	}
 
 	clFractal->opacity = params->doubles.iterFogOpacity;
@@ -3448,41 +3454,46 @@ void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFr
 	clParams->colouringEnabled = params->imageSwitches.coloringEnabled;
 	clParams->fastAmbientOcclusionEnabled = (params->fastGlobalIllumination || params->SSAOEnabled);
 	clParams->slowAmbientOcclusionEnabled = params->global_ilumination && !params->fastGlobalIllumination;
-	clParams->glowColour1 = sRGB2float4(params->effectColours.glow_color1, 65536.0);
-	clParams->glowColour2 = sRGB2float4(params->effectColours.glow_color2, 65536.0);
-	clParams->backgroundColour1 = sRGB2float4(params->background_color1, 65536.0);
-	clParams->backgroundColour2 = sRGB2float4(params->background_color2, 65536.0);
-	clParams->backgroundColour3 = sRGB2float4(params->background_color3, 65536.0);
-	clParams->mainLightColour = sRGB2float4(params->effectColours.mainLightColour, 65536.0);
+	clParams->glowColour1 = sRGB2float3(params->effectColours.glow_color1, 65536.0);
+	clParams->glowColour2 = sRGB2float3(params->effectColours.glow_color2, 65536.0);
+	clParams->backgroundColour1 = sRGB2float3(params->background_color1, 65536.0);
+	clParams->backgroundColour2 = sRGB2float3(params->background_color2, 65536.0);
+	clParams->backgroundColour3 = sRGB2float3(params->background_color3, 65536.0);
+	clParams->mainLightColour = sRGB2float3(params->effectColours.mainLightColour, 65536.0);
 
 	clParams->fogColour1Distance = params->doubles.fogColour1Distance;
 	clParams->fogColour2Distance = params->doubles.fogColour2Distance;
 	clParams->fogDensity = params->doubles.fogDensity;
 	clParams->fogDistanceFactor = params->doubles.fogDistanceFactor;
-	clParams->fogColour1 = sRGB2float4(params->fogColour1, 65536.0);
-	clParams->fogColour2 = sRGB2float4(params->fogColour2, 65536.0);
-	clParams->fogColour3 = sRGB2float4(params->fogColour3, 65536.0);
+	clParams->fogColour1 = sRGB2float3(params->fogColour1, 65536.0);
+	clParams->fogColour2 = sRGB2float3(params->fogColour2, 65536.0);
+	clParams->fogColour3 = sRGB2float3(params->fogColour3, 65536.0);
+
+	clParams->DOFEnabled = params->DOFEnabled;
+	clParams->DOFFocus = pow(10, params->doubles.DOFFocus / 10.0 - 16.0);
+	clParams->DOFRadius = params->doubles.DOFRadius;
+
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
 {
 	matrix33 rot33;
 	CMatrix33 matrix = rot.GetMatrix();
-	rot33.m1 = (cl_float4){{matrix.m11, matrix.m12, matrix.m13, 0.0f}};
-	rot33.m2 = (cl_float4){{matrix.m21, matrix.m22, matrix.m23, 0.0f}};
-	rot33.m3 = (cl_float4){{matrix.m31, matrix.m32, matrix.m33, 0.0f}};
+	rot33.m1 = (cl_float3){{matrix.m11, matrix.m12, matrix.m13}};
+	rot33.m2 = (cl_float3){{matrix.m21, matrix.m22, matrix.m23}};
+	rot33.m3 = (cl_float3){{matrix.m31, matrix.m32, matrix.m33}};
 	return rot33;
 }
 
-cl_float4 CVector2float4(CVector3 vect)
+cl_float3 CVector2float3(CVector3 vect)
 {
-	cl_float4 vect2 = (cl_float4){{vect.x, vect.y, vect.z, 0.0f}};
+	cl_float3 vect2 = (cl_float3){{vect.x, vect.y, vect.z}};
 	return vect2;
 }
 
-cl_float4 sRGB2float4(sRGB colour, double factor)
+cl_float3 sRGB2float3(sRGB colour, double factor)
 {
-	cl_float4 col = (cl_float4){{colour.R / factor, colour.G / factor, colour.B / factor, 0.0f}};
+	cl_float3 col = (cl_float3){{colour.R / factor, colour.G / factor, colour.B / factor}};
 	return col;
 }
 #endif

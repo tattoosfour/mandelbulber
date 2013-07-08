@@ -220,7 +220,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 		input.point = point;
 		input.dist_thresh = input.stepBuff[index].distThresh;
 
-		if(totalStep < input.dist_thresh)
+		if(totalStep < input.dist_thresh * input.param->doubles.quality)
 		{
 			continue;
 		}
@@ -480,14 +480,14 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	CVector3 point2;
 
 	bool max_iter;
-	double factor = input.dist_thresh / input.param->doubles.resolution;
+	double factor = input.dist_thresh / input.param->doubles.resolution * input.param->doubles.quality;
 	if (!input.param->penetratingLights) factor = input.param->doubles.viewDistanceMax;
 	double dist = input.dist_thresh;
 
 	double DE_factor = input.param->doubles.DE_factor;
 	if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
 
-	double start = input.dist_thresh;
+	double start = input.dist_thresh  * input.param->doubles.quality;;
 	if (input.calcParam->interiorMode) start = input.dist_thresh * DE_factor * 0.5;
 
 	double opacity = 0.0;
@@ -496,13 +496,15 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	double softRange = tan(input.param->doubles.shadowConeAngle / 180.0 * M_PI);
 	double maxSoft = 0.0;
 
+	double bSoft = (!input.param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled && !input.calcParam->iterThresh) && softRange > 0.0;
+
 	for (double i = start; i < factor; i += dist * DE_factor)
 	{
 		point2 = input.point + input.lightVect * i;
 
 		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
-		if ((!input.param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled) && softRange > 0.0)
+		if (bSoft)
 		{
 			double angle = (dist - input.dist_thresh) / i;
 			if (angle < 0) angle = 0;
@@ -532,7 +534,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 			break;
 		}
 	}
-	if (input.param->imageSwitches.iterFogEnabled || input.calcParam->limits_enabled || softRange == 0.0)
+	if (!bSoft)
 	{
 		shadow.R = shadowTemp;
 		shadow.G = shadowTemp;
@@ -647,8 +649,8 @@ CVector3 CalculateNormals(sShaderInputData input)
 	{
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
-		double delta = input.dist_thresh * input.param->doubles.smoothness;
-		if(input.calcParam->interiorMode) delta = input.dist_thresh * 0.2;
+		double delta = input.dist_thresh * input.param->doubles.smoothness * input.param->doubles.quality;
+		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
 
 		double s1, s2, s3, s4;
 		input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
@@ -689,7 +691,7 @@ CVector3 CalculateNormals(sShaderInputData input)
 			{
 				for (point2.z = -1.0; point2.z <= 1.0; point2.z += 0.2)
 				{
-					point3 = input.point + point2 * input.dist_thresh * input.param->doubles.smoothness;
+					point3 = input.point + point2 * input.dist_thresh * input.param->doubles.smoothness * input.param->doubles.quality;
 
 					double dist = CalculateDistance(point3, *input.calcParam, &max_iter);
 
@@ -1033,8 +1035,7 @@ sShaderOutput AuxLightsShader(sShaderInputData &input, sShaderOutput *specularOu
 double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 {
 	double delta = input.dist_thresh;
-	double stepFactor = 1.0;
-	double step = delta * input.param->doubles.DE_factor * stepFactor;
+	double step = delta * input.param->doubles.DE_factor;
 	double dist = step;
 	double light = 1.0;
 
@@ -1044,7 +1045,7 @@ double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 	double DE_factor = input.param->doubles.DE_factor;
 	if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
 
-	for (double i = input.dist_thresh; i < distance; i += dist * stepFactor * DE_factor)
+	for (double i = input.dist_thresh * input.param->doubles.quality; i < distance; i += dist * DE_factor)
 	{
 		CVector3 point2 = input.point + lightVector * i;
 
@@ -1053,7 +1054,7 @@ double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 
 		if (input.param->imageSwitches.iterFogEnabled)
 		{
-			opacity = IterOpacity(dist * stepFactor * DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+			opacity = IterOpacity(dist * DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
 					input.param->doubles.iterFogOpacity);
 		}
 		else
@@ -1062,7 +1063,7 @@ double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 		}
 		shadowTemp -= opacity * (distance - i) / distance;
 
-		if (dist < 0.5 * input.dist_thresh || max_iter || shadowTemp < 0.0)
+		if (dist < input.dist_thresh || max_iter || shadowTemp < 0.0)
 		{
 			if (input.param->penetratingLights)
 			{
@@ -1196,7 +1197,7 @@ void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined)
 double IterOpacity(double step, double iters, double maxN, double trim, double opacitySp)
 {
 	double opacity = ((double)iters - trim) / maxN;
-	if(opacity < 0.0) opacity = 0;
+	if(opacity < 0.0) opacity = 0.0;
 	opacity*=opacity;
 	opacity*=step  * opacitySp;
 	if(opacity > 1.0) opacity = 1.0;

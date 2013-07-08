@@ -1,9 +1,9 @@
 
 typedef struct
 {
-	cl_float4 m1;
-	cl_float4 m2;
-	cl_float4 m3;
+	cl_float3 m1;
+	cl_float3 m2;
+	cl_float3 m3;
 } matrix33;
 
 typedef struct
@@ -34,9 +34,9 @@ typedef struct
 	cl_float beta[9];
 	cl_float gamma[9];
 	cl_float intensity[9];
-	cl_float4 offset;
-	cl_float4 direction[9];
-	cl_float4 edge;
+	cl_float3 offset;
+	cl_float3 direction[9];
+	cl_float3 edge;
 } sClIFS;
 
 typedef struct
@@ -44,12 +44,13 @@ typedef struct
 	cl_uint N;
 	cl_float power;
 	cl_int formula;
-	cl_float4 julia;
+	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;
 	cl_int juliaMode;
 	cl_float opacity;
 	cl_float opacityTrim;
+	cl_int constantDEThreshold;
 } sClFractal;
 
 typedef struct
@@ -62,13 +63,15 @@ typedef struct
 	cl_float zoom;
 	cl_float persp;
 	cl_float DEfactor;
-	cl_float4 vp;
+	cl_float quality;
+	cl_float3 vp;
 	cl_float mainLightAlfa;
 	cl_float mainLightBeta;
 	cl_int AmbientOcclusionNoOfVectors;
 	cl_int colouringEnabled;
 	cl_int fastAmbientOcclusionEnabled;
 	cl_int slowAmbientOcclusionEnabled;
+	cl_int DOFEnabled;
 	cl_float colouringSpeed;
 	cl_float colouringOffset;
 	cl_float ambientOcclusionIntensity;
@@ -79,15 +82,17 @@ typedef struct
 	cl_float fogColour2Distance;
 	cl_float fogDistanceFactor;
 	cl_float fogDensity;
-	cl_float4 glowColour1;
-	cl_float4 glowColour2;
-	cl_float4 backgroundColour1;
-	cl_float4 backgroundColour2;
-	cl_float4 backgroundColour3;
-	cl_float4 mainLightColour;
-	cl_float4 fogColour1;
-	cl_float4 fogColour2;
-	cl_float4 fogColour3;
+	cl_float DOFFocus;
+	cl_float DOFRadius;
+	cl_float3 glowColour1;
+	cl_float3 glowColour2;
+	cl_float3 backgroundColour1;
+	cl_float3 backgroundColour2;
+	cl_float3 backgroundColour3;
+	cl_float3 mainLightColour;
+	cl_float3 fogColour1;
+	cl_float3 fogColour2;
+	cl_float3 fogColour3;
 } sClParams;
 
 typedef struct
@@ -100,7 +105,9 @@ typedef struct
 
 typedef struct
 {
-	cl_float4 palette[256];
-	cl_float4 vectorsAround[10000];
-	cl_float4 vectorsAroundColours[10000];
+	sClParams params;
+	sClFractal fractal;
+	cl_float3 palette[256];
+	cl_float3 vectorsAround[10000];
+	cl_float3 vectorsAroundColours[10000];
 } sClInBuff;

@@ -881,9 +881,9 @@ sRGB GdkColor2sRGB(GdkColor color);
 GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
 #ifdef CLSUPPORT
-void Params2Cl(const sParamRender *params, sClParams *clParams, sClFractal *clFractal, sClInBuff *clInBuff);
+void Params2Cl(const sParamRender *params, sClInBuff *clInBuff);
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
-cl_float4 CVector2float4(CVector3 vect);
-cl_float4 sRGB2float4(sRGB colour, double factor);
+cl_float4 CVector2float3(CVector3 vect);
+cl_float4 sRGB2float3(sRGB colour, double factor);
 #endif
 #endif /* INTERFACE_H_ */
