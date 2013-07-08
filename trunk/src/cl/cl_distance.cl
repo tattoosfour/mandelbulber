@@ -1,4 +1,4 @@
-formulaOut CalculateDistance(float4 point, sClFractal *fractal)
+formulaOut CalculateDistance(float3 point, sClFractal *fractal)
 {
 	formulaOut out=Fractal(point, fractal);
 	if (out.iters == fractal->N)

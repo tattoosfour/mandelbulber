@@ -34,7 +34,7 @@ class CclSupport
 public:
 	CclSupport();
 	void Init(void);
-	void SetParams(sClParams ClParams, sClFractal ClFractal, enumFractalFormula formula);
+	void SetParams(sClInBuff *inBuff, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
 	bool IsReady(void) {return ready;}

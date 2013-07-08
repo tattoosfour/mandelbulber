@@ -486,6 +486,7 @@ void *MainThread(void *ptr)
 							shaderInputData.calcParam = &calcParam;
 							shaderInputData.param = &param;
 							shaderInputData.dist_thresh = reflectBuff[ray].distThresh;
+							shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
 							shaderInputData.lightVect = lightVector;
 							shaderInputData.point = reflectBuff[ray].point;
 							shaderInputData.viewVector = reflectBuff[ray].viewVector;
@@ -827,7 +828,6 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						gtk_main_iteration();
 				}
 
-
 				int done2 = 0;
 				//refreshing image and histograms during rendering
 				while (done2 < height / progressive - 1 && !programClosed)
@@ -1126,12 +1126,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	{
 #ifdef CLSUPPORT
 		printf("OpenCL rendering\n");
-		sClFractal clFractal;
-		sClParams clParams;
 		clSupport->SetSize(image->GetWidth(), image->GetHeight());
 
 		sClInBuff *inCLBuff = clSupport->GetInBuffer1();
-		Params2Cl(&param, &clParams, &clFractal, inCLBuff);
+		Params2Cl(&param, inCLBuff);
 
 		//calculating vectors for AmbientOcclusion
 
@@ -1173,10 +1171,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			inCLBuff->vectorsAroundColours[0].y = 0;
 			inCLBuff->vectorsAroundColours[0].z = 0;
 		}
-		clParams.AmbientOcclusionNoOfVectors = counter;
+		inCLBuff->params.AmbientOcclusionNoOfVectors = counter;
 		printf("Ambient occlusion counter %d\n", counter);
 
-		clSupport->SetParams(clParams, clFractal, param.fractal.formula);
+		clSupport->SetParams(inCLBuff, param.fractal.formula);
 		start_time = real_clock();
 		clSupport->Render(image, outputDarea);
 		double time = real_clock() - start_time;
