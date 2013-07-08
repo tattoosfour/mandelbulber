@@ -589,8 +589,8 @@ sShaderOutput AmbientOcclusion(sShaderInputData &input)
 	sShaderOutput AO = { 0, 0, 0 };
 
 	bool max_iter;
-	double start_dist = input.dist_thresh;
-	double end_dist = input.dist_thresh / input.param->doubles.resolution;
+	double start_dist = input.dist_thresh * input.param->doubles.quality;
+	double end_dist = input.dist_thresh / input.param->doubles.resolution * input.param->doubles.quality;
 	double intense = 0;
 
 	for (int i = 0; i < input.vectorsCount; i++)
