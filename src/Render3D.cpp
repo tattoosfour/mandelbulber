@@ -105,6 +105,7 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		{
 			distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality + distThreshInit;
 		}
+		if(param->perspectiveType == equirectangular || param->perspectiveType == fishEye) distThresh *= M_PI;
 		calcParam->doubles.detailSize = distThresh;
 		dist = CalculateDistance(point, *calcParam, &max_iter);
 
@@ -1061,13 +1062,13 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		//*** postprocessing
 
+		image->CompileImage();
+		WriteLog("Image compiled");
 		if (param.SSAOEnabled && !programClosed && !netRender->IsClient())
 		{
 			PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
 			WriteLog("SSAO rendered");
 		}
-		image->CompileImage();
-		WriteLog("Image compiled");
 		if (param.DOFEnabled && !programClosed && !netRender->IsClient())
 		{
 			double DOF_focus = pow(10, param.doubles.DOFFocus / 10.0 - 16.0);

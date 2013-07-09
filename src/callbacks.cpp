@@ -1163,13 +1163,16 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 	bool SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
 	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
 	enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+	double intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient_occlusion)));
+	sImageAdjustments *adj = mainImage.GetImageAdjustments();
+	adj->globalIlum = intensity;
 	if (!isRendering)
 	{
+		mainImage.CompileImage();
 		if (SSAOEnabled)
 		{
 			PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
 		}
-		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
@@ -1181,12 +1184,23 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 {
 	if (Interface_data.disableInitRefresh) return;
+
+	double SSAOQuality = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality));
+	bool SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
+	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+	enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+
+
 	double DOFFocus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
 	double DOFRadius = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius));
 	bool DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
 	if (!isRendering)
 	{
 		mainImage.CompileImage();
+		if (SSAOEnabled)
+		{
+			PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
+		}
 		if (DOFEnabled)
 		{
 			double DOF_focus = pow(10, DOFFocus / 10.0 - 16.0);

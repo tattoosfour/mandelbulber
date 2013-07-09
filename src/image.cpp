@@ -387,13 +387,19 @@ void ThreadSSAO(void *ptr)
 
 			}
 
-			sRGBfloat pixel = image->GetPixelImage(x, y);
+			sRGB16 pixel = image->GetPixelImage16(x, y);
 			sRGB8 colour = image->GetPixelColor(x, y);
-			pixel.R += colour.R / 256.0 * total_ambient * intensity * (1.0 - opacity);
-			pixel.G += colour.G / 256.0 * total_ambient * intensity * (1.0 - opacity);
-			pixel.B += colour.B / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			double R = pixel.R + 65535.0 * colour.R / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			double G = pixel.G + 65535.0 * colour.G / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			double B = pixel.B + 65535.0 * colour.B / 256.0 * total_ambient * intensity * (1.0 - opacity);
+			if (R > 65535) R = 65535;
+			if (G > 65535) G = 65535;
+			if (B > 65535) B = 65535;
+			pixel.R = R;
+			pixel.G = G;
+			pixel.B = B;
 
-			image->PutPixelImage(x, y, pixel);
+			image->PutPixelImage16(x, y, pixel);
 		}
 
 		double percentDone = (double) y / height * 100.0;
