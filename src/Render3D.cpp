@@ -418,8 +418,6 @@ void *MainThread(void *ptr)
 						double distThresh = 0.0;
 
 						CVector3 point;
-
-
 						CVector3 startRay = start;
 
 						sShaderOutput resultShader = { 0.0, 0.0, 0.0 };

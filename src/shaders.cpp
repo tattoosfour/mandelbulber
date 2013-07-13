@@ -33,7 +33,7 @@ sShaderOutput ObjectShader(sShaderInputData input, sShaderOutput *surfaceColour,
 	shade.G = input.param->doubles.imageAdjustments.directLight * ((1.0 - input.param->doubles.imageAdjustments.shading) + input.param->doubles.imageAdjustments.shading * shade.G);
 	shade.B = input.param->doubles.imageAdjustments.directLight * ((1.0 - input.param->doubles.imageAdjustments.shading) + input.param->doubles.imageAdjustments.shading * shade.B);
 
-	//calculate shading based on angle of incidence
+	//calculate shadow
 	sShaderOutput shadow = {1.0, 1.0, 1.0, 0.0};
 	if(input.param->shadow)	shadow = MainShadow(input);
 
