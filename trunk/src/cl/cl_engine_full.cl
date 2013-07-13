@@ -1,4 +1,4 @@
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+//#pragma OPENCL EXTENSION cl_amd_fp64 : enable
 
 typedef float3 cl_float3;
 typedef float cl_float;
@@ -8,7 +8,7 @@ typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
-#define MAX_RAYMARCHING 1000
+#define MAX_RAYMARCHING 5000
 
 typedef struct
 {
@@ -17,15 +17,6 @@ typedef struct
 	float distance;
 	float colourIndex;
 } formulaOut;
-
-typedef struct 
-{
-	float distance;
-	float step;
-	float3 point;
-	int iters;
-	float distThresh;
-} sStep;
 
 static formulaOut Fractal(float3 point, sClFractal *fr);
 static formulaOut CalculateDistance(float3 point, sClFractal *fractal);
@@ -156,191 +147,116 @@ float3 IndexToColour(int index, global float3 *palette)
 		col1 = palette[no];
 		col2 = palette[no+1];
 		colDiff = col2 - col1;
-		float delta = (index2 % 256)/256.0;
+		float delta = (index2 % 256)/256.0f;
 		colOut = col1 + colDiff * delta;
 	}
 	return colOut;
 }
 
-float3 NormalVector(sClFractal *fractal, float3 point, float mainDistance, float distThresh)
+float3 CalculateNormals(sClShaderInputData *input)
 {
-	float delta = distThresh;
-	float s1 = CalculateDistance(point + (float3){delta,0.0f,0.0f}, fractal).distance;
-	float s2 = CalculateDistance(point + (float3){0.0f,delta,0.0f}, fractal).distance;
-	float s3 = CalculateDistance(point + (float3){0.0f,0.0f,delta}, fractal).distance;
-	float3 normal = (float3) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance};
-	normal = fast_normalize(normal);
+	float3 normal = 0.0f;
+	//calculating normal vector based on distance estimation (gradient of distance function)
+	if (!input->param->slowShading)
+	{
+		float delta = input->delta;
+		//if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
+
+		float s1, s2, s3, s4;
+		input->calcParam->N *= 5;
+		//input.calcParam->minN = 0;
+
+		bool maxIter;
+
+		s1 = CalculateDistance(input->point, input->calcParam).distance;
+
+		float3 deltax = (float3) {delta, 0.0f, 0.0f};
+		s2 = CalculateDistance(input->point + deltax, input->calcParam).distance;
+
+		float3 deltay = (float3) {0.0f, delta, 0.0f};
+		s3 = CalculateDistance(input->point + deltay, input->calcParam).distance;
+
+		float3 deltaz = (float3) {0.0f, 0.0f, delta};
+		s4 = CalculateDistance(input->point + deltaz, input->calcParam).distance;
+
+		normal.x = s2 - s1;
+		normal.y = s3 - s1;
+		normal.z = s4 - s1;
+		input->calcParam->N /= 5;
+		//input.calcParam->minN = input.param->fractal.minN;
+	}
+
+	//calculating normal vector based on average value of binary central difference
+	else
+	{
+		float result2;
+		bool max_iter;
+
+		float3 point2;
+		float3 point3;
+		for (point2.x = -1.0f; point2.x <= 1.0f; point2.x += 0.2f) //+0.2
+		{
+			for (point2.y = -1.0f; point2.y <= 1.0f; point2.y += 0.2f)
+			{
+				for (point2.z = -1.0f; point2.z <= 1.0f; point2.z += 0.2f)
+				{
+					point3 = input->point + point2 * input->delta;
+
+					float dist = CalculateDistance(point3, input->calcParam).distance;
+
+					if (dist < input->dist_thresh || max_iter) result2 = 0.0f;
+					else result2 = 1.0f;
+
+					normal += (point2 * result2);
+				}
+			}
+		}
+	}
+
+	if(normal.x == 0.0f && normal.y == 0.0f && normal.z == 0.0f)
+	{
+		normal.x = 1.0f;
+	}
+	else
+	{
+		normal = fast_normalize(normal);
+	}
+
 	return normal;
 }
 
 
-float Shadow(sClFractal *fractal, float3 point, float3 lightVector, float distThresh, float resolution)
-{
-	float scan = distThresh * 2.0f;
-	float shadow = 0.0;
-	float factor = distThresh / resolution;
-	for(int count = 0; (count < 1000); count++)
-	{
-		float3 pointTemp = point + lightVector*scan;
-		float distance = CalculateDistance(pointTemp, fractal).distance;
-		scan += distance * 2.0;
-		
-		if(scan > factor)
-		{
-			shadow = 1.0;
-			break;
-		}
-		
-		if(distance < distThresh)
-		{
-			shadow = scan / factor;
-			break;
-		}
-	}
-	return shadow;
-}
 
-
-float FastAmbientOcclusion(sClFractal *fractal, float3 point, float3 normal, float dist_thresh, float tune, int quality)
-{
-	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
-
-	float delta = dist_thresh;
-	float aoTemp = 0;
-	for(int i=1; i<quality*quality; i++)
-	{
-		float scan = i * i * delta;
-		float3 pointTemp = point + normal * scan;
-		float dist = CalculateDistance(pointTemp, fractal).distance;
-		aoTemp += 1.0/(native_powr(2.0,(float)i)) * (scan - tune*dist)/dist_thresh;
-	}
-	float ao = 1.0 - 0.2 * aoTemp;
-	if(ao < 0) ao = 0;
-	return ao;
-}
-
-float3 AmbientOcclusion(sClFractal *fractal, float3 point, float dist_thresh, int noOfVectors, global sClInBuff *inBuff)
-{
-	float3 AO = 0.0;
-	int count = 0;
-	float factor = dist_thresh * 1000.0f;
-
-	for (int i = 0; i < noOfVectors -1; i++)
-	{
-		float3 shadow = 0.0;
-		float scan = dist_thresh * 2.0f;
-
-		float3 d = inBuff->vectorsAround[i];
-		float3 colour = inBuff->vectorsAroundColours[i];
-		for (int count = 0; (count < 100); count++)
-		{
-			
-			float3 pointTemp = point + d * scan;
-			float distance = CalculateDistance(pointTemp, fractal).distance;
-			scan += distance * 2.0;
-
-			if (scan > factor)
-			{
-				shadow = colour;
-				break;
-			}
-
-			if (distance < dist_thresh)
-			{
-				shadow = colour * scan / factor;
-				break;
-			}
-		}
-
-		AO += shadow;
-	}
-
-	AO /= noOfVectors;
-	return AO;
-}
-
-float3 Background(float3 viewVector, sClParams *params)
-{
-	float3 vector = {1.0, 1.0, -1.0};
-	vector = fast_normalize(vector);
-	float grad = dot(viewVector, vector) + 1.0;
-	float3 colour;
-	if(grad < 1.0)
-	{
-		float ngrad = 1.0 - grad;
-		colour = params->backgroundColour3 * ngrad + params->backgroundColour2 * grad;
-	}
-	else
-	{
-		grad = grad - 1.0;
-		float ngrad = 1.0 - grad;
-		colour = params->backgroundColour2 * ngrad + params->backgroundColour1 * grad;
-	}
-	return colour;
-}
-
-float3 VolumetricFog(sClParams *params, int buffCount, float *distanceBuff, float *stepBuff)
-{
-	float density = 0.0;
-	float3 fogCol = params->fogColour1;
-	float3 fogCol1 = fogCol;
-	float3 fogCol2 = params->fogColour2;
-	float3 fogCol3 = params->fogColour3;
-
-	float colourThresh = params->fogColour1Distance;
-	float colourThresh2 = params->fogColour2Distance;
-	float fogReduce = params->fogDistanceFactor;
-	float fogIntensity = params->fogDensity;
-	for (int i = buffCount - 1; i >= 0; i--)
-	{
-		float densityTemp = (stepBuff[i] * fogReduce) / (distanceBuff[i] * distanceBuff[i] + fogReduce * fogReduce);
-
-		float k = distanceBuff[i] / colourThresh;
-		if (k > 1.0) k = 1.0;
-		float kn = 1.0 - k;
-		float3 fogTemp = (fogCol1 * kn + fogCol2 * k);
-
-		float k2 = distanceBuff[i] / colourThresh2 * k;
-		if (k2 > 1.0) k2 = 1.0;
-		kn = 1.0 - k2;
-		fogTemp = (fogTemp * kn + fogCol3 * k2);
-
-		float d1 = fogIntensity * densityTemp / (1.0 + fogIntensity * densityTemp);
-		float d2 = 1.0 - d1;
-		fogCol = fogCol * d2 + fogTemp * d1;
-		
-		density += densityTemp;
-	}
-	density *= fogIntensity;
-	//fogCol.w = density / (1.0 + density);
-	return fogCol;
-}
-
-float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3 direction, float maxScan, bool binaryEnable, sStep *stepBuff, int *buffCount,
-		float *distThreshOut, float *lastDistOut, bool *foundOut, float *depthOut)
+float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3 direction, float maxScan, bool binaryEnable, float *distThreshOut, float *lastDistOut, bool *foundOut, float *depthOut)
 {
 	float3 point;
 	bool found = false;
-	float scan = 1e-10;
+	float scan = 1e-10f;
 	float distThresh = *distThreshOut;
-	float dist = 0;
-	float search_accuracy = 0.01 * param->quality;
+	float dist = 0.0f;
+	float search_accuracy = 0.01f * param->quality;
 	//printf("param->quality %f, start %f %f %f\n", param->quality, start.x, start.y, start.z);
-	float search_limit = 1.0 - search_accuracy;
-	float step = 1e-10;
+	float search_limit = 1.0f - search_accuracy;
+	float step = 1e-10f;
 	float resolution = 1.0f/param->width;
-	*buffCount = 0;
+	//*buffCount = 0;
 	float distThreshInit = *distThreshOut;
-
+	//printf("DE_factor %f\n", param->DEfactor);
 	
+	//printf("Start, start.x = %g, start.y = %g, start.z = %g\n", start.x, start.y, start.z);
 	for (int i = 0; i < MAX_RAYMARCHING; i++)
 	{
 		point = start + direction * scan;
+		//printf("viewVector %f %f %f\n", direction.x, direction.y, direction.z);
+		//printf("scan %f\n", scan);
+		//printf("DE_factor %f\n", param->DEfactor);
+		
 		bool max_iter = false;
 
 		if (calcParam->constantDEThreshold)
 		{
 			distThresh = param->quality;
+			//printf("DistThresh = %f\n", distThresh);
 		}
 		else
 		{
@@ -348,25 +264,19 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 		}
 		//calcParam->doubles.detailSize = distThresh;
 		formulaOut outF;
-		outF = CalculateDistance(point, &calcParam);
+		outF = CalculateDistance(point, calcParam);
 		dist = outF.distance;
 		
-		printf("Distance = %g\n", dist/distThresh);
-		stepBuff[i].distance = dist;
-		stepBuff[i].iters = outF.iters;
-		stepBuff[i].distThresh = distThresh;
+		//printf("Distance = %f\n", dist/distThresh);
 
-		if (dist > 3.0) dist = 3.0;
+		if (dist > 3.0f) dist = 3.0f;
 		if (dist < distThresh)
 		{
 			found = true;
 			break;
 		}
-
-		stepBuff[i].step = step;
-		step = (dist - 0.5 * distThresh) * param->DEfactor;
-		stepBuff[i].point = point;
-		(*buffCount)++;
+		//printf("DE_factor %f\n", param->DEfactor);
+		step = (dist - 0.5f * distThresh) * param->DEfactor;
 		scan += step;
 		if (scan > maxScan)
 		{
@@ -377,7 +287,7 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 	
 	if (found && binaryEnable)
 	{
-		float step = distThresh * 0.5;
+		float step = distThresh * 0.5f;
 		for (int i = 0; i < 10; i++)
 		{
 			if (dist < distThresh && dist > distThresh * search_limit)
@@ -398,10 +308,10 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 				}
 			}
 			formulaOut outF;
-			outF = CalculateDistance(point, &calcParam);
+			outF = CalculateDistance(point, calcParam);
 					dist = outF.distance;
 			//printf("Distance binary = %g\n", dist/distThresh);
-			step *= 0.5;
+			step *= 0.5f;
 		}
 	}
 
@@ -412,8 +322,156 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 	return point;
 }
 
+float3 MainShadow(sClShaderInputData *input)
+{
+	float3 shadow = 1.0f;
+
+	//starting point
+	float3 point2;
+
+	bool max_iter;
+	float factor = input->delta / input->resolution;
+	if (!input->param->penetratingLights) factor = input->param->viewDistanceMax;
+	float dist = input->dist_thresh;
+
+	float DE_factor = input->param->DEfactor;
+	//if(input->param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
+
+	float start = input->delta;
+	//if (input->calcParam->interiorMode) start = input.dist_thresh * DE_factor * 0.5;
+
+	float opacity = 0.0f;
+	float shadowTemp = 1.0f;
+
+	float softRange = tan(input->param->shadowConeAngle / 180.0f * 3.14f);
+	float maxSoft = 0.0f;
+
+	//bool bSoft = (!input->param->imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled && !input.calcParam->iterThresh) && softRange > 0.0;
+	bool bSoft = softRange > 0.0f;
+	
+	for (float i = start; i < factor; i += dist * DE_factor)
+	{
+		point2 = input->point + input->lightVect * i;
+
+		dist = CalculateDistance(point2, input->calcParam).distance;
+
+		if (bSoft)
+		{
+			float angle = (dist - input->dist_thresh) / i;
+			if (angle < 0.0f) angle = 0.0f;
+			if (dist < input->dist_thresh) angle = 0.0f;
+			float softShadow = (1.0f - angle / softRange);
+			if (input->param->penetratingLights) softShadow *= (factor - i) / factor;
+			if (softShadow < 0.0f) softShadow = 0.0f;
+			if (softShadow > maxSoft) maxSoft = softShadow;
+		}
+
+		//if (input->param->imageSwitches.iterFogEnabled)
+		//{
+		//	opacity = IterOpacity(dist * DE_factor, input->calcParam->itersOut, input->calcParam->doubles.N, input->param->doubles.iterFogOpacityTrim,
+		//			input.param->doubles.iterFogOpacity);
+		//}
+		//else
+		//{
+			opacity = 0.0f;
+		//}
+		shadowTemp -= opacity * (factor - i) / factor;
+
+		if (dist < input->dist_thresh || shadowTemp < 0.0f)
+		{
+			shadowTemp -= (factor - i) / factor;
+			if (!input->param->penetratingLights) shadowTemp = 0.0f;
+			if (shadowTemp < 0.0f) shadowTemp = 0.0f;
+			break;
+		}
+	}
+	if (!bSoft)
+	{
+		shadow = shadowTemp;
+	}
+	else
+	{
+		shadow = (1.0f - maxSoft);
+	}
+	return shadow;
+}
+
+float3 MainSpecular(sClShaderInputData *input)
+{
+	float3 specular;
+	float3 half = input->lightVect - input->viewVector;
+	half = fast_normalize(half);
+	float shade2 = dot(input->normal,half);
+	if (shade2 < 0.0f) shade2 = 0.0f;
+	shade2 = pow(shade2, 30.0f) * 1.0f;
+	if (shade2 > 15.0f) shade2 = 15.0f;
+	specular = shade2;
+	return specular;
+}
+
+float3 SurfaceColour(sClShaderInputData *input, global cl_float3 *palette)
+{
+	formulaOut outF = Fractal(input->point, input->calcParam);
+	int colourNumber = outF.colourIndex * input->param->colouringSpeed + 256.0 * input->param->colouringOffset;
+	float3 surfaceColour = 1.0;
+	if (input->param->colouringEnabled) surfaceColour = IndexToColour(colourNumber, palette);
+	return surfaceColour;
+}
+
+float3 ObjectShader(sClShaderInputData *input, float3 *specularOut, global cl_float3 *palette)
+{
+	float3 output;
+
+	//normal vector
+	float3 vn = CalculateNormals(input);
+	input->normal = vn;
+	
+	float3 mainLight = input->param->mainLightIntensity * input->param->mainLightColour;
+	
+	//calculate shading based on angle of incidence
+	float shadeTemp = dot(input->normal, input->lightVect);
+	if (shadeTemp < 0.0f) shadeTemp = 0.0f;
+	shadeTemp = input->param->mainLightIntensity * ((1.0f - input->param->shading) + input->param->shading * shadeTemp);
+	float3 shade = shadeTemp;
+	
+	//calculate shadow
+	float3 shadow = 1.0f;
+	if(input->param->shadow) shadow = MainShadow(input);
+	
+	//calculate specular highlight
+	float3 specular = MainSpecular(input);
+	
+	//calculate surface colour
+	float3 colour = SurfaceColour(input, palette);
+	
+	
+	output = mainLight * shadow * (shade * colour + specular);
+	
+	return output;
+}
+
+float3 BackgroundShader(sClShaderInputData *input)
+{
+	float3 vector = { 1.0, 1.0, -1.0 };
+	vector = fast_normalize(vector);
+	float grad = dot(input->viewVector, vector) + 1.0;
+	float3 colour;
+	if (grad < 1.0)
+	{
+		float ngrad = 1.0 - grad;
+		colour = input->param->backgroundColour3 * ngrad + input->param->backgroundColour2 * grad;
+	}
+	else
+	{
+		grad = grad - 1.0;
+		float ngrad = 1.0 - grad;
+		colour = input->param->backgroundColour2 * ngrad + input->param->backgroundColour1 * grad;
+	}
+	return colour;
+}
+
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_offset)
+kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gcl_offset, __global sClReflect *reflectBuff)
 {
 	
 	sClParams params = inBuff->params;
@@ -424,6 +482,10 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_of
 	const unsigned int imageY = i / params.width;
 	const unsigned int buffIndex = (i - cl_offset);
 	
+	const size_t local_id = get_local_id(0);
+	const size_t local_size = get_local_size(0);
+	const size_t group_id = get_group_id(0);
+	const int local_offset = get_global_id(0) * 10;
 	
 	
 	int seed = i;
@@ -451,19 +513,25 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_of
 		rot = RotateY(rot, params.gamma);
 		
 		float zBuff;
-		sStep stepBuff[MAX_RAYMARCHING];
+		//local sClStep stepBuff[MAX_RAYMARCHING];
 		int buffCount;
 		
+		int maxRay = params.reflectionsMax;		
 
+
+		float3 colour = 0.0f;
+		
+		
+		
 		//DOF effect
 		#if _DOFEnabled
 		int blurIndex = 0;
-		float3 totalColour = (float3) {0.0, 0.0, 0.0};
+		float3 totalColour = (float3) {0.0f, 0.0f, 0.0f};
 		float focus = params.DOFFocus;
 		for(blurIndex = 0; blurIndex<256; blurIndex++)
 		{
 		
-			float randR = 0.003 * params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0 + 0.5);
+			float randR = 0.003f * params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0f + 0.5f);
 			float randAngle = rand(&seed);
 			float randX = randR * sin(randAngle);
 			float randZ = randR * cos(randAngle);
@@ -479,8 +547,8 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_of
 			
 			float aspectRatio = width / height;
 			float x2,z2;
-			x2 = (screenPoint.x / width - 0.5) * aspectRatio;
-			z2 = (screenPoint.y / height - 0.5);
+			x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
+			z2 = (screenPoint.y / height - 0.5f);
 		
 			float x3 = x2 + randX / focus / params.persp;
 			float z3 = z2 + randZ / focus / params.persp;
@@ -488,74 +556,134 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_of
 			float3 viewVector = (float3) {x3 * params.persp, 1.0f, z3 * params.persp}; 
 			viewVector = Matrix33MulFloat3(rot, viewVector);
 			
-			bool found = false;
-			int count;
-			
+			//ray-marching			
+			float distThresh = 0.0f;
 			float3 point = start;
-			float distThresh = 0.0f; 
-			float lastDist = 0.01f;
-			float depth = 0.1f;
-			//ray-marching
-			
 			float3 startRay = start;
-			point = RayMarching(&params, &fractal, startRay, viewVector, 50.0, true, stepBuff, &buffCount, &distThresh,
-					&lastDist, &found, &depth);
+			float lastDist = 0.0f;
+			bool found = false;
+			float depth = 0.0f;
 			
+			float3 resultShader = 0.0f;
+			float3 objectColour = 0.0f;
 			
-			zBuff = depth;
-			
-			float3 colour = 0.0f;
-			if(found)
+			float3 lightVector = (float3)
 			{
-				float3 normal = NormalVector(&fractal, point, lastDist, distThresh);
-				
-				float3 lightVector = (float3) {
-					cos(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
-					sin(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
-					sin(-params.mainLightBeta)};
-				lightVector = Matrix33MulFloat3(rot, lightVector);
-				float shade = dot(lightVector, normal);
-				if(shade<0.0) shade = 0.0;
-				
-				float shadow = Shadow(&fractal, point, lightVector, distThresh, resolution);
-				//float shadow = 1.0f;
-				//shadow = 0.0;
-				
-				float3 half = lightVector - viewVector;
-				half = fast_normalize(half);
-				float specular = dot(normal, half);
-				if (specular < 0.0f) specular = 0.0f;
-				specular = pown(specular, 20);
-				if (specular > 15.0) specular = 15.0;
-				
-				float3 ao = 0.0;
-				if (params.fastAmbientOcclusionEnabled) ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 0.8f, 3);
-				if (params.slowAmbientOcclusionEnabled) ao = AmbientOcclusion(&fractal, point, distThresh, params.AmbientOcclusionNoOfVectors, inBuff) * 2.0;
-				
-				//int colourNumber = outF.colourIndex * params.colouringSpeed + 256.0 * params.colouringOffset;
-				int colourNumber = 0;
-				float3 surfaceColour = 1.0;
-				if (params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
+				cos(params.mainLightAlfa - 0.5f * M_PI) * cos(-params.mainLightBeta),
+				sin(params.mainLightAlfa - 0.5f * M_PI) * cos(-params.mainLightBeta),
+				sin(-params.mainLightBeta)};
+			lightVector = Matrix33MulFloat3(rot, lightVector);
 			
-				colour = (shade*surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
-			}
-			else
+			int rayEnd = 0;
+			
+			
+			
+			//printf("start ray-tracing\n");
+			//printf("Max ray = %d\n", maxRay);
+			for (int ray = 0; ray <= maxRay; ray++)
 			{
-				colour = Background(viewVector, &params);
+				sClShaderInputData shaderInputData;
+				reflectBuff[ray + local_offset].start = startRay;
+				reflectBuff[ray + local_offset].viewVector = viewVector;
+				reflectBuff[ray + local_offset].found = false;
+				//printf("startRay %f %f %f\n", startRay.x, startRay.y, startRay.z);
+				//printf("viewVector %f %f %f\n", viewVector.x, viewVector.y, viewVector.z);
+				//reflectBuff[ray].buffCount = 0;
+
+				//printf("Ray %d, DE_factor %f\n", ray, params.DEfactor);
+
+				point = RayMarching(&params, &fractal, startRay, viewVector, params.viewDistanceMax, true, &distThresh, &lastDist, &found, &depth);
+				
+				//printf("point %f %f %f\n", point.x, point.y, point.z);
+				
+				reflectBuff[ray + local_offset].depth = depth;
+				reflectBuff[ray + local_offset].found = found;
+				reflectBuff[ray + local_offset].lastDist = lastDist;
+				reflectBuff[ray + local_offset].point = point;
+				reflectBuff[ray + local_offset].distThresh = distThresh;
+				
+				//printf("reflectBuff[ray].distThresh %f\n", reflectBuff[ray + local_offset].distThresh);
+				
+				//reflectBuff[ray].objectType = calcParam.objectOut;
+
+				rayEnd = ray;
+				if(!found) break;
+				//if(reflectBuff[ray].reflect == 0) break;
+
+				//calculate new ray direction and start point
+				startRay = point;
+
+				shaderInputData.calcParam = &fractal;
+				shaderInputData.param = &params;
+				shaderInputData.dist_thresh = distThresh;
+				shaderInputData.lightVect = lightVector;
+				shaderInputData.point = point;
+				shaderInputData.viewVector = viewVector;
+				//if(param.fractal.constantDEThreshold) shaderInputData.delta = depth * param.doubles.resolution * param.doubles.persp;
+				//else 
+				shaderInputData.delta = distThresh * params.quality;
+				float3 vn = CalculateNormals(&shaderInputData);
+				viewVector = viewVector - vn * dot(viewVector,vn) * 2.0f;
+				startRay = startRay + viewVector * distThresh;
 			}
 			
-			//float3 volFog = VolumetricFog(&params, count-1, distanceBuff, stepBuff);
-			//if(volFog.w > 1.0) volFog.w = 1.0;
-			//colour = colour * (1.0 - volFog.w) + volFog;
-	
-			float glow = params.glowIntensity * count / 512.0f;
-			float glowN = 1.0f - glow;
-			if(glowN < 0.0f) glowN = 0.0f;
-			float3 glowColor = params.glowColour1 * glowN + params.glowColour2 * glow;
-			colour += glowColor * glow;
-		
+			for(int ray = rayEnd; ray >= 0; ray--)
+			{
+				sClShaderInputData shaderInputData;
+				float3 objectShader = 0.0f;
+				float3 backgroudShader = 0.0f;
+				float3 volumetricShader = 0.0f;
+				float3 specular = 0.0f;
+
+				shaderInputData.calcParam = &fractal;
+				shaderInputData.param = &params;
+				shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
+				
+				//if(param.fractal.constantDEThreshold) delta = depth * resolution * params.persp;
+				//else 
+				shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * params.quality;
+				shaderInputData.lightVect = lightVector;
+				shaderInputData.point = reflectBuff[ray + local_offset].point;
+				shaderInputData.viewVector = reflectBuff[ray + local_offset].viewVector;
+				shaderInputData.vectorsCount = params.AmbientOcclusionNoOfVectors;
+				shaderInputData.lastDist = reflectBuff[ray + local_offset].lastDist;
+
+				shaderInputData.depth = reflectBuff[ray + local_offset].depth;
+				//shaderInputData.depth = depth;
+				
+				shaderInputData.resolution = resolution;
+				//shaderInputData.vectorsAround = inBuff->vectorsAround;
+				//shaderInputData.vectorsAroundColours = inBuff->vectorsAroundColours;
+				//shaderInputData.envMappingTexture = param.envmapTexture;
+				//shaderInputData.objectType = reflectBuff[ray].objectType;
+				//shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
+
+				if(reflectBuff[ray + local_offset].found)
+				{
+					//printf("Last dist %f = \n", lastDist / distThresh);	
+					objectShader = ObjectShader(&shaderInputData, &specular, inBuff->palette);
+				}
+				else
+				{
+					backgroudShader = BackgroundShader(&shaderInputData);
+					reflectBuff[ray + local_offset].depth = 1e20;
+				}
+				
+				if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
+				{
+					colour = resultShader * params.reflect; 
+					colour += (1.0 - params.reflect) * (objectShader + backgroudShader) + specular;
+				}
+				else
+				{
+					colour = objectShader + backgroudShader + specular;
+				}
+				resultShader = colour;
+
+			}
+			zBuff = reflectBuff[0 + local_offset].depth;
 			#if _DOFEnabled
-			totalColour += colour / 256.0;
+			totalColour += colour / 256.0f;
 		}
 		
 		ushort R = convert_ushort_sat(totalColour.x * 65536.0f);
@@ -571,6 +699,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, int Gcl_of
 		out[buffIndex].G = G;
 		out[buffIndex].B = B;
 		out[buffIndex].zBuffer = zBuff;
+		
 	}
 }
 

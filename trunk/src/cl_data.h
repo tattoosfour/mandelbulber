@@ -8,6 +8,15 @@ typedef struct
 
 typedef struct
 {
+	cl_float distance;
+	cl_float distThresh;
+	cl_float step;
+	cl_float3 point;
+	cl_int iters;
+} sClStep;
+
+typedef struct
+{
 	cl_float scale;
 	cl_float foldingLimit;
 	cl_float foldingValue;
@@ -42,21 +51,30 @@ typedef struct
 typedef struct
 {
 	cl_uint N;
-	cl_float power;
 	cl_int formula;
+	cl_int juliaMode;
+	cl_int constantDEThreshold;
+	cl_float power;
+	cl_float opacity;
+	cl_float opacityTrim;
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;
-	cl_int juliaMode;
-	cl_float opacity;
-	cl_float opacityTrim;
-	cl_int constantDEThreshold;
 } sClFractal;
 
 typedef struct
 {
 	cl_int width;
 	cl_int height;
+	cl_int AmbientOcclusionNoOfVectors;
+	cl_int colouringEnabled;
+	cl_int fastAmbientOcclusionEnabled;
+	cl_int slowAmbientOcclusionEnabled;
+	cl_int DOFEnabled;
+	cl_int slowShading;
+	cl_int penetratingLights;
+	cl_int shadow;
+	cl_int reflectionsMax;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -64,18 +82,13 @@ typedef struct
 	cl_float persp;
 	cl_float DEfactor;
 	cl_float quality;
-	cl_float3 vp;
 	cl_float mainLightAlfa;
 	cl_float mainLightBeta;
-	cl_int AmbientOcclusionNoOfVectors;
-	cl_int colouringEnabled;
-	cl_int fastAmbientOcclusionEnabled;
-	cl_int slowAmbientOcclusionEnabled;
-	cl_int DOFEnabled;
 	cl_float colouringSpeed;
 	cl_float colouringOffset;
 	cl_float ambientOcclusionIntensity;
 	cl_float specularIntensity;
+	cl_float shading;
 	cl_float mainLightIntensity;
 	cl_float glowIntensity;
 	cl_float fogColour1Distance;
@@ -84,6 +97,10 @@ typedef struct
 	cl_float fogDensity;
 	cl_float DOFFocus;
 	cl_float DOFRadius;
+	cl_float shadowConeAngle;
+	cl_float viewDistanceMax;
+	cl_float reflect;
+	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
 	cl_float3 backgroundColour1;
@@ -111,3 +128,41 @@ typedef struct
 	cl_float3 vectorsAround[10000];
 	cl_float3 vectorsAroundColours[10000];
 } sClInBuff;
+
+typedef struct
+{
+	sClParams *param;
+	sClFractal *calcParam;
+	cl_float3 point;
+	cl_float3 viewVector;
+	cl_float3 normal;
+	cl_float3 lightVect;
+	cl_float dist_thresh;
+	cl_float lastDist;
+	cl_float delta;
+	cl_float resolution;
+	cl_float3 *vectorsAround;
+	cl_float3 *vectorsAroundColours;
+	cl_int vectorsCount;
+	//cTexture *envMappingTexture;
+	cl_float depth;
+	//sClStep *stepBuff;
+	//int stepCount;
+	//enumObjectType objectType;
+} sClShaderInputData;
+
+typedef struct
+{
+	cl_float3 start;
+	cl_float3 point;
+	cl_float3 viewVector;
+	cl_float3 distance;
+	//sClStep stepBuff[MAX_RAYMARCHING];
+	//int buffCount;
+	cl_float depth;
+	cl_float lastDist;
+	cl_float distThresh;
+	//enumObjectType objectType;
+	//cl_float reflect;
+	cl_int found;
+} sClReflect;

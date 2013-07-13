@@ -178,10 +178,15 @@ void CclSupport::Init(void)
 	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
 	printf("OpenCL Job size: %d\n", stepSize);
 	buffSize = stepSize * sizeof(sClPixel);
-
 	rgbbuff = new sClPixel[buffSize];
+
+	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
+	printf("reflectBuffer size = %d", reflectBufferSize);
+	reflectBuffer = new sClReflect[reflectBufferSize];
+
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
 	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
+	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffer created\n");
 
@@ -247,6 +252,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		err = kernel->setArg(0, *outCL);
 		err = kernel->setArg(1, *inCLBuffer1);
 		err = kernel->setArg(2, stepSize * loop);
+		err = kernel->setArg(3, *auxReflectBuffer);
 
 		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 

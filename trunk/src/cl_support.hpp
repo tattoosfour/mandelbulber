@@ -53,11 +53,13 @@ private:
 	bool recompileRequest;
 	sClPixel *rgbbuff;
 	sClInBuff *inBuffer1;
+	sClReflect *reflectBuffer;
 	std::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
 	cl::Buffer *outCL;
 	cl::Buffer *inCLBuffer1;
+	cl::Buffer *auxReflectBuffer;
 	std::vector<cl::Device> devices;
 	cl::Program::Sources *source;
 	cl::Program::Sources *source2;
@@ -70,6 +72,7 @@ private:
 	unsigned int buffSize;
 	unsigned int stepSize;
 	unsigned int steps;
+	unsigned int reflectBufferSize;
 	cl_int numberOfComputeUnits;
 	cl_int maxWorkItemDimmensions;
 	cl_int maxMaxWorkGroupSize[3];

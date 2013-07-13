@@ -3394,6 +3394,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff)
 	clParams->zoom = params->doubles.zoom;
 	clParams->DEfactor = params->doubles.DE_factor;
 	clParams->quality = params->doubles.quality;
+	clParams->slowShading = params->slowShading;
 
 	clParams->mainLightAlfa = params->doubles.mainLightAlpha;
 	clParams->mainLightBeta = params->doubles.mainLightBeta;
@@ -3450,16 +3451,24 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff)
 	clParams->ambientOcclusionIntensity = params->doubles.imageAdjustments.globalIlum;
 	clParams->specularIntensity = params->doubles.imageAdjustments.specular;
 	clParams->mainLightIntensity = params->doubles.imageAdjustments.directLight * params->doubles.imageAdjustments.mainLightIntensity;
+	clParams->shading = params->doubles.imageAdjustments.shading;
 	clParams->glowIntensity = params->doubles.imageAdjustments.glow_intensity;
 	clParams->colouringEnabled = params->imageSwitches.coloringEnabled;
 	clParams->fastAmbientOcclusionEnabled = (params->fastGlobalIllumination || params->SSAOEnabled);
 	clParams->slowAmbientOcclusionEnabled = params->global_ilumination && !params->fastGlobalIllumination;
+	clParams->shadowConeAngle = params->doubles.shadowConeAngle;
+	clParams->penetratingLights = params->penetratingLights;
+	clParams->viewDistanceMax = params->doubles.viewDistanceMax;
+	clParams->shadow = params->shadow;
+	clParams->reflectionsMax = params->reflectionsMax;
+	clParams->reflect = params->doubles.imageAdjustments.reflect;
 	clParams->glowColour1 = sRGB2float3(params->effectColours.glow_color1, 65536.0);
 	clParams->glowColour2 = sRGB2float3(params->effectColours.glow_color2, 65536.0);
 	clParams->backgroundColour1 = sRGB2float3(params->background_color1, 65536.0);
 	clParams->backgroundColour2 = sRGB2float3(params->background_color2, 65536.0);
 	clParams->backgroundColour3 = sRGB2float3(params->background_color3, 65536.0);
 	clParams->mainLightColour = sRGB2float3(params->effectColours.mainLightColour, 65536.0);
+
 
 	clParams->fogColour1Distance = params->doubles.fogColour1Distance;
 	clParams->fogColour2Distance = params->doubles.fogColour2Distance;
