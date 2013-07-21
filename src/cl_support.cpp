@@ -78,6 +78,9 @@ void CclSupport::Init(void)
 	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memorySize);
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
 
+	devices[0].getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &maxConstantBufferSize);
+	printf("OpenCL Max constant bufferr size  %ld MB\n", memorySize/1024/1024);
+
 	std::string clDir = std::string(sharedDir) + "cl/";
 
 	std::string strFormula = "mandelbulb";

@@ -75,6 +75,8 @@ typedef struct
 	cl_int penetratingLights;
 	cl_int shadow;
 	cl_int reflectionsMax;
+	cl_int globalIlumQuality;
+	cl_int fogEnabled;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -100,6 +102,8 @@ typedef struct
 	cl_float shadowConeAngle;
 	cl_float viewDistanceMax;
 	cl_float reflect;
+	cl_float fastAoTune;
+	cl_float fogVisibility;
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
@@ -107,6 +111,7 @@ typedef struct
 	cl_float3 backgroundColour2;
 	cl_float3 backgroundColour3;
 	cl_float3 mainLightColour;
+	cl_float3 fogColour;
 	cl_float3 fogColour1;
 	cl_float3 fogColour2;
 	cl_float3 fogColour3;
@@ -134,6 +139,7 @@ typedef struct
 	sClParams *param;
 	sClFractal *calcParam;
 	cl_float3 point;
+	cl_float3 startPoint;
 	cl_float3 viewVector;
 	cl_float3 normal;
 	cl_float3 lightVect;
@@ -141,13 +147,10 @@ typedef struct
 	cl_float lastDist;
 	cl_float delta;
 	cl_float resolution;
-	cl_float3 *vectorsAround;
-	cl_float3 *vectorsAroundColours;
 	cl_int vectorsCount;
 	//cTexture *envMappingTexture;
 	cl_float depth;
-	//sClStep *stepBuff;
-	//int stepCount;
+	cl_int stepCount;
 	//enumObjectType objectType;
 } sClShaderInputData;
 
@@ -157,8 +160,7 @@ typedef struct
 	cl_float3 point;
 	cl_float3 viewVector;
 	cl_float3 distance;
-	//sClStep stepBuff[MAX_RAYMARCHING];
-	//int buffCount;
+	cl_int stepCount;
 	cl_float depth;
 	cl_float lastDist;
 	cl_float distThresh;

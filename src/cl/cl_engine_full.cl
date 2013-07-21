@@ -8,7 +8,7 @@ typedef unsigned short cl_ushort;
 
 #include "cl_data.h"
 
-#define MAX_RAYMARCHING 5000
+#define MAX_RAYMARCHING 10000
 
 typedef struct
 {
@@ -35,7 +35,7 @@ int rand(int* seed)
     return(s % 65536);
 }
 
-inline float3 Matrix33MulFloat3(matrix33 matrix, float3 vect)
+float3 Matrix33MulFloat3(matrix33 matrix, float3 vect)
 {
 	float3 out;
 	out.x = dot(vect, matrix.m1);
@@ -227,7 +227,7 @@ float3 CalculateNormals(sClShaderInputData *input)
 
 
 
-float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3 direction, float maxScan, bool binaryEnable, float *distThreshOut, float *lastDistOut, bool *foundOut, float *depthOut)
+float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3 direction, float maxScan, bool binaryEnable, float *distThreshOut, float *lastDistOut, bool *foundOut, float *depthOut, int *stepCount)
 {
 	float3 point;
 	bool found = false;
@@ -239,7 +239,8 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 	float search_limit = 1.0f - search_accuracy;
 	float step = 1e-10f;
 	float resolution = 1.0f/param->width;
-	//*buffCount = 0;
+	*stepCount = 0;
+	int count = 0;
 	float distThreshInit = *distThreshOut;
 	//printf("DE_factor %f\n", param->DEfactor);
 	
@@ -282,8 +283,9 @@ float3 RayMarching(sClParams *param, sClFractal *calcParam, float3 start, float3
 		{
 			break;
 		}
-
+		count = i;
 	}
+	*stepCount = count;
 	
 	if (found && binaryEnable)
 	{
@@ -418,7 +420,84 @@ float3 SurfaceColour(sClShaderInputData *input, global cl_float3 *palette)
 	return surfaceColour;
 }
 
-float3 ObjectShader(sClShaderInputData *input, float3 *specularOut, global cl_float3 *palette)
+float3 FastAmbientOcclusion2(sClShaderInputData *input)
+{
+	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
+
+	float delta = input->dist_thresh;
+	float aoTemp = 0.0f;
+	int quality = input->param->globalIlumQuality;
+	for (int i = 1; i < quality * quality; i++)
+	{
+		float scan = i * i * delta;
+		float3 pointTemp = input->point + input->normal * scan;
+		float 		dist = CalculateDistance(pointTemp, input->calcParam).distance;
+		aoTemp += 1.0f / (pow(2.0f, i)) * (scan - input->param->fastAoTune * dist) / input->dist_thresh;
+	}
+	float ao = 1.0f - 0.2f * aoTemp;
+	if (ao < 0.0f) ao = 0.0f;
+	float3 output = ao;
+	return output;
+}
+
+float3 AmbientOcclusion(sClShaderInputData *input, global float3 *vectorsAround, global float3 *vectorsAroundColours)
+{
+	float3 AO = 0.0f;
+
+	float start_dist = input->delta;
+	float end_dist = input->delta / input->resolution;
+	float intense = 0.0f;
+
+	for (int i = 0; i < input->vectorsCount; i++)
+	{
+		float3 v = vectorsAround[i];
+		float3 colour = vectorsAroundColours[i];
+
+		//printf("ao vector %d, %f %f %f\n", i, v.x, v.y, v.z);
+		
+		float dist = input->lastDist;
+
+		float opacity = 0.0;
+		float shadowTemp = 1.0;
+
+		int count = 0;
+		for (float r = start_dist; r < end_dist; r += dist * 2.0f)
+		{
+			float3 point2 = input->point + v * r;
+
+			dist = CalculateDistance(point2, input->calcParam).distance;
+
+			//if (input->param->imageSwitches.iterFogEnabled)
+			//{
+			//	opacity = IterOpacity(dist * input.param->doubles.DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+			//			input.param->doubles.iterFogOpacity);
+			//}
+			//else
+			//{
+			//	opacity = 0.0;
+			//}
+			//shadowTemp -= opacity * (end_dist - r) / end_dist;
+
+			if (dist < input->dist_thresh || shadowTemp < 0.0)
+			{
+				shadowTemp -= (end_dist - r) / end_dist;
+				if (shadowTemp < 0.0) shadowTemp = 0.0;
+				break;
+			}
+			if (count > 100) break;
+		}
+
+		intense = shadowTemp;
+
+		AO += intense * colour;
+
+	}
+	AO = AO / input->vectorsCount;
+
+	return AO;
+}
+
+float3 ObjectShader(sClShaderInputData *input, float3 *specularOut, global cl_float3 *palette, global float3 *vectorsAround, global float3 *vectorsAroundColours)
 {
 	float3 output;
 
@@ -444,30 +523,99 @@ float3 ObjectShader(sClShaderInputData *input, float3 *specularOut, global cl_fl
 	//calculate surface colour
 	float3 colour = SurfaceColour(input, palette);
 	
+	float3 ambient = 0.0f;
+	if(input->param->fastAmbientOcclusionEnabled)
+	{
+		ambient = FastAmbientOcclusion2(input);
+	}
+	else if(input->param->slowAmbientOcclusionEnabled)
+	{
+		ambient = AmbientOcclusion(input, vectorsAround, vectorsAroundColours);
+	}
+	float3 ambient2 = ambient * input->param->ambientOcclusionIntensity;
 	
-	output = mainLight * shadow * (shade * colour + specular);
+	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour;
 	
 	return output;
 }
 
 float3 BackgroundShader(sClShaderInputData *input)
 {
-	float3 vector = { 1.0, 1.0, -1.0 };
+	float3 vector = { 1.0f, 1.0f, -1.0f };
 	vector = fast_normalize(vector);
-	float grad = dot(input->viewVector, vector) + 1.0;
+	float grad = dot(input->viewVector, vector) + 1.0f;
 	float3 colour;
-	if (grad < 1.0)
+	if (grad < 1.0f)
 	{
-		float ngrad = 1.0 - grad;
+		float ngrad = 1.0f - grad;
 		colour = input->param->backgroundColour3 * ngrad + input->param->backgroundColour2 * grad;
 	}
 	else
 	{
-		grad = grad - 1.0;
-		float ngrad = 1.0 - grad;
+		grad = grad - 1.0f;
+		float ngrad = 1.0f - grad;
 		colour = input->param->backgroundColour2 * ngrad + input->param->backgroundColour1 * grad;
 	}
 	return colour;
+}
+
+float3 VolumetricShader(sClShaderInputData *input, float3 oldPixel)
+{
+	float3 output = oldPixel;
+	float scan = input->depth;
+	float dist = input->lastDist;
+	float distThresh = input->dist_thresh;
+	bool end = false;
+	
+	//glow init
+  float glow = input->stepCount * input->param->glowIntensity / 512.0f * input->param->DEfactor;
+  float glowN = 1.0f - glow;
+  if (glowN < 0.0f) glowN = 0.0f;
+  float3 glowColour = (input->param->glowColour1 * glowN + input->param->glowColour2 * glow);
+	
+	for(int i=0; i<MAX_RAYMARCHING; i++)
+	{
+		//calculate back step
+		float step = dist * 2.0f;
+
+		if(step < distThresh) step = distThresh;
+		if(step > scan) 
+		{
+			step = scan;
+			end = true;
+		}
+		//else if(step > 100.0f * distThresh) step = 100.0f * distThresh;
+		scan -= step;
+		
+		float3 point = input->startPoint + input->viewVector * scan;
+		
+		dist = CalculateDistance(point, input->calcParam).distance;
+		
+		if (input->calcParam->constantDEThreshold)
+		{
+			distThresh = input->param->quality;
+		}
+		else
+		{
+			distThresh = scan * input->resolution * input->param->persp / input->param->quality;
+		}
+		
+		//------------------- glow
+		float glowOpacity = glow * step / input->depth;
+		output = glowOpacity * glowColour + (1.0f - glowOpacity) * output;
+		
+		//----------------------- basic fog
+		if(input->param->fogEnabled)
+		{
+			float fogDensity = step / input->param->fogVisibility;
+			if(fogDensity > 1.0f) fogDensity = 1.0f;
+			output = fogDensity * input->param->fogColour + (1.0f - fogDensity) * output;
+		}
+		
+		if(end) break;
+	}
+
+	return output;
 }
 
 //------------------ MAIN RENDER FUNCTION --------------------
@@ -520,7 +668,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 
 
 		float3 colour = 0.0f;
-		
+		float3 resultShader = 0.0f;
 		
 		
 		//DOF effect
@@ -563,8 +711,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 			float lastDist = 0.0f;
 			bool found = false;
 			float depth = 0.0f;
+			int stepCount = 0;
 			
-			float3 resultShader = 0.0f;
 			float3 objectColour = 0.0f;
 			
 			float3 lightVector = (float3)
@@ -592,7 +740,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 
 				//printf("Ray %d, DE_factor %f\n", ray, params.DEfactor);
 
-				point = RayMarching(&params, &fractal, startRay, viewVector, params.viewDistanceMax, true, &distThresh, &lastDist, &found, &depth);
+				point = RayMarching(&params, &fractal, startRay, viewVector, params.viewDistanceMax, true, &distThresh, &lastDist, &found, &depth, &stepCount);
 				
 				//printf("point %f %f %f\n", point.x, point.y, point.z);
 				
@@ -601,6 +749,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 				reflectBuff[ray + local_offset].lastDist = lastDist;
 				reflectBuff[ray + local_offset].point = point;
 				reflectBuff[ray + local_offset].distThresh = distThresh;
+				reflectBuff[ray + local_offset].stepCount = stepCount;
 				
 				//printf("reflectBuff[ray].distThresh %f\n", reflectBuff[ray + local_offset].distThresh);
 				
@@ -619,9 +768,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 				shaderInputData.lightVect = lightVector;
 				shaderInputData.point = point;
 				shaderInputData.viewVector = viewVector;
-				//if(param.fractal.constantDEThreshold) shaderInputData.delta = depth * param.doubles.resolution * param.doubles.persp;
-				//else 
-				shaderInputData.delta = distThresh * params.quality;
+				if(fractal.constantDEThreshold) shaderInputData.delta = depth * resolution * params.persp;
+				else shaderInputData.delta = distThresh * params.quality;
 				float3 vn = CalculateNormals(&shaderInputData);
 				viewVector = viewVector - vn * dot(viewVector,vn) * 2.0f;
 				startRay = startRay + viewVector * distThresh;
@@ -639,21 +787,17 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 				shaderInputData.param = &params;
 				shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
 				
-				//if(param.fractal.constantDEThreshold) delta = depth * resolution * params.persp;
-				//else 
-				shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * params.quality;
+				if(fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * params.persp;
+				else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * params.quality;
 				shaderInputData.lightVect = lightVector;
 				shaderInputData.point = reflectBuff[ray + local_offset].point;
+				shaderInputData.startPoint = reflectBuff[ray + local_offset].start;
 				shaderInputData.viewVector = reflectBuff[ray + local_offset].viewVector;
 				shaderInputData.vectorsCount = params.AmbientOcclusionNoOfVectors;
 				shaderInputData.lastDist = reflectBuff[ray + local_offset].lastDist;
-
 				shaderInputData.depth = reflectBuff[ray + local_offset].depth;
-				//shaderInputData.depth = depth;
-				
+				shaderInputData.stepCount = reflectBuff[ray + local_offset].stepCount;
 				shaderInputData.resolution = resolution;
-				//shaderInputData.vectorsAround = inBuff->vectorsAround;
-				//shaderInputData.vectorsAroundColours = inBuff->vectorsAroundColours;
 				//shaderInputData.envMappingTexture = param.envmapTexture;
 				//shaderInputData.objectType = reflectBuff[ray].objectType;
 				//shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
@@ -661,7 +805,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 				if(reflectBuff[ray + local_offset].found)
 				{
 					//printf("Last dist %f = \n", lastDist / distThresh);	
-					objectShader = ObjectShader(&shaderInputData, &specular, inBuff->palette);
+					objectShader = ObjectShader(&shaderInputData, &specular, inBuff->palette, inBuff->vectorsAround, inBuff->vectorsAroundColours);
 				}
 				else
 				{
@@ -678,21 +822,22 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, int Gc
 				{
 					colour = objectShader + backgroudShader + specular;
 				}
-				resultShader = colour;
-
+				resultShader = VolumetricShader(&shaderInputData, colour);
+				//resultShader = colour;
+				
 			}
 			zBuff = reflectBuff[0 + local_offset].depth;
 			#if _DOFEnabled
-			totalColour += colour / 256.0f;
+			totalColour += resultShader / 256.0f;
 		}
 		
 		ushort R = convert_ushort_sat(totalColour.x * 65536.0f);
 		ushort G = convert_ushort_sat(totalColour.y * 65536.0f);
 		ushort B = convert_ushort_sat(totalColour.z * 65536.0f);
 		#else
-		ushort R = convert_ushort_sat(colour.x * 65536.0f);
-		ushort G = convert_ushort_sat(colour.y * 65536.0f);
-		ushort B = convert_ushort_sat(colour.z * 65536.0f);
+		ushort R = convert_ushort_sat(resultShader.x * 65536.0f);
+		ushort G = convert_ushort_sat(resultShader.y * 65536.0f);
+		ushort B = convert_ushort_sat(resultShader.z * 65536.0f);
 		#endif //end DOFEnabled
 		
 		out[buffIndex].R = R;

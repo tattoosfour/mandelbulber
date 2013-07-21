@@ -79,6 +79,7 @@ private:
 	cl_int maxClockFrequency;
 	size_t memorySize;
 	size_t workGroupSize;
+	size_t maxConstantBufferSize;
 
 	sClParams lastParams;
 	sClFractal lastFractal;

@@ -16,13 +16,13 @@
 		
 		z = z * m + c;
 		tgladDE = tgladDE * fabs(m) + 1.0f;
-		r = dot(z,z);
+		r = fast_length(z);
 		
 		colourMin += fabs(m);
 		
 		if(r>1024.0f) 
 		{
-			distance = native_sqrt(r) / fabs(tgladDE);
-			out.colourIndex = colourMin / i * 300.0;
+			distance = r / fabs(tgladDE);
+			out.colourIndex = colourMin / i * 300.0f;
 			break;
 		}

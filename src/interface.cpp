@@ -3461,7 +3461,13 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff)
 	clParams->viewDistanceMax = params->doubles.viewDistanceMax;
 	clParams->shadow = params->shadow;
 	clParams->reflectionsMax = params->reflectionsMax;
+	if(!params->imageSwitches.raytracedReflections) clParams->reflectionsMax = 0;
 	clParams->reflect = params->doubles.imageAdjustments.reflect;
+	clParams->globalIlumQuality = params->globalIlumQuality;
+	clParams->fastAoTune = params->doubles.fastAoTune;
+	clParams->fogVisibility = pow(10.0, params->doubles.imageAdjustments.fogVisibility / 10 - 16.0);
+	clParams->fogEnabled = params->imageSwitches.fogEnabled;
+	clParams->fogColour = sRGB2float3(params->effectColours.fogColor, 65536.0);
 	clParams->glowColour1 = sRGB2float3(params->effectColours.glow_color1, 65536.0);
 	clParams->glowColour2 = sRGB2float3(params->effectColours.glow_color2, 65536.0);
 	clParams->backgroundColour1 = sRGB2float3(params->background_color1, 65536.0);
