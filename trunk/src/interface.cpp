@@ -3379,11 +3379,11 @@ sRGB sRGBDiv256(sRGB color)
 
 //#define CLSUPPORT
 #ifdef CLSUPPORT
-void Params2Cl(const sParamRender *params, sClInBuff *clInBuff)
+void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *clConstantsBuff)
 {
 
-	sClParams *clParams = &clInBuff->params;
-	sClFractal *clFractal = &clInBuff->fractal;
+	sClParams *clParams = &clConstantsBuff->params;
+	sClFractal *clFractal = &clConstantsBuff->fractal;
 	clParams->alpha = params->doubles.alpha;
 	clParams->beta = params->doubles.beta;
 	clParams->gamma = params->doubles.gamma;

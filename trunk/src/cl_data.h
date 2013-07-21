@@ -127,8 +127,6 @@ typedef struct
 
 typedef struct
 {
-	sClParams params;
-	sClFractal fractal;
 	cl_float3 palette[256];
 	cl_float3 vectorsAround[10000];
 	cl_float3 vectorsAroundColours[10000];
@@ -136,8 +134,18 @@ typedef struct
 
 typedef struct
 {
-	sClParams *param;
-	sClFractal *calcParam;
+	sClParams params;
+	sClFractal fractal;
+} sClInConstants;
+
+typedef struct
+{
+	cl_uint N;
+} sClCalcParams;
+
+typedef struct
+{
+	sClCalcParams *calcParam;
 	cl_float3 point;
 	cl_float3 startPoint;
 	cl_float3 viewVector;
@@ -153,6 +161,8 @@ typedef struct
 	cl_int stepCount;
 	//enumObjectType objectType;
 } sClShaderInputData;
+
+
 
 typedef struct
 {

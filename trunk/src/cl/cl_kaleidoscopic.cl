@@ -1,44 +1,44 @@
-		if(ifs.absX) z.x = fabs(z.x);
-		if(ifs.absY) z.y = fabs(z.y);
-		if(ifs.absZ) z.z = fabs(z.z);
+		if(consts->fractal.ifs.absX) z.x = fabs(z.x);
+		if(consts->fractal.ifs.absY) z.y = fabs(z.y);
+		if(consts->fractal.ifs.absZ) z.z = fabs(z.z);
 
 		for(int i=0; i<9; i++)
 		{
-			if(ifs.enabled[i])
+			if(consts->fractal.ifs.enabled[i])
 			{
-				z = Matrix33MulFloat3(ifs.rot[i], z);
-				float length = dot(z, ifs.direction[i]);
-				if(length < ifs.distance[i])
+				z = Matrix33MulFloat3(consts->fractal.ifs.rot[i], z);
+				float length = dot(z, consts->fractal.ifs.direction[i]);
+				if(length < consts->fractal.ifs.distance[i])
 				{
-					z -= ifs.direction[i] * (2.0f * (length - ifs.distance[i]) * ifs.intensity[i]);
+					z -= consts->fractal.ifs.direction[i] * (2.0f * (length - consts->fractal.ifs.distance[i]) * consts->fractal.ifs.intensity[i]);
 				}
 			}
 		}
 		
-		z = Matrix33MulFloat3(ifs.mainRot, z - ifs.offset) + ifs.offset;
+		z = Matrix33MulFloat3(consts->fractal.ifs.mainRot, z - consts->fractal.ifs.offset) + consts->fractal.ifs.offset;
 		
-		if(ifs.edge.x > 0.0f) z.x = ifs.edge.x - fabs(ifs.edge.x - z.x);
-		if(ifs.edge.y > 0.0f) z.y = ifs.edge.y - fabs(ifs.edge.y - z.y);
-		if(ifs.edge.z > 0.0f) z.z = ifs.edge.z - fabs(ifs.edge.z - z.z);
+		if(consts->fractal.ifs.edge.x > 0.0f) z.x = consts->fractal.ifs.edge.x - fabs(consts->fractal.ifs.edge.x - z.x);
+		if(consts->fractal.ifs.edge.y > 0.0f) z.y = consts->fractal.ifs.edge.y - fabs(consts->fractal.ifs.edge.y - z.y);
+		if(consts->fractal.ifs.edge.z > 0.0f) z.z = consts->fractal.ifs.edge.z - fabs(consts->fractal.ifs.edge.z - z.z);
 		
 		r = fast_length(z);
 		if (r < colourMin) colourMin = r;
 		
-		z *= ifs.scale;
+		z *= consts->fractal.ifs.scale;
 		
-		if(ifs.mengerSpongeMode)
+		if(consts->fractal.ifs.mengerSpongeMode)
 		{
-			z.x -= ifs.offset.x * (ifs.scale - 1.0f);
-			z.y -= ifs.offset.y * (ifs.scale - 1.0f);
-			float ztemp = ifs.offset.z * (ifs.scale - 1.0f);
+			z.x -= consts->fractal.ifs.offset.x * (consts->fractal.ifs.scale - 1.0f);
+			z.y -= consts->fractal.ifs.offset.y * (consts->fractal.ifs.scale - 1.0f);
+			float ztemp = consts->fractal.ifs.offset.z * (consts->fractal.ifs.scale - 1.0f);
 			if(z.z > 0.5f * ztemp) z.z -= ztemp;
 		}
 		else
 		{
-			z -= ifs.offset * (ifs.scale - 1.0f);
+			z -= consts->fractal.ifs.offset * (consts->fractal.ifs.scale - 1.0f);
 		}
 		
-		DE *= ifs.scale;
+		DE *= consts->fractal.ifs.scale;
 		r = fast_length(z);
 		
 		if(r>1024.0f) 

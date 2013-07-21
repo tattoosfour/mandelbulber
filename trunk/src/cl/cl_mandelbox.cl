@@ -12,7 +12,7 @@
 		if (rr < mr2)	m = native_divide(scale, mr2);
 		else if (rr < fr2)	m = native_divide(scale,rr);
 		
-		z = Matrix33MulFloat3(fr->mandelbox.mainRot, z);
+		z = Matrix33MulFloat3(consts->fractal.mandelbox.mainRot, z);
 		
 		z = z * m + c;
 		tgladDE = tgladDE * fabs(m) + 1.0f;

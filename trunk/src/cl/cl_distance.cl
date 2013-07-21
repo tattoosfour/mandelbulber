@@ -1,7 +1,7 @@
-formulaOut CalculateDistance(float3 point, sClFractal *fractal)
+formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
 {
-	formulaOut out=Fractal(point, fractal);
-	if (out.iters == fractal->N)
+	formulaOut out=Fractal(consts, point, calcParam);
+	if (out.iters == calcParam->N)
 	{
 		out.distance = 0.0f;
 	}

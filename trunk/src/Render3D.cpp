@@ -1132,7 +1132,8 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		clSupport->SetSize(image->GetWidth(), image->GetHeight());
 
 		sClInBuff *inCLBuff = clSupport->GetInBuffer1();
-		Params2Cl(&param, inCLBuff);
+		sClInConstants *inCLConstants = clSupport->GetInConstantBuffer1();
+		Params2Cl(&param, inCLBuff, inCLConstants);
 
 		//calculating vectors for AmbientOcclusion
 
@@ -1174,10 +1175,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			inCLBuff->vectorsAroundColours[0].y = 0;
 			inCLBuff->vectorsAroundColours[0].z = 0;
 		}
-		inCLBuff->params.AmbientOcclusionNoOfVectors = counter;
+		inCLConstants->params.AmbientOcclusionNoOfVectors = counter;
 		printf("Ambient occlusion counter %d\n", counter);
 
-		clSupport->SetParams(inCLBuff, param.fractal.formula);
+		clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
 		start_time = real_clock();
 		clSupport->Render(image, outputDarea);
 		double time = real_clock() - start_time;

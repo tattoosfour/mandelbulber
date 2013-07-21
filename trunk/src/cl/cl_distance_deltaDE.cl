@@ -1,25 +1,25 @@
-formulaOut CalculateDistance(float3 point, sClFractal *fractal)
+formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
 {
 	float distance;
 	float delta = 1e-6;
 	float3 dr = 0.0;
-	formulaOut out = Fractal(point, fractal);
+	formulaOut out = Fractal(consts, point, calcParam);
 
-	if (out.iters == fractal->N)
+	if (out.iters == calcParam->N)
 	{
 		distance = 0.0f;
 	}
 	else
 	{
 		float r = out.distance;
-		float r1 = Fractal(point + (float3)
-		{ delta, 0.0, 0.0}, fractal).distance;
+		float r1 = Fractal(consts, point + (float3)
+		{ delta, 0.0, 0.0}, calcParam).distance;
 		dr.x = fabs(r1 - r) / delta;
-		float r2 = Fractal(point + (float3)
-		{ 0.0, delta, 0.0}, fractal).distance;
+		float r2 = Fractal(consts, point + (float3)
+		{ 0.0, delta, 0.0}, calcParam).distance;
 		dr.y = fabs(r2 - r) / delta;
-		float r3 = Fractal(point + (float3)
-		{ 0.0, 0.0, delta}, fractal).distance;
+		float r3 = Fractal(consts, point + (float3)
+		{ 0.0, 0.0, delta}, calcParam).distance;
 		dr.z = fabs(r3 - r) / delta;
 		float d = fast_length(dr);
 
