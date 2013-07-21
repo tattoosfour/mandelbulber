@@ -1,12 +1,12 @@
-formulaOut Fractal(float3 point, sClFractal *fr)
+formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
 {	
 	float distance = 0.0f;
-	int N = fr->N;
+	int N = calcParam->N;
 	float3 z = point;
 	float3 c = point;
 	int i;
 	formulaOut out;
 	float r = 0.0f;
-	float colourMin = 1e8;
+	float colourMin = 1e8f;
 	
 	

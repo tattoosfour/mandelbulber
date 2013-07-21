@@ -36,6 +36,7 @@ CclSupport::CclSupport(void)
 	lastEngineNumber = 0;
 	lastStepSize = 0;
 	inBuffer1 = new sClInBuff;
+	constantsBuffer1 = new sClInConstants;
 }
 
 void CclSupport::Init(void)
@@ -79,7 +80,9 @@ void CclSupport::Init(void)
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
 
 	devices[0].getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &maxConstantBufferSize);
-	printf("OpenCL Max constant bufferr size  %ld MB\n", memorySize/1024/1024);
+	printf("OpenCL Max constant buffer size  %ld kB\n", maxConstantBufferSize/1024);
+
+	printf("OpenCL Constant buffer used  %ld kB\n", sizeof(sClInConstants)/1024);
 
 	std::string clDir = std::string(sharedDir) + "cl/";
 
@@ -189,9 +192,10 @@ void CclSupport::Init(void)
 
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
 	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
+	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
 	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 	checkErr(err, "Buffer::Buffer()");
-	printf("OpenCL buffer created\n");
+	printf("OpenCL buffers created\n");
 
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
 	checkErr(err, "CommandQueue::CommandQueue()");
@@ -218,11 +222,11 @@ void CclSupport::Init(void)
 	ready = true;
 }
 
-void CclSupport::SetParams(sClInBuff *inBuff, enumFractalFormula formula)
+void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula)
 {
-	if(inBuff->fractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
+	if(inConstants->fractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
 	if(formula != lastFormula) recompileRequest = true;
-	if(inBuff->params.DOFEnabled != lastParams.DOFEnabled) recompileRequest = true;
+	if(inConstants->params.DOFEnabled != lastParams.DOFEnabled) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -232,8 +236,8 @@ void CclSupport::SetParams(sClInBuff *inBuff, enumFractalFormula formula)
 	if(pixelsPerJob != lastStepSize) recompileRequest = true;
 	lastStepSize = pixelsPerJob;
 
-	lastParams = inBuff->params;
-	lastFractal = inBuff->fractal;
+	lastParams = inConstants->params;
+	lastFractal = inConstants->fractal;
 	lastFormula = formula;
 }
 
@@ -254,12 +258,17 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	{
 		err = kernel->setArg(0, *outCL);
 		err = kernel->setArg(1, *inCLBuffer1);
-		err = kernel->setArg(2, stepSize * loop);
+		err = kernel->setArg(2, *inCLConstBuffer1);
 		err = kernel->setArg(3, *auxReflectBuffer);
+		err = kernel->setArg(4, stepSize * loop);
+
 
 		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
 		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
+		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+
+		err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
 		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
 
 		cl::Event event;
@@ -310,6 +319,7 @@ void CclSupport::Disable(void)
 	delete kernel;
 	delete queue;
 	delete inCLBuffer1;
+	delete inCLConstBuffer1;
 	enabled = false;
 	ready = false;
 }

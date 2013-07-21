@@ -34,7 +34,7 @@ class CclSupport
 public:
 	CclSupport();
 	void Init(void);
-	void SetParams(sClInBuff *inBuff, enumFractalFormula formula);
+	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
 	bool IsReady(void) {return ready;}
@@ -46,6 +46,7 @@ public:
 	void SetSize(int w, int h);
 	void RecopileRequest(void);
 	sClInBuff* GetInBuffer1(void) {return inBuffer1;}
+	sClInConstants* GetInConstantBuffer1(void) {return constantsBuffer1;}
 
 private:
 	bool enabled;
@@ -54,11 +55,13 @@ private:
 	sClPixel *rgbbuff;
 	sClInBuff *inBuffer1;
 	sClReflect *reflectBuffer;
+	sClInConstants *constantsBuffer1;
 	std::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
 	cl::Buffer *outCL;
 	cl::Buffer *inCLBuffer1;
+	cl::Buffer *inCLConstBuffer1;
 	cl::Buffer *auxReflectBuffer;
 	std::vector<cl::Device> devices;
 	cl::Program::Sources *source;

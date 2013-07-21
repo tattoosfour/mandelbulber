@@ -1,11 +1,11 @@
 				float rp = native_powr(r, p);
 				float th = atan2(z.y, z.x);
 				float ph = acos(z.z / r);
-				if (ph > 0.5 * M_PI)
+				if (ph > 0.5f * M_PI)
 				{
 					ph = M_PI - ph;
 				}
-				else if (ph < -0.5 * M_PI)
+				else if (ph < -0.5f * M_PI)
 				{
 					ph = -M_PI - ph;
 				}
@@ -18,6 +18,6 @@
 				if(r>4000.0f || any(isinf(z))) 
 				{
 					distance = r;
-					out.colourIndex = colourMin * 5000.0;
+					out.colourIndex = colourMin * 5000.0f;
 					break;
 				}
