@@ -649,7 +649,7 @@ CVector3 CalculateNormals(sShaderInputData input)
 	{
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
-		double delta = input.delta;
+		double delta = input.delta * input.param->doubles.smoothness;
 		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
 
 		double s1, s2, s3, s4;
