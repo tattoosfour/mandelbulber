@@ -970,7 +970,7 @@ sShaderOutput LightShading(sShaderInputData &input, sLight light, int number, sS
 	double shade = input.normal.Dot(lightVector);
 	if (shade < 0) shade = 0;
 	shade = shade * intensity;
-	if (shade > 5.0) shade = 5.0;
+	if (shade > 500.0) shade = 500.0;
 
 	//specular
 	CVector3 half = lightVector - input.viewVector;

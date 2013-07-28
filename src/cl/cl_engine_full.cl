@@ -375,9 +375,9 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 		//}
 		//else
 		//{
-			opacity = 0.0f;
+		//	opacity = 0.0f;
 		//}
-		shadowTemp -= opacity * (factor - i) / factor;
+		//shadowTemp -= opacity * (factor - i) / factor;
 
 		if (dist < input->dist_thresh || shadowTemp < 0.0f)
 		{
@@ -497,7 +497,123 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	return AO;
 }
 
-float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global cl_float3 *palette, global float3 *vectorsAround, global float3 *vectorsAroundColours)
+float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, float distance, float3 lightVector)
+{
+	float step = input->delta;
+	float dist = step;
+	float light = 1.0f;
+
+	float opacity = 0.0f;
+	float shadowTemp = 1.0f;
+
+	float DE_factor = consts->params.DEfactor;
+	//if(consts->params.imageSwitches.iterFogEnabled || consts->params.imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
+
+	for (float i = input->delta; i < distance; i += dist * DE_factor)
+	{
+		float3 point2 = input->point + lightVector * i;
+
+		dist = CalculateDistance(consts, point2, input->calcParam).distance;
+
+		//if (consts->params.imageSwitches.iterFogEnabled)
+		//{
+		//	opacity = IterOpacity(dist * DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+		//			input.param->doubles.iterFogOpacity);
+		//}
+		//else
+		//{
+		//	opacity = 0.0;
+		//}
+		//shadowTemp -= opacity * (distance - i) / distance;
+
+		if (dist < input->dist_thresh || shadowTemp < 0.0f)
+		{
+			if (consts->params.penetratingLights)
+			{
+				shadowTemp -= (distance - i) / distance;
+				if (shadowTemp < 0.0f) shadowTemp = 0.0f;
+			}
+			else
+			{
+				shadowTemp = 0.0f;
+			}
+			break;
+		}
+	}
+	light = shadowTemp;
+	return light;
+}
+
+float3 LightShading(__constant sClInConstants *consts, sClShaderInputData *input, sClLight light, int number, float3 *specularOut)
+{
+	float3 shading;
+
+	float3 d = light.position - input->point;
+
+	float distance = fast_length(d);
+
+	//angle of incidence
+	float3 lightVector = d;
+	lightVector = fast_normalize(lightVector);
+
+	float intensity = consts->params.auxLightIntensity * 100.0f * light.intensity / (distance * distance) / number;
+	float shade = dot(input->normal, lightVector);
+	if (shade < 0.0f) shade = 0.0f;
+	shade = shade * intensity;
+	if (shade > 500.0f) shade = 500.0f;
+
+	//specular
+	float3 half = lightVector - input->viewVector;
+	half = fast_normalize(half);
+	float shade2 = dot(input->normal, half);
+	if (shade2 < 0.0f) shade2 = 0.0f;
+	shade2 = pow(shade2, 30.0f) * 1.0f;
+	shade2 *= intensity * consts->params.specularIntensity;
+	if (shade2 > 15.0) shade2 = 15.0;
+
+	//calculate shadow
+	if ((shade > 0.01f || shade2 > 0.01f) && consts->params.shadow)
+	{
+		float light = AuxShadow(consts, input, distance, lightVector);
+		shade *= light;
+		shade2 *= light;
+	}
+	else
+	{
+		if (consts->params.shadow)
+		{
+			shade = 0.0f;
+			shade2 = 0.0f;
+		}
+	}
+
+	shading = shade * light.colour;
+	(*specularOut) = shade2 * light.colour;
+
+	return shading;
+}
+
+float3 AuxLightsShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClLight *lights)
+{
+	int numberOfLights = consts->params.auxLightNumber;
+
+	float3 shadeAuxSum = 0.0f;
+	float3 specularAuxSum = 0.0f;
+	for (int i = 0; i < numberOfLights; i++)
+	{
+		if (lights[i].enabled)
+		{
+			float3 specularAuxOutTemp;
+			float3 shadeAux = LightShading(consts, input, lights[i], numberOfLights, &specularAuxOutTemp);
+			shadeAuxSum += shadeAux;
+			specularAuxSum += specularAuxOutTemp;
+		}
+	}
+	*specularOut = specularAuxSum;
+	return shadeAuxSum;
+}
+
+float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClInBuff *inBuff)
 {
 	float3 output;
 
@@ -521,8 +637,9 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	float3 specular = MainSpecular(input);
 	
 	//calculate surface colour
-	float3 colour = SurfaceColour(consts, input, palette);
+	float3 colour = SurfaceColour(consts, input, inBuff->palette);
 	
+	//ambient occlusion
 	float3 ambient = 0.0f;
 	if(consts->params.fastAmbientOcclusionEnabled)
 	{
@@ -530,11 +647,16 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	}
 	else if(consts->params.slowAmbientOcclusionEnabled)
 	{
-		ambient = AmbientOcclusion(consts, input, vectorsAround, vectorsAroundColours);
+		ambient = AmbientOcclusion(consts, input, inBuff->vectorsAround, inBuff->vectorsAroundColours);
 	}
 	float3 ambient2 = ambient * consts->params.ambientOcclusionIntensity;
 	
-	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour;
+	//additional lights
+	float3 auxLights;
+	float3 auxLightsSpecular;
+	auxLights = AuxLightsShader(consts, input, &auxLightsSpecular, inBuff->lights);
+	
+	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + auxLights * colour + auxLightsSpecular;
 	
 	return output;
 }
@@ -802,7 +924,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 				if(reflectBuff[ray + local_offset].found)
 				{
 					//printf("Last dist %f = \n", lastDist / distThresh);	
-					objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff->palette, inBuff->vectorsAround, inBuff->vectorsAroundColours);
+					objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff);
 				}
 				else
 				{

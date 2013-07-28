@@ -20,6 +20,7 @@
 
 #include "interface.h"
 #include "callbacks.h"
+#include "shaders.h"
 
 #define CONNECT_SIGNAL(object, callback, event) g_signal_connect(G_OBJECT(object), event, G_CALLBACK(callback), NULL)
 #define CONNECT_SIGNAL_CLICKED(x, y) CONNECT_SIGNAL(x, y, "clicked")
@@ -3467,6 +3468,8 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->fastAoTune = params->doubles.fastAoTune;
 	clParams->fogVisibility = pow(10.0, params->doubles.imageAdjustments.fogVisibility / 10 - 16.0);
 	clParams->fogEnabled = params->imageSwitches.fogEnabled;
+	clParams->auxLightIntensity = params->doubles.auxLightIntensity;
+
 	clParams->fogColour = sRGB2float3(params->effectColours.fogColor, 65536.0);
 	clParams->glowColour1 = sRGB2float3(params->effectColours.glow_color1, 65536.0);
 	clParams->glowColour2 = sRGB2float3(params->effectColours.glow_color2, 65536.0);
@@ -3488,6 +3491,15 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->DOFFocus = pow(10, params->doubles.DOFFocus / 10.0 - 16.0);
 	clParams->DOFRadius = params->doubles.DOFRadius;
 
+	clParams->auxLightNumber = params->auxLightNumber;
+
+	for(int i = 0; i < params->auxLightNumber; i++)
+	{
+		clInBuff->lights[i].enabled = Lights[i].enabled;
+		clInBuff->lights[i].intensity = Lights[i].intensity;
+		clInBuff->lights[i].position = CVector2float3(Lights[i].position);
+		clInBuff->lights[i].colour = sRGB2float3(Lights[i].colour, 65536.0);
+	}
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
