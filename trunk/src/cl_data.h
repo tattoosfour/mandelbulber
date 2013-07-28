@@ -27,6 +27,14 @@ typedef struct
 
 typedef struct
 {
+	cl_float3 position;
+	cl_float3 colour;
+	cl_float intensity;
+	cl_int enabled;
+} sClLight;
+
+typedef struct
+{
 	cl_int absX;
 	cl_int absY;
 	cl_int absZ;
@@ -77,6 +85,7 @@ typedef struct
 	cl_int reflectionsMax;
 	cl_int globalIlumQuality;
 	cl_int fogEnabled;
+	cl_int auxLightNumber;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -104,6 +113,7 @@ typedef struct
 	cl_float reflect;
 	cl_float fastAoTune;
 	cl_float fogVisibility;
+	cl_float auxLightIntensity;
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
@@ -130,6 +140,7 @@ typedef struct
 	cl_float3 palette[256];
 	cl_float3 vectorsAround[10000];
 	cl_float3 vectorsAroundColours[10000];
+	sClLight lights[10000];
 } sClInBuff;
 
 typedef struct
