@@ -10,7 +10,7 @@
 		dz.y = native_cos(ph_phdz) * native_sin(th_thdz);
 		dz.z = native_sin(ph_phdz);
 		dz = dz * p_r1_rdz + one;
-		r_dz = fast_length(dz);
+		r_dz = length(dz);
 		th_dz = atan2(dz.y, dz.x);
 		ph_dz = -atan2(dz.z, sqrt(dz.x * dz.x + dz.y * dz.y));
 
@@ -21,7 +21,7 @@
 		z.z = native_sin(pph);
 
 		z = z * r2 + c;
-		r = fast_length(z);
+		r = length(z);
 		if (r < colourMin) colourMin = r;
 		
 		if(r>4.0f || any(isinf(z))) 

@@ -21,7 +21,7 @@
 		if(consts->fractal.ifs.edge.y > 0.0f) z.y = consts->fractal.ifs.edge.y - fabs(consts->fractal.ifs.edge.y - z.y);
 		if(consts->fractal.ifs.edge.z > 0.0f) z.z = consts->fractal.ifs.edge.z - fabs(consts->fractal.ifs.edge.z - z.z);
 		
-		r = fast_length(z);
+		r = length(z);
 		if (r < colourMin) colourMin = r;
 		
 		z *= consts->fractal.ifs.scale;
@@ -39,7 +39,7 @@
 		}
 		
 		DE *= consts->fractal.ifs.scale;
-		r = fast_length(z);
+		r = length(z);
 		
 		if(r>1024.0f) 
 		{

@@ -3,7 +3,7 @@
 		newz.z = 2.0f * z4.x * z4.z - 2.0f * z4.y * z4.w;
 		newz.w = 2.0f * z4.x * z4.w - 2.0f * z4.y * z4.z;
 		z4 = newz + c4;
-		r = fast_length(z4);
+		r = length(z4);
 		if (r < colourMin) colourMin = r;
 		if(r>40.0f || any(isinf(z4))) 
 		{

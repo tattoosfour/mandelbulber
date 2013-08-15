@@ -12,16 +12,16 @@ formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sC
 	else
 	{
 		float r = out.distance;
-		float r1 = Fractal(consts, point + (float3)
-		{ delta, 0.0, 0.0}, calcParam).distance;
-		dr.x = fabs(r1 - r) / delta;
-		float r2 = Fractal(consts, point + (float3)
-		{ 0.0, delta, 0.0}, calcParam).distance;
-		dr.y = fabs(r2 - r) / delta;
-		float r3 = Fractal(consts, point + (float3)
-		{ 0.0, 0.0, delta}, calcParam).distance;
-		dr.z = fabs(r3 - r) / delta;
-		float d = fast_length(dr);
+		float r11 = Fractal(consts, point + (float3)	{ delta, 0.0, 0.0}, calcParam).distance;
+		float r12 = Fractal(consts, point + (float3)	{ -delta, 0.0, 0.0}, calcParam).distance;
+		dr.x = min(fabs(r11 - r), fabs(r12 - r)) / delta;
+		float r21 = Fractal(consts, point + (float3)	{ 0.0, delta, 0.0}, calcParam).distance;
+		float r22 = Fractal(consts, point + (float3)	{ 0.0, -delta, 0.0}, calcParam).distance;
+		dr.y = min(fabs(r21 - r), fabs(r22 - r)) / delta;
+		float r31 = Fractal(consts, point + (float3)	{ 0.0, 0.0, delta}, calcParam).distance;
+		float r32 = Fractal(consts, point + (float3)	{ 0.0, 0.0, -delta}, calcParam).distance;
+		dr.z = min(fabs(r31 - r), fabs(r32 - r)) / delta;
+		float d = length(dr);
 
 		if (isinf(r) || isinf(d))
 		{

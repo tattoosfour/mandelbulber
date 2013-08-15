@@ -3492,6 +3492,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->DOFRadius = params->doubles.DOFRadius;
 
 	clParams->auxLightNumber = params->auxLightNumber;
+  clParams->auxLightVisibility = params->doubles.auxLightVisibility;
 
 	for(int i = 0; i < params->auxLightNumber; i++)
 	{
@@ -3499,6 +3500,12 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 		clInBuff->lights[i].intensity = Lights[i].intensity;
 		clInBuff->lights[i].position = CVector2float3(Lights[i].position);
 		clInBuff->lights[i].colour = sRGB2float3(Lights[i].colour, 65536.0);
+	}
+
+	for(int i=0; i < 5; i++)
+	{
+		clParams->volumetricLightEnabled[i] = params->volumetricLightEnabled[i];
+		clParams->volumetricLightIntensity[i] = params->doubles.volumetricLightIntensity[i];
 	}
 }
 

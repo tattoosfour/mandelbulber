@@ -5,7 +5,7 @@
 				{
 					ph = M_PI - ph;
 				}
-				else if (ph < -0.5f * M_PI)
+				else if (ph < -0.5f * M_PI_F)
 				{
 					ph = -M_PI - ph;
 				}
@@ -13,7 +13,7 @@
 				z.y = rp * native_sin(th * p) * native_sin(ph * p);
 				z.z = rp * native_cos(ph * p);
 				z+=c;
-				r = fast_length(z);
+				r = length(z);
 				if (r < colourMin) colourMin = r;
 				if(r>4000.0f || any(isinf(z))) 
 				{

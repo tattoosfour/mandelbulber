@@ -10,7 +10,7 @@
 		z = (float3) {cth * native_cos(ph), cth * native_sin(ph), native_sin(th)};
 		z*=rp;
 		z+=c;
-		r = fast_length(z);
+		r = length(z);
 		if (r < colourMin) colourMin = r;
 		if(r>4.0f || any(isinf(z))) 
 		{
