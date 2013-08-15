@@ -101,7 +101,7 @@ matrix33 RotateZ(matrix33 m, float angle)
 float PrimitivePlane(float3 point, float3 centre, float3 normal)
 {
 	float3 plane = normal;
-	plane = plane * (1.0/ fast_length(plane));
+	plane = plane * (1.0/ length(plane));
 	float planeDistance = dot(plane, point - centre);
 	return planeDistance;
 }
@@ -219,7 +219,7 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 	}
 	else
 	{
-		normal = fast_normalize(normal);
+		normal = normalize(normal);
 	}
 
 	return normal;
@@ -402,7 +402,7 @@ float3 MainSpecular(sClShaderInputData *input)
 {
 	float3 specular;
 	float3 half = input->lightVect - input->viewVector;
-	half = fast_normalize(half);
+	half = normalize(half);
 	float shade2 = dot(input->normal,half);
 	if (shade2 < 0.0f) shade2 = 0.0f;
 	shade2 = pow(shade2, 30.0f) * 1.0f;
@@ -550,11 +550,11 @@ float3 LightShading(__constant sClInConstants *consts, sClShaderInputData *input
 
 	float3 d = light.position - input->point;
 
-	float distance = fast_length(d);
+	float distance = length(d);
 
 	//angle of incidence
 	float3 lightVector = d;
-	lightVector = fast_normalize(lightVector);
+	lightVector = normalize(lightVector);
 
 	float intensity = consts->params.auxLightIntensity * 100.0f * light.intensity / (distance * distance) / number;
 	float shade = dot(input->normal, lightVector);
@@ -564,7 +564,7 @@ float3 LightShading(__constant sClInConstants *consts, sClShaderInputData *input
 
 	//specular
 	float3 half = lightVector - input->viewVector;
-	half = fast_normalize(half);
+	half = normalize(half);
 	float shade2 = dot(input->normal, half);
 	if (shade2 < 0.0f) shade2 = 0.0f;
 	shade2 = pow(shade2, 30.0f) * 1.0f;
@@ -664,7 +664,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *input)
 {
 	float3 vector = { 1.0f, 1.0f, -1.0f };
-	vector = fast_normalize(vector);
+	vector = normalize(vector);
 	float grad = dot(input->viewVector, vector) + 1.0f;
 	float3 colour;
 	if (grad < 1.0f)
@@ -681,12 +681,14 @@ float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *i
 	return colour;
 }
 
-float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 oldPixel)
+float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *input, global sClInBuff *inBuff, float3 oldPixel)
 {
 	float3 output = oldPixel;
 	float scan = input->depth;
+	if(scan > consts->params.viewDistanceMax) scan = consts->params.viewDistanceMax;
 	float dist = input->lastDist;
 	float distThresh = input->dist_thresh;
+	float delta = input->delta;
 	bool end = false;
 	
 	//glow init
@@ -695,12 +697,18 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
   if (glowN < 0.0f) glowN = 0.0f;
   float3 glowColour = (consts->params.glowColour1 * glowN + consts->params.glowColour2 * glow);
 	
+  //volumetric fog init
+	float colourThresh = consts->params.fogColour1Distance;
+	float colourThresh2 = consts->params.fogColour2Distance;
+	float fogReduce = consts->params.fogDistanceFactor;
+	float fogIntensity = consts->params.fogDensity;
+  
 	for(int i=0; i<MAX_RAYMARCHING; i++)
 	{
 		//calculate back step
-		float step = dist * 2.0f;
+		float step = dist * consts->params.DEfactor * (0.9f + 0.2f * rand(&input->calcParam->randomSeed)/65536.0);
 
-		if(step < distThresh) step = distThresh;
+		if(step < delta) step = delta;
 		if(step > scan) 
 		{
 			step = scan;
@@ -710,6 +718,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		scan -= step;
 		
 		float3 point = input->startPoint + input->viewVector * scan;
+		input->point = point;
 		
 		dist = CalculateDistance(consts, point, input->calcParam).distance;
 		
@@ -721,10 +730,97 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		{
 			distThresh = scan * input->resolution * consts->params.persp / consts->params.quality;
 		}
+		input->dist_thresh = distThresh;
+		
+		if(consts->fractal.constantDEThreshold) input->delta = scan * input->resolution * consts->params.persp;
+		else input->delta = distThresh * consts->params.quality;
+		delta = input->delta;
 		
 		//------------------- glow
 		float glowOpacity = glow * step / input->depth;
 		output = glowOpacity * glowColour + (1.0f - glowOpacity) * output;
+	
+		//------------------ visible light
+		if (consts->params.auxLightVisibility > 0.0f)
+		{
+			float lowestLightSize = 1.0e10f;
+			float lowestLightDist = 1.0e10f;
+			for (int i = 0; i < consts->params.auxLightNumber; ++i)
+			{
+				if (inBuff->lights[i].enabled)
+				{
+					float3 lightDistVect = point - inBuff->lights[i].position;
+					float lightDist = length(lightDistVect);
+					float lightSize = inBuff->lights[i].intensity * consts->params.auxLightIntensity * consts->params.auxLightVisibility;
+					float r2 = lightDist / lightSize;
+					if (r2 < lowestLightSize)
+					{
+							lowestLightSize = r2;
+							lowestLightDist = lightDist;
+					}
+				}
+			}
+
+			//small steps close to light source to improve accuracy
+			int smallSteps = 0;
+			int smallStep_start = 0;
+			int smallStep_end = 1;
+			float step2 = step;
+
+			smallSteps = 10.0f * step / (lowestLightDist + 1.0e-15f);
+			if(smallSteps > 50) smallSteps = 50;
+			if (smallSteps > 0)
+			{
+				smallStep_start = 1;
+				smallStep_end = smallSteps + 1;
+				step2 = step / (smallSteps + 1.0f);
+			}
+
+			for (int smallStep = smallStep_start; smallStep < smallStep_end; smallStep++)
+			{
+				float3 point2 = point + input->viewVector * step2 * smallStep;
+
+				for (int i = 0; i < consts->params.auxLightNumber; ++i)
+				{
+					if (inBuff->lights[i].enabled)
+					{
+						float3 lightDistVect = point2 - inBuff->lights[i].position;
+						float lightDist = length(lightDistVect);
+						float lightSize = inBuff->lights[i].intensity * consts->params.auxLightIntensity * consts->params.auxLightVisibility;
+						float r2 = lightDist / lightSize;
+						if (r2 > 1.0f) r2 = 1.0f;
+						float bellFunction = (cos(r2 * M_PI) + 1.0f) / (r2 * r2 + 0.02f) * 0.3f;
+						float lightDensity = step2 * bellFunction / lightSize;
+
+						output += lightDensity * inBuff->lights[i].colour;
+					}
+				}
+			}
+		}
+		
+		//---------------------- volumetric lights with shadows in fog
+
+		for (int i = 0; i < 5; i++)
+		{
+			if (i == 0 && consts->params.volumetricLightEnabled[0])
+			{
+				float3 shadowOutputTemp = MainShadow(consts, input);
+				output += shadowOutputTemp * step * consts->params.volumetricLightIntensity[0] * consts->params.mainLightColour;
+			}
+			if (i > 0)
+			{
+				if (inBuff->lights[i - 1].enabled && consts->params.volumetricLightEnabled[i])
+				{
+					float3 d = inBuff->lights[i - 1].position - point;
+					float distance = length(d);
+					float distance2 = distance * distance;
+					float3 lightVectorTemp = d;
+					lightVectorTemp = normalize(lightVectorTemp);
+					float light = AuxShadow(consts, input, distance, lightVectorTemp);
+					output += light * inBuff->lights[i - 1].colour * consts->params.volumetricLightIntensity[i] * step / distance2;
+				}
+			}
+		}
 		
 		//----------------------- basic fog
 		if(consts->params.fogEnabled)
@@ -732,6 +828,27 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			float fogDensity = step / consts->params.fogVisibility;
 			if(fogDensity > 1.0f) fogDensity = 1.0f;
 			output = fogDensity * consts->params.fogColour + (1.0f - fogDensity) * output;
+		}
+		
+		//-------------------- volumetric fog
+		if(fogIntensity > 0.0f)
+		{
+			float densityTemp = (step * fogReduce) / (dist * dist + fogReduce * fogReduce);
+
+			float k = dist / colourThresh;
+			if (k > 1.0f) k = 1.0f;
+			float kn = 1.0f - k;
+			float3 fogTemp = (consts->params.fogColour1 * kn + consts->params.fogColour2 * k);
+
+			float k2 = dist / colourThresh2 * k;
+			if (k2 > 1.0f) k2 = 1.0f;
+			kn = 1.0f - k2;
+			fogTemp = fogTemp * kn + consts->params.fogColour3 * k2;
+
+			float fogDensity = 0.3f * fogIntensity * densityTemp / (1.0f + fogIntensity * densityTemp);
+			if(fogDensity > 1.0f) fogDensity = 1.0f;
+
+			output = fogDensity * fogTemp + (1.0 - fogDensity) * output;
 		}
 		
 		if(end) break;
@@ -839,8 +956,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			
 			float3 lightVector = (float3)
 			{
-				cos(consts->params.mainLightAlfa - 0.5f * M_PI) * cos(-consts->params.mainLightBeta),
-				sin(consts->params.mainLightAlfa - 0.5f * M_PI) * cos(-consts->params.mainLightBeta),
+				cos(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
+				sin(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
 				sin(-consts->params.mainLightBeta)};
 			lightVector = Matrix33MulFloat3(rot, lightVector);
 			
@@ -903,6 +1020,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 				float3 volumetricShader = 0.0f;
 				float3 specular = 0.0f;
 
+				calcParam.randomSeed = seed;
 				shaderInputData.calcParam = &calcParam;
 				shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
 				
@@ -929,20 +1047,22 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 				else
 				{
 					backgroudShader = BackgroundShader(consts, &shaderInputData);
-					reflectBuff[ray + local_offset].depth = 1e20;
+					reflectBuff[ray + local_offset].depth = 1e20f;
 				}
 				
 				if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
 				{
 					colour = resultShader * consts->params.reflect; 
-					colour += (1.0 - consts->params.reflect) * (objectShader + backgroudShader) + specular;
+					colour += (1.0f - consts->params.reflect) * (objectShader + backgroudShader) + specular;
 				}
 				else
 				{
 					colour = objectShader + backgroudShader + specular;
 				}
-				resultShader = VolumetricShader(consts, &shaderInputData, colour);
+				resultShader = VolumetricShader(consts, &shaderInputData, inBuff, colour);
 				//resultShader = colour;
+				
+				//seed = shaderInputData.calcParam->randomSeed;
 				
 			}
 			zBuff = reflectBuff[0 + local_offset].depth;

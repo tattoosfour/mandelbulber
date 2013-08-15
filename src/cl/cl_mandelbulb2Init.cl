@@ -3,7 +3,7 @@
 	float3 dz = 0.0f;
 	float ph_dz = 0.0f;
 	float th_dz = 0.0f;
-	r = fast_length(z);
+	r = length(z);
 	float r_dz = 1.0f;
 
 	

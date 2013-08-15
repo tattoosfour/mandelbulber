@@ -86,6 +86,7 @@ typedef struct
 	cl_int globalIlumQuality;
 	cl_int fogEnabled;
 	cl_int auxLightNumber;
+	cl_int volumetricLightEnabled[5];
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -114,6 +115,8 @@ typedef struct
 	cl_float fastAoTune;
 	cl_float fogVisibility;
 	cl_float auxLightIntensity;
+	cl_float volumetricLightIntensity[5];
+	cl_float auxLightVisibility;
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
@@ -152,6 +155,7 @@ typedef struct
 typedef struct
 {
 	cl_uint N;
+	cl_int randomSeed;
 } sClCalcParams;
 
 typedef struct

@@ -19,7 +19,7 @@
 			z.y = temp;
 		}
 		
-		r = fast_length(z);
+		r = length(z);
 		if (r < colourMin) colourMin = r;
 		
 		z *= 3.0f;
@@ -27,7 +27,7 @@
 		z.x -= 2.0f;
 		z.y -= 2.0f;
 		if (z.z > 1.0f) z.z -= 2.0f;
-		r = fast_length(z);
+		r = length(z);
 		DE *= 3.0f;
 
 		if (r > 1024.0f)

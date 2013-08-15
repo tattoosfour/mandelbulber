@@ -16,7 +16,7 @@
 		
 		z = z * m + c;
 		tgladDE = tgladDE * fabs(m) + 1.0f;
-		r = fast_length(z);
+		r = length(z);
 		
 		colourMin += fabs(m);
 		
