@@ -95,6 +95,23 @@ matrix33 RotateZ(matrix33 m, float angle)
 		return out;
 }
 
+float4 quaternionMul(float4 q1, float4 q2)
+{
+//source: http://www.cs.columbia.edu/~keenan/Projects/QuaternionJulia/QJuliaFragment.html
+	float4 result;
+	result.x = q1.x * q2.x - dot(q1.yzw, q2.yzw);
+	result.yzw = q1.x * q2.yzw + q2.x * q1.yzw + cross(q1.yzw, q2.yzw);
+	return result;
+}
+
+float4 quaternionSqr(float4 q)
+{
+	//source: http://www.cs.columbia.edu/~keenan/Projects/QuaternionJulia/QJuliaFragment.html
+	float4 result;
+	result.x = q.x * q.x - dot(q.yzw, q.yzw);
+	result.yzw = 2.0f * q.x * q.yzw;
+	return result;
+}
 
 
 /*
@@ -634,7 +651,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	if(consts->params.shadow) shadow = MainShadow(consts, input);
 	
 	//calculate specular highlight
-	float3 specular = MainSpecular(input);
+	float3 specular = MainSpecular(input) * consts->params.specularIntensity;
 	
 	//calculate surface colour
 	float3 colour = SurfaceColour(consts, input, inBuff->palette);
@@ -655,6 +672,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	float3 auxLights;
 	float3 auxLightsSpecular;
 	auxLights = AuxLightsShader(consts, input, &auxLightsSpecular, inBuff->lights);
+	auxLightsSpecular *= consts->params.specularIntensity;
 	
 	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + auxLights * colour + auxLightsSpecular;
 	
@@ -1070,14 +1088,17 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			totalColour += resultShader / 256.0f;
 		}
 		
-		ushort R = convert_ushort_sat(totalColour.x * 65536.0f);
-		ushort G = convert_ushort_sat(totalColour.y * 65536.0f);
-		ushort B = convert_ushort_sat(totalColour.z * 65536.0f);
+		float3 finallColour = totalColour;
 		#else
-		ushort R = convert_ushort_sat(resultShader.x * 65536.0f);
-		ushort G = convert_ushort_sat(resultShader.y * 65536.0f);
-		ushort B = convert_ushort_sat(resultShader.z * 65536.0f);
+		float3 finallColour = resultShader;
 		#endif //end DOFEnabled
+		finallColour *= consts->params.imageBrightness;
+		finallColour = (finallColour - 0.5f) * consts->params.imageContrast + 0.5f;
+		finallColour = pow(finallColour, 1.0f / consts->params.imageGamma);
+		
+		ushort R = convert_ushort_sat(finallColour.x * 65536.0f);
+		ushort G = convert_ushort_sat(finallColour.y * 65536.0f);
+		ushort B = convert_ushort_sat(finallColour.z * 65536.0f);
 		
 		out[buffIndex].R = R;
 		out[buffIndex].G = G;

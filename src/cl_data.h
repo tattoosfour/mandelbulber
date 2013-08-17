@@ -65,6 +65,7 @@ typedef struct
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
+	cl_float fractalConstantFactor;
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;
@@ -117,6 +118,9 @@ typedef struct
 	cl_float auxLightIntensity;
 	cl_float volumetricLightIntensity[5];
 	cl_float auxLightVisibility;
+	cl_float imageBrightness;
+	cl_float imageContrast;
+	cl_float imageGamma;
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;

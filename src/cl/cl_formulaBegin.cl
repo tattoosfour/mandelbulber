@@ -3,7 +3,7 @@ formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParam
 	float distance = 0.0f;
 	int N = calcParam->N;
 	float3 z = point;
-	float3 c = point;
+	float3 c = point * consts->fractal.fractalConstantFactor;
 	int i;
 	formulaOut out;
 	float r = 0.0f;

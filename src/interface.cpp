@@ -2878,7 +2878,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("10000", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("16384", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
@@ -3412,6 +3412,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->formula = params->fractal.formula;
 	clFractal->julia = CVector2float3(params->fractal.doubles.julia);
 	clFractal->constantDEThreshold = params->fractal.constantDEThreshold;
+	clFractal->fractalConstantFactor = params->fractal.doubles.constantFactor;
 
 	clFractal->ifs.absX = params->fractal.IFS.absX;
 	clFractal->ifs.absY = params->fractal.IFS.absY;
@@ -3501,6 +3502,10 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 		clInBuff->lights[i].position = CVector2float3(Lights[i].position);
 		clInBuff->lights[i].colour = sRGB2float3(Lights[i].colour, 65536.0);
 	}
+
+	clParams->imageBrightness = params->doubles.imageAdjustments.brightness;
+	clParams->imageContrast = params->doubles.imageAdjustments.contrast;
+	clParams->imageGamma = params->doubles.imageAdjustments.imageGamma;
 
 	for(int i=0; i < 5; i++)
 	{
