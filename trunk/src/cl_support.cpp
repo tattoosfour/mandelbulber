@@ -108,7 +108,7 @@ void CclSupport::Init(void)
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 
 	std::string strFileDistance = clDir;
-	if(lastFormula == hypercomplex || lastFormula == quaternion || lastFormula == xenodreambuie)
+	if(lastFormula == lastFormula == xenodreambuie || lastFormula == hypercomplex)
 		strFileDistance += "cl_distance_deltaDE.cl";
 	else
 		strFileDistance += "cl_distance.cl";

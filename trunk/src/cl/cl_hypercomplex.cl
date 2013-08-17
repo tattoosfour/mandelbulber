@@ -1,3 +1,4 @@
+
 		newz.x = z4.x * z4.x - z4.y * z4.y - z4.z * z4.z - z4.w * z4.w;
 		newz.y = 2.0f * z4.x * z4.y - 2.0f * z4.w * z4.z;
 		newz.z = 2.0f * z4.x * z4.z - 2.0f * z4.y * z4.w;
@@ -11,4 +12,5 @@
 			out.colourIndex = colourMin * 5000.0f;
 			break;
 		}
-		
+
+

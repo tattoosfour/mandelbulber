@@ -1,13 +1,13 @@
-				newz.x = z4.x * z4.x - z4.y * z4.y - z4.z * z4.z - z4.w * z4.w;
-				newz.y = 2.0f* z4.x * z4.y;
-				newz.z = 2.0f * z4.x * z4.z;
-				newz.w = 2.0f * z4.x * z4.w;
+				zp = 2.0 * quaternionMul(z4, zp);
+				newz = quaternionSqr(z4);
 				z4 = newz + c4;
 				r = length(z4);
+				
 				if (r < colourMin) colourMin = r;
-				if(r>4000.0f || any(isinf(z4))) 
+				if(r>40.0f || any(isinf(z4))) 
 				{
-					distance = r;
+					float rp = length(zp);
+					distance = 0.5f * r * native_log(r) / rp;
 					out.colourIndex = colourMin * 5000.0f;
 					break;
 				}
