@@ -1828,6 +1828,10 @@ void MainRender(void)
 
 	int tiles = fractParam.noOfTiles;
 
+	int lastDeltaXm, lastDeltaYm;
+	double spaceShipAngle = 0.0;
+	double last_spaceShipAngle = 0.0;
+
 	start_time = real_clock();
 
 	printf("************ Rendering frames *************\n");
@@ -1853,15 +1857,35 @@ void MainRender(void)
 			}
 
 			//calculating of mouse pointer position
-			int delta_xm, delta_ym;
+			int deltaXm, deltaYm;
 
-			delta_xm = x_mouse - width * mainImage.GetPreviewScale() / 2;
-			delta_ym = y_mouse - height * mainImage.GetPreviewScale() / 2;
+			deltaXm = x_mouse - width * mainImage.GetPreviewScale() / 2;
+			deltaYm = y_mouse - height * mainImage.GetPreviewScale() / 2;
+			int XmStep = deltaXm - lastDeltaXm;
+			int YmStep = deltaYm - lastDeltaYm;
 
 			if (fractParam.recordMode)
 			{
+				/*
 				fractParam.doubles.alpha -= 0.0003 * delta_xm;
 				fractParam.doubles.beta += 0.0003 * delta_ym;
+				*/
+				double rotation_step = 0.0001;
+
+				spaceShipAngle -= deltaXm * rotation_step;
+				fractParam.doubles.gamma -= deltaXm * rotation_step;
+
+				CRotationMatrix mRot;
+				mRot.RotateZ(fractParam.doubles.alpha);
+				mRot.RotateX(fractParam.doubles.beta);
+				mRot.RotateY(fractParam.doubles.gamma);
+				mRot.RotateX(-deltaYm * rotation_step);
+				mRot.RotateZ(deltaXm * rotation_step);
+
+				fractParam.doubles.alpha = -mRot.GetAlfa();
+				fractParam.doubles.beta = -mRot.GetBeta();
+				fractParam.doubles.gamma = -mRot.GetGamma();
+
 			}
 
 			//calculation of distance to fractal surface
@@ -1897,8 +1921,8 @@ void MainRender(void)
 
 				//saving coordinates to file
 				pFile_coordinates = fopen(fractParam.file_path, "a");
-				fprintf(pFile_coordinates, "%.10f %.10f %.10f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alpha,
-						fractParam.doubles.beta);
+				fprintf(pFile_coordinates, "%.11f %.11f %.11f %f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alpha,
+						fractParam.doubles.beta, fractParam.doubles.gamma);
 				fclose(pFile_coordinates);
 				WriteLog("Coordinates saved");
 			}
@@ -1908,8 +1932,8 @@ void MainRender(void)
 			{
 				//loading coordinates
 				int n;
-				n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alpha,
-						&fractParam.doubles.beta);
+				n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alpha,
+						&fractParam.doubles.beta, &fractParam.doubles.gamma);
 				if (n <= 0)
 				{
 					foundLastFrame = true;

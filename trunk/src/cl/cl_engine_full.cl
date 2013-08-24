@@ -946,8 +946,17 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			float focus = 1.0f;
 			#endif //end DOFEnabled
 		
-			float3 back = (float3) {0.0f + randX/consts->params.zoom, 1.0f, 0.0f + randZ/consts->params.zoom} / consts->params.persp * consts->params.zoom;
-			float3 start = consts->params.vp - Matrix33MulFloat3(rot, back);
+			float3 start = 0.0f;
+			if (consts->params.perspectiveType == 1 || consts->params.perspectiveType == 2)
+			{
+				float3 back = (float3) {randX, 0.0f, randZ};
+				start = consts->params.vp - Matrix33MulFloat3(rot, back);
+			}
+			else
+			{
+				float3 back = (float3) {randX/consts->params.zoom, 1.0f, randZ/consts->params.zoom} / consts->params.persp * consts->params.zoom;
+				start = consts->params.vp - Matrix33MulFloat3(rot, back);
+			}
 			//printf("x %f, y %f, start %f %f %f\n", screenPoint.x, screenPoint.y, start.x, start.y, start.z);
 			
 			float aspectRatio = width / height;
@@ -955,10 +964,55 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
 			z2 = (screenPoint.y / height - 0.5f);
 		
-			float x3 = x2 + randX / focus / consts->params.persp;
-			float z3 = z2 + randZ / focus / consts->params.persp;
+			//float x3 = x2 + randX / focus / consts->params.persp / consts->params.persp;
+			//float z3 = z2 + randZ / focus / consts->params.persp / consts->params.persp;
+			float x3 = x2 + randX / focus / M_PI / consts->params.persp;
+			float z3 = z2 + randZ / focus / M_PI / consts->params.persp;
+			
 
-			float3 viewVector = (float3) {x3 * consts->params.persp, 1.0f, z3 * consts->params.persp}; 
+			float3 viewVector;
+			bool hemisphereCut = false;
+			float fov = consts->params.persp;
+			
+			if (consts->params.perspectiveType == 1) //fish eye
+			{
+				if (consts->params.fishEyeCut && length((float2){x2, z2}) > 0.5f / fov)
+				{
+					hemisphereCut = true;
+				}
+
+				float x4 = x3 * M_PI;
+				float z4 = z3 * M_PI;
+				float r = length((float2){x4, z4});
+
+				if(r == 0.0f)
+				{
+					viewVector.x = 0.0f;
+					viewVector.z = 0.0f;
+					viewVector.y = 1.0f;
+				}
+				else
+				{
+					viewVector.x = x4 / r * sin(r * fov);
+					viewVector.z = z4 / r * sin(r * fov);
+					viewVector.y = cos(r * fov);
+				}
+			}
+			else if(consts->params.perspectiveType == 2) //equirectangular
+			{
+				float x4 = x3 * M_PI;
+				float z4 = z3 * M_PI;
+
+				viewVector.x = sin(fov * x4) * cos(fov * z4);
+				viewVector.z = sin(fov * z4);
+				viewVector.y = cos(fov * x4) * cos(fov * z4);
+			}
+			else //three-point perspective
+			{
+				viewVector = (float3) {x3 * fov, 1.0f, z3 * fov}; 
+			}
+			
+			//rotate vieviector by view angle
 			viewVector = Matrix33MulFloat3(rot, viewVector);
 			
 			//ray-marching			
