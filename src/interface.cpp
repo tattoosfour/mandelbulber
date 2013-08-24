@@ -3507,6 +3507,9 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->imageContrast = params->doubles.imageAdjustments.contrast;
 	clParams->imageGamma = params->doubles.imageAdjustments.imageGamma;
 
+	clParams->perspectiveType = params->perspectiveType;
+	clParams->fishEyeCut = params->fishEyeCut;
+
 	for(int i=0; i < 5; i++)
 	{
 		clParams->volumetricLightEnabled[i] = params->volumetricLightEnabled[i];

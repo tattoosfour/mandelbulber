@@ -88,6 +88,8 @@ typedef struct
 	cl_int fogEnabled;
 	cl_int auxLightNumber;
 	cl_int volumetricLightEnabled[5];
+	cl_int perspectiveType;
+	cl_int fishEyeCut;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
