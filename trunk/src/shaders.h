@@ -32,6 +32,7 @@ struct sShaderInputData
 	sFractal *calcParam;
 	CVector3 point;
 	CVector3 viewVector;
+	CVector3 eyePoint;
 	CVector3 normal;
 	CVector3 lightVect;
 	double dist_thresh;

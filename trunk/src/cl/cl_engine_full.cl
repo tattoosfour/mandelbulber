@@ -170,6 +170,16 @@ float3 IndexToColour(int index, global float3 *palette)
 	return colOut;
 }
 
+float IterOpacity(float step, float iters, float maxN, float trim, float opacitySp)
+{
+	float opacity = ((float)iters - trim) / maxN;
+	if(opacity < 0.0f) opacity = 0.0f;
+	opacity*=opacity;
+	opacity*=step  * opacitySp;
+	if(opacity > 1.0f) opacity = 1.0f;
+	return opacity;
+}
+
 float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *input)
 {
 	float3 normal = 0.0f;
@@ -354,7 +364,7 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	float dist = input->dist_thresh;
 
 	float DE_factor = consts->params.DEfactor;
-	//if(consts->params.imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
+	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0;
 
 	float start = input->delta;
 	//if (input->calcParam->interiorMode) start = input.dist_thresh * DE_factor * 0.5;
@@ -365,38 +375,45 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	float softRange = tan(consts->params.shadowConeAngle / 180.0f * 3.14f);
 	float maxSoft = 0.0f;
 
-	//bool bSoft = (!consts->params.imageSwitches.iterFogEnabled && !input.calcParam->limits_enabled && !input.calcParam->iterThresh) && softRange > 0.0;
-	bool bSoft = softRange > 0.0f;
+	bool bSoft = (!consts->params.iterFogEnabled /*&& !input.calcParam->limits_enabled && !input.calcParam->iterThresh*/) && softRange > 0.0;
+	
+	float distThresh = consts->params.quality;
 	
 	for (float i = start; i < factor; i += dist * DE_factor)
 	{
 		point2 = input->point + input->lightVect * i;
 
-		dist = CalculateDistance(consts, point2, input->calcParam).distance;
-
+		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
+		dist = out.distance;
+		
+		if (!consts->fractal.constantDEThreshold)
+		{
+			distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+		}
+		
 		if (bSoft)
 		{
-			float angle = (dist - input->dist_thresh) / i;
+			float angle = (dist - distThresh) / i;
 			if (angle < 0.0f) angle = 0.0f;
-			if (dist < input->dist_thresh) angle = 0.0f;
+			if (dist < distThresh) angle = 0.0f;
 			float softShadow = (1.0f - angle / softRange);
 			if (consts->params.penetratingLights) softShadow *= (factor - i) / factor;
 			if (softShadow < 0.0f) softShadow = 0.0f;
 			if (softShadow > maxSoft) maxSoft = softShadow;
 		}
 
-		//if (consts->params.imageSwitches.iterFogEnabled)
-		//{
-		//	opacity = IterOpacity(dist * DE_factor, input->calcParam->itersOut, input->calcParam->doubles.N, consts->params.doubles.iterFogOpacityTrim,
-		//			input.param->doubles.iterFogOpacity);
-		//}
-		//else
-		//{
-		//	opacity = 0.0f;
-		//}
-		//shadowTemp -= opacity * (factor - i) / factor;
-
-		if (dist < input->dist_thresh || shadowTemp < 0.0f)
+		if (consts->params.iterFogEnabled)
+		{
+			opacity = IterOpacity(dist * DE_factor, out.iters, consts->fractal.N, consts->params.iterFogOpacityTrim,
+					consts->params.iterFogOpacity);
+		}
+		else
+		{
+			opacity = 0.0f;
+		}
+		shadowTemp -= opacity * (factor - i) / factor;
+		
+		if (dist < distThresh || shadowTemp < 0.0f)
 		{
 			shadowTemp -= (factor - i) / factor;
 			if (!consts->params.penetratingLights) shadowTemp = 0.0f;
@@ -464,7 +481,8 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	float start_dist = input->delta;
 	float end_dist = input->delta / input->resolution;
 	float intense = 0.0f;
-
+	float distThresh = consts->params.quality;
+	
 	for (int i = 0; i < input->vectorsCount; i++)
 	{
 		float3 v = vectorsAround[i];
@@ -482,20 +500,26 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 		{
 			float3 point2 = input->point + v * r;
 
-			dist = CalculateDistance(consts, point2, input->calcParam).distance;
+			formulaOut out = CalculateDistance(consts, point2, input->calcParam);
+			dist = out.distance;
 
-			//if (consts->params.imageSwitches.iterFogEnabled)
-			//{
-			//	opacity = IterOpacity(dist * input.param->doubles.DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
-			//			input.param->doubles.iterFogOpacity);
-			//}
-			//else
-			//{
-			//	opacity = 0.0;
-			//}
-			//shadowTemp -= opacity * (end_dist - r) / end_dist;
+			if (consts->params.iterFogEnabled)
+			{
+				opacity = IterOpacity(dist * 2.0f, out.iters, consts->fractal.N, consts->params.iterFogOpacityTrim,
+						consts->params.iterFogOpacity);
+			}
+			else
+			{
+				opacity = 0.0;
+			}
+			shadowTemp -= opacity * (end_dist - r) / end_dist;
 
-			if (dist < input->dist_thresh || shadowTemp < 0.0)
+			if (!consts->fractal.constantDEThreshold)
+			{
+				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+			}
+			
+			if (dist < distThresh || shadowTemp < 0.0)
 			{
 				shadowTemp -= (end_dist - r) / end_dist;
 				if (shadowTemp < 0.0) shadowTemp = 0.0;
@@ -514,8 +538,9 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	return AO;
 }
 
-float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, float distance, float3 lightVector)
+float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, float distanceToLight, float3 lightVector)
 {
+	
 	float step = input->delta;
 	float dist = step;
 	float light = 1.0f;
@@ -523,31 +548,43 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 	float opacity = 0.0f;
 	float shadowTemp = 1.0f;
 
-	float DE_factor = consts->params.DEfactor;
-	//if(consts->params.imageSwitches.iterFogEnabled || consts->params.imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
+	//float DE_factor = consts->params.DEfactor;
+	float DE_factor = 1.0;
+	
+	float distThresh = consts->params.quality;
 
-	for (float i = input->delta; i < distance; i += dist * DE_factor)
+	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0f;
+	int count = 0;
+	//printf("start, thresh = %f, distance = %f\n", input->dist_thresh, distanceToLight);
+	for (float i = input->delta; i < distanceToLight; i += dist * DE_factor)
 	{
+		//printf("i = %f, dist = %f\n", i, dist);
 		float3 point2 = input->point + lightVector * i;
 
-		dist = CalculateDistance(consts, point2, input->calcParam).distance;
+		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
+		dist = out.distance;
+		
+		if (consts->params.iterFogEnabled)
+		{
+			opacity = IterOpacity(dist * DE_factor, out.iters, consts->fractal.N, consts->params.iterFogOpacityTrim,
+					consts->params.iterFogOpacity);
+		}
+		else
+		{
+			opacity = 0.0f;
+		}
+		shadowTemp -= opacity * (distanceToLight - i) / distanceToLight;
 
-		//if (consts->params.imageSwitches.iterFogEnabled)
-		//{
-		//	opacity = IterOpacity(dist * DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
-		//			input.param->doubles.iterFogOpacity);
-		//}
-		//else
-		//{
-		//	opacity = 0.0;
-		//}
-		//shadowTemp -= opacity * (distance - i) / distance;
-
-		if (dist < input->dist_thresh || shadowTemp < 0.0f)
+		if (!consts->fractal.constantDEThreshold)
+		{
+			distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+		}
+		
+		if (dist < distThresh || shadowTemp < 0.0f || count > 1000)
 		{
 			if (consts->params.penetratingLights)
 			{
-				shadowTemp -= (distance - i) / distance;
+				shadowTemp -= (distanceToLight - i) / distanceToLight;
 				if (shadowTemp < 0.0f) shadowTemp = 0.0f;
 			}
 			else
@@ -556,6 +593,7 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 			}
 			break;
 		}
+		count ++;
 	}
 	light = shadowTemp;
 	return light;
@@ -738,7 +776,8 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		float3 point = input->startPoint + input->viewVector * scan;
 		input->point = point;
 		
-		dist = CalculateDistance(consts, point, input->calcParam).distance;
+		formulaOut out = CalculateDistance(consts, point, input->calcParam);
+		dist = out.distance;
 		
 		if (consts->fractal.constantDEThreshold)
 		{
@@ -746,7 +785,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		}
 		else
 		{
-			distThresh = scan * input->resolution * consts->params.persp / consts->params.quality;
+			distThresh = distance(point, input->eyePoint) * input->resolution * consts->params.persp / consts->params.quality;
 		}
 		input->dist_thresh = distThresh;
 		
@@ -754,10 +793,13 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		else input->delta = distThresh * consts->params.quality;
 		delta = input->delta;
 		
+		
+		
 		//------------------- glow
 		float glowOpacity = glow * step / input->depth;
 		output = glowOpacity * glowColour + (1.0f - glowOpacity) * output;
 	
+		
 		//------------------ visible light
 		if (consts->params.auxLightVisibility > 0.0f)
 		{
@@ -816,6 +858,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			}
 		}
 		
+		
 		//---------------------- volumetric lights with shadows in fog
 
 		for (int i = 0; i < 5; i++)
@@ -831,14 +874,19 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 				{
 					float3 d = inBuff->lights[i - 1].position - point;
 					float distance = length(d);
-					float distance2 = distance * distance;
-					float3 lightVectorTemp = d;
-					lightVectorTemp = normalize(lightVectorTemp);
-					float light = AuxShadow(consts, input, distance, lightVectorTemp);
-					output += light * inBuff->lights[i - 1].colour * consts->params.volumetricLightIntensity[i] * step / distance2;
+					if(distance > 0.0f)
+					{
+						float distance2 = distance * distance;
+						float3 lightVectorTemp = d;
+						lightVectorTemp = normalize(lightVectorTemp);
+						float light = AuxShadow(consts, input, distance, lightVectorTemp);
+						//float light = 1.0;
+						output += light * inBuff->lights[i - 1].colour * consts->params.volumetricLightIntensity[i] * step / distance2;
+					}
 				}
 			}
 		}
+		
 		
 		//----------------------- basic fog
 		if(consts->params.fogEnabled)
@@ -847,6 +895,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			if(fogDensity > 1.0f) fogDensity = 1.0f;
 			output = fogDensity * consts->params.fogColour + (1.0f - fogDensity) * output;
 		}
+		
 		
 		//-------------------- volumetric fog
 		if(fogIntensity > 0.0f)
@@ -868,6 +917,76 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 
 			output = fogDensity * fogTemp + (1.0 - fogDensity) * output;
 		}
+		
+		//iter fog
+		
+		if (consts->params.iterFogEnabled)
+		{
+			int L = out.iters;
+			float opacity = IterOpacity(step, L, consts->fractal.N, consts->params.iterFogOpacityTrim, consts->params.iterFogOpacity);
+
+			float3 newColour = 0.0f;
+			if (opacity > 0)
+			{
+				//fog colour
+				float iterFactor = (float) 2.0f * (L - consts->params.iterFogOpacityTrim) / (consts->fractal.N - consts->params.iterFogOpacityTrim);
+				float k = iterFactor;
+				if (k > 1.0) k = 1.0;
+				if (k < 0.0) k = 0.0;
+				float kn = 1.0 - k;
+				float3 fogCol = (consts->params.fogColour1 * kn + consts->params.fogColour2 * k);
+
+				float k2 = iterFactor - 1.0f;
+				if (k2 < 0.0f) k2 = 0.0f;
+				if (k2 > 1.0f) k2 = 1.0f;
+				kn = 1.0f - k2;
+				fogCol = (fogCol * kn + consts->params.fogColour3 * k2);
+
+				//----
+
+				
+				for (int i = 0; i < 5; i++)
+				{
+					if (i == 0)
+					{
+						if (consts->params.mainLightIntensity > 0.0)
+						{
+							float3 shadowOutputTemp = MainShadow(consts, input);
+							newColour += shadowOutputTemp * consts->params.mainLightColour * consts->params.mainLightIntensity;
+						}
+					}
+
+					
+					if (i > 0)
+					{
+						if (inBuff->lights[i - 1].enabled)
+						{
+							float3 d = inBuff->lights[i - 1].position - point;
+							float distance = length(d);
+							float distance2 = distance * distance;
+							float3 lightVectorTemp = normalize(d);
+							float3 light = AuxShadow(consts, input, distance, lightVectorTemp);
+							float3 intensity = inBuff->lights[i - 1].intensity * 100.0f;
+							newColour += light * inBuff->lights[i - 1].colour / distance2 * intensity;
+						}
+					}
+				}
+
+				
+				//if (input.param->global_ilumination && !input.param->fastGlobalIllumination)
+				//{
+				//	sShaderOutput AO = AmbientOcclusion(input);
+				//	newColour.R += AO.R * input.param->doubles.imageAdjustments.globalIlum;
+				//	newColour.G += AO.G * input.param->doubles.imageAdjustments.globalIlum;
+				//	newColour.B += AO.B * input.param->doubles.imageAdjustments.globalIlum;
+				//}
+				
+				if (opacity > 1.0f) opacity = 1.0f;
+
+				output = output * (1.0f - opacity) + newColour * opacity * fogCol;
+			}
+		}
+		
 		
 		if(end) break;
 	}
@@ -1094,13 +1213,24 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 				calcParam.randomSeed = seed;
 				shaderInputData.calcParam = &calcParam;
-				shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
+						
+				if (consts->fractal.constantDEThreshold)
+				{
+					shaderInputData.dist_thresh = consts->params.quality;
+				}
+				else
+				{
+					shaderInputData.dist_thresh = distance(reflectBuff[ray + local_offset].point, start) * resolution * consts->params.persp / consts->params.quality;
+				}
+				
+			//	shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
 				
 				if(consts->fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * consts->params.persp;
 				else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * consts->params.quality;
 				shaderInputData.lightVect = lightVector;
 				shaderInputData.point = reflectBuff[ray + local_offset].point;
 				shaderInputData.startPoint = reflectBuff[ray + local_offset].start;
+				shaderInputData.eyePoint = start;
 				shaderInputData.viewVector = reflectBuff[ray + local_offset].viewVector;
 				shaderInputData.vectorsCount = consts->params.AmbientOcclusionNoOfVectors;
 				shaderInputData.lastDist = reflectBuff[ray + local_offset].lastDist;

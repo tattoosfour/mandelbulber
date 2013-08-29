@@ -90,6 +90,7 @@ typedef struct
 	cl_int volumetricLightEnabled[5];
 	cl_int perspectiveType;
 	cl_int fishEyeCut;
+	cl_int iterFogEnabled;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -123,6 +124,8 @@ typedef struct
 	cl_float imageBrightness;
 	cl_float imageContrast;
 	cl_float imageGamma;
+	cl_float iterFogOpacity;
+	cl_float iterFogOpacityTrim;
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
@@ -169,6 +172,7 @@ typedef struct
 	sClCalcParams *calcParam;
 	cl_float3 point;
 	cl_float3 startPoint;
+	cl_float3 eyePoint;
 	cl_float3 viewVector;
 	cl_float3 normal;
 	cl_float3 lightVect;

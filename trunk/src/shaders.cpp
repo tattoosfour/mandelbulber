@@ -504,11 +504,23 @@ sShaderOutput MainShadow(sShaderInputData &input)
 
 		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
+		float dist_thresh;
+		if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled)
+		{
+			if(!input.calcParam->constantDEThreshold)
+				dist_thresh = (point2 - input.eyePoint).Length() * input.param->doubles.resolution * input.param->doubles.persp / input.param->doubles.quality;
+			else
+				dist_thresh = input.param->doubles.quality;
+		}
+		else
+			dist_thresh = input.dist_thresh;
+
+
 		if (bSoft)
 		{
-			double angle = (dist - input.dist_thresh) / i;
+			double angle = (dist - dist_thresh) / i;
 			if (angle < 0) angle = 0;
-			if (dist < input.dist_thresh) angle = 0;
+			if (dist < dist_thresh) angle = 0;
 			double softShadow = (1.0 - angle / softRange);
 			if (input.param->penetratingLights) softShadow *= (factor - i) / factor;
 			if (softShadow < 0) softShadow = 0;
@@ -526,7 +538,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 		}
 		shadowTemp -= opacity * (factor - i) / factor;
 
-		if (dist < input.dist_thresh || shadowTemp < 0.0)
+		if (dist < dist_thresh || shadowTemp < 0.0)
 		{
 			shadowTemp -= (factor - i) / factor;
 			if (!input.param->penetratingLights) shadowTemp = 0.0;
@@ -610,7 +622,7 @@ sShaderOutput AmbientOcclusion(sShaderInputData &input)
 
 			if (input.param->imageSwitches.iterFogEnabled)
 			{
-				opacity = IterOpacity(dist * input.param->doubles.DE_factor, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
+				opacity = IterOpacity(dist * 2.0, input.calcParam->itersOut, input.calcParam->doubles.N, input.param->doubles.iterFogOpacityTrim,
 						input.param->doubles.iterFogOpacity);
 			}
 			else
@@ -619,7 +631,18 @@ sShaderOutput AmbientOcclusion(sShaderInputData &input)
 			}
 			shadowTemp -= opacity * (end_dist - r) / end_dist;
 
-			if (dist < input.dist_thresh || max_iter || shadowTemp < 0.0)
+			float dist_thresh;
+			if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled)
+			{
+				if(!input.calcParam->constantDEThreshold)
+					dist_thresh = (point2 - input.eyePoint).Length() * input.param->doubles.resolution * input.param->doubles.persp / input.param->doubles.quality;
+				else
+					dist_thresh = input.param->doubles.quality;
+			}
+			else
+				dist_thresh = input.dist_thresh;
+
+			if (dist < dist_thresh || max_iter || shadowTemp < 0.0)
 			{
 				shadowTemp -= (end_dist - r) / end_dist;
 				if (shadowTemp < 0.0) shadowTemp = 0.0;
@@ -1062,7 +1085,18 @@ double AuxShadow(sShaderInputData &input, double distance, CVector3 lightVector)
 		}
 		shadowTemp -= opacity * (distance - i) / distance;
 
-		if (dist < input.dist_thresh || max_iter || shadowTemp < 0.0)
+		float dist_thresh;
+		if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled)
+		{
+			if(!input.calcParam->constantDEThreshold)
+				dist_thresh = (point2 - input.eyePoint).Length() * input.param->doubles.resolution * input.param->doubles.persp / input.param->doubles.quality;
+			else
+				dist_thresh = input.param->doubles.quality;
+		}
+		else
+			dist_thresh = input.dist_thresh;
+
+		if (dist < dist_thresh || max_iter || shadowTemp < 0.0)
 		{
 			if (input.param->penetratingLights)
 			{

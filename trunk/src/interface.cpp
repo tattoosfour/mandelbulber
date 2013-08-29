@@ -3510,6 +3510,10 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->perspectiveType = params->perspectiveType;
 	clParams->fishEyeCut = params->fishEyeCut;
 
+	clParams->iterFogEnabled = params->imageSwitches.iterFogEnabled;
+	clParams->iterFogOpacity = params->doubles.iterFogOpacity;
+	clParams->iterFogOpacityTrim = params->doubles.iterFogOpacityTrim;
+
 	for(int i=0; i < 5; i++)
 	{
 		clParams->volumetricLightEnabled[i] = params->volumetricLightEnabled[i];
