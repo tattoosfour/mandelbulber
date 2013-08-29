@@ -493,6 +493,7 @@ void *MainThread(void *ptr)
 							shaderInputData.lightVect = lightVector;
 							shaderInputData.point = reflectBuff[ray].point;
 							shaderInputData.viewVector = reflectBuff[ray].viewVector;
+							shaderInputData.eyePoint = start;
 							shaderInputData.vectorsCount = vectorsCount;
 							shaderInputData.vectorsAround = vectorsAround;
 							shaderInputData.lastDist = reflectBuff[ray].lastDist;
