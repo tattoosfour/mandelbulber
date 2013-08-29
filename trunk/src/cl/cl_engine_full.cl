@@ -364,7 +364,7 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	float dist = input->dist_thresh;
 
 	float DE_factor = consts->params.DEfactor;
-	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0;
+	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny) DE_factor = 1.0;
 
 	float start = input->delta;
 	//if (input->calcParam->interiorMode) start = input.dist_thresh * DE_factor * 0.5;
@@ -377,7 +377,7 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 
 	bool bSoft = (!consts->params.iterFogEnabled /*&& !input.calcParam->limits_enabled && !input.calcParam->iterThresh*/) && softRange > 0.0;
 	
-	float distThresh = consts->params.quality;
+	float distThresh;
 	
 	for (float i = start; i < factor; i += dist * DE_factor)
 	{
@@ -386,10 +386,15 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
 		dist = out.distance;
 		
-		if (!consts->fractal.constantDEThreshold)
+		if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
 		{
-			distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+			if (!consts->fractal.constantDEThreshold)
+				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
+			else
+				distThresh = consts->params.quality;
 		}
+		else
+			distThresh = input->dist_thresh;
 		
 		if (bSoft)
 		{
@@ -481,7 +486,7 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	float start_dist = input->delta;
 	float end_dist = input->delta / input->resolution;
 	float intense = 0.0f;
-	float distThresh = consts->params.quality;
+	float distThresh;
 	
 	for (int i = 0; i < input->vectorsCount; i++)
 	{
@@ -514,10 +519,15 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 			}
 			shadowTemp -= opacity * (end_dist - r) / end_dist;
 
-			if (!consts->fractal.constantDEThreshold)
+			if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
 			{
-				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+				if (!consts->fractal.constantDEThreshold)
+					distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
+				else
+					distThresh = consts->params.quality;
 			}
+			else
+				distThresh = input->dist_thresh;
 			
 			if (dist < distThresh || shadowTemp < 0.0)
 			{
@@ -551,7 +561,7 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 	//float DE_factor = consts->params.DEfactor;
 	float DE_factor = 1.0;
 	
-	float distThresh = consts->params.quality;
+	float distThresh;
 
 	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0f;
 	int count = 0;
@@ -575,10 +585,15 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 		}
 		shadowTemp -= opacity * (distanceToLight - i) / distanceToLight;
 
-		if (!consts->fractal.constantDEThreshold)
+		if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
 		{
-			distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+			if (!consts->fractal.constantDEThreshold)
+				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
+			else
+				distThresh = consts->params.quality;
 		}
+		else
+			distThresh = input->dist_thresh;
 		
 		if (dist < distThresh || shadowTemp < 0.0f || count > 1000)
 		{
@@ -1213,17 +1228,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 				calcParam.randomSeed = seed;
 				shaderInputData.calcParam = &calcParam;
-						
-				if (consts->fractal.constantDEThreshold)
-				{
-					shaderInputData.dist_thresh = consts->params.quality;
-				}
-				else
-				{
-					shaderInputData.dist_thresh = distance(reflectBuff[ray + local_offset].point, start) * resolution * consts->params.persp / consts->params.quality;
-				}
 				
-			//	shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
+			  shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
 				
 				if(consts->fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * consts->params.persp;
 				else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * consts->params.quality;
