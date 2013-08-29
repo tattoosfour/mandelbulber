@@ -3519,6 +3519,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 		clParams->volumetricLightEnabled[i] = params->volumetricLightEnabled[i];
 		clParams->volumetricLightIntensity[i] = params->doubles.volumetricLightIntensity[i];
 	}
+	clParams->volumetricLightEnabledAny = params->imageSwitches.volumetricLightEnabled;
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)
