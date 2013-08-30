@@ -72,6 +72,7 @@ struct sImageSwitches
 	bool raytracedReflections;
 	bool volumetricLightEnabled;
 	bool iterFogEnabled;
+	bool hdrEnabled;
 };
 
 struct sAllImageData
@@ -114,8 +115,9 @@ public:
   int GetPreviewWidth(void) {return previewWidth;}
   int GetPreviewHeight(void) {return previewHeight;}
   int GetUsedMB(void);
-  void SetImageParameters(sImageAdjustments adjustments);
+  void SetImageParameters(sImageAdjustments adjustments, sImageSwitches switches);
   sImageAdjustments* GetImageAdjustments(void) {return &adj;}
+  sImageSwitches* GetImageSwitches(void) {return &sw;}
 
   unsigned char* ConvertTo8bit(void);
   unsigned char* CreatePreview(double scale);
@@ -147,6 +149,7 @@ private:
 
 	sRGB8 *preview;
 	sImageAdjustments adj;
+	sImageSwitches sw;
 	int width;
 	int height;
 	int *gammaTable;

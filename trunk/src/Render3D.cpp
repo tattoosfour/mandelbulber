@@ -1821,7 +1821,7 @@ void MainRender(void)
 		autoSaveImage = true;
 		secondEyeImage = new cImage(width, height);
 		secondEyeImage->CreatePreview(Interface_data.imageScale);
-		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments);
+		secondEyeImage->SetImageParameters(fractParam.doubles.imageAdjustments, fractParam.imageSwitches);
 		stereoImage = new unsigned char[width * height * 3 * 2];
 	}
 
@@ -1957,7 +1957,7 @@ void MainRender(void)
 			if (fractParam.doubles.zoom < 1e-15) fractParam.doubles.zoom = 1e-15;
 			fractParam.doubles.resolution = 1.0 / fractParam.image_width;
 			sImageAdjustments imageAdjustments = fractParam.doubles.imageAdjustments;
-			mainImage.SetImageParameters(imageAdjustments);
+			mainImage.SetImageParameters(imageAdjustments, fractParam.imageSwitches);
 
 			sprintf(label_text, "Frame: %d, Keyframe %f", index, (double) index / fractParam.framesPerKeyframe);
 			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_keyframeInfo), label_text);
@@ -2215,7 +2215,7 @@ void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage)
 	CreateFormulaSequence(fractParamLoaded.fractal);
 
 	miniImage->ClearImage();
-	miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments);
+	miniImage->SetImageParameters(fractParamLoaded.doubles.imageAdjustments, fractParamLoaded.imageSwitches);
 	memcpy(Interface_data.palette, fractParamLoaded.palette, sizeof(sRGB)*256);
 
 	LoadTextures(&fractParamLoaded);
