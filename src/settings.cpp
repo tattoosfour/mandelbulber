@@ -174,6 +174,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "brightness", params.doubles.imageAdjustments.brightness, 1.0, compare);
 	fprintfDot(fileSettings, "contrast", params.doubles.imageAdjustments.contrast, 1.0, compare);
 	fprintfDot(fileSettings, "gamma", params.doubles.imageAdjustments.imageGamma, 1.0, compare);
+	fprintfInt(fileSettings, "hdr", params.imageSwitches.hdrEnabled, false, compare);
 	fprintfDot(fileSettings, "ambient", params.doubles.imageAdjustments.ambient, 0.0, compare);
 	fprintfDot(fileSettings, "reflect", params.doubles.imageAdjustments.reflect, 0.0, compare);
 	fprintfDot(fileSettings, "shadows_intensity", params.doubles.imageAdjustments.directLight, 0.7, compare);
@@ -763,6 +764,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "brightness")) params.doubles.imageAdjustments.brightness = atof2(str2);
 	else if (!strcmp(str1, "contrast")) params.doubles.imageAdjustments.contrast = atof2(str2);
 	else if (!strcmp(str1, "gamma")) params.doubles.imageAdjustments.imageGamma = atof2(str2);
+	else if (!strcmp(str1, "hdr")) params.imageSwitches.hdrEnabled = atoi(str2);
 	else if (!strcmp(str1, "ambient")) params.doubles.imageAdjustments.ambient = atof2(str2);
 	else if (!strcmp(str1, "reflect")) params.doubles.imageAdjustments.reflect = atof2(str2);
 	else if (!strcmp(str1, "shadows_intensity")) params.doubles.imageAdjustments.directLight = atof2(str2);

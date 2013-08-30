@@ -1284,6 +1284,10 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		#endif //end DOFEnabled
 		finallColour *= consts->params.imageBrightness;
 		finallColour = (finallColour - 0.5f) * consts->params.imageContrast + 0.5f;
+		if(consts->params.hdrEnabled)
+		{
+			finallColour = tanh(finallColour);
+		}
 		finallColour = pow(finallColour, 1.0f / consts->params.imageGamma);
 		
 		ushort R = convert_ushort_sat(finallColour.x * 65536.0f);

@@ -703,7 +703,8 @@ struct sInterface
 	GtkWidget *checkNetRenderServerScan;
 	GtkWidget *checkNetRenderClientEnable;
 	GtkWidget *checkPrimitiveOnlyPlane;
-	GtkWidget *checkFakeLightsEnabled;;
+	GtkWidget *checkFakeLightsEnabled;
+	GtkWidget *checkHDR;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;

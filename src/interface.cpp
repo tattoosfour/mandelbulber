@@ -275,6 +275,7 @@ void ReadInterface(sParamRender *params)
 		params->doubles.imageAdjustments.brightness = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_brightness)));
 		params->doubles.imageAdjustments.imageGamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gamma)));
 		params->doubles.imageAdjustments.contrast = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_contrast)));
+		params->imageSwitches.hdrEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkHDR));
 		params->doubles.imageAdjustments.ambient = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient)));
 		params->doubles.imageAdjustments.globalIlum = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_ambient_occlusion)));
 		params->doubles.imageAdjustments.glow_intensity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_glow)));
@@ -688,7 +689,7 @@ void ReadInterface(sParamRender *params)
 
 	Interface_data.imageFormat = (enumImageFormat) params->imageFormat;
 
-	mainImage.SetImageParameters(params->doubles.imageAdjustments);
+	mainImage.SetImageParameters(params->doubles.imageAdjustments, params->imageSwitches);
 
 	//srand(Interface_data.coloring_seed);
 	//NowaPaleta(paleta, 1.0);
@@ -972,6 +973,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled), params->fractal.primitives.waterEnable);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable), params->imageSwitches.iterFogEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkFakeLightsEnabled), params->fakeLightsEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkHDR), params->imageSwitches.hdrEnabled);
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentFogDepth), params->doubles.imageAdjustments.fogVisibility);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(Interface.adjustmentSSAOQuality), params->SSAOQuality);
@@ -1955,6 +1957,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkNetRenderServerEnable = gtk_check_button_new_with_label("Server enable");
 	Interface.checkNetRenderServerScan = gtk_check_button_new_with_label("Scan for clients");
 	Interface.checkFakeLightsEnabled = gtk_check_button_new_with_label("Enable fake lights");
+	Interface.checkHDR = gtk_check_button_new_with_label("HDR");
 
 	//pixamps
 	Interface.pixmap_up = gtk_image_new_from_file((string(sharedDir)+"icons/go-up.png").c_str());
@@ -2400,6 +2403,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "brightness:", 5, Interface.edit_brightness), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "contrast:", 5, Interface.edit_contrast), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "gamma:", 5, Interface.edit_gamma), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.checkHDR, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.buApplyImageAdjustments, false, false, 1);
 
 	//frame Stereoscopic
@@ -3506,6 +3510,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->imageBrightness = params->doubles.imageAdjustments.brightness;
 	clParams->imageContrast = params->doubles.imageAdjustments.contrast;
 	clParams->imageGamma = params->doubles.imageAdjustments.imageGamma;
+	clParams->hdrEnabled = params->imageSwitches.hdrEnabled;
 
 	clParams->perspectiveType = params->perspectiveType;
 	clParams->fishEyeCut = params->fishEyeCut;

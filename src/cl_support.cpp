@@ -253,7 +253,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		recompileRequest = false;
 	}
 
-
+	double startTime = real_clock();
+	double lastTime = startTime;
 	for (unsigned int loop = 0; loop < steps; loop++)
 	{
 		err = kernel->setArg(0, *outCL);
@@ -291,10 +292,35 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		}
 
 		char progressText[1000];
-		double percent = (double)loop/steps;
-		sprintf(progressText, "OpenCL - rendering. Done %.1f%%", percent*100.0);
+		double percent = (double)(loop+1.0)/steps;
+		double time = real_clock() - startTime;
+		double time_to_go = (1.0 - percent) * time / percent;
+		int togo_time_s = (int) time_to_go % 60;
+		int togo_time_min = (int) (time_to_go / 60) % 60;
+		int togo_time_h = time_to_go / 3600;
+		int time_s = (int) time % 60;
+		int time_min = (int) (time / 60) % 60;
+		int time_h = time / 3600;
+		sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds", percent*100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
+				time_min, time_s);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+
+		if (real_clock() - lastTime > 30.0)
+		{
+			if (image->IsPreview())
+			{
+				image->ConvertTo8bit();
+				image->UpdatePreview();
+				image->RedrawInWidget(outputDarea);
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
+			lastTime = real_clock();
+		}
+
+		if(programClosed) break;
+
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}

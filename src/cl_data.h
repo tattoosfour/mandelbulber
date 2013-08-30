@@ -92,6 +92,7 @@ typedef struct
 	cl_int perspectiveType;
 	cl_int fishEyeCut;
 	cl_int iterFogEnabled;
+	cl_int hdrEnabled;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
