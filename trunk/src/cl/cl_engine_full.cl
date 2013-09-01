@@ -734,7 +734,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 
 float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *input)
 {
-	float3 vector = { 1.0f, 1.0f, -1.0f };
+	float3 vector = { 0.0f, 0.0f, -1.0f };
 	vector = normalize(vector);
 	float grad = dot(input->viewVector, vector) + 1.0f;
 	float3 colour;
