@@ -1,6 +1,6 @@
 #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
 
-typedef float4 cl_float4;
+typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
@@ -12,22 +12,21 @@ typedef unsigned short cl_ushort;
 
 typedef struct
 {
-	float4 z;
+	float3 z;
 	float iters;
 	float distance;
 	float colourIndex;
 } formulaOut;
 
-static formulaOut Fractal(float4 point, sClFractal *fr);
-static formulaOut CalculateDistance(float4 point, sClFractal *fractal);
+static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
+static formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
 
-inline float4 Matrix33MulFloat3(matrix33 matrix, float4 vect)
+inline float3 Matrix33MulFloat3(matrix33 matrix, float3 vect)
 {
-	float4 out;
+	float3 out;
 	out.x = dot(vect, matrix.m1);
 	out.y = dot(vect, matrix.m2);
 	out.z = dot(vect, matrix.m3);
-	out.w = 0.0f;
 	return out;
 }
 
@@ -51,9 +50,9 @@ matrix33 RotateX(matrix33 m, float angle)
 		matrix33 out, rot;
 		float s = sin(angle);
 		float c = cos(angle);		
-		rot.m1 = (float4) {1.0f, 0.0f, 0.0f, 0.0f};
-		rot.m2 = (float4) {0.0f, c   , -s  , 0.0f};
-		rot.m3 = (float4) {0.0f, s   ,  c  , 0.0f};
+		rot.m1 = (float3) {1.0f, 0.0f, 0.0f};
+		rot.m2 = (float3) {0.0f, c   , -s  };
+		rot.m3 = (float3) {0.0f, s   ,  c  };
 		out = Matrix33MulMatrix33(m, rot);
 		return out;
 }
@@ -63,9 +62,9 @@ matrix33 RotateY(matrix33 m, float angle)
 		matrix33 out, rot;
 		float s = sin(angle);
 		float c = cos(angle);		
-		rot.m1 = (float4) {c   , 0.0f, s   , 0.0f};
-		rot.m2 = (float4) {0.0f, 1.0f, 0.0f, 0.0f};
-		rot.m3 = (float4) {-s  , 0.0f, c   , 0.0f};
+		rot.m1 = (float3) {c   , 0.0f, s   };
+		rot.m2 = (float3) {0.0f, 1.0f, 0.0f};
+		rot.m3 = (float3) {-s  , 0.0f, c   };
 		out = Matrix33MulMatrix33(m, rot);
 		return out;
 }
@@ -75,14 +74,30 @@ matrix33 RotateZ(matrix33 m, float angle)
 		matrix33 out, rot;
 		float s = sin(angle);
 		float c = cos(angle);		
-		rot.m1 = (float4) { c  , -s  , 0.0f, 0.0f};
-		rot.m2 = (float4) { s  ,  c  , 0.0f, 0.0f};
-		rot.m3 = (float4) {0.0f, 0.0f, 1.0f, 0.0f};
+		rot.m1 = (float3) { c  , -s  , 0.0f};
+		rot.m2 = (float3) { s  ,  c  , 0.0f};
+		rot.m3 = (float3) {0.0f, 0.0f, 1.0f};
 		out = Matrix33MulMatrix33(m, rot);
 		return out;
 }
 
+float4 quaternionMul(float4 q1, float4 q2)
+{
+//source: http://www.cs.columbia.edu/~keenan/Projects/QuaternionJulia/QJuliaFragment.html
+	float4 result;
+	result.x = q1.x * q2.x - dot(q1.yzw, q2.yzw);
+	result.yzw = q1.x * q2.yzw + q2.x * q1.yzw + cross(q1.yzw, q2.yzw);
+	return result;
+}
 
+float4 quaternionSqr(float4 q)
+{
+	//source: http://www.cs.columbia.edu/~keenan/Projects/QuaternionJulia/QJuliaFragment.html
+	float4 result;
+	result.x = q.x * q.x - dot(q.yzw, q.yzw);
+	result.yzw = 2.0f * q.x * q.yzw;
+	return result;
+}
 
 /*
 float PrimitivePlane(float4 point, float4 centre, float4 normal)
@@ -119,32 +134,32 @@ float PrimitiveBox(float4 point, float4 center, float4 size)
 */
 
 
-float4 NormalVector(sClFractal *fractal, float4 point, float mainDistance, float distThresh)
+float3 NormalVector(__constant sClInConstants *consts, float3 point, float mainDistance, float distThresh, sClCalcParams *calcParam)
 {
 	float delta = distThresh;
-	float s1 = CalculateDistance(point + (float4){delta,0.0f,0.0f,0.0f}, fractal).distance;
-	float s2 = CalculateDistance(point + (float4){0.0f,delta,0.0f,0.0f}, fractal).distance;
-	float s3 = CalculateDistance(point + (float4){0.0f,0.0f,delta,0.0f}, fractal).distance;
-	float4 normal = (float4) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance, 1.0e-10f};
-	normal = fast_normalize(normal);
+	float s1 = CalculateDistance(consts, point + (float3){delta,0.0f,0.0f}, calcParam).distance;
+	float s2 = CalculateDistance(consts, point + (float3){0.0f,delta,0.0f}, calcParam).distance;
+	float s3 = CalculateDistance(consts, point + (float3){0.0f,0.0f,delta}, calcParam).distance;
+	float3 normal = (float3) {s1 - mainDistance, s2 - mainDistance, s3 - mainDistance};
+	normal = normalize(normal);
 	return normal;
 }
 
 
-float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distThresh)
+float Shadow(__constant sClInConstants *consts, float3 point, float3 lightVector, float distThresh, sClCalcParams *calcParam)
 {
 	float scan = distThresh * 2.0f;
-	float shadow = 0.0;
+	float shadow = 0.0f;
 	float factor = distThresh * 1000.0f;
 	for(int count = 0; (count < 100); count++)
 	{
-		float4 pointTemp = point + lightVector*scan;
-		float distance = CalculateDistance(pointTemp, fractal).distance;
-		scan += distance * 2.0;
+		float3 pointTemp = point + lightVector*scan;
+		float distance = CalculateDistance(consts, pointTemp, calcParam).distance;
+		scan += distance * 2.0f;
 		
 		if(scan > factor)
 		{
-			shadow = 1.0;
+			shadow = 1.0f;
 			break;
 		}
 		
@@ -158,27 +173,27 @@ float Shadow(sClFractal *fractal, float4 point, float4 lightVector, float distTh
 }
 
 
-float FastAmbientOcclusion(sClFractal *fractal, float4 point, float4 normal, float dist_thresh, float tune, int quality)
+float FastAmbientOcclusion(__constant sClInConstants *consts, float3 point, float3 normal, float dist_thresh, float tune, int quality, sClCalcParams *calcParam)
 {
 	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
 
 	float delta = dist_thresh;
-	float aoTemp = 0;
+	float aoTemp = 0.0f;
 	for(int i=1; i<quality*quality; i++)
 	{
 		float scan = i * i * delta;
-		float4 pointTemp = point + normal * scan;
-		float dist = CalculateDistance(pointTemp, fractal).distance;
-		aoTemp += 1.0/(native_powr(2.0,(float)i)) * (scan - tune*dist)/dist_thresh;
+		float3 pointTemp = point + normal * scan;
+		float dist = CalculateDistance(consts, pointTemp, calcParam).distance;
+		aoTemp += 1.0f/(native_powr(2.0f,(float)i)) * (scan - tune*dist)/dist_thresh;
 	}
-	float ao = 1.0 - 0.2 * aoTemp;
-	if(ao < 0) ao = 0;
+	float ao = 1.0f - 0.2f * aoTemp;
+	if(ao < 0.0f) ao = 0.0f;
 	return ao;
 }
 
-float4 IndexToColour(int index, global float4 *palette)
+float3 IndexToColour(int index, global float3 *palette)
 {
-	float4 colOut, col1, col2, colDiff;
+	float3 colOut, col1, col2, colDiff;
 
 	if (index < 0)
 	{
@@ -194,86 +209,86 @@ float4 IndexToColour(int index, global float4 *palette)
 		float delta = (index2 % 256)/256.0;
 		colOut = col1 + colDiff * delta;
 	}
-	colOut.w = 0.0f;
 	return colOut;
 }
 
-float4 Background(float4 viewVector, sClParams *params)
+float3 Background(float3 viewVector, __constant sClParams *params)
 {
-	float4 vector = {1.0, 1.0, -1.0, 0.0};
+	float3 vector = {0.0f, 0.0f, -1.0f};
 	vector = fast_normalize(vector);
-	float grad = dot(viewVector, vector) + 1.0;
-	float4 colour;
-	if(grad < 1.0)
+	float grad = dot(viewVector, vector) + 1.0f;
+	float3 colour;
+	if(grad < 1.0f)
 	{
-		float ngrad = 1.0 - grad;
+		float ngrad = 1.0f - grad;
 		colour = params->backgroundColour3 * ngrad + params->backgroundColour2 * grad;
 	}
 	else
 	{
-		grad = grad - 1.0;
-		float ngrad = 1.0 - grad;
+		grad = grad - 1.0f;
+		float ngrad = 1.0f - grad;
 		colour = params->backgroundColour2 * ngrad + params->backgroundColour1 * grad;
 	}
 	return colour;
 }
 
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams Gparams, sClFractal Gfractal, int Gcl_offset)
+kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __constant sClInConstants *consts, __global sClReflect *reflectBuff, int Gcl_offset)
 {
-	sClParams params = Gparams;
-	sClFractal fractal = Gfractal;
 	int cl_offset = Gcl_offset;
 	
 	const unsigned int i = get_global_id(0) + cl_offset;
-	const unsigned int imageX = i % params.width;
-	const unsigned int imageY = i / params.width;
+	const unsigned int imageX = i % consts->params.width;
+	const unsigned int imageY = i / consts->params.width;
 	const unsigned int buffIndex = (i - cl_offset);
 	
-	if(imageY < params.height)
+	if(imageY < consts->params.height)
 	{
 		float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
-		float width = convert_float(params.width);
-		float height = convert_float(params.height);
+		float width = convert_float(consts->params.width);
+		float height = convert_float(consts->params.height);
 		float resolution = 1.0f/width;
 		
-		const float4 one = (float4) {1.0f, 0.0f, 0.0f, 0.0f};
-		const float4 ones = 1.0f;
+		const float3 one = (float3) {1.0f, 0.0f, 0.0f};
+		const float3 ones = 1.0f;
 		
 		matrix33 rot;
-		rot.m1 = (float4){1.0f, 0.0f, 0.0f, 0.0f};
-		rot.m2 = (float4){0.0f, 1.0f, 0.0f, 0.0f};
-		rot.m3 = (float4){0.0f, 0.0f, 1.0f, 0.0f};
-		rot = RotateZ(rot, params.alpha);
-		rot = RotateX(rot, params.beta);
-		rot = RotateY(rot, params.gamma);
+		rot.m1 = (float3){1.0f, 0.0f, 0.0f};
+		rot.m2 = (float3){0.0f, 1.0f, 0.0f};
+		rot.m3 = (float3){0.0f, 0.0f, 1.0f};
+		rot = RotateZ(rot, consts->params.alpha);
+		rot = RotateX(rot, consts->params.beta);
+		rot = RotateY(rot, consts->params.gamma);
 		
-		float4 back = (float4) {0.0f, 1.0f, 0.0f, 0.0f} / params.persp * params.zoom;
-		float4 start = params.vp - Matrix33MulFloat3(rot, back);
+		float3 back = (float3) {0.0f, 1.0f, 0.0f} / consts->params.persp * consts->params.zoom;
+		float3 start = consts->params.vp - Matrix33MulFloat3(rot, back);
 		
 		float aspectRatio = width / height;
 		float x2,z2;
-		x2 = (screenPoint.x / width - 0.5) * aspectRatio;
-		z2 = (screenPoint.y / height - 0.5);
-		float4 viewVector = (float4) {x2 * params.persp, 1.0f, z2 * params.persp, 0.0f}; 
+		x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
+		z2 = (screenPoint.y / height - 0.5f);
+		float3 viewVector = (float3) {x2 * consts->params.persp, 1.0f, z2 * consts->params.persp}; 
 		viewVector = Matrix33MulFloat3(rot, viewVector);
 		
 		bool found = false;
 		int count;
 		
-		float4 point;
+		float3 point;
 		float scan, distThresh, distance;
 		
 		scan = 1e-10f;
-				
+		
+		sClCalcParams calcParam;
+		calcParam.N = consts->fractal.N;
+		
 		formulaOut outF;
 		//ray-marching
 		for(count = 0; count < MAX_RAYMARCHING; count++)
 		{
 			point = start + viewVector * scan;
-			outF = CalculateDistance(point, &fractal);
+			outF = CalculateDistance(consts, point, &calcParam);
 			distance = outF.distance;
-			distThresh = scan * resolution * params.persp;
+			distThresh = scan * resolution * consts->params.persp;
 			
 			if(distance < distThresh)
 			{
@@ -281,10 +296,10 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 				break;
 			}
 					
-			float step = (distance  - 0.5*distThresh) * params.DEfactor;			
+			float step = (distance  - 0.5f*distThresh) * consts->params.DEfactor;			
 			scan += step;
 			
-			if(scan > 50) break;
+			if(scan > 50.0f) break;
 		}
 		
 		
@@ -292,7 +307,7 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 		float step = distThresh;
 		for(int i=0; i<10; i++)
 		{
-			if(distance < distThresh && distance > distThresh * 0.95)
+			if(distance < distThresh && distance > distThresh * 0.95f)
 			{
 				break;
 			}
@@ -302,61 +317,59 @@ kernel void fractal3D(global sClPixel *out, global sClInBuff *inBuff, sClParams 
 				{
 					point += viewVector * step;
 				}
-				else if(distance < distThresh * 0.95)
+				else if(distance < distThresh * 0.95f)
 				{
 					point -= viewVector * step;
 				}
 			}
-			outF = CalculateDistance(point, &fractal);
+			outF = CalculateDistance(consts, point, &calcParam);
 			distance = outF.distance;
-			step *= 0.5;
+			step *= 0.5f;
 		}
 		
 		float zBuff = scan;
 		
-		float4 colour = 0.0f;
+		float3 colour = 0.0f;
 		if(found)
 		{
-			float4 normal = NormalVector(&fractal, point, distance, distThresh);
+			float3 normal = NormalVector(consts, point, distance, distThresh, &calcParam);
 			
-			float4 lightVector = (float4) {
-				cos(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
-				sin(params.mainLightAlfa - 0.5 * M_PI) * cos(-params.mainLightBeta), 
-				sin(-params.mainLightBeta), 
-				0.0f};
+			float3 lightVector = (float3) {
+				cos(consts->params.mainLightAlfa - 0.5f * M_PI) * cos(-consts->params.mainLightBeta), 
+				sin(consts->params.mainLightAlfa - 0.5f * M_PI) * cos(-consts->params.mainLightBeta), 
+				sin(-consts->params.mainLightBeta)};
 			lightVector = Matrix33MulFloat3(rot, lightVector);
 			float shade = dot(lightVector, normal);
-			if(shade<0) shade = 0;
+			if(shade<0.0f) shade = 0.0f;
 			
-			float shadow = Shadow(&fractal, point, lightVector, distThresh);
+			float shadow = Shadow(consts, point, lightVector, distThresh, &calcParam);
 			//float shadow = 1.0f;
 			//shadow = 0.0;
 			
-			float4 half = lightVector - viewVector;
+			float3 half = lightVector - viewVector;
 			half = fast_normalize(half);
 			float specular = dot(normal, half);
 			if (specular < 0.0f) specular = 0.0f;
-			specular = pown(specular, 30.0);
-			if (specular > 15.0) specular = 15.0;
+			specular = pown(specular, 30.0f);
+			if (specular > 15.0f) specular = 15.0f;
 			
-			float ao = FastAmbientOcclusion(&fractal, point, normal, distThresh, 1.0f, 3);
+			float ao = FastAmbientOcclusion(consts, point, normal, distThresh, 1.0f, 3, &calcParam);
 			
-			int colourNumber = outF.colourIndex * params.colouringSpeed + 256.0 * params.colouringOffset;
-			float4 surfaceColour = 1.0;
-			if (params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
+			int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
+			float3 surfaceColour = 1.0;
+			if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
 			
-			colour = (shade * surfaceColour + specular * params.specularIntensity) * shadow * params.mainLightIntensity + ao * surfaceColour * params.ambientOcclusionIntensity;
-			colour.w = 0;
+			colour = (shade * surfaceColour + specular * consts->params.specularIntensity) * shadow * consts->params.mainLightIntensity + ao * surfaceColour * consts->params.ambientOcclusionIntensity;
 		}
 		else
 		{
-			colour = Background(viewVector, &params);
+			colour = Background(viewVector, &consts->params);
 		}
 		
 		float glow = count / 2560.0f;
 		float glowN = 1.0f - glow;
 		if(glowN < 0.0f) glowN = 0.0f;
-		float4 glowColor;
+		float3 glowColor;
 		glowColor.x = 1.0f * glowN + 1.0f * glow;
 		glowColor.y = 0.0f * glowN + 1.0f * glow;
 		glowColor.z = 0.0f * glowN + 0.0f * glow;
