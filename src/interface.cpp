@@ -1808,7 +1808,9 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_iterFogOpacity = gtk_entry_new();
 	Interface.edit_iterFogOpacityTrim = gtk_entry_new();
+
 	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
+	Interface.edit_OpenCLProcessingCycleTime = gtk_entry_new();
 
 	Interface.edit_netRenderClientName = gtk_entry_new();
 	Interface.edit_netRenderClientPort = gtk_entry_new();
@@ -2881,7 +2883,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("16384", "Pixels per job", 6, Interface.edit_OpenCLPixelsPerJob), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, Interface.edit_OpenCLProcessingCycleTime), false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);

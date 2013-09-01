@@ -178,27 +178,31 @@ void CclSupport::Init(void)
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
-	int pixelsPerJob =  atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
+
+	int pixelsPerJob =  workGroupSize * numberOfComputeUnits;
 	steps = height * width / pixelsPerJob + 1;
 	stepSize = (width * height / steps / workGroupSize + 1) * workGroupSize;
 	printf("OpenCL Job size: %d\n", stepSize);
 	buffSize = stepSize * sizeof(sClPixel);
 	rgbbuff = new sClPixel[buffSize];
 
+
 	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 	printf("reflectBuffer size = %d", reflectBufferSize);
 	reflectBuffer = new sClReflect[reflectBufferSize];
+	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+
+	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
+	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
 
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
-	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
-	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
-	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 	checkErr(err, "Buffer::Buffer()");
 	printf("OpenCL buffers created\n");
 
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
 	checkErr(err, "CommandQueue::CommandQueue()");
 	printf("OpenCL command queue prepared\n");
+
 
 	sprintf(progressText, "OpenCL - ready");
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
@@ -231,10 +235,6 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
 	lastEngineNumber = engineNumber;
 
-	int pixelsPerJob =  atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
-	if(pixelsPerJob != lastStepSize) recompileRequest = true;
-	lastStepSize = pixelsPerJob;
-
 	lastParams = inConstants->params;
 	lastFractal = inConstants->fractal;
 	lastFormula = formula;
@@ -252,15 +252,51 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		recompileRequest = false;
 	}
 
+	stepSize = workGroupSize;
+	int workGroupSizeMultiplier = 1;
+
 	double startTime = real_clock();
 	double lastTime = startTime;
-	for (unsigned int loop = 0; loop < steps; loop++)
+	double lastTimeProcessing = startTime;
+	double lastProcessingTime = 1.0;
+	for (int pixel = 0; pixel < width * height; pixel += stepSize)
 	{
+
+		delete outCL;
+		delete[] rgbbuff;
+		delete auxReflectBuffer;
+		delete[] reflectBuffer;
+
+		double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+		if(processingCycleTime < 0.1) processingCycleTime = 0.1;
+
+		workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
+
+		int pixelsLeft = width * height - pixel;
+		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
+		if(workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
+		if(workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
+		if(workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+
+		stepSize =  workGroupSize * workGroupSizeMultiplier;
+		printf("OpenCL Job size: %d\n", stepSize);
+		buffSize = stepSize * sizeof(sClPixel);
+		rgbbuff = new sClPixel[buffSize];
+		outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
+
+		reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
+		printf("reflectBuffer size = %d\n", reflectBufferSize);
+		reflectBuffer = new sClReflect[10 * stepSize];
+		auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+
+		checkErr(err, "Buffer::Buffer()");
+		printf("OpenCL buffers created\n");
+
 		err = kernel->setArg(0, *outCL);
 		err = kernel->setArg(1, *inCLBuffer1);
 		err = kernel->setArg(2, *inCLConstBuffer1);
 		err = kernel->setArg(3, *auxReflectBuffer);
-		err = kernel->setArg(4, stepSize * loop);
+		err = kernel->setArg(4, pixel);
 
 
 		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
@@ -279,7 +315,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
 		checkErr(err, "ComamndQueue::enqueueReadBuffer()");
 
-		unsigned int offset = loop * stepSize;
+		unsigned int offset = pixel;
 		for(unsigned int i=0; i<stepSize; i++)
 		{
 			unsigned int a = offset + i;
@@ -291,7 +327,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		}
 
 		char progressText[1000];
-		double percent = (double)(loop+1.0)/steps;
+		double percent = (double)(pixel + stepSize)/(width * height);
 		double time = real_clock() - startTime;
 		double time_to_go = (1.0 - percent) * time / percent;
 		int togo_time_s = (int) time_to_go % 60;
@@ -300,10 +336,13 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		int time_s = (int) time % 60;
 		int time_min = (int) (time / 60) % 60;
 		int time_h = time / 3600;
-		sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds", percent*100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
-				time_min, time_s);
+		sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, job size %d", percent*100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
+				time_min, time_s, stepSize);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+
+		lastProcessingTime = time - lastTimeProcessing;
+		lastTimeProcessing = time;
 
 		if (real_clock() - lastTime > 30.0)
 		{
@@ -338,20 +377,21 @@ void CclSupport::Enable(void)
 void CclSupport::Disable(void)
 {
 	delete context;
-	delete rgbbuff;
+	delete[] rgbbuff;
 	delete outCL;
 	delete program;
 	delete kernel;
 	delete queue;
 	delete inCLBuffer1;
 	delete inCLConstBuffer1;
+	delete[] reflectBuffer;
 	enabled = false;
 	ready = false;
 }
 
 void CclSupport::SetSize(int w, int h)
 {
-	if(width != w || height != h) recompileRequest = true;
+	//if(width != w || height != h) recompileRequest = true;
 	width = w;
 	height = h;
 }
