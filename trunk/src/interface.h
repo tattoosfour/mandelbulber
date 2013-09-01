@@ -583,6 +583,7 @@ struct sInterface
 	GtkWidget *edit_measureZ;
 	GtkWidget *edit_tiles;
 	GtkWidget *edit_OpenCLPixelsPerJob;
+	GtkWidget *edit_OpenCLProcessingCycleTime;
 	GtkWidget *edit_iterFogOpacityTrim;
 	GtkWidget *edit_iterFogOpacity;
 	GtkWidget *edit_netRenderServerPort;
