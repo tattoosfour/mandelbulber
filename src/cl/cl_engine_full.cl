@@ -479,6 +479,7 @@ float3 FastAmbientOcclusion2(__constant sClInConstants *consts, sClShaderInputDa
 	return output;
 }
 
+#if _SlowAOEnabled
 float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *input, global float3 *vectorsAround, global float3 *vectorsAroundColours)
 {
 	float3 AO = 0.0f;
@@ -547,7 +548,9 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 
 	return AO;
 }
+#endif
 
+#if _AuxLightsEnabled
 float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, float distanceToLight, float3 lightVector)
 {
 	
@@ -682,6 +685,7 @@ float3 AuxLightsShader(__constant sClInConstants *consts, sClShaderInputData *in
 	*specularOut = specularAuxSum;
 	return shadeAuxSum;
 }
+#endif
 
 float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClInBuff *inBuff)
 {
@@ -717,15 +721,19 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	}
 	else if(consts->params.slowAmbientOcclusionEnabled)
 	{
+#if _SlowAOEnabled
 		ambient = AmbientOcclusion(consts, input, inBuff->vectorsAround, inBuff->vectorsAroundColours);
+#endif
 	}
 	float3 ambient2 = ambient * consts->params.ambientOcclusionIntensity;
 	
 	//additional lights
-	float3 auxLights;
-	float3 auxLightsSpecular;
+	float3 auxLights = 0.0f;
+	float3 auxLightsSpecular = 0.0f;
+#if _AuxLightsEnabled
 	auxLights = AuxLightsShader(consts, input, &auxLightsSpecular, inBuff->lights);
 	auxLightsSpecular *= consts->params.specularIntensity;
+#endif
 	
 	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + auxLights * colour + auxLightsSpecular;
 	
@@ -876,6 +884,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		
 		//---------------------- volumetric lights with shadows in fog
 
+#if _AuxLightsEnabled
 		for (int i = 0; i < 5; i++)
 		{
 			if (i == 0 && consts->params.volumetricLightEnabled[0])
@@ -901,7 +910,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 				}
 			}
 		}
-		
+#endif
 		
 		//----------------------- basic fog
 		if(consts->params.fogEnabled)
@@ -971,7 +980,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 						}
 					}
 
-					
+#if _AuxLightsEnabled
 					if (i > 0)
 					{
 						if (inBuff->lights[i - 1].enabled)
@@ -985,6 +994,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 							newColour += light * inBuff->lights[i - 1].colour / distance2 * intensity;
 						}
 					}
+#endif
 				}
 
 				

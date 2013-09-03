@@ -1862,8 +1862,6 @@ void MainRender(void)
 
 			deltaXm = x_mouse - width * mainImage.GetPreviewScale() / 2;
 			deltaYm = y_mouse - height * mainImage.GetPreviewScale() / 2;
-			int XmStep = deltaXm - lastDeltaXm;
-			int YmStep = deltaYm - lastDeltaYm;
 
 			if (fractParam.recordMode)
 			{
@@ -1871,17 +1869,19 @@ void MainRender(void)
 				fractParam.doubles.alpha -= 0.0003 * delta_xm;
 				fractParam.doubles.beta += 0.0003 * delta_ym;
 				*/
-				double rotation_step = 0.0001;
+				double rotation_step = 0.000001;
 
-				spaceShipAngle -= deltaXm * rotation_step;
-				fractParam.doubles.gamma -= deltaXm * rotation_step;
+				double deltaXm2 = deltaXm * deltaXm * (deltaXm > 0.0 ? 1.0 : -1.0);
+				double deltaYm2 = deltaYm * deltaYm * (deltaYm > 0.0 ? 1.0 : -1.0);
+
+				fractParam.doubles.gamma -= deltaXm * rotation_step * 300.0;
 
 				CRotationMatrix mRot;
 				mRot.RotateZ(fractParam.doubles.alpha);
 				mRot.RotateX(fractParam.doubles.beta);
 				mRot.RotateY(fractParam.doubles.gamma);
-				mRot.RotateX(-deltaYm * rotation_step);
-				mRot.RotateZ(deltaXm * rotation_step);
+				mRot.RotateX(-deltaYm2 * rotation_step);
+				mRot.RotateZ(-deltaXm2 * rotation_step);
 
 				fractParam.doubles.alpha = -mRot.GetAlfa();
 				fractParam.doubles.beta = -mRot.GetBeta();
