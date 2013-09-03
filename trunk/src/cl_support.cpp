@@ -163,7 +163,9 @@ void CclSupport::Init(void)
 
 	std::string buildParams;
 	buildParams = "-w ";
-	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled";
+	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
+	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
+	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
 	err = program->build(devices, buildParams.c_str());
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 	checkErr(err, "Program::build()");
@@ -230,6 +232,8 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->fractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
 	if(formula != lastFormula) recompileRequest = true;
 	if(inConstants->params.DOFEnabled != lastParams.DOFEnabled) recompileRequest = true;
+	if(inConstants->params.slowAmbientOcclusionEnabled != lastParams.slowAmbientOcclusionEnabled) recompileRequest = true;
+	if(inConstants->params.auxLightNumber != lastParams.auxLightNumber) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -279,18 +283,18 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		if(workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 
 		stepSize =  workGroupSize * workGroupSizeMultiplier;
-		printf("OpenCL Job size: %d\n", stepSize);
+		//printf("OpenCL Job size: %d\n", stepSize);
 		buffSize = stepSize * sizeof(sClPixel);
 		rgbbuff = new sClPixel[buffSize];
 		outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
 
 		reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
-		printf("reflectBuffer size = %d\n", reflectBufferSize);
+		//printf("reflectBuffer size = %d\n", reflectBufferSize);
 		reflectBuffer = new sClReflect[10 * stepSize];
 		auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 
 		checkErr(err, "Buffer::Buffer()");
-		printf("OpenCL buffers created\n");
+		//printf("OpenCL buffers created\n");
 
 		err = kernel->setArg(0, *outCL);
 		err = kernel->setArg(1, *inCLBuffer1);
