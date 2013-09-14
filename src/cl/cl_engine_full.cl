@@ -6,7 +6,7 @@ typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
 
-#include "cl_data.h"
+#include "mandelbulber_cl_data.h"
 
 #define MAX_RAYMARCHING 10000
 

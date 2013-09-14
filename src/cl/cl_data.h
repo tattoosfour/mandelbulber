@@ -1,1 +1,0 @@
-/home/krzysztof/workspace/mandelbulber2/src/cl_data.h

@@ -535,12 +535,20 @@ void PressedApplyBrigtness(GtkWidget *widget, gpointer data)
 
 	//if (!isRendering)
 	//{
+
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled)))
+	{
 		mainImage.CompileImage();
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
 		while (gtk_events_pending())
 			gtk_main_iteration();
+	}
+	else
+	{
+		PressedSSAOUpdate(widget, data);
+	}
 	//}
 }
 

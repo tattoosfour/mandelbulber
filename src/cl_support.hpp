@@ -27,7 +27,7 @@
 #include "cimage.hpp"
 
 
-#include "cl_data.h"
+#include "mandelbulber_cl_data.h"
 
 class CclSupport
 {
