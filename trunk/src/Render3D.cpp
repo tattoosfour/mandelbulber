@@ -1990,11 +1990,10 @@ void MainRender(void)
 			if(!netRender->IsClient()) fractParam.tileCount = tile;
 
 
-			printf("---------- Tile: %d -------------\n", fractParam.tileCount);
-			//if(tiles > 1)
-			//{
-			//	printf("---------- Tile: %d -------------\n", index2);
-			//}
+			if(tiles > 1)
+			{
+				printf("---------- Tile: %d -------------\n", index2);
+			}
 
 			if (Interface_data.imageFormat == imgFormatJPG && tiles == 1)
 			{
