@@ -818,6 +818,7 @@ struct sInterface_data
 	char file_keyframes[1000];
 
 	int franeNo;
+	int tileCount;
 
 	sRGB palette[256];
 };

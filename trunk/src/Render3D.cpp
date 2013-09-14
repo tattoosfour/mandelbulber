@@ -1980,14 +1980,21 @@ void MainRender(void)
 		}
 
 		bool tilesDone = false;
+
+		if(netRender->IsClient()) tiles = 1;
+
 		for (int tile = 0; tile < tiles*tiles; tile++)
 		{
 			int index2 = index * tiles * tiles + tile;
-			fractParam.tileCount = tile;
-			if(tiles > 1)
-			{
-				printf("---------- Tile: %d -------------\n", index2);
-			}
+
+			if(!netRender->IsClient()) fractParam.tileCount = tile;
+
+
+			printf("---------- Tile: %d -------------\n", fractParam.tileCount);
+			//if(tiles > 1)
+			//{
+			//	printf("---------- Tile: %d -------------\n", index2);
+			//}
 
 			if (Interface_data.imageFormat == imgFormatJPG && tiles == 1)
 			{

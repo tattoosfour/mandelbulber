@@ -3326,6 +3326,7 @@ void Params2InterfaceData(sParamRender *source)
 	strcpy(Interface_data.file_path, source->file_path);
 	strcpy(Interface_data.file_keyframes, source->file_keyframes);
 	Interface_data.franeNo = source->fractal.frameNo;
+	Interface_data.tileCount = source->tileCount;
 }
 
 void InterfaceData2Params(sParamRender *dest)
@@ -3337,6 +3338,7 @@ void InterfaceData2Params(sParamRender *dest)
 	strcpy(dest->file_path, Interface_data.file_path);
 	strcpy(dest->file_keyframes, Interface_data.file_keyframes);
 	dest->fractal.frameNo = Interface_data.franeNo;
+	dest->tileCount = Interface_data.tileCount;
 }
 
 void CheckPrameters(sParamRender *params)
