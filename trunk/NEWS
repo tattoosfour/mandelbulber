@@ -1,5 +1,12 @@
 Version history
 
+v1.17
+- OpenCL - rewritten most of OpenCL kernel. Implemented almost all shaders including ray-traced reflections and volumetric effects
+- animation record mode works now like flight simulator. There is also recorded camera gamma angle.
+- added HDR filter
+- fixed bug: there was vissible different detail level between 3-point perspective and fish-eye
+- fixed bug: Netrender didn't work with number of tiles > 1
+
 v1.16
 - all shaders and rendering engine rewritten from the beginning
 - light sources are rendered as a volumetric objects
@@ -35,7 +42,7 @@ v1.13
 - fixed memoryleaks
 
 v1.12-1
-- fixed bud: background texture was not seamless
+- fixed bug: background texture was not seamless
 - fixed bug: some of shadows in volumatric iteration fog weren't calculated properly
 
 v1.12

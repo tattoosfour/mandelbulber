@@ -37,6 +37,14 @@ CclSupport::CclSupport(void)
 	lastStepSize = 0;
 	inBuffer1 = new sClInBuff;
 	constantsBuffer1 = new sClInConstants;
+	auxReflectBuffer = NULL;
+	buffSize = 0;
+	context = NULL;
+	kernel = NULL;
+	outCL = NULL;
+	rgbbuff = NULL;
+	inCLBuffer1 = NULL;
+	reflectBuffer = NULL;
 }
 
 void CclSupport::Init(void)
@@ -107,7 +115,7 @@ void CclSupport::Init(void)
 	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
 
 	std::string strFileDistance = clDir;
-	if(lastFormula == lastFormula == xenodreambuie || lastFormula == hypercomplex)
+	if(lastFormula == xenodreambuie || lastFormula == hypercomplex)
 		strFileDistance += "cl_distance_deltaDE.cl";
 	else
 		strFileDistance += "cl_distance.cl";
@@ -152,7 +160,7 @@ void CclSupport::Init(void)
 	sources.push_back(std::make_pair(progFormulaFor.c_str(), progFormulaFor.length()));
 	sources.push_back(std::make_pair(progFormula.c_str(), progFormula.length()));
 	sources.push_back(std::make_pair(progFormulaEnd.c_str(), progFormulaEnd.length()+1));
-	printf("OpenCL Number of loaded sources %d\n", sources.size());
+	printf("OpenCL Number of loaded sources %ld\n", sources.size());
 
 	program = new cl::Program(*context, sources, &err);
 	checkErr(err, "Program()");
