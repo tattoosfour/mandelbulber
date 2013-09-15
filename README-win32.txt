@@ -1,10 +1,10 @@
-MANDELBULBER 1.16 - Windows
+MANDELBULBER 1.17 - Windows
 
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke
 
 contact: buddhi1980@gmail.com
-www: http://sites.google.com/site/mandelbulber/
+www: http://www.mandelbulber.com
 download site: http://sourceforge.net/projects/mandelbulber/
 SVN: http://code.google.com/p/mandelbulber/
 

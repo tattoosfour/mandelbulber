@@ -1829,10 +1829,6 @@ void MainRender(void)
 
 	int tiles = fractParam.noOfTiles;
 
-	int lastDeltaXm, lastDeltaYm;
-	double spaceShipAngle = 0.0;
-	double last_spaceShipAngle = 0.0;
-
 	start_time = real_clock();
 
 	printf("************ Rendering frames *************\n");
