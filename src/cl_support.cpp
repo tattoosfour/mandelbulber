@@ -169,7 +169,7 @@ void CclSupport::Init(void)
 
 	std::string buildParams;
 	buildParams = "-w ";
-	buildParams += "-I" + std::string(sharedDir) + "cl ";
+	buildParams += "-I\"" + std::string(sharedDir) + "cl\" ";
 	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
