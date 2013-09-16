@@ -167,10 +167,9 @@ void CclSupport::Init(void)
 	//program->getInfo(CL_PROGRAM_SOURCE, )
 	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
-	chdir(clDir.c_str());
-
 	std::string buildParams;
 	buildParams = "-w ";
+	buildParams += "-I" + std::string(sharedDir) + "cl ";
 	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
@@ -178,8 +177,6 @@ void CclSupport::Init(void)
 	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 	checkErr(err, "Program::build()");
 	printf("OpenCL program built done\n");
-
-	chdir(data_directory);
 
 	kernel = new cl::Kernel(*program, "fractal3D", &err);
 	checkErr(err, "Kernel::Kernel()");
