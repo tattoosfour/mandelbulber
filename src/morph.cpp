@@ -93,6 +93,12 @@ void CMorph::CatmullRom(int frame, double *destData)
 			if(negative) value = -exp(value);
 			else value = exp(value);
 		}
+		if(value > 1e20) value = 1e20;
+		if(value < -1e20) value = 1e20;
+		if(fabs(value) < 1e-20) value = 0.0;
+
+		//printf("Morph value = %g\n", value);
+
 		output[i]=value;
 		destData[i] = output[i];
 	}

@@ -1516,12 +1516,28 @@ void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
 {
 	if (!isRendering)
 	{
-		Interface_data .animMode = true;
-		Interface_data.playMode = false;
-		Interface_data.recordMode = false;
-		Interface_data.continueRecord = false;
-		Interface_data.keyframeMode = true;
-		MainRender();
+
+		if (clSupport->IsEnabled())
+		{
+			Interface_data.animMode = true;
+			Interface_data.playMode = false;
+			Interface_data.recordMode = false;
+			Interface_data.continueRecord = false;
+			Interface_data.keyframeMode = true;
+			programClosed = false;
+			gdk_threads_enter();
+			MainRender();
+			gdk_threads_leave();
+		}
+		else
+		{
+			Interface_data.animMode = true;
+			Interface_data.playMode = false;
+			Interface_data.recordMode = false;
+			Interface_data.continueRecord = false;
+			Interface_data.keyframeMode = true;
+			MainRender();
+		}
 	}
 }
 
@@ -1805,8 +1821,8 @@ void ChangedSliderPaletteOffset(GtkWidget *widget, gpointer data)
 
 	DrawPalette(Interface_data.palette);
 
-	imageCompileNeeded = true;
-	refreshNeeded = true;
+	//imageCompileNeeded = true;
+	//refreshNeeded = true;
 }
 
 void PressedRandomPalette(GtkWidget *widget, gpointer data)

@@ -195,7 +195,7 @@ void CclSupport::Init(void)
 
 
 	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
-	printf("reflectBuffer size = %d", reflectBufferSize);
+	printf("reflectBuffer size = %d kB\n", reflectBufferSize / 1024);
 	reflectBuffer = new sClReflect[reflectBufferSize];
 	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 
@@ -268,7 +268,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	double lastTime = startTime;
 	double lastTimeProcessing = startTime;
 	double lastProcessingTime = 1.0;
-	for (int pixel = 0; pixel < width * height; pixel += stepSize)
+
+	for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
 	{
 
 		delete outCL;
@@ -281,7 +282,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 		workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
 
-		int pixelsLeft = width * height - pixel;
+		int pixelsLeft = width * height - pixelIndex;
 		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
 		if(workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
 		if(workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
@@ -305,26 +306,34 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		err = kernel->setArg(1, *inCLBuffer1);
 		err = kernel->setArg(2, *inCLConstBuffer1);
 		err = kernel->setArg(3, *auxReflectBuffer);
-		err = kernel->setArg(4, pixel);
-
+		err = kernel->setArg(4, pixelIndex);
 
 		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
 		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
 		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+		err = queue->finish();
+		checkErr(err, "ComamndQueue::finish() - CLBuffer");
 
 		err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
 		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+		err = queue->finish();
+		checkErr(err, "ComamndQueue::finish() - ConstBuffer");
 
-		cl::Event event;
-		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize), NULL, &event);
-		checkErr(err, "ComamndQueue::enqueueNDRangeKernel()");
+		//cl::Event event;
+		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));//, NULL, &event);
+		checkErr(err, "ComamndQueue::enqueueNDRangeKernel() ");
+		//event.wait();
+		err = queue->finish();
+		checkErr(err, "ComamndQueue::finish() - Kernel");
 
-		event.wait();
 		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
 		checkErr(err, "ComamndQueue::enqueueReadBuffer()");
+		err = queue->finish();
+		checkErr(err, "ComamndQueue::finish() - ReadBuffer");
 
-		unsigned int offset = pixel;
+		unsigned int offset = pixelIndex;
+
 		for(unsigned int i=0; i<stepSize; i++)
 		{
 			unsigned int a = offset + i;
@@ -336,7 +345,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		}
 
 		char progressText[1000];
-		double percent = (double)(pixel + stepSize)/(width * height);
+		double percent = (double)(pixelIndex + stepSize)/(width * height);
+		if(percent > 1.0) percent = 1.0;
 		double time = real_clock() - startTime;
 		double time_to_go = (1.0 - percent) * time / percent;
 		int togo_time_s = (int) time_to_go % 60;
@@ -371,6 +381,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		while (gtk_events_pending())
 			gtk_main_iteration();
 	}
+
 	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
 	//		clSupport->GetRgbBuff(), clSupport->GetWidth() * 3);
 }
