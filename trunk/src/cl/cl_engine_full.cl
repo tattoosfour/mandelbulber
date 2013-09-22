@@ -872,7 +872,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 						float lightSize = inBuff->lights[i].intensity * consts->params.auxLightIntensity * consts->params.auxLightVisibility;
 						float r2 = lightDist / lightSize;
 						if (r2 > 1.0f) r2 = 1.0f;
-						float bellFunction = (cos(r2 * M_PI) + 1.0f) / (r2 * r2 + 0.02f) * 0.3f;
+						float bellFunction = (cos(r2 * M_PI_F) + 1.0f) / (r2 * r2 + 0.02f) * 0.3f;
 						float lightDensity = step2 * bellFunction / lightSize;
 
 						output += lightDensity * inBuff->lights[i].colour;
@@ -1110,8 +1110,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		
 			//float x3 = x2 + randX / focus / consts->params.persp / consts->params.persp;
 			//float z3 = z2 + randZ / focus / consts->params.persp / consts->params.persp;
-			float x3 = x2 + randX / focus / M_PI / consts->params.persp;
-			float z3 = z2 + randZ / focus / M_PI / consts->params.persp;
+			float x3 = x2 + randX / focus / M_PI_F / consts->params.persp;
+			float z3 = z2 + randZ / focus / M_PI_F / consts->params.persp;
 			
 
 			float3 viewVector;
@@ -1125,8 +1125,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 					hemisphereCut = true;
 				}
 
-				float x4 = x3 * M_PI;
-				float z4 = z3 * M_PI;
+				float x4 = x3 * M_PI_F;
+				float z4 = z3 * M_PI_F;
 				float r = length((float2){x4, z4});
 
 				if(r == 0.0f)
@@ -1144,8 +1144,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			}
 			else if(consts->params.perspectiveType == 2) //equirectangular
 			{
-				float x4 = x3 * M_PI;
-				float z4 = z3 * M_PI;
+				float x4 = x3 * M_PI_F;
+				float z4 = z3 * M_PI_F;
 
 				viewVector.x = sin(fov * x4) * cos(fov * z4);
 				viewVector.z = sin(fov * z4);

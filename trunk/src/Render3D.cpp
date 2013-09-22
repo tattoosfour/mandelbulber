@@ -1177,11 +1177,13 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			inCLBuff->vectorsAroundColours[0].z = 0;
 		}
 		inCLConstants->params.AmbientOcclusionNoOfVectors = counter;
-		printf("Ambient occlusion counter %d\n", counter);
+		//printf("Ambient occlusion counter %d\n", counter);
 
 		clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
 		start_time = real_clock();
+
 		clSupport->Render(image, outputDarea);
+
 		double time = real_clock() - start_time;
 		if (image->IsPreview())
 		{
@@ -1198,6 +1200,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 		}
+
 #endif
 	}
 }
@@ -1239,7 +1242,7 @@ int main(int argc, char *argv[])
   sharedDir = new char[MAXPATHLEN];
   char pathCWD[MAXPATHLEN];
   getcwd(pathCWD, MAXPATHLEN);
-  strcpy(sharedDir, (string(pathCWD)+"/").c_str());
+  strcpy(sharedDir, (string(pathCWD)+"\\").c_str());
 #else               /*other unix - try sysconf*/
 	sharedDir = new char[1000];
 	strcpy(sharedDir, (string(SHARED_DIR)+"/").c_str());

@@ -13,16 +13,7 @@
 
 struct sParamRenderD
 {
-	CVector3 vp; //view point
-	CVector3 auxLightPre1;
-	CVector3 auxLightPre2;
-	CVector3 auxLightPre3;
-	CVector3 auxLightPre4;
-	CVector3 auxLightRandomCenter;
-
 	double zoom; //zoom
-	double minDepth; //range of depth;
-	double maxDepth;
 	double DE_factor; //factor for distance estimation steps
 	double resolution; //resolution of image in fractal coordinates
 	double persp; //perspective factor
@@ -67,6 +58,13 @@ struct sParamRenderD
 	double primitiveWaterReflect;
 
 	sImageAdjustments imageAdjustments;
+
+	CVector3 vp; //view point
+	CVector3 auxLightPre1;
+	CVector3 auxLightPre2;
+	CVector3 auxLightPre3;
+	CVector3 auxLightPre4;
+	CVector3 auxLightRandomCenter;
 };
 
 struct sParamRender
