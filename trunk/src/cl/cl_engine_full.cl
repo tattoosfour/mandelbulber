@@ -1035,7 +1035,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	const int local_offset = get_global_id(0) * 10;
 	
 	
-	int seed = i;
+	int seed = i + consts->params.randomSeed;
 	for(int i=0; i<20; i++)
 	{
 		rand(&seed);

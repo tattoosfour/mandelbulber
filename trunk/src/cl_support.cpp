@@ -269,6 +269,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	double lastTimeProcessing = startTime;
 	double lastProcessingTime = 1.0;
 
+	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
 	for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
 	{
 
@@ -287,6 +288,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		if(workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
 		if(workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
 		if(workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+
+		constantsBuffer1->params.randomSeed = rand();
 
 		stepSize =  workGroupSize * workGroupSizeMultiplier;
 		//printf("OpenCL Job size: %d\n", stepSize);
