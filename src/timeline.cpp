@@ -6,7 +6,7 @@
  */
 
 #include <cstdlib>
-
+#include <cstring>
 #include "timeline.hpp"
 #include "files.h"
 #include "interface.h"
