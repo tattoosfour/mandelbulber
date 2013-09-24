@@ -5,6 +5,7 @@
  *      Author: krzysztof
  */
 #include <stdio.h>
+#include <cstring>
 #include "texture.hpp"
 #include "files.h"
 

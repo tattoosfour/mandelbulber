@@ -1,5 +1,15 @@
 Version history
 
+v1.7.2
+- fixed bug: OpenCL - include path compatible with nVidia-win32 driver requirements
+- fixed bug: OpenCL - changed all M_PI to M_PI_F - there were problems with compilation kernel code on some machines
+- fixed bug: OpenCL - some frames of animation were incomplette
+- fixed bug: OpenCL - removed #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
+- fixed bug: on Arch Linux there was problem with missing system incudes
+
+v1.7.1
+- release for Win32
+
 v1.17
 - OpenCL - rewritten most of OpenCL kernel. Implemented almost all shaders including ray-traced reflections and volumetric effects
 - animation record mode works now like flight simulator. There is also recorded camera gamma angle.
