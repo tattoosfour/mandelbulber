@@ -884,7 +884,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		
 		//---------------------- volumetric lights with shadows in fog
 
-#if _AuxLightsEnabled
+
 		for (int i = 0; i < 5; i++)
 		{
 			if (i == 0 && consts->params.volumetricLightEnabled[0])
@@ -892,6 +892,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 				float3 shadowOutputTemp = MainShadow(consts, input);
 				output += shadowOutputTemp * step * consts->params.volumetricLightIntensity[0] * consts->params.mainLightColour;
 			}
+#if _AuxLightsEnabled
 			if (i > 0)
 			{
 				if (inBuff->lights[i - 1].enabled && consts->params.volumetricLightEnabled[i])
@@ -909,8 +910,9 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 					}
 				}
 			}
-		}
 #endif
+		}
+
 		
 		//----------------------- basic fog
 		if(consts->params.fogEnabled)
@@ -1077,236 +1079,231 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		int blurIndex = 0;
 		float3 totalColour = (float3) {0.0f, 0.0f, 0.0f};
 		float focus = consts->params.DOFFocus;
-		for(blurIndex = 0; blurIndex<256; blurIndex++)
+
+		float randR = 0.003f * consts->params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0f + 0.5f);
+		float randAngle = rand(&seed);
+		float randX = randR * sin(randAngle);
+		float randZ = randR * cos(randAngle);
+#else
+		float randX = 0.0f;
+		float randZ = 0.0f;
+		float focus = 1.0f;
+#endif //end DOFEnabled
+		float3 start = 0.0f;
+		if (consts->params.perspectiveType == 1 || consts->params.perspectiveType == 2)
 		{
+			float3 back = (float3)
+			{ randX, 0.0f, randZ};
+			start = consts->params.vp - Matrix33MulFloat3(rot, back);
+		}
+		else
+		{
+			float3 back = (float3) {randX/consts->params.zoom, 1.0f, randZ/consts->params.zoom } / consts->params.persp * consts->params.zoom;
+			start = consts->params.vp - Matrix33MulFloat3(rot, back);
+		}
+		//printf("x %f, y %f, start %f %f %f\n", screenPoint.x, screenPoint.y, start.x, start.y, start.z);
+
+		float aspectRatio = width / height;
+		float x2,z2;
+		x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
+		z2 = (screenPoint.y / height - 0.5f);
+
+		float x3, z3;
+		if (consts->params.perspectiveType == 1 || consts->params.perspectiveType == 2)
+		{
+			x3 = x2 + randX / focus / M_PI_F / consts->params.persp;
+			z3 = z2 + randZ / focus / M_PI_F / consts->params.persp;
+		}
+		else
+		{
+			x3 = x2 + randX / focus / consts->params.persp / consts->params.persp;
+			z3 = z2 + randZ / focus / consts->params.persp / consts->params.persp;
+		}
 		
-			float randR = 0.003f * consts->params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0f + 0.5f);
-			float randAngle = rand(&seed);
-			float randX = randR * sin(randAngle);
-			float randZ = randR * cos(randAngle);
-			#else
-			float randX = 0.0f;
-			float randZ = 0.0f;
-			float focus = 1.0f;
-			#endif //end DOFEnabled
-		
-			float3 start = 0.0f;
-			if (consts->params.perspectiveType == 1 || consts->params.perspectiveType == 2)
+		float3 viewVector;
+		bool hemisphereCut = false;
+		float fov = consts->params.persp;
+
+		if (consts->params.perspectiveType == 1)//fish eye
+		{
+			if (consts->params.fishEyeCut && length((float2)
+							{ x2, z2}) > 0.5f / fov)
 			{
-				float3 back = (float3) {randX, 0.0f, randZ};
-				start = consts->params.vp - Matrix33MulFloat3(rot, back);
+				hemisphereCut = true;
+			}
+
+			float x4 = x3 * M_PI_F;
+			float z4 = z3 * M_PI_F;
+			float r = length((float2)
+					{ x4, z4});
+
+			if(r == 0.0f)
+			{
+				viewVector.x = 0.0f;
+				viewVector.z = 0.0f;
+				viewVector.y = 1.0f;
 			}
 			else
 			{
-				float3 back = (float3) {randX/consts->params.zoom, 1.0f, randZ/consts->params.zoom} / consts->params.persp * consts->params.zoom;
-				start = consts->params.vp - Matrix33MulFloat3(rot, back);
+				viewVector.x = x4 / r * sin(r * fov);
+				viewVector.z = z4 / r * sin(r * fov);
+				viewVector.y = cos(r * fov);
 			}
-			//printf("x %f, y %f, start %f %f %f\n", screenPoint.x, screenPoint.y, start.x, start.y, start.z);
-			
-			float aspectRatio = width / height;
-			float x2,z2;
-			x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
-			z2 = (screenPoint.y / height - 0.5f);
-		
-			//float x3 = x2 + randX / focus / consts->params.persp / consts->params.persp;
-			//float z3 = z2 + randZ / focus / consts->params.persp / consts->params.persp;
-			float x3 = x2 + randX / focus / M_PI_F / consts->params.persp;
-			float z3 = z2 + randZ / focus / M_PI_F / consts->params.persp;
-			
-
-			float3 viewVector;
-			bool hemisphereCut = false;
-			float fov = consts->params.persp;
-			
-			if (consts->params.perspectiveType == 1) //fish eye
-			{
-				if (consts->params.fishEyeCut && length((float2){x2, z2}) > 0.5f / fov)
-				{
-					hemisphereCut = true;
-				}
-
-				float x4 = x3 * M_PI_F;
-				float z4 = z3 * M_PI_F;
-				float r = length((float2){x4, z4});
-
-				if(r == 0.0f)
-				{
-					viewVector.x = 0.0f;
-					viewVector.z = 0.0f;
-					viewVector.y = 1.0f;
-				}
-				else
-				{
-					viewVector.x = x4 / r * sin(r * fov);
-					viewVector.z = z4 / r * sin(r * fov);
-					viewVector.y = cos(r * fov);
-				}
-			}
-			else if(consts->params.perspectiveType == 2) //equirectangular
-			{
-				float x4 = x3 * M_PI_F;
-				float z4 = z3 * M_PI_F;
-
-				viewVector.x = sin(fov * x4) * cos(fov * z4);
-				viewVector.z = sin(fov * z4);
-				viewVector.y = cos(fov * x4) * cos(fov * z4);
-			}
-			else //three-point perspective
-			{
-				viewVector = (float3) {x3 * fov, 1.0f, z3 * fov}; 
-			}
-			
-			//rotate vieviector by view angle
-			viewVector = Matrix33MulFloat3(rot, viewVector);
-			
-			//ray-marching			
-			float distThresh = 0.0f;
-			float3 point = start;
-			float3 startRay = start;
-			float lastDist = 0.0f;
-			bool found = false;
-			float depth = 0.0f;
-			int stepCount = 0;
-			
-			float3 objectColour = 0.0f;
-			
-			float3 lightVector = (float3)
-			{
-				cos(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
-				sin(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
-				sin(-consts->params.mainLightBeta)};
-			lightVector = Matrix33MulFloat3(rot, lightVector);
-			
-			int rayEnd = 0;
-			
-			
-			
-			//printf("start ray-tracing\n");
-			//printf("Max ray = %d\n", maxRay);
-			for (int ray = 0; ray <= maxRay; ray++)
-			{
-				sClShaderInputData shaderInputData;
-				reflectBuff[ray + local_offset].start = startRay;
-				reflectBuff[ray + local_offset].viewVector = viewVector;
-				reflectBuff[ray + local_offset].found = false;
-				//printf("startRay %f %f %f\n", startRay.x, startRay.y, startRay.z);
-				//printf("viewVector %f %f %f\n", viewVector.x, viewVector.y, viewVector.z);
-				//reflectBuff[ray].buffCount = 0;
-
-
-				point = RayMarching(consts, &calcParam, startRay, viewVector, consts->params.viewDistanceMax, true, &distThresh, &lastDist, &found, &depth, &stepCount);
-				
-				//printf("point %f %f %f\n", point.x, point.y, point.z);
-				
-				reflectBuff[ray + local_offset].depth = depth;
-				reflectBuff[ray + local_offset].found = found;
-				reflectBuff[ray + local_offset].lastDist = lastDist;
-				reflectBuff[ray + local_offset].point = point;
-				reflectBuff[ray + local_offset].distThresh = distThresh;
-				reflectBuff[ray + local_offset].stepCount = stepCount;
-				
-				//printf("reflectBuff[ray].distThresh %f\n", reflectBuff[ray + local_offset].distThresh);
-				
-				//reflectBuff[ray].objectType = calcParam.objectOut;
-
-				rayEnd = ray;
-				if(!found) break;
-				//if(reflectBuff[ray].reflect == 0) break;
-
-				//calculate new ray direction and start point
-				startRay = point;
-
-				shaderInputData.calcParam = &calcParam;
-				shaderInputData.dist_thresh = distThresh;
-				shaderInputData.lightVect = lightVector;
-				shaderInputData.point = point;
-				shaderInputData.viewVector = viewVector;
-				if(consts->fractal.constantDEThreshold) shaderInputData.delta = depth * resolution * consts->params.persp;
-				else shaderInputData.delta = distThresh * consts->params.quality;
-				float3 vn = CalculateNormals(consts, &shaderInputData);
-				viewVector = viewVector - vn * dot(viewVector,vn) * 2.0f;
-				startRay = startRay + viewVector * distThresh;
-			}
-			
-			for(int ray = rayEnd; ray >= 0; ray--)
-			{
-				sClShaderInputData shaderInputData;
-				float3 objectShader = 0.0f;
-				float3 backgroudShader = 0.0f;
-				float3 volumetricShader = 0.0f;
-				float3 specular = 0.0f;
-
-				calcParam.randomSeed = seed;
-				shaderInputData.calcParam = &calcParam;
-				
-			  shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
-				
-				if(consts->fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * consts->params.persp;
-				else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * consts->params.quality;
-				shaderInputData.lightVect = lightVector;
-				shaderInputData.point = reflectBuff[ray + local_offset].point;
-				shaderInputData.startPoint = reflectBuff[ray + local_offset].start;
-				shaderInputData.eyePoint = start;
-				shaderInputData.viewVector = reflectBuff[ray + local_offset].viewVector;
-				shaderInputData.vectorsCount = consts->params.AmbientOcclusionNoOfVectors;
-				shaderInputData.lastDist = reflectBuff[ray + local_offset].lastDist;
-				shaderInputData.depth = reflectBuff[ray + local_offset].depth;
-				shaderInputData.stepCount = reflectBuff[ray + local_offset].stepCount;
-				shaderInputData.resolution = resolution;
-				//shaderInputData.envMappingTexture = param.envmapTexture;
-				//shaderInputData.objectType = reflectBuff[ray].objectType;
-				//shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
-
-				if(reflectBuff[ray + local_offset].found)
-				{
-					//printf("Last dist %f = \n", lastDist / distThresh);	
-					objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff);
-				}
-				else
-				{
-					backgroudShader = BackgroundShader(consts, &shaderInputData);
-					reflectBuff[ray + local_offset].depth = 1e20f;
-				}
-				
-				if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
-				{
-					colour = resultShader * consts->params.reflect; 
-					colour += (1.0f - consts->params.reflect) * (objectShader + backgroudShader) + specular;
-				}
-				else
-				{
-					colour = objectShader + backgroudShader + specular;
-				}
-				resultShader = VolumetricShader(consts, &shaderInputData, inBuff, colour);
-				//resultShader = colour;
-				
-				//seed = shaderInputData.calcParam->randomSeed;
-				
-			}
-			zBuff = reflectBuff[0 + local_offset].depth;
-			#if _DOFEnabled
-			totalColour += resultShader / 256.0f;
 		}
-		
-		float3 finallColour = totalColour;
-		#else
-		float3 finallColour = resultShader;
-		#endif //end DOFEnabled
-		finallColour *= consts->params.imageBrightness;
-		finallColour = (finallColour - 0.5f) * consts->params.imageContrast + 0.5f;
-		if(consts->params.hdrEnabled)
+		else if(consts->params.perspectiveType == 2) //equirectangular
 		{
-			finallColour = tanh(finallColour);
+			float x4 = x3 * M_PI_F;
+			float z4 = z3 * M_PI_F;
+
+			viewVector.x = sin(fov * x4) * cos(fov * z4);
+			viewVector.z = sin(fov * z4);
+			viewVector.y = cos(fov * x4) * cos(fov * z4);
 		}
-		finallColour = pow(finallColour, 1.0f / consts->params.imageGamma);
+		else //three-point perspective
+		{
+			viewVector = (float3)
+			{ x3 * fov, 1.0f, z3 * fov};
+		}
+
+		//rotate vieviector by view angle
+		viewVector = Matrix33MulFloat3(rot, viewVector);
+
+		//ray-marching			
+		float distThresh = 0.0f;
+		float3 point = start;
+		float3 startRay = start;
+		float lastDist = 0.0f;
+		bool found = false;
+		float depth = 0.0f;
+		int stepCount = 0;
+
+		float3 objectColour = 0.0f;
+
+		float3 lightVector = (float3)
+		{
+			cos(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
+			sin(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
+			sin(-consts->params.mainLightBeta)};
+		lightVector = Matrix33MulFloat3(rot, lightVector);
+
+		int rayEnd = 0;
+
+		//printf("start ray-tracing\n");
+		//printf("Max ray = %d\n", maxRay);
+		for (int ray = 0; ray <= maxRay; ray++)
+		{
+			sClShaderInputData shaderInputData;
+			reflectBuff[ray + local_offset].start = startRay;
+			reflectBuff[ray + local_offset].viewVector = viewVector;
+			reflectBuff[ray + local_offset].found = false;
+			//printf("startRay %f %f %f\n", startRay.x, startRay.y, startRay.z);
+			//printf("viewVector %f %f %f\n", viewVector.x, viewVector.y, viewVector.z);
+			//reflectBuff[ray].buffCount = 0;
+
+			point = RayMarching(consts, &calcParam, startRay, viewVector, consts->params.viewDistanceMax, true, &distThresh, &lastDist, &found, &depth, &stepCount);
+
+			//printf("point %f %f %f\n", point.x, point.y, point.z);
+
+			reflectBuff[ray + local_offset].depth = depth;
+			reflectBuff[ray + local_offset].found = found;
+			reflectBuff[ray + local_offset].lastDist = lastDist;
+			reflectBuff[ray + local_offset].point = point;
+			reflectBuff[ray + local_offset].distThresh = distThresh;
+			reflectBuff[ray + local_offset].stepCount = stepCount;
+
+			//printf("reflectBuff[ray].distThresh %f\n", reflectBuff[ray + local_offset].distThresh);
+
+			//reflectBuff[ray].objectType = calcParam.objectOut;
+
+			rayEnd = ray;
+			if(!found) break;
+			//if(reflectBuff[ray].reflect == 0) break;
+
+			//calculate new ray direction and start point
+			startRay = point;
+
+			shaderInputData.calcParam = &calcParam;
+			shaderInputData.dist_thresh = distThresh;
+			shaderInputData.lightVect = lightVector;
+			shaderInputData.point = point;
+			shaderInputData.viewVector = viewVector;
+			if(consts->fractal.constantDEThreshold) shaderInputData.delta = depth * resolution * consts->params.persp;
+			else shaderInputData.delta = distThresh * consts->params.quality;
+			float3 vn = CalculateNormals(consts, &shaderInputData);
+			viewVector = viewVector - vn * dot(viewVector,vn) * 2.0f;
+			startRay = startRay + viewVector * distThresh;
+		}
+
+		for(int ray = rayEnd; ray >= 0; ray--)
+		{
+			sClShaderInputData shaderInputData;
+			float3 objectShader = 0.0f;
+			float3 backgroudShader = 0.0f;
+			float3 volumetricShader = 0.0f;
+			float3 specular = 0.0f;
+
+			calcParam.randomSeed = seed;
+			shaderInputData.calcParam = &calcParam;
+
+			shaderInputData.dist_thresh = reflectBuff[ray + local_offset].distThresh;
+
+			if(consts->fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * consts->params.persp;
+			else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * consts->params.quality;
+			shaderInputData.lightVect = lightVector;
+			shaderInputData.point = reflectBuff[ray + local_offset].point;
+			shaderInputData.startPoint = reflectBuff[ray + local_offset].start;
+			shaderInputData.eyePoint = start;
+			shaderInputData.viewVector = reflectBuff[ray + local_offset].viewVector;
+			shaderInputData.vectorsCount = consts->params.AmbientOcclusionNoOfVectors;
+			shaderInputData.lastDist = reflectBuff[ray + local_offset].lastDist;
+			shaderInputData.depth = reflectBuff[ray + local_offset].depth;
+			shaderInputData.stepCount = reflectBuff[ray + local_offset].stepCount;
+			shaderInputData.resolution = resolution;
+			//shaderInputData.envMappingTexture = param.envmapTexture;
+			//shaderInputData.objectType = reflectBuff[ray].objectType;
+			//shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
+
+			if(reflectBuff[ray + local_offset].found)
+			{
+				//printf("Last dist %f = \n", lastDist / distThresh);	
+				objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff);
+			}
+			else
+			{
+				backgroudShader = BackgroundShader(consts, &shaderInputData);
+				reflectBuff[ray + local_offset].depth = 1e20f;
+			}
+
+			if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
+			{
+				colour = resultShader * consts->params.reflect;
+				colour += (1.0f - consts->params.reflect) * (objectShader + backgroudShader) + specular;
+			}
+			else
+			{
+				colour = objectShader + backgroudShader + specular;
+			}
+			resultShader = VolumetricShader(consts, &shaderInputData, inBuff, colour);
+			//resultShader = colour;
+
+			//seed = shaderInputData.calcParam->randomSeed;
+
+		}
+		zBuff = reflectBuff[0 + local_offset].depth;
+
+		float3 finallColour = resultShader;
+
+		//finallColour *= consts->params.imageBrightness;
+		//finallColour = (finallColour - 0.5f) * consts->params.imageContrast + 0.5f;
+		//if(consts->params.hdrEnabled)
+		//{
+		//	finallColour = tanh(finallColour);
+		//}
+		//finallColour = pow(finallColour, 1.0f / consts->params.imageGamma);
 		
-		ushort R = convert_ushort_sat(finallColour.x * 65536.0f);
-		ushort G = convert_ushort_sat(finallColour.y * 65536.0f);
-		ushort B = convert_ushort_sat(finallColour.z * 65536.0f);
-		
-		out[buffIndex].R = R;
-		out[buffIndex].G = G;
-		out[buffIndex].B = B;
+		out[buffIndex].R = finallColour.x;
+		out[buffIndex].G = finallColour.y;
+		out[buffIndex].B = finallColour.z;
 		out[buffIndex].zBuffer = zBuff;
 		
 	}

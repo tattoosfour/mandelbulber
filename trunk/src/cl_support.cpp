@@ -269,120 +269,152 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	double lastTimeProcessing = startTime;
 	double lastProcessingTime = 1.0;
 
+	int nDof = 1;
+	if(lastParams.DOFEnabled) nDof = 256;
+
+
 	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
-	for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
+
+	for(int dofLoop = 1; dofLoop <= nDof; dofLoop++)
 	{
-
-		delete outCL;
-		delete[] rgbbuff;
-		delete auxReflectBuffer;
-		delete[] reflectBuffer;
-
-		double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
-		if(processingCycleTime < 0.1) processingCycleTime = 0.1;
-
-		workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
-
-		int pixelsLeft = width * height - pixelIndex;
-		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
-		if(workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
-		if(workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
-		if(workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
-
-		constantsBuffer1->params.randomSeed = rand();
-
-		stepSize =  workGroupSize * workGroupSizeMultiplier;
-		//printf("OpenCL Job size: %d\n", stepSize);
-		buffSize = stepSize * sizeof(sClPixel);
-		rgbbuff = new sClPixel[buffSize];
-		outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
-
-		reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
-		//printf("reflectBuffer size = %d\n", reflectBufferSize);
-		reflectBuffer = new sClReflect[10 * stepSize];
-		auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
-
-		checkErr(err, "Buffer::Buffer()");
-		//printf("OpenCL buffers created\n");
-
-		err = kernel->setArg(0, *outCL);
-		err = kernel->setArg(1, *inCLBuffer1);
-		err = kernel->setArg(2, *inCLConstBuffer1);
-		err = kernel->setArg(3, *auxReflectBuffer);
-		err = kernel->setArg(4, pixelIndex);
-
-		//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
-
-		err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
-		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
-		err = queue->finish();
-		checkErr(err, "ComamndQueue::finish() - CLBuffer");
-
-		err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
-		checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
-		err = queue->finish();
-		checkErr(err, "ComamndQueue::finish() - ConstBuffer");
-
-		//cl::Event event;
-		err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));//, NULL, &event);
-		checkErr(err, "ComamndQueue::enqueueNDRangeKernel() ");
-		//event.wait();
-		err = queue->finish();
-		checkErr(err, "ComamndQueue::finish() - Kernel");
-
-		err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
-		checkErr(err, "ComamndQueue::enqueueReadBuffer()");
-		err = queue->finish();
-		checkErr(err, "ComamndQueue::finish() - ReadBuffer");
-
-		unsigned int offset = pixelIndex;
-
-		for(unsigned int i=0; i<stepSize; i++)
+		for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
 		{
-			unsigned int a = offset + i;
-			sRGB16 pixel = {rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B};
-			int x = a % width;
-			int y = a / width;
-			image->PutPixelImage16(x,y,pixel);
-			image->PutPixelZBuffer(x,y,rgbbuff[i].zBuffer);
-		}
 
-		char progressText[1000];
-		double percent = (double)(pixelIndex + stepSize)/(width * height);
-		if(percent > 1.0) percent = 1.0;
-		double time = real_clock() - startTime;
-		double time_to_go = (1.0 - percent) * time / percent;
-		int togo_time_s = (int) time_to_go % 60;
-		int togo_time_min = (int) (time_to_go / 60) % 60;
-		int togo_time_h = time_to_go / 3600;
-		int time_s = (int) time % 60;
-		int time_min = (int) (time / 60) % 60;
-		int time_h = time / 3600;
-		sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, job size %d", percent*100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
-				time_min, time_s, stepSize);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+			delete outCL;
+			delete[] rgbbuff;
+			delete auxReflectBuffer;
+			delete[] reflectBuffer;
 
-		lastProcessingTime = time - lastTimeProcessing;
-		lastTimeProcessing = time;
+			double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+			if (processingCycleTime < 0.1) processingCycleTime = 0.1;
 
-		if (real_clock() - lastTime > 30.0)
-		{
-			if (image->IsPreview())
+			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
+
+			int pixelsLeft = width * height - pixelIndex;
+			int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
+			if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
+			if (workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
+			if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+
+			constantsBuffer1->params.randomSeed = rand();
+
+			stepSize = workGroupSize * workGroupSizeMultiplier;
+			//printf("OpenCL Job size: %d\n", stepSize);
+			buffSize = stepSize * sizeof(sClPixel);
+			rgbbuff = new sClPixel[buffSize];
+			outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err);
+
+			reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
+			//printf("reflectBuffer size = %d\n", reflectBufferSize);
+			reflectBuffer = new sClReflect[10 * stepSize];
+			auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+
+			checkErr(err, "Buffer::Buffer()");
+			//printf("OpenCL buffers created\n");
+
+			err = kernel->setArg(0, *outCL);
+			err = kernel->setArg(1, *inCLBuffer1);
+			err = kernel->setArg(2, *inCLConstBuffer1);
+			err = kernel->setArg(3, *auxReflectBuffer);
+			err = kernel->setArg(4, pixelIndex);
+
+			//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
+
+			err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
+			checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+			err = queue->finish();
+			checkErr(err, "ComamndQueue::finish() - CLBuffer");
+
+			err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
+			checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+			err = queue->finish();
+			checkErr(err, "ComamndQueue::finish() - ConstBuffer");
+
+			//cl::Event event;
+			err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));	//, NULL, &event);
+			checkErr(err, "ComamndQueue::enqueueNDRangeKernel() ");
+			//event.wait();
+			err = queue->finish();
+			checkErr(err, "ComamndQueue::finish() - Kernel");
+
+			err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
+			checkErr(err, "ComamndQueue::enqueueReadBuffer()");
+			err = queue->finish();
+			checkErr(err, "ComamndQueue::finish() - ReadBuffer");
+
+			unsigned int offset = pixelIndex;
+
+			for (unsigned int i = 0; i < stepSize; i++)
 			{
-				image->ConvertTo8bit();
-				image->UpdatePreview();
-				image->RedrawInWidget(outputDarea);
-				while (gtk_events_pending())
-					gtk_main_iteration();
+				unsigned int a = offset + i;
+				sRGBfloat pixel = { rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B };
+				int x = a % width;
+				int y = a / width;
+
+				if(lastParams.DOFEnabled)
+				{
+					sRGBfloat oldPixel = image->GetPixelImage(x,y);
+					sRGBfloat newPixel;
+					newPixel.R = oldPixel.R * (1.0 - 1.0/dofLoop) + pixel.R * (1.0/dofLoop);
+					newPixel.G = oldPixel.G * (1.0 - 1.0/dofLoop) + pixel.G * (1.0/dofLoop);
+					newPixel.B = oldPixel.B * (1.0 - 1.0/dofLoop) + pixel.B * (1.0/dofLoop);
+					image->PutPixelImage(x, y, newPixel);
+					image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+				}
+				else
+				{
+					image->PutPixelImage(x, y, pixel);
+					image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+				}
 			}
-			lastTime = real_clock();
+
+			char progressText[1000];
+			double percent;
+			if(lastParams.DOFEnabled)
+			{
+				percent = (double) dofLoop / nDof + (double) (pixelIndex + stepSize) / (width * height) / nDof;
+			}
+			else
+			{
+				percent = (double) (pixelIndex + stepSize) / (width * height);
+			}
+			if (percent > 1.0) percent = 1.0;
+			double time = real_clock() - startTime;
+			double time_to_go = (1.0 - percent) * time / percent;
+			int togo_time_s = (int) time_to_go % 60;
+			int togo_time_min = (int) (time_to_go / 60) % 60;
+			int togo_time_h = time_to_go / 3600;
+			int time_s = (int) time % 60;
+			int time_min = (int) (time / 60) % 60;
+			int time_h = time / 3600;
+			sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, job size %d", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
+					time_min, time_s, stepSize);
+			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+
+			lastProcessingTime = time - lastTimeProcessing;
+			lastTimeProcessing = time;
+
+			if (real_clock() - lastTime > 30.0)
+			{
+				if (image->IsPreview())
+				{
+					image->CompileImage();
+					image->ConvertTo8bit();
+					image->UpdatePreview();
+					image->RedrawInWidget(outputDarea);
+					while (gtk_events_pending())
+						gtk_main_iteration();
+				}
+				lastTime = real_clock();
+			}
+
+			if (programClosed) break;
+
+			while (gtk_events_pending())
+				gtk_main_iteration();
 		}
-
-		if(programClosed) break;
-
-		while (gtk_events_pending())
-			gtk_main_iteration();
+		if (programClosed) break;
 	}
 
 	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
