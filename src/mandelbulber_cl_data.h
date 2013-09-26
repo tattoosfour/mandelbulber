@@ -144,9 +144,9 @@ typedef struct
 
 typedef struct
 {
-	cl_ushort R;
-	cl_ushort G;
-	cl_ushort B;
+	cl_float R;
+	cl_float G;
+	cl_float B;
 	cl_float zBuffer;
 } sClPixel;
 
