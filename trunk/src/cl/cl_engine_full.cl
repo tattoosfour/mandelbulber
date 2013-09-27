@@ -1229,6 +1229,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			shaderInputData.viewVector = viewVector;
 			if(consts->fractal.constantDEThreshold) shaderInputData.delta = depth * resolution * consts->params.persp;
 			else shaderInputData.delta = distThresh * consts->params.quality;
+			if(shaderInputData.delta < 1.0e-6) shaderInputData.delta = 1.0e-6;
 			float3 vn = CalculateNormals(consts, &shaderInputData);
 			viewVector = viewVector - vn * dot(viewVector,vn) * 2.0f;
 			startRay = startRay + viewVector * distThresh;
@@ -1249,6 +1250,8 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 			if(consts->fractal.constantDEThreshold) shaderInputData.delta = reflectBuff[ray + local_offset].depth * resolution * consts->params.persp;
 			else shaderInputData.delta = reflectBuff[ray + local_offset].distThresh * consts->params.quality;
+			if(shaderInputData.delta < 1.0e-6) shaderInputData.delta = 1.0e-6;
+			
 			shaderInputData.lightVect = lightVector;
 			shaderInputData.point = reflectBuff[ray + local_offset].point;
 			shaderInputData.startPoint = reflectBuff[ray + local_offset].start;
@@ -1292,14 +1295,6 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		zBuff = reflectBuff[0 + local_offset].depth;
 
 		float3 finallColour = resultShader;
-
-		//finallColour *= consts->params.imageBrightness;
-		//finallColour = (finallColour - 0.5f) * consts->params.imageContrast + 0.5f;
-		//if(consts->params.hdrEnabled)
-		//{
-		//	finallColour = tanh(finallColour);
-		//}
-		//finallColour = pow(finallColour, 1.0f / consts->params.imageGamma);
 		
 		out[buffIndex].R = finallColour.x;
 		out[buffIndex].G = finallColour.y;

@@ -1185,9 +1185,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		clSupport->Render(image, outputDarea);
 
 		double time = real_clock() - start_time;
+
+		image->CompileImage();
 		if (image->IsPreview())
 		{
-			image->CompileImage();
 			image->ConvertTo8bit();
 			image->UpdatePreview();
 			image->RedrawInWidget(outputDarea);
