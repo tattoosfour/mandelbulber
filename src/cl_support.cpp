@@ -98,7 +98,13 @@ void CclSupport::Init(void)
 
 	if(lastFormula == trig_optim) strFormula = "mandelbulb";
 	if(lastFormula == trig_DE) strFormula = "mandelbulb2";
-	if(lastFormula == tglad) strFormula = "mandelbox";
+	if(lastFormula == tglad)
+	{
+		if(lastFractal.mandelbox.rotEnabled)
+			strFormula = "mandelbox_full";
+		else
+			strFormula = "mandelbox";
+	}
 	if(lastFormula == menger_sponge) strFormula = "mengersponge";
 	if(lastFormula == hypercomplex) strFormula = "hypercomplex";
 	if(lastFormula == quaternion) strFormula = "quaternion";

@@ -3416,10 +3416,20 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->mandelbox.minRadius = params->fractal.mandelbox.doubles.foldingSphericalMin;
 	clFractal->mandelbox.fixedRadius = params->fractal.mandelbox.doubles.foldingSphericalFixed;
 	clFractal->mandelbox.mainRot = RotMatrix2matrix33(params->fractal.mandelbox.mainRot);
+	for (int i = 0; i < 6; i++)
+	{
+		clFractal->mandelbox.rot[i] = RotMatrix2matrix33(params->fractal.mandelbox.rot[i % 2][i / 2]);
+		clFractal->mandelbox.rotinv[i] = RotMatrix2matrix33(params->fractal.mandelbox.rotinv[i % 2][i / 2]);
+	}
+	clFractal->mandelbox.rotEnabled = params->fractal.mandelbox.rotationsEnabled;
+	clFractal->mandelbox.colorFactorX = params->fractal.mandelbox.doubles.colorFactorX;
+	clFractal->mandelbox.colorFactorX = params->fractal.mandelbox.doubles.colorFactorY;
+	clFractal->mandelbox.colorFactorX = params->fractal.mandelbox.doubles.colorFactorZ;
 	clFractal->formula = params->fractal.formula;
 	clFractal->julia = CVector2float3(params->fractal.doubles.julia);
 	clFractal->constantDEThreshold = params->fractal.constantDEThreshold;
 	clFractal->fractalConstantFactor = params->fractal.doubles.constantFactor;
+
 
 	clFractal->ifs.absX = params->fractal.IFS.absX;
 	clFractal->ifs.absY = params->fractal.IFS.absY;

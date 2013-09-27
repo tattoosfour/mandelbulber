@@ -323,13 +323,9 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		glowColor.z = 0.0f * glowN + 0.0f * glow;
 		colour += glowColor * glow;
 		
-		ushort R = convert_ushort_sat(colour.x * 65536.0f);
-		ushort G = convert_ushort_sat(colour.y * 65536.0f);
-		ushort B = convert_ushort_sat(colour.z * 65536.0f);
-		
-		out[buffIndex].R = R;
-		out[buffIndex].G = G;
-		out[buffIndex].B = B;
+		out[buffIndex].R = colour.x;
+		out[buffIndex].G = colour.y;
+		out[buffIndex].B = colour.z;
 		out[buffIndex].zBuffer = zBuff;
 	}
 }

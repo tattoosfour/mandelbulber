@@ -22,7 +22,13 @@ typedef struct
 	cl_float foldingValue;
 	cl_float fixedRadius;
 	cl_float minRadius;
+	cl_float colorFactorX;
+	cl_float colorFactorY;
+	cl_float colorFactorZ;
 	matrix33 mainRot;
+	matrix33 rot[6];
+	matrix33 rotinv[6];
+	cl_int rotEnabled;
 } sClMandelbox;
 
 typedef struct
