@@ -41,13 +41,16 @@ char lastFilenameImage[1000];
 char lastFilenameSettings[1000];
 char lastFilenamePalette[1000];
 
-int x_mouse = 0;
-int y_mouse = 0;
 bool programClosed = false;
 bool interfaceCreated = false;
 bool paletteViewCreated = false;
 
 char *sharedDir;
+
+int x_mouse = 0;
+int y_mouse = 0;
+double last_z_mouse = 2.0;
+double smooth_last_z_mouse = 2.0;
 
 using namespace std;
 

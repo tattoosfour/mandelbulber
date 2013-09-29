@@ -245,6 +245,7 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->params.DOFEnabled != lastParams.DOFEnabled) recompileRequest = true;
 	if(inConstants->params.slowAmbientOcclusionEnabled != lastParams.slowAmbientOcclusionEnabled) recompileRequest = true;
 	if(inConstants->params.auxLightNumber != lastParams.auxLightNumber) recompileRequest = true;
+	if(inConstants->fractal.mandelbox.rotEnabled != lastFractal.mandelbox.rotEnabled) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;

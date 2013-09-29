@@ -129,6 +129,12 @@ public:
   void Squares(int y, int progressiveFactor);
   void CalculateGammaTable(void);
   sRGB16 CalculatePixel(sRGBfloat pixel);
+
+  void PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity);
+  void AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity);
+  void AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity);
+  void CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity);
+
 	int progressiveFactor;
 
 private:
@@ -148,6 +154,7 @@ private:
 	float *zBuffer;
 
 	sRGB8 *preview;
+	sRGB8 *preview2;
 	sImageAdjustments adj;
 	sImageSwitches sw;
 	int width;
