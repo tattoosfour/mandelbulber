@@ -59,9 +59,11 @@ void cImage::AllocMem(void)
 
 	if (previewAllocated)
 		delete[] preview;
+		delete[] preview2;
 	previewAllocated = false;
 
-	preview = 0;
+	preview = NULL;
+	preview2 = NULL;
 }
 
 void cImage::ChangeSize(int w, int h)
@@ -234,9 +236,16 @@ unsigned char* cImage::CreatePreview(double scale)
 {
 	int w = width * scale;
 	int h = height * scale;
-	if (previewAllocated) delete[] preview;
+	if (previewAllocated)
+	{
+		delete[] preview;
+		delete[] preview2;
+	}
 	preview = new sRGB8[w * h];
+	preview2 = new sRGB8[w * h];
+
 	memset(preview, 0, (unsigned long int)sizeof(sRGB8) * (w * h));
+	memset(preview2, 0, (unsigned long int)sizeof(sRGB8) * (w * h));
 	previewAllocated = true;
 	previewWidth = w;
 	previewHeight = h;
@@ -299,6 +308,7 @@ void cImage::UpdatePreview(void)
 				}//next x
 			}//next y
 		}
+		memcpy(preview2, preview, w * h * sizeof(sRGB8));
 	}
 	else
 	{
@@ -311,7 +321,7 @@ unsigned char* cImage::GetPreviewPtr(void)
 	unsigned char* ptr = 0;
 	if (previewAllocated)
 	{
-		ptr = (unsigned char*) preview;
+		ptr = (unsigned char*) preview2;
 	} else abort();
 	return ptr;
 }
@@ -334,6 +344,7 @@ void cImage::RedrawInWidget(GtkWidget *dareaWidget)
 	{
 		gdk_draw_rgb_image(dareaWidget->window, dareaWidget->style->fg_gc[GTK_STATE_NORMAL], 0, 0, GetPreviewWidth(), GetPreviewHeight(), GDK_RGB_DITHER_MAX, GetPreviewPtr(),
 				GetPreviewWidth() * 3);
+		memcpy(preview2, preview, previewWidth * previewHeight * sizeof(sRGB8));
 	}
 }
 
@@ -361,4 +372,218 @@ void cImage::Squares(int y, int pFactor)
 	}
 }
 
+void cImage::PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity)
+{
+	if (x >= 0 && x < previewWidth && y >= 0 && y < previewHeight)
+	{
+		size_t address = x + y * previewWidth;
+		float zImage = GetPixelZBuffer(x / previewScale, y / previewScale);
+		if (z > zImage) opacity *= 0.03;
+		sRGB8 oldPixel = preview2[address];
+		sRGB8 newPixel;
+		newPixel.R = (oldPixel.R * (1.0 - opacity) + color.R * opacity);
+		newPixel.G = (oldPixel.G * (1.0 - opacity) + color.G * opacity);
+		newPixel.B = (oldPixel.B * (1.0 - opacity) + color.B * opacity);
+		preview2[address] = newPixel;
+
+	}
+}
+
+void cImage::AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity)
+{
+	double deltaX = x - (int) x;
+	double deltaY = y - (int) y;
+
+	double intensity1 = (1.0 - deltaX) * (1.0 - deltaY);
+	double intensity2 = (deltaX) * (1.0 - deltaY);
+	double intensity3 = (1.0 - deltaX) * (deltaY);
+	double intensity4 = (deltaX) * (deltaY);
+	double sum = intensity1 + intensity2 + intensity3 + intensity4;
+
+	double opacity2;
+
+	opacity2 = opacity * intensity1 / sum;
+	PutPixelAlfa(x, y, z, color, opacity2);
+
+	opacity2 = opacity * intensity2 / sum;
+	PutPixelAlfa(x + 1, y, z, color, opacity2);
+
+	opacity2 = opacity * intensity3 / sum;
+	PutPixelAlfa(x, y + 1, z, color, opacity2);
+
+	opacity2 = opacity * intensity4 / sum;
+	PutPixelAlfa(x + 1, y + 1, z, color, opacity2);
+}
+
+void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity)
+{
+	if ((x1 >= 0 && x1 < previewWidth && y1 >= 0 && y1 < previewHeight) || (x2 >= 0 && x2 < previewWidth && y2 >= 0 && y2 < previewHeight))
+	{
+		double deltaX = x2 - x1;
+		double deltaY = y2 - y1;
+		if (deltaX != 0 || deltaY != 0)
+		{
+
+			int max;
+			double a_deltaX = fabs(deltaX);
+			double a_deltaY = fabs(deltaY);
+
+			double A = y1 - y2;
+			double B = x2 - x1;
+			double C = y2 * x1 - x2 * y1;
+			double denominator = 1.0 / sqrt(A * A + B * B);
+
+			if (a_deltaX > a_deltaY)
+			{
+				x1 += 0.5;
+				x2 += 0.5;
+				max = abs((int) x2 - (int) x1);
+			}
+			else
+			{
+				y1 += 0.5;
+				y2 += 0.5;
+				max = abs((int) y2 - (int) y1);
+			}
+
+			if (a_deltaX > a_deltaY)
+			{
+				double k = (y2 - y1) / (x2 - x1);
+				float kz = (z2 - z1) / (x2 - x1);
+
+				double xx1, xx2;
+				if (x1 < x2)
+				{
+					xx1 = x1;
+					xx2 = x2;
+				}
+				else
+				{
+					xx1 = x2;
+					xx2 = x1;
+				}
+
+				int start = xx1;
+				if(start < 0) start = 0;
+				int end = xx2;
+				if(end > previewWidth) end = previewWidth;
+
+				for (int intX = start; intX <= end; intX++)
+				{
+					double x = intX;
+					double y = k * (x - x1) + y1;
+					float z = kz * (x - x1) + z1;
+					int xx = 0.5 + x;
+					for (double d = -1; d <= 1; d++)
+					{
+						int yy = 0.5 + y + d;
+						double distance = 1.0 * fabs(A * x + B * yy + C) * denominator;
+						if (distance >= 1.0) distance = 1.0;
+						double opacity2;
+						opacity2 = opacity * (1.0 - distance);
+						if (intX == start)
+						{
+							opacity2 = opacity * (1.0 - (xx1 - x)) * (1.0 - distance);
+						}
+						if (intX == end)
+						{
+							opacity2 = opacity * ((xx2 - x)) * (1.0 - distance);
+						}
+						PutPixelAlfa(xx, yy, z, color, opacity2);
+					}
+				}
+			}
+			else
+			{
+				double k = (x2 - x1) / (y2 - y1);
+				float kz = (z2 - z1) / (y2 - y1);
+				double yy1, yy2;
+				if (y1 < y2)
+				{
+					yy1 = y1;
+					yy2 = y2;
+				}
+				else
+				{
+					yy1 = y2;
+					yy2 = y1;
+				}
+
+				int start = yy1;
+				if(start < 0) start = 0;
+				int end = yy2;
+				if(end > previewHeight) end = previewHeight;
+
+				for (int intY = start; intY <= end; intY++)
+				{
+					double y = intY;
+					double x = k * (y - y1) + x1;
+					float z = kz * (y - y1) + z1;
+					int yy = 0.5 + y;
+					for (int d = -1; d <= 1; d++)
+					{
+						int xx = 0.5 + x + d;
+						double distance = fabs(A * xx + B * y + C) * denominator;
+						if (distance >= 1.0) distance = 1.0;
+						double opacity2;
+						opacity2 = opacity * (1.0 - distance);
+						if (intY == start)
+						{
+							opacity2 = opacity * (1.0 - (yy1 - (y))) * (1.0 - distance);
+						}
+						if (intY == end)
+						{
+							opacity2 = opacity * ((yy2 - (y))) * (1.0 - distance);
+						}
+						PutPixelAlfa(xx, yy, z, color, opacity2);
+					}
+				}
+			}
+		}
+	}
+}
+
+void cImage::CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity)
+{
+  if(borderWidth>0 && r>0)
+  {
+    double r2 = r + borderWidth;
+    double r1 = r - borderWidth;
+    if(r1<0) r1 = 0;
+    int y1 = y - r2;
+    int y2 = y + r2;
+
+    double wspJ = 1.0/borderWidth * opacity;
+
+    for (int yy = y1; yy<=y2; yy++)
+    {
+      double dyy = yy - y;
+      double dxx = r2*r2 - dyy*dyy;
+      if(dxx < 0) dxx = 0;
+      double dx = sqrt(dxx);
+      int x1 = x - dx;
+      int x2 = x + dx;
+
+      double dxx2 = r1*r1 - dyy*dyy;
+      if(dxx2 < 0) dxx2 = 0;
+      double dx2 = sqrt(dxx2);
+      int x12 = x - dx2;
+      int x22 = x + dx2;
+
+      for(int xx = x1; xx<=x2; xx++)
+      {
+        if(xx<=x12 || xx>=x22)
+        {
+          double deltaX = xx - x;
+          double deltaY = yy - y;
+          double rr = sqrt(deltaX*deltaX + deltaY*deltaY);
+          double deltaR = fabs(rr - r);
+          if(deltaR > borderWidth) deltaR = borderWidth;
+          double opacity2 = wspJ * (borderWidth - deltaR);
+          PutPixelAlfa(xx,yy, z, border, opacity2);
+        }
+      }
+    }
+  }
+}
 

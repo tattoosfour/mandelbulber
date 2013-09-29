@@ -40,6 +40,152 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 	x_mouse = event->x;
 	y_mouse = event->y;
 
+	int x = event->x;
+	int y = event->y;
+	int xs = x / mainImage.GetPreviewScale();
+	int ys = y / mainImage.GetPreviewScale();
+	double z = mainImage.GetPixelZBuffer(xs, ys);
+
+	if(z < 1e10)
+	{
+		smooth_last_z_mouse = smooth_last_z_mouse + (z - smooth_last_z_mouse) * 0.01;
+
+		double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
+		double lightPlacementDistance = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPlacementDistance)));
+		int mode = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode));
+
+		double sw = mainImage.GetPreviewWidth();
+		double sh = mainImage.GetPreviewHeight();
+
+		float aspectRatio = sw / sh;
+
+		double x2 = (x / sw - 0.5) * aspectRatio;
+		double y2 = (y / sh - 0.5);
+
+		if (mode >= 5 && mode < 10)
+		{
+			z = z - lightPlacementDistance; //lights placement
+		}
+
+
+		double scale = smooth_last_z_mouse / z;
+
+		double boxWidth = 10.0 / sw * scale;
+		double boxHeight = 10.0 / sw * scale;
+		double boxDepth = 10.0 / sw * scale;
+		double persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+		double boxWidth2 = boxWidth * z * persp;
+		double boxHeigth2 = boxHeight * z * persp;
+		double boxDepth2 = boxHeight * z * persp;
+
+
+		double n = 3.0;
+
+		for (int iz = -n; iz <=n; iz++)
+		{
+			double yy1 = ((y2 + n * boxHeight) / (1.0 - boxDepth * iz * persp) + 0.5) * sh;
+			double yy2 = ((y2 - n * boxHeight) / (1.0 - boxDepth * iz * persp) + 0.5) * sh;
+			for (int ix = -3.0; ix <=3.0; ix++)
+			{
+				double xx1 = ((x2 + boxWidth * ix) / (1.0 - boxDepth * iz * persp) / aspectRatio + 0.5) * sw;
+				unsigned char R = 128 + iz * 40;
+				unsigned char G = 128 - iz * 40;
+				unsigned char B = 0;
+				double opacity = 0.8;
+				if(iz == 0 && ix == 0)
+				{
+					R = G = B = 255;
+					opacity = 1.0;
+				}
+				mainImage.AntiAliasedLine(xx1, yy1, xx1, yy2, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity);
+			}
+
+			double xx1 = ((x2 + n * boxWidth) / (1.0 - boxDepth * iz * persp) / aspectRatio + 0.5) * sw;
+			double xx2 = ((x2 - n * boxWidth) / (1.0 - boxDepth * iz * persp) / aspectRatio + 0.5) * sw;
+			for (int iy = -n; iy <=n; iy++)
+			{
+				double yy1 = ((y2 + boxWidth * iy) / (1.0 - boxDepth * iz * persp) + 0.5) * sh;
+				unsigned char R = 128 + iz * 40;
+				unsigned char G = 128 - iz * 40;
+				unsigned char B = 0;
+				double opacity = 0.8;
+
+				if(iz == 0 && iy == 0)
+				{
+					R = G = B = 255;
+					opacity = 1.0;
+				}
+
+				mainImage.AntiAliasedLine(xx1, yy1, xx2, yy1, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity);
+			}
+
+			if(iz < n)
+			{
+				for (int ix = -n; ix <=n; ix++)
+				{
+					for (int iy = -n; iy <=n; iy++)
+					{
+						double xx1 = ((x2 + boxWidth * ix) / (1.0 - boxDepth * iz * persp) / aspectRatio + 0.5) * sw;
+						double yy1 = ((y2 + boxWidth * iy) / (1.0 - boxDepth * iz * persp) + 0.5) * sh;
+						double xx2 = ((x2 + boxWidth * ix) / (1.0 - boxDepth * (iz + 1) * persp) / aspectRatio + 0.5) * sw;
+						double yy2 = ((y2 + boxWidth * iy) / (1.0 - boxDepth * (iz + 1) * persp) + 0.5) * sh;
+
+						double opacity = 0.8;
+						unsigned char R = 128 + iz * 40;
+						unsigned char G = 128 - iz * 40;
+						unsigned char B = 0;
+
+						if(ix == 0 && iy == 0)
+						{
+							R = G = B = 255;
+							opacity = 1.0;
+						}
+
+						mainImage.AntiAliasedLine(xx1, yy1, xx2, yy2, z - iz * boxDepth2, z - (iz + 1) * boxDepth2, (sRGB8){R, G, B}, opacity);
+					}
+				}
+			}
+			if (iz == 0)
+			{
+				mainImage.AntiAliasedLine(x - sw * 0.3, y, x + sw * 0.3, y, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0);
+				mainImage.AntiAliasedLine(x, y - sh * 0.3, x, y + sh * 0.3, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0);
+
+				if (mode >= 5 && mode < 10)
+				{
+					double r = 1.5 * (boxWidth * n / aspectRatio);
+					if (r > 1.0) r = 1.0;
+					mainImage.CircleBorder(x, y, z, r * sw, (sRGB8 ) { 0, 100, 255 }, r * 0.1 * sw, 1.0);
+				}
+			}
+		}
+
+
+
+		mainImage.AntiAliasedLine(sw / 2, 0, sw / 2, sh, -1, -1, (sRGB8){255, 255, 255}, 0.2);
+		mainImage.AntiAliasedLine(0, sh / 2, sw, sh / 2, -1, -1, (sRGB8){255, 255, 255}, 0.2);
+
+		//mainImage.AntiAliasedLine(x11, y12, x12, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x11, y11, x11, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x12, y11, x12, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x21, y21, x22, y21, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x21, y22, x22, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x21, y21, x21, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x22, y21, x22, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
+		//mainImage.AntiAliasedLine(x11, y11, x21, y21, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
+		//mainImage.AntiAliasedLine(x12, y11, x22, y21, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
+		//mainImage.AntiAliasedLine(x11, y12, x21, y22, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
+		//mainImage.AntiAliasedLine(x12, y12, x22, y22, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
+
+
+		//mainImage.AntiAliasedLine(x - 50, y, x + 50, y, z, z, (sRGB8){255, 255, 255}, 1.0);
+		//mainImage.AntiAliasedLine(x, y-50, x, y + 50, z, z, (sRGB8){255, 255, 255}, 1.0);
+
+		last_z_mouse = z;
+	}
+	mainImage.RedrawInWidget(renderWindow.drawingArea);
+
+
+
 	return TRUE;
 }
 

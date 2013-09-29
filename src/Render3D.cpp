@@ -1182,6 +1182,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
 		start_time = real_clock();
 
+		image->progressiveFactor = 1;
 		clSupport->Render(image, outputDarea);
 
 		double time = real_clock() - start_time;

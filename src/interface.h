@@ -23,6 +23,11 @@
 
 extern char *sharedDir;
 
+extern int x_mouse;
+extern int y_mouse;
+extern double last_z_mouse;
+extern double smooth_last_z_mouse;
+
 enum enumImageFormat
 {
 	imgFormatJPG = 0,
