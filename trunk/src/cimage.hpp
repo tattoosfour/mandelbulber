@@ -130,10 +130,10 @@ public:
   void CalculateGammaTable(void);
   sRGB16 CalculatePixel(sRGBfloat pixel);
 
-  void PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity);
-  void AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity);
-  void AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity);
-  void CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity);
+  void PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity, int layer);
+  void AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity, int layer);
+  void AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity, int layer);
+  void CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity, int layer);
 
 	int progressiveFactor;
 

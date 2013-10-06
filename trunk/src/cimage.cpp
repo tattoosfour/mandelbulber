@@ -26,7 +26,6 @@ cImage::cImage(int w, int h, bool low_mem)
 
 cImage::~cImage()
 {
-	if(!lowMem)
 	delete[] imageFloat;
 	delete[] image16;
 	delete[] image8;
@@ -36,7 +35,10 @@ cImage::~cImage()
 	delete[] zBuffer;
 	delete[] gammaTable;
 	if (previewAllocated)
+	{
 		delete[] preview;
+		delete[] preview2;
+	}
 }
 
 void cImage::AllocMem(void)
@@ -58,8 +60,10 @@ void cImage::AllocMem(void)
 	}
 
 	if (previewAllocated)
+	{
 		delete[] preview;
 		delete[] preview2;
+	}
 	previewAllocated = false;
 
 	preview = NULL;
@@ -372,24 +376,33 @@ void cImage::Squares(int y, int pFactor)
 	}
 }
 
-void cImage::PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity)
+void cImage::PutPixelAlfa(int x, int y, float z, sRGB8 color, double opacity, int layer)
 {
 	if (x >= 0 && x < previewWidth && y >= 0 && y < previewHeight)
 	{
 		size_t address = x + y * previewWidth;
 		float zImage = GetPixelZBuffer(x / previewScale, y / previewScale);
 		if (z > zImage) opacity *= 0.03;
-		sRGB8 oldPixel = preview2[address];
+		sRGB8 oldPixel;
+		if(layer == 0)
+			oldPixel = preview[address];
+		else if (layer == 1)
+			oldPixel = preview2[address];
 		sRGB8 newPixel;
 		newPixel.R = (oldPixel.R * (1.0 - opacity) + color.R * opacity);
 		newPixel.G = (oldPixel.G * (1.0 - opacity) + color.G * opacity);
 		newPixel.B = (oldPixel.B * (1.0 - opacity) + color.B * opacity);
-		preview2[address] = newPixel;
-
+		if(layer == 0)
+		{
+			preview[address] = newPixel;
+			preview2[address] = newPixel;
+		}
+		else if (layer == 1)
+			preview2[address] = newPixel;
 	}
 }
 
-void cImage::AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity)
+void cImage::AntiAliasedPoint(double x, double y, float z, sRGB8 color, double opacity, int layer)
 {
 	double deltaX = x - (int) x;
 	double deltaY = y - (int) y;
@@ -403,19 +416,19 @@ void cImage::AntiAliasedPoint(double x, double y, float z, sRGB8 color, double o
 	double opacity2;
 
 	opacity2 = opacity * intensity1 / sum;
-	PutPixelAlfa(x, y, z, color, opacity2);
+	PutPixelAlfa(x, y, z, color, opacity2, layer);
 
 	opacity2 = opacity * intensity2 / sum;
-	PutPixelAlfa(x + 1, y, z, color, opacity2);
+	PutPixelAlfa(x + 1, y, z, color, opacity2, layer);
 
 	opacity2 = opacity * intensity3 / sum;
-	PutPixelAlfa(x, y + 1, z, color, opacity2);
+	PutPixelAlfa(x, y + 1, z, color, opacity2, layer);
 
 	opacity2 = opacity * intensity4 / sum;
-	PutPixelAlfa(x + 1, y + 1, z, color, opacity2);
+	PutPixelAlfa(x + 1, y + 1, z, color, opacity2, layer);
 }
 
-void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity)
+void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z1, float z2, sRGB8 color, double opacity, int layer)
 {
 	if ((x1 >= 0 && x1 < previewWidth && y1 >= 0 && y1 < previewHeight) || (x2 >= 0 && x2 < previewWidth && y2 >= 0 && y2 < previewHeight))
 	{
@@ -489,7 +502,7 @@ void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z
 						{
 							opacity2 = opacity * ((xx2 - x)) * (1.0 - distance);
 						}
-						PutPixelAlfa(xx, yy, z, color, opacity2);
+						PutPixelAlfa(xx, yy, z, color, opacity2, layer);
 					}
 				}
 			}
@@ -535,7 +548,7 @@ void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z
 						{
 							opacity2 = opacity * ((yy2 - (y))) * (1.0 - distance);
 						}
-						PutPixelAlfa(xx, yy, z, color, opacity2);
+						PutPixelAlfa(xx, yy, z, color, opacity2, layer);
 					}
 				}
 			}
@@ -543,7 +556,7 @@ void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z
 	}
 }
 
-void cImage::CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity)
+void cImage::CircleBorder(double x, double y, float z, double r, sRGB8 border, double borderWidth, double opacity, int layer)
 {
   if(borderWidth>0 && r>0)
   {
@@ -580,7 +593,7 @@ void cImage::CircleBorder(double x, double y, float z, double r, sRGB8 border, d
           double deltaR = fabs(rr - r);
           if(deltaR > borderWidth) deltaR = borderWidth;
           double opacity2 = wspJ * (borderWidth - deltaR);
-          PutPixelAlfa(xx,yy, z, border, opacity2);
+          PutPixelAlfa(xx,yy, z, border, opacity2, layer);
         }
       }
     }

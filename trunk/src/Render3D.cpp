@@ -305,11 +305,11 @@ void *MainThread(void *ptr)
 	CVector3 start;
 	if (perspectiveType == fishEye || perspectiveType == equirectangular)
 	{
-		start = vp + baseY * param.doubles.viewDistanceMin;
+		start = vp;// + baseY * param.doubles.viewDistanceMin;
 	}
 	else
 	{
-		start = vp - baseY * (1.0 / fov * zoom + param.doubles.viewDistanceMin);
+		start = vp - baseY * (1.0 / fov * zoom);// + param.doubles.viewDistanceMin);
 	}
 
 	//parameters for iteration functions
@@ -1205,6 +1205,46 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		}
 
 #endif
+	}
+
+	//render camera flyight path on preview
+	if (image->IsPreview() && !param.quiet)
+	{
+		CRotationMatrix mRotInv;
+		mRotInv.RotateY(-param.doubles.gamma);
+		mRotInv.RotateX(-param.doubles.beta);
+		mRotInv.RotateZ(-param.doubles.alpha);
+
+		CVector3 pointPrevFrame, pointActFrame;
+		for (int index = 0; index < timeline->GetKeyframeCount(); index++)
+		{
+			for (int frame = 0; frame < 100; frame++)
+			{
+				sParamRenderD params;
+				timeline->GetFrameParamsInterpolated(index * 100 + frame, 100, &params);
+				pointActFrame = InvProjection3D(params.vp, param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom, image->GetPreviewWidth(),
+						image->GetPreviewHeight());
+
+				if (index > 0 || frame > 0)
+				{
+					if (pointActFrame.z > 0.0)
+					{
+						unsigned char R = (int) 255 * index / timeline->GetKeyframeCount();
+						unsigned char G = (int) 255 * frame / 100;
+						unsigned char B = (int) 255 - 255 * index / timeline->GetKeyframeCount();
+						image->AntiAliasedLine(pointPrevFrame.x, pointPrevFrame.y, pointActFrame.x, pointActFrame.y, pointPrevFrame.z, pointActFrame.z, (sRGB8 ) { R, G, B }, 0.9, 0);
+					}
+				}
+				if (frame == 0)
+				{
+					if (pointActFrame.z > 0.0)
+						image->CircleBorder(pointActFrame.x, pointActFrame.y, pointActFrame.z, 5.0, (sRGB8 ) { 255, 0, 0 }, 2.0, 1.0, 0);
+				}
+
+				pointPrevFrame = pointActFrame;
+			}
+		}
+		image->RedrawInWidget(outputDarea);
 	}
 }
 

@@ -50,6 +50,30 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 	{
 		smooth_last_z_mouse = smooth_last_z_mouse + (z - smooth_last_z_mouse) * 0.01;
 
+		//preparing rotation matrix
+		double alpha = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_alfa))) / 180.0 * M_PI;
+		double beta = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_beta))) / 180.0 * M_PI;
+		double gamma = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_gammaAngle))) / 180.0 * M_PI;
+
+		CVector3 vp;
+		vp.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_va)));
+		vp.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vb)));
+		vp.z = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_vc)));
+
+		enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
+		double zoom = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_zoom)));
+		double persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+
+		CRotationMatrix mRot;
+		mRot.RotateZ(alpha);
+		mRot.RotateX(beta);
+		mRot.RotateY(gamma);
+
+		CRotationMatrix mRotInv;
+		mRotInv.RotateY(-gamma);
+		mRotInv.RotateX(-beta);
+		mRotInv.RotateZ(-alpha);
+
 		double closeUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
 		double lightPlacementDistance = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_auxLightPlacementDistance)));
 		int mode = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboMouseClickMode));
@@ -73,7 +97,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 		double boxWidth = 10.0 / sw * scale;
 		double boxHeight = 10.0 / sw * scale;
 		double boxDepth = 10.0 / sw * scale;
-		double persp = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
+
 		double boxWidth2 = boxWidth * z * persp;
 		double boxHeigth2 = boxHeight * z * persp;
 		double boxDepth2 = boxHeight * z * persp;
@@ -97,7 +121,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 					R = G = B = 255;
 					opacity = 1.0;
 				}
-				mainImage.AntiAliasedLine(xx1, yy1, xx1, yy2, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity);
+				mainImage.AntiAliasedLine(xx1, yy1, xx1, yy2, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity, 1);
 			}
 
 			double xx1 = ((x2 + n * boxWidth) / (1.0 - boxDepth * iz * persp) / aspectRatio + 0.5) * sw;
@@ -116,7 +140,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 					opacity = 1.0;
 				}
 
-				mainImage.AntiAliasedLine(xx1, yy1, xx2, yy1, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity);
+				mainImage.AntiAliasedLine(xx1, yy1, xx2, yy1, z - iz * boxDepth2, z - iz * boxDepth2, (sRGB8){R, G, B}, opacity, 1);
 			}
 
 			if(iz < n)
@@ -141,44 +165,27 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 							opacity = 1.0;
 						}
 
-						mainImage.AntiAliasedLine(xx1, yy1, xx2, yy2, z - iz * boxDepth2, z - (iz + 1) * boxDepth2, (sRGB8){R, G, B}, opacity);
+						mainImage.AntiAliasedLine(xx1, yy1, xx2, yy2, z - iz * boxDepth2, z - (iz + 1) * boxDepth2, (sRGB8){R, G, B}, opacity, 1);
 					}
 				}
 			}
 			if (iz == 0)
 			{
-				mainImage.AntiAliasedLine(x - sw * 0.3, y, x + sw * 0.3, y, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0);
-				mainImage.AntiAliasedLine(x, y - sh * 0.3, x, y + sh * 0.3, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0);
+				mainImage.AntiAliasedLine(x - sw * 0.3, y, x + sw * 0.3, y, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0, 1);
+				mainImage.AntiAliasedLine(x, y - sh * 0.3, x, y + sh * 0.3, z, z, (sRGB8 ) { 255, 255, 255 }, 1.0, 1);
 
 				if (mode >= 5 && mode < 10)
 				{
 					double r = 1.5 * (boxWidth * n / aspectRatio);
 					if (r > 1.0) r = 1.0;
-					mainImage.CircleBorder(x, y, z, r * sw, (sRGB8 ) { 0, 100, 255 }, r * 0.1 * sw, 1.0);
+					mainImage.CircleBorder(x, y, z, r * sw, (sRGB8 ) { 0, 100, 255 }, r * 0.1 * sw, 1.0, 1);
 				}
 			}
 		}
 
+		mainImage.AntiAliasedLine(sw / 2, 0, sw / 2, sh, -1, -1, (sRGB8){255, 255, 255}, 0.2, 1);
+		mainImage.AntiAliasedLine(0, sh / 2, sw, sh / 2, -1, -1, (sRGB8){255, 255, 255}, 0.2, 1);
 
-
-		mainImage.AntiAliasedLine(sw / 2, 0, sw / 2, sh, -1, -1, (sRGB8){255, 255, 255}, 0.2);
-		mainImage.AntiAliasedLine(0, sh / 2, sw, sh / 2, -1, -1, (sRGB8){255, 255, 255}, 0.2);
-
-		//mainImage.AntiAliasedLine(x11, y12, x12, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x11, y11, x11, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x12, y11, x12, y12, zBack, zBack, (sRGB8){255, 0, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x21, y21, x22, y21, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x21, y22, x22, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x21, y21, x21, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x22, y21, x22, y22, zFront, zFront, (sRGB8){255, 255, 0}, 0.7);
-		//mainImage.AntiAliasedLine(x11, y11, x21, y21, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
-		//mainImage.AntiAliasedLine(x12, y11, x22, y21, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
-		//mainImage.AntiAliasedLine(x11, y12, x21, y22, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
-		//mainImage.AntiAliasedLine(x12, y12, x22, y22, zBack, zFront, (sRGB8){0, 255, 255}, 0.7);
-
-
-		//mainImage.AntiAliasedLine(x - 50, y, x + 50, y, z, z, (sRGB8){255, 255, 255}, 1.0);
-		//mainImage.AntiAliasedLine(x, y-50, x, y + 50, z, z, (sRGB8){255, 255, 255}, 1.0);
 
 		last_z_mouse = z;
 	}
@@ -335,7 +342,16 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 			CVector3 viewVectorNotRotated = viewVector;
 			viewVector = mRot.RotateVector(viewVector);
 
-			CVector3 start = params.doubles.vp - baseY * (1.0 / params.doubles.persp * params.doubles.zoom);
+			CVector3 start;
+			if (perspectiveType == fishEye || perspectiveType == equirectangular)
+			{
+				start = params.doubles.vp;
+			}
+			else
+			{
+				start = params.doubles.vp - baseY * (1.0 / params.doubles.persp * params.doubles.zoom);
+			}
+
 			CVector3 point = start + viewVector * y;
 
 			//difference behavior depends on selected mode
@@ -1603,6 +1619,7 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 		renderRequest = true;
 	}
 
+	timeline->UpdateGlobalMorph();
 }
 
 void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
@@ -1656,6 +1673,7 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 		renderRequest = true;
 	}
 
+	timeline->UpdateGlobalMorph();
 }
 
 void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
@@ -2056,6 +2074,7 @@ void PressedTimeline(GtkWidget *widget, gpointer data)
 		{
 			timeline->Initialize(Interface_data.file_keyframes);
 		}
+		timeline->UpdateGlobalMorph();
 	}
 	else
 	{
@@ -2073,6 +2092,7 @@ void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
 {
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	timeline->DeleteKeyframe(index, Interface_data.file_keyframes);
+	timeline->UpdateGlobalMorph();
 }
 
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)

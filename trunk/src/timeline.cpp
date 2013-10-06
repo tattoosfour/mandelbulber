@@ -8,10 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "timeline.hpp"
-#include "files.h"
-#include "interface.h"
-#include "settings.h"
-#include "callbacks.h"
+
 
 using namespace std;
 
@@ -23,6 +20,7 @@ cTimeline::cTimeline()
 	keyframeCount = 0;
 	isCreated = false;
 	isOpened = false;
+	morphParamRenderGlobal = NULL;
 }
 
 cTimeline::~cTimeline()
@@ -365,6 +363,32 @@ void cTimeline::Refresh(void)
 	Initialize(Interface_data.file_keyframes);
 }
 
+void cTimeline::UpdateGlobalMorph(void)
+{
+	if(morphParamRenderGlobal) delete morphParamRenderGlobal;
+	morphParamRenderGlobal = new CMorph (keyframeCount, sizeof(sParamRenderD) / sizeof(double));
+
+	sParamRender fractParam;
+	ReadInterface(&fractParam);
+
+	morphParamRenderGlobal->SetFramesPerKey(fractParam.framesPerKeyframe);
+
+	for (int keyNumber = 0; keyNumber < keyframeCount; keyNumber++)
+	{
+		string filename;
+		filename = IndexFilename(fractParam.file_keyframes, "fract", keyNumber);
+		sParamRender fractParamLoaded;
+		LoadSettings(filename.c_str(), fractParamLoaded, true);
+		morphParamRenderGlobal->AddData(keyNumber, (double*) &fractParamLoaded.doubles);
+	}
+}
+
+void cTimeline::GetFrameParamsInterpolated(int index, int framesPerKey, sParamRenderD *params)
+{
+	morphParamRenderGlobal->SetFramesPerKey(framesPerKey);
+	morphParamRenderGlobal->CatmullRom(index, (double*) params);
+}
+
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
 	const char* widgetName = gtk_widget_get_name(widget);
@@ -416,4 +440,5 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 		}
 	}
 }
+
 
