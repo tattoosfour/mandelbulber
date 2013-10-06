@@ -19,8 +19,7 @@
 #include <cstdlib>
 
 #include "interface.h"
-#include "callbacks.h"
-#include "shaders.h"
+
 
 #define CONNECT_SIGNAL(object, callback, event) g_signal_connect(G_OBJECT(object), event, G_CALLBACK(callback), NULL)
 #define CONNECT_SIGNAL_CLICKED(x, y) CONNECT_SIGNAL(x, y, "clicked")

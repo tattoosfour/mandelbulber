@@ -11,7 +11,10 @@
 #include "database.hpp"
 #include "cimage.hpp"
 #include "smartptr.h"
-
+#include "files.h"
+#include "interface.h"
+#include "settings.h"
+#include "callbacks.h"
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event);
@@ -40,12 +43,16 @@ public:
 	void Resize(int newsize);
 	void Reset(void);
 	void Refresh(void);
+	void UpdateGlobalMorph(void);
+	void GetFrameParamsInterpolated(int index, int framesPerKey, sParamRenderD *params);
+	int GetKeyframeCount(void) {return keyframeCount;}
 	bool isOpened;
 
 private:
 	smart_ptr<cDatabase> database;
 	int keyframeCount;
 	bool isCreated;
+	CMorph *morphParamRenderGlobal;
 };
 
 extern smart_ptr<cTimeline> timeline;

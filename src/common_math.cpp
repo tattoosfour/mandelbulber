@@ -130,3 +130,48 @@ CVector3 Projection3D(CVector3 point, CVector3 vp, CRotationMatrix mRot, enumPer
 	return result;
 }
 
+CVector3 InvProjection3D(CVector3 point, CVector3 vp, CRotationMatrix mRotInv, enumPerspectiveType perspectiveType, double fov, double zoom, double imgWidth, double imgHeight)
+{
+	CVector3 screenPoint;
+	CVector3 baseZ(0.0, 1.0, 0.0);
+
+	double aspectRatio = (double) imgWidth / imgHeight;
+
+	CVector3 start;
+	if (perspectiveType == fishEye || perspectiveType == equirectangular)
+	{
+		start = vp;
+	}
+	else
+	{
+		start = vp - baseZ * (1.0 / fov * zoom);
+	}
+	CVector3 viewVector = point - start;
+	viewVector = mRotInv.RotateVector(viewVector);
+
+	double x, y, z;
+	if (perspectiveType == fishEye)
+	{
+		z = viewVector.Length();
+		if(viewVector.y < 0) z = -z;
+		viewVector.Normalize();
+		double r = sqrt(viewVector.x * viewVector.x + viewVector.z * viewVector.z);
+		double r2 = asin(r) / (M_PI * 0.5);
+		x = (viewVector.x / fov) * r2 / r / 2.0;
+		y = (viewVector.z / fov) * r2 / r / 2.0;
+	}
+	else
+	{
+
+		viewVector.x /= viewVector.y;
+		viewVector.z /= viewVector.y;
+		x = viewVector.x / fov;
+		y = viewVector.z / fov;
+		z = viewVector.y;
+	}
+	screenPoint.x = (x / aspectRatio + 0.5) * imgWidth;
+	screenPoint.y = (y + 0.5) * imgHeight;
+	screenPoint.z = z;
+
+	return screenPoint;
+}

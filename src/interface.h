@@ -11,6 +11,9 @@
 #include <gtk/gtk.h>
 #include "fractparams.h"
 #include "cl_support.hpp"
+#include "callbacks.h"
+#include "shaders.h"
+#include "morph.hpp"
 
 #define MANDELBULBER_VERSION 1.172
 #define MANDELBULBER_VERSION_STR "1.17-2"
