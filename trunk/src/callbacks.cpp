@@ -403,9 +403,16 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						params.doubles.zoom /= closeUpRatio;
 
 						char distanceString[1000];
-						double distance = CalculateDistance(params.doubles.vp, params.fractal);
-						double key_distance = (params.doubles.vp - last_keyframe_position).Length();
-						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", distance, key_distance);
+						double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+						double key_distance = 0.0;
+						if (timeline->isOpened)
+						{
+							sParamRenderD paramsD;
+							int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+							timeline->GetFrameParamsInterpolated((keyframe-1) * 100, 100, &paramsD);
+							key_distance = (params.doubles.vp - paramsD.vp).Length();
+						}
+						sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
 						gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
 
@@ -1022,7 +1029,14 @@ static void Move(int x, int y, int z)
 
 	char distanceString[1000];
 	distance = CalculateDistance(params.doubles.vp, params.fractal);
-	double key_distance = (params.doubles.vp - last_keyframe_position).Length();
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe-1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
 	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", distance, key_distance);
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 
@@ -1103,10 +1117,17 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 	params.doubles.viewDistanceMax = initCameraDistance + objectSize;
 
 	char distanceString[1000];
-	double distance = CalculateDistance(params.doubles.vp, params.fractal);
-	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g", distance);
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
 	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
-
 	WriteInterface(&params);
 
 	if (clSupport->IsEnabled())
@@ -1620,6 +1641,21 @@ void PressedRecordKeyframe(GtkWidget *widget, gpointer data)
 	}
 
 	timeline->UpdateGlobalMorph();
+
+	sParamRender params;
+	ReadInterface(&params);
+	char distanceString[1000];
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 }
 
 void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
@@ -1674,6 +1710,21 @@ void PressedInsertKeyframe(GtkWidget *widget, gpointer data)
 	}
 
 	timeline->UpdateGlobalMorph();
+
+	sParamRender params;
+	ReadInterface(&params);
+	char distanceString[1000];
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 }
 
 void PressedKeyframeAnimationRender(GtkWidget *widget, gpointer data)
@@ -1742,6 +1793,21 @@ void PressedNextKeyframe(GtkWidget *widget, gpointer data)
 		index--;
 		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 	}
+
+	sParamRender params;
+	ReadInterface(&params);
+	char distanceString[1000];
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 }
 
 void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
@@ -1781,6 +1847,21 @@ void PressedPreviousKeyframe(GtkWidget *widget, gpointer data)
 		index++;
 		gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 	}
+
+	sParamRender params;
+	ReadInterface(&params);
+	char distanceString[1000];
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 }
 
 void PressedTimelineRefresh(GtkWidget *widget, gpointer data)
@@ -2093,6 +2174,21 @@ void PressedDeleteKeyframe(GtkWidget *widget, gpointer widget_pointer)
 	int index = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
 	timeline->DeleteKeyframe(index, Interface_data.file_keyframes);
 	timeline->UpdateGlobalMorph();
+
+	sParamRender params;
+	ReadInterface(&params);
+	char distanceString[1000];
+	double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+	double key_distance = 0.0;
+	if (timeline->isOpened)
+	{
+		sParamRenderD paramsD;
+		int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+		timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+		key_distance = (params.doubles.vp - paramsD.vp).Length();
+	}
+	sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+	gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 }
 
 void UpdatePreviewSettingsDialog(GtkFileChooser *file_chooser, gpointer data)

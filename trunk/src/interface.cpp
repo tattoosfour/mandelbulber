@@ -3511,10 +3511,18 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->DOFFocus = pow(10, params->doubles.DOFFocus / 10.0 - 16.0);
 	clParams->DOFRadius = params->doubles.DOFRadius;
 
-	clParams->auxLightNumber = params->auxLightNumber;
+
   clParams->auxLightVisibility = params->doubles.auxLightVisibility;
 
-	for(int i = 0; i < params->auxLightNumber; i++)
+  int lightCount = 0;
+  for(int i = 0; i < 4; i++)
+  {
+  	 if (Lights[i].enabled) lightCount = i+1;
+  }
+  int numberOfLights = max(lightCount, params->auxLightNumber);
+	clParams->auxLightNumber = numberOfLights;
+
+	for(int i = 0; i < clParams->auxLightNumber; i++)
 	{
 		clInBuff->lights[i].enabled = Lights[i].enabled;
 		clInBuff->lights[i].intensity = Lights[i].intensity;
