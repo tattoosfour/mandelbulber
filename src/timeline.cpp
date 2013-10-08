@@ -385,8 +385,15 @@ void cTimeline::UpdateGlobalMorph(void)
 
 void cTimeline::GetFrameParamsInterpolated(int index, int framesPerKey, sParamRenderD *params)
 {
-	morphParamRenderGlobal->SetFramesPerKey(framesPerKey);
-	morphParamRenderGlobal->CatmullRom(index, (double*) params);
+	if(index > 0 && index < framesPerKey * keyframeCount)
+	{
+		morphParamRenderGlobal->SetFramesPerKey(framesPerKey);
+		morphParamRenderGlobal->CatmullRom(index, (double*) params);
+	}
+	else
+	{
+		memset(params, sizeof(sParamRenderD), 0);
+	}
 }
 
 gboolean thumbnail_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)

@@ -15,8 +15,8 @@
 #include "shaders.h"
 #include "morph.hpp"
 
-#define MANDELBULBER_VERSION 1.172
-#define MANDELBULBER_VERSION_STR "1.17-2"
+#define MANDELBULBER_VERSION 1.18
+#define MANDELBULBER_VERSION_STR "1.18"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
