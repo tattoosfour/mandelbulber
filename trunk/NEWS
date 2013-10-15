@@ -1,13 +1,26 @@
 Version history
 
-v1.7.2
+v1.18
+- added 3D pointer in image preview window
+- added showing of animation path in image preview window
+- OpenCL - improved rendering performance of DOF - iteration loop moved out of OpenCL kernel
+- OpenCL - image buffer changer to float type - possible to adjust image brightness and gamma after rendering
+- OpenCL - implemented full Mandelbox formula
+- fixed bug: lights were placed in wrong position on fish-eye mode
+- fixed bug: OpenCL - under Windows with nVidia gfx card the program couldn't find mandelbulber_cl_data.h file
+- fixed bug: OpenCL - main volumetric light wasn't rendered when no aux lights were enabled
+- fixed bug: OpenCL - wrong calculation of focus point for DOF
+- fixed bug: OpenCL - reduced noise on depth zooms - linited "delta" from very small values
+
+
+v1.17.2
 - fixed bug: OpenCL - include path compatible with nVidia-win32 driver requirements
 - fixed bug: OpenCL - changed all M_PI to M_PI_F - there were problems with compilation kernel code on some machines
 - fixed bug: OpenCL - some frames of animation were incomplette
 - fixed bug: OpenCL - removed #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
 - fixed bug: on Arch Linux there was problem with missing system incudes
 
-v1.7.1
+v1.17.1
 - release for Win32
 
 v1.17

@@ -2019,8 +2019,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.label_about = gtk_label_new("Mandelbulber "MANDELBULBER_VERSION_STR"\n"
 		"author: Krzysztof Marczak\n"
 		"Licence: GNU GPL v3\n"
-		"www: http://sites.google.com/site/mandelbulber/home\n"
-		"thanks to: Knighty, Makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke"
+		"www: www.mandelbulber.com\n"
+		"thanks to: Knighty, Makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke, Quazgaa"
 	);
 
 	//sliders

@@ -1,5 +1,3 @@
-//#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-
 typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;

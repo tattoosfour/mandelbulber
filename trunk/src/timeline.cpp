@@ -445,6 +445,21 @@ void PressedKeyframeThumbnail(GtkWidget *widget, GdkEventButton *event)
 			gtk_widget_destroy(dialog);
 			gtk_entry_set_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber), IntToString(index));
 		}
+
+		sParamRender params;
+		ReadInterface(&params);
+		char distanceString[1000];
+		double actDistance = CalculateDistance(params.doubles.vp, params.fractal);
+		double key_distance = 0.0;
+		if (timeline->isOpened)
+		{
+			sParamRenderD paramsD;
+			int keyframe = atoi(gtk_entry_get_text(GTK_ENTRY(timelineInterface.editAnimationKeyNumber)));
+			timeline->GetFrameParamsInterpolated((keyframe - 1) * 100, 100, &paramsD);
+			key_distance = (params.doubles.vp - paramsD.vp).Length();
+		}
+		sprintf(distanceString, "Estimated viewpoint distance to the surface: %g\nDistance from last keyframe: %g", actDistance, key_distance);
+		gtk_label_set_text(GTK_LABEL(Interface.label_NavigatorEstimatedDistance), distanceString);
 	}
 }
 

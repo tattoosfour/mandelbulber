@@ -47,10 +47,13 @@ CclSupport::CclSupport(void)
 	reflectBuffer = NULL;
 	memset(&lastParams, sizeof(lastParams), 0);
 	memset(&lastFractal, sizeof(lastFractal), 0);
+	isNVIDIA = false;
 }
 
 void CclSupport::Init(void)
 {
+	cl_int err;
+
 	char progressText[1000];
 	sprintf(progressText, "OpenCL - initialization");
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
@@ -58,7 +61,12 @@ void CclSupport::Init(void)
 	while (gtk_events_pending())
 		gtk_main_iteration();
 
-	cl_int err;
+#ifdef WIN32
+	const std::wstring opencldll( L"OpenCL.dll" );
+	err = clewInit(opencldll.c_str());
+	std::cout << clewErrorString(err) << std::endl;
+#endif
+
 	cl::Platform::get(&platformList);
 	checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
 	std::cout << "OpenCL Platform number is: " << platformList.size() << std::endl;
@@ -66,6 +74,16 @@ void CclSupport::Init(void)
 	platformList[0].getInfo((cl_platform_info) CL_PLATFORM_VENDOR, &platformVendor);
 	std::cout << "OpenCL Platform is by: " << platformVendor << "\n";
 	cl_context_properties cprops[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) (platformList[0])(), 0 };
+	if(platformVendor.find("NVIDIA") != std::string::npos)
+	{
+		isNVIDIA = true;
+		printf("nVidia OpenCL library is detected\n");
+	}
+	if(platformVendor.find("Advanced") != std::string::npos)
+	{
+		isNVIDIA = false;
+		printf("AMD OpenCL library is detected\n");
+	}
 
 	context = new cl::Context(CL_DEVICE_TYPE_GPU, cprops, NULL, NULL, &err);
 	checkErr(err, "Context::Context()");
@@ -88,6 +106,9 @@ void CclSupport::Init(void)
 
 	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memorySize);
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
+
+	devices[0].getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &maxAllocMemSize);
+	printf("OpenCL Max size of memory object allocation %ld MB\n", maxAllocMemSize/1024/1024);
 
 	devices[0].getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &maxConstantBufferSize);
 	printf("OpenCL Max constant buffer size  %ld kB\n", maxConstantBufferSize/1024);
@@ -175,11 +196,22 @@ void CclSupport::Init(void)
 	//program->getInfo(CL_PROGRAM_SOURCE, )
 	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
+#ifdef WIN32
+	SetCurrentDirectory(clDir.c_str());
+#else
 	chdir(clDir.c_str());
+#endif
 
 	std::string buildParams;
 	buildParams = "-w ";
+#ifdef WIN32
+	if(!isNVIDIA)
+	{
+		buildParams += "-I\"" + std::string(sharedDir) + "cl\" ";
+	}
+#else
 	buildParams += "-I\"" + std::string(sharedDir) + "cl\" ";
+#endif
 	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
@@ -189,7 +221,11 @@ void CclSupport::Init(void)
 	checkErr(err, "Program::build()");
 	printf("OpenCL program built done\n");
 
+#ifdef WIN32
+	SetCurrentDirectory(data_directory);
+#else
   chdir(data_directory);
+#endif
 
 	kernel = new cl::Kernel(*program, "fractal3D", &err);
 	checkErr(err, "Kernel::Kernel()");
@@ -304,10 +340,21 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
 
+			size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect);
+			size_t jobSizeLimit;
+			if (maxAllocMemSize > 0)
+			{
+				jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75 / 10; //10 because max nuber of reflections is 10
+			}
+			else
+			{
+				jobSizeLimit = 262144;
+			}
+			//printf("job size limit: %ld\n", jobSizeLimit);
 			int pixelsLeft = width * height - pixelIndex;
 			int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
 			if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
-			if (workGroupSizeMultiplier > 1024) workGroupSizeMultiplier = 1024;
+			if (workGroupSizeMultiplier *  workGroupSize > jobSizeLimit) workGroupSizeMultiplier = jobSizeLimit / workGroupSize;
 			if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 
 			constantsBuffer1->params.randomSeed = rand();
