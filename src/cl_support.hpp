@@ -14,8 +14,12 @@
 
 #ifdef CLSUPPORT
 
-//#include <CL/opencl.h>
+#ifdef WIN32
+#include "clew.h"
+#include "clew-cl.hpp"
+#else
 #include <CL/cl.hpp>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -81,8 +85,11 @@ private:
 	cl_int maxMaxWorkGroupSize[3];
 	cl_int maxClockFrequency;
 	size_t memorySize;
+	size_t maxAllocMemSize;
 	size_t workGroupSize;
 	size_t maxConstantBufferSize;
+
+	bool isNVIDIA;
 
 	sClParams lastParams;
 	sClFractal lastFractal;

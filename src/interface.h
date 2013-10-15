@@ -9,6 +9,7 @@
 #define INTERFACE_H_
 
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
 #include "fractparams.h"
 #include "cl_support.hpp"
 #include "callbacks.h"

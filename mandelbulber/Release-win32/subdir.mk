@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/clew.cpp \
 ../src/Render3D.cpp \
 ../src/algebra.cpp \
 ../src/callbacks.cpp \
@@ -25,6 +26,7 @@ CPP_SRCS += \
 ../src/netrender.cpp  
 
 OBJS += \
+./src/clew.o \
 ./src/Render3D.o \
 ./src/algebra.o \
 ./src/callbacks.o \
@@ -46,6 +48,7 @@ OBJS += \
 ./src/netrender.o
 
 CPP_DEPS += \
+./src/clew.d \
 ./src/Render3D.d \
 ./src/algebra.d \
 ./src/callbacks.d \

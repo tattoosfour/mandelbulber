@@ -5,7 +5,7 @@
  *      Author: krzysztof
  */
 
-#include <gtk-2.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

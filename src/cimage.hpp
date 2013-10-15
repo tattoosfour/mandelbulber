@@ -8,7 +8,7 @@
 #ifndef CIMAGE_HPP_
 #define CIMAGE_HPP_
 
-#include <gtk-2.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 //global variables
 struct sRGB8
