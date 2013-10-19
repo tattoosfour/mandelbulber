@@ -1175,52 +1175,19 @@ void PlaceRandomLights(sParamRender *fractParams, bool onlyPredefined)
 		}
 	}
 
-	if (fractParams->auxLightPre1Enabled)
+	for (int i = 0; i < 4; i++)
 	{
-		Lights[0].position = fractParams->doubles.auxLightPre1;
-		Lights[0].intensity = fractParams->doubles.auxLightPre1intensity;
-		Lights[0].colour = fractParams->auxLightPre1Colour;
-		Lights[0].enabled = true;
-	}
-	else
-	{
-		Lights[0].enabled = false;
-	}
-
-	if (fractParams->auxLightPre2Enabled)
-	{
-		Lights[1].position = fractParams->doubles.auxLightPre2;
-		Lights[1].intensity = fractParams->doubles.auxLightPre2intensity;
-		Lights[1].colour = fractParams->auxLightPre2Colour;
-		Lights[1].enabled = true;
-	}
-	else
-	{
-		Lights[1].enabled = false;
-	}
-
-	if (fractParams->auxLightPre3Enabled)
-	{
-		Lights[2].position = fractParams->doubles.auxLightPre3;
-		Lights[2].intensity = fractParams->doubles.auxLightPre3intensity;
-		Lights[2].colour = fractParams->auxLightPre3Colour;
-		Lights[2].enabled = true;
-	}
-	else
-	{
-		Lights[2].enabled = false;
-	}
-
-	if (fractParams->auxLightPre4Enabled)
-	{
-		Lights[3].position = fractParams->doubles.auxLightPre4;
-		Lights[3].intensity = fractParams->doubles.auxLightPre4intensity;
-		Lights[3].colour = fractParams->auxLightPre4Colour;
-		Lights[3].enabled = true;
-	}
-	else
-	{
-		Lights[3].enabled = false;
+		if (fractParams->auxLightPreEnabled[i])
+		{
+			Lights[i].position = fractParams->doubles.auxLightPre[i];
+			Lights[i].intensity = fractParams->doubles.auxLightPreIntensity[i];
+			Lights[i].colour = fractParams->auxLightPreColour[i];
+			Lights[i].enabled = true;
+		}
+		else
+		{
+			Lights[i].enabled = false;
+		}
 	}
 
 	lightsPlaced = fractParams->auxLightNumber;
