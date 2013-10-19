@@ -8,7 +8,7 @@
 		if (r < colourMin) colourMin = r;
 		if(r>40.0f || any(isinf(z4))) 
 		{
-			distance = r;
+			dist = r;
 			out.colourIndex = colourMin * 5000.0f;
 			break;
 		}

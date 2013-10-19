@@ -21,12 +21,16 @@
 		z.z = native_sin(pph);
 
 		z = z * r2 + c;
-		r = length(z);
+		r = distance(z, orbitTrap);
 		if (r < colourMin) colourMin = r;
+		
+#if _orbitTrapsEnabled
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r+1e-10));
+#endif
 		
 		if(r>4.0f || any(isinf(z))) 
 		{
-			distance = 0.5f * r * native_log(r) / (r_dz);
+			dist = 0.5f * r * native_log(r) / (r_dz);
 			out.colourIndex = colourMin * 5000.0f;
 			break;
 		}

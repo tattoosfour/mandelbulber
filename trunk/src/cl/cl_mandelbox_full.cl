@@ -61,13 +61,17 @@
 		
 		z = z * m + c;
 		tgladDE = tgladDE * fabs(m) + 1.0f;
-		r = length(z);
+		r = distance(z, orbitTrap);
 		
 		colourMin += fabs(m);
 		
+#if _orbitTrapsEnabled
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r));
+#endif
+		
 		if(r>1024.0f) 
 		{
-			distance = r / fabs(tgladDE);
+			dist = r / fabs(tgladDE);
 			out.colourIndex = colourMin / i * 300.0f;
 			break;
 		}

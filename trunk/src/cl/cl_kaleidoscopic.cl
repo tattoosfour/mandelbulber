@@ -39,11 +39,15 @@
 		}
 		
 		DE *= consts->fractal.ifs.scale;
-		r = length(z);
+		r = distance(z, orbitTrap);
+		
+#if _orbitTrapsEnabled
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r));
+#endif
 		
 		if(r>1024.0f) 
 		{
-			distance = (r - 2.0f) / DE;
+			dist = (r - 2.0f) / DE;
 			out.colourIndex = colourMin * 1000.0f;
 			break;
 		}

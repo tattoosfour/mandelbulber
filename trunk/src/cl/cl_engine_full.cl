@@ -14,6 +14,7 @@ typedef struct
 	float iters;
 	float distance;
 	float colourIndex;
+	float distFromOrbitTrap;
 } formulaOut;
 
 static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
@@ -685,6 +686,65 @@ float3 AuxLightsShader(__constant sClInConstants *consts, sClShaderInputData *in
 }
 #endif
 
+#if _orbitTrapsEnabled
+float3 FakeLights(__constant sClInConstants *consts, sClShaderInputData *input, float3 *fakeSpecOut)
+{
+	float3 fakeLights;
+
+	input->calcParam->orbitTrap = consts->params.fakeLightsOrbitTrap;
+
+	formulaOut out = Fractal(consts, input->point, input->calcParam);
+	float r = 1.0/(out.distFromOrbitTrap+1e-10);
+	//float fakeLight = consts->params.fakeLightsIntensity/(r*r + 1e-20f);
+	float fakeLight = consts->params.fakeLightsIntensity * (out.distFromOrbitTrap);
+
+	float3 deltax = (float3)
+	{ input->delta, 0.0f, 0.0f};
+	out = Fractal(consts, input->point + deltax, input->calcParam);
+	float rx = 1.0/(out.distFromOrbitTrap+1e-10);
+
+	float3 deltay = (float3)
+	{ 0.0f, input->delta, 0.0f};
+	out = Fractal(consts, input->point + deltay, input->calcParam);
+	float ry = 1.0/(out.distFromOrbitTrap+1e-10);
+
+	float3 deltaz = (float3)
+	{ 0.0f, 0.0f, input->delta};
+	out = Fractal(consts, input->point + deltaz, input->calcParam);
+	float rz = 1.0/(out.distFromOrbitTrap+1e-10);
+
+	float3 fakeLightNormal;
+	fakeLightNormal.x = r - rx;
+	fakeLightNormal.y = r - ry;
+	fakeLightNormal.z = r - rz;
+
+	if(length(fakeLightNormal) == 0.0f)
+	{
+		fakeLightNormal.x = 0.0f;
+	}
+	else
+	{
+		fakeLightNormal = normalize(fakeLightNormal);
+	}
+
+	float fakeLight2 = fakeLight * dot(input->normal, fakeLightNormal);
+	if(fakeLight2 < 0.0f) fakeLight2 = 0.0f;
+	fakeLights = fakeLight2;
+
+	float3 half = fakeLightNormal - input->viewVector;
+	half = normalize(half);
+	float fakeSpecular = dot(input->normal, half);
+	if (fakeSpecular < 0.0f) fakeSpecular = 0.0f;
+	fakeSpecular = pow(fakeSpecular, 30.0f) * fakeLight;
+	if (fakeSpecular > 15.0f) fakeSpecular = 15.0f;
+	(*fakeSpecOut) = fakeSpecular;
+
+	input->calcParam->orbitTrap = 0.0f;
+
+	return fakeLights;
+}
+#endif
+
 float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClInBuff *inBuff)
 {
 	float3 output;
@@ -733,7 +793,13 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	auxLightsSpecular *= consts->params.specularIntensity;
 #endif
 	
-	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + auxLights * colour + auxLightsSpecular;
+	float3 fakeLights = 0.0f;
+	float3 fakeLightsSpecular = 0.0f;
+#if _orbitTrapsEnabled
+	fakeLights = FakeLights(consts, input, &fakeLightsSpecular);
+#endif
+	
+	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + (auxLights + fakeLights) * colour + auxLightsSpecular + fakeLightsSpecular;
 	
 	return output;
 }
@@ -879,7 +945,17 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			}
 		}
 		
-		
+#if _orbitTrapsEnabled
+		if(consts->params.fakeLightsEnabled)
+		{
+			input->calcParam->orbitTrap = consts->params.fakeLightsOrbitTrap;
+			formulaOut out = Fractal(consts, input->point, input->calcParam);
+			float r = sqrt(1.0f/(out.distFromOrbitTrap + 1.0e-10f));
+			float fakeLight = 1.0f / (pow(r, 10.0f / consts->params.fakeLightsVisibilitySize) * pow(10.0f, 10.0f / consts->params.fakeLightsVisibilitySize) + 1e-20f);
+			output += fakeLight * step * consts->params.fakeLightsVisibility;
+			input->calcParam->orbitTrap = 0.0f;
+		}
+#endif		
 		//---------------------- volumetric lights with shadows in fog
 
 
@@ -1067,6 +1143,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 		sClCalcParams calcParam;
 		calcParam.N = consts->fractal.N;
+		calcParam.orbitTrap = (float3){0.0f, 0.0f, 0.0f};
 
 		float3 colour = 0.0f;
 		float3 resultShader = 0.0f;

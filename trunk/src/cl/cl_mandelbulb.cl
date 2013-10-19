@@ -10,11 +10,16 @@
 		z = (float3) {cth * native_cos(ph), cth * native_sin(ph), native_sin(th)};
 		z*=rp;
 		z+=c;
-		r = length(z);
+		r = distance(z, orbitTrap);
 		if (r < colourMin) colourMin = r;
+		
+#if _orbitTrapsEnabled
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r));
+#endif
+		
 		if(r>4.0f || any(isinf(z))) 
 		{
-			distance = 0.5f * r * native_log(r) / (r_dz);
+			dist = 0.5f * r * native_log(r) / (r_dz);
 			out.colourIndex = colourMin * 5000.0f;
 			break;
 		}
