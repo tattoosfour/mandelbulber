@@ -214,7 +214,7 @@ void CclSupport::Init(void)
 #endif
 	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
-	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled";
+	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
 	printf("OpenCL build params:%s\n", buildParams.c_str());
 	err = program->build(devices, buildParams.c_str());

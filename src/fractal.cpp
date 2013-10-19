@@ -68,7 +68,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double tglad_factor1 = fR2 / mR2;
 
 	double tgladDE = 1.0;
-
+	double orbitTrapTotal = 0.0;
 	double scale = par.mandelbox.doubles.scale;
 
 	enumFractalFormula actualFormula = par.formula;
@@ -1125,10 +1125,10 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 		{
 			CVector3 delta = z - par.doubles.fakeLightsOrbitTrap;
 			distance = delta.Length();
-			if (L >= par.fakeLightsMinIter && L <= par.fakeLightsMaxIter && distance < min) min = distance;
+			if (L >= par.fakeLightsMinIter && L <= par.fakeLightsMaxIter) orbitTrapTotal += (1.0f/(distance*distance));
 			if (distance > 1000)
 			{
-				distance = min;
+				distance = orbitTrapTotal;
 				break;
 			}
 		}
