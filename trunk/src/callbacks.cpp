@@ -474,23 +474,23 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 						double distance = CalculateDistance(point, params.fractal);
 						if (clickMode == 5)
 						{
-							params.doubles.auxLightPre1 = point;
-							params.doubles.auxLightPre1intensity = distance * distance;
+							params.doubles.auxLightPre[0] = point;
+							params.doubles.auxLightPreIntensity[0] = distance * distance;
 						}
 						if (clickMode == 6)
 						{
-							params.doubles.auxLightPre2 = point;
-							params.doubles.auxLightPre2intensity = distance * distance;
+							params.doubles.auxLightPre[1] = point;
+							params.doubles.auxLightPreIntensity[1] = distance * distance;
 						}
 						if (clickMode == 7)
 						{
-							params.doubles.auxLightPre3 = point;
-							params.doubles.auxLightPre3intensity = distance * distance;
+							params.doubles.auxLightPre[2] = point;
+							params.doubles.auxLightPreIntensity[2] = distance * distance;
 						}
 						if (clickMode == 8)
 						{
-							params.doubles.auxLightPre4 = point;
-							params.doubles.auxLightPre4intensity = distance * distance;
+							params.doubles.auxLightPre[3] = point;
+							params.doubles.auxLightPreIntensity[3] = distance * distance;
 						}
 						if (clickMode == 9)
 						{
@@ -2504,10 +2504,9 @@ void AutoDEStep(bool highQuality)
 	fractParams.global_ilumination = false;
 	fractParams.SSAOEnabled = false;
 	fractParams.DOFEnabled = false;
-	fractParams.auxLightPre1Enabled = false;
-	fractParams.auxLightPre2Enabled = false;
-	fractParams.auxLightPre3Enabled = false;
-	fractParams.auxLightPre4Enabled = false;
+	for(int i = 0; i<4; i++)
+		fractParams.auxLightPreEnabled[i] = false;
+
 	fractParams.fractal.iterThresh = false;
 	for(int i=0; i<5; i++)
 		fractParams.volumetricLightEnabled[i] = false;

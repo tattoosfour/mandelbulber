@@ -1207,7 +1207,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 #endif
 	}
 
-	//render camera flyight path on preview
+	//render camera and light flyight patha on preview
 	if (image->IsPreview() && !param.quiet)
 	{
 		CRotationMatrix mRotInv;
@@ -1216,14 +1216,28 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		mRotInv.RotateZ(-param.doubles.alpha);
 
 		CVector3 pointPrevFrame, pointActFrame;
+		CVector3 lightPrevFrame[4], lightActFrame[4];
 		for (int index = 0; index < timeline->GetKeyframeCount(); index++)
 		{
 			for (int frame = 0; frame < 100; frame++)
 			{
-				sParamRenderD params;
-				timeline->GetFrameParamsInterpolated(index * 100 + frame, 100, &params);
-				pointActFrame = InvProjection3D(params.vp, param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom, image->GetPreviewWidth(),
+				sParamRenderD paramsInterpol;
+				timeline->GetFrameParamsInterpolated(index * 100 + frame, 100, &paramsInterpol);
+				pointActFrame = InvProjection3D(paramsInterpol.vp, param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom, image->GetPreviewWidth(),
 						image->GetPreviewHeight());
+
+				for (int l = 0; l < 4; l++)
+				{
+					if (param.auxLightPreEnabled[l])
+					{
+						lightActFrame[l] = InvProjection3D(paramsInterpol.auxLightPre[l], param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom,
+								image->GetPreviewWidth(), image->GetPreviewHeight());
+					}
+					else
+					{
+						lightActFrame[l] = (CVector3){0.0, 0.0, -1.0};
+					}
+				}
 
 				if (index > 0 || frame > 0)
 				{
@@ -1234,14 +1248,35 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 						unsigned char B = (int) 255 - 255 * index / timeline->GetKeyframeCount();
 						image->AntiAliasedLine(pointPrevFrame.x, pointPrevFrame.y, pointActFrame.x, pointActFrame.y, pointPrevFrame.z, pointActFrame.z, (sRGB8 ) { R, G, B }, 0.9, 0);
 					}
+
+					for (int l = 0; l < 4; l++)
+					{
+						if (lightActFrame[l].z > 0.0)
+						{
+							unsigned char R = 255 - param.auxLightPreColour[l].R/256;
+							unsigned char G = 255 - param.auxLightPreColour[l].G/256;
+							unsigned char B = 255 - param.auxLightPreColour[l].B/256;
+							image->AntiAliasedLine(lightPrevFrame[l].x, lightPrevFrame[l].y, lightActFrame[l].x, lightActFrame[l].y, lightPrevFrame[l].z, lightActFrame[l].z, (sRGB8 ) { R, G, B }, 0.9, 0);
+						}
+					}
+
 				}
 				if (frame == 0)
 				{
-					if (pointActFrame.z > 0.0)
-						image->CircleBorder(pointActFrame.x, pointActFrame.y, pointActFrame.z, 5.0, (sRGB8 ) { 255, 0, 0 }, 2.0, 1.0, 0);
+					if (pointActFrame.z > 0.0) image->CircleBorder(pointActFrame.x, pointActFrame.y, pointActFrame.z, 5.0, (sRGB8 ) { 255, 0, 0 }, 2.0, 1.0, 0);
+					for (int l = 0; l < 4; l++)
+					{
+						unsigned char R = param.auxLightPreColour[l].R/256;
+						unsigned char G = param.auxLightPreColour[l].G/256;
+						unsigned char B = param.auxLightPreColour[l].B/256;
+						if (lightActFrame[l].z > 0.0) image->CircleBorder(lightActFrame[l].x, lightActFrame[l].y, lightActFrame[l].z, 3.0, (sRGB8 ) { R, G, B }, 1.0, 1.0, 0);
+					}
 				}
 
 				pointPrevFrame = pointActFrame;
+				for (int l = 0; l < 4; l++)
+					lightPrevFrame[l] = lightActFrame[l];
+
 			}
 		}
 		image->RedrawInWidget(outputDarea);
