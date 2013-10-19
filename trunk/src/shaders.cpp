@@ -299,6 +299,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 		if(input.param->fakeLightsEnabled)
 		{
 			double r = Compute<orbitTrap>(point, *input.calcParam);
+			r = sqrt(1.0f/(r + 1.0e-30f));
 			double fakeLight = 1.0 / (pow(r, 10.0 / input.param->doubles.fakeLightsVisibilitySize) * pow(10.0, 10.0 / input.param->doubles.fakeLightsVisibilitySize) + 1e-100);
 			output.R += fakeLight * step * input.param->doubles.fakeLightsVisibility;
 			output.G += fakeLight * step * input.param->doubles.fakeLightsVisibility;
@@ -1209,15 +1210,16 @@ sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec)
 {
 	sShaderOutput fakeLights;
 	double delta = input.dist_thresh * input.param->doubles.smoothness;
-	double r = Compute<orbitTrap>(input.point, *input.calcParam);
-	double fakeLight = input.param->doubles.fakeLightsIntensity/(r*r + 1e-100);
+	double rr = Compute<orbitTrap>(input.point, *input.calcParam);
+	double fakeLight = input.param->doubles.fakeLightsIntensity/rr;
+	double r = 1.0/(rr + 1e-30);
 
 	CVector3 deltax(delta, 0.0, 0.0);
-	double rx = Compute<orbitTrap>(input.point + deltax, *input.calcParam);
+	double rx = 1.0/(Compute<orbitTrap>(input.point + deltax, *input.calcParam) + 1e-30);
 	CVector3 deltay(0.0, delta, 0.0);
-	double ry = Compute<orbitTrap>(input.point + deltay, *input.calcParam);
+	double ry = 1.0/(Compute<orbitTrap>(input.point + deltay, *input.calcParam) + 1e-30);
 	CVector3 deltaz(0.0, 0.0, delta);
-	double rz = Compute<orbitTrap>(input.point + deltaz, *input.calcParam);
+	double rz = 1.0/(Compute<orbitTrap>(input.point + deltaz, *input.calcParam) + 1e-30);
 
 	CVector3 fakeLightNormal;
 	fakeLightNormal.x = r - rx;
