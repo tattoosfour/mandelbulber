@@ -14,6 +14,7 @@ typedef struct
 	float iters;
 	float distance;
 	float colourIndex;
+	float distFromOrbitTrap;
 } formulaOut;
 
 static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);

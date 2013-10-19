@@ -1,6 +1,6 @@
 formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
 {	
-	float distance = 0.0f;
+	float dist = 0.0f;
 	int N = calcParam->N;
 	float3 z = point;
 	float3 c = consts->fractal.julia;

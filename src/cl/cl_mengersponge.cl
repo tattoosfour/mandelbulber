@@ -27,12 +27,16 @@
 		z.x -= 2.0f;
 		z.y -= 2.0f;
 		if (z.z > 1.0f) z.z -= 2.0f;
-		r = length(z);
+		r = distance(z, orbitTrap);
 		DE *= 3.0f;
 
+#if _orbitTrapsEnabled
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r));
+#endif
+		
 		if (r > 1024.0f)
 		{
-			distance = r / fabs(DE);
+			dist = r / fabs(DE);
 			out.colourIndex = colourMin * 1000.0f;
 			break;
 		}

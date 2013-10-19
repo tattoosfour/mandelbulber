@@ -3459,6 +3459,9 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->opacity = params->doubles.iterFogOpacity;
 	clFractal->opacityTrim = params->doubles.iterFogOpacityTrim;
 
+	clFractal->fakeLightsMinIter = params->fractal.fakeLightsMinIter;
+	clFractal->fakeLightsMaxIter = params->fractal.fakeLightsMaxIter;
+
 	for(int i=0; i<256; i++)
 	{
 		clInBuff->palette[i].x = params->palette[i].R/256.0;
@@ -3548,6 +3551,12 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 		clParams->volumetricLightIntensity[i] = params->doubles.volumetricLightIntensity[i];
 	}
 	clParams->volumetricLightEnabledAny = params->imageSwitches.volumetricLightEnabled;
+
+	clParams->fakeLightsEnabled = params->fakeLightsEnabled;
+	clParams->fakeLightsIntensity = params->doubles.fakeLightsIntensity;
+	clParams->fakeLightsVisibility = params->doubles.fakeLightsVisibility;
+	clParams->fakeLightsVisibilitySize = params->doubles.fakeLightsVisibilitySize;
+	clParams->fakeLightsOrbitTrap = CVector2float3(params->fractal.doubles.fakeLightsOrbitTrap);
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)

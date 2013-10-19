@@ -7,7 +7,7 @@
 				if(r>40.0f || any(isinf(z4))) 
 				{
 					float rp = length(zp);
-					distance = 0.5f * r * native_log(r) / rp;
+					dist = 0.5f * r * native_log(r) / rp;
 					out.colourIndex = colourMin * 5000.0f;
 					break;
 				}

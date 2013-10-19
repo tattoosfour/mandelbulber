@@ -68,6 +68,8 @@ typedef struct
 	cl_int formula;
 	cl_int juliaMode;
 	cl_int constantDEThreshold;
+	cl_int fakeLightsMinIter;
+	cl_int fakeLightsMaxIter;
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
@@ -100,6 +102,7 @@ typedef struct
 	cl_int iterFogEnabled;
 	cl_int hdrEnabled;
 	cl_int randomSeed;
+	cl_int fakeLightsEnabled;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -135,6 +138,10 @@ typedef struct
 	cl_float imageGamma;
 	cl_float iterFogOpacity;
 	cl_float iterFogOpacityTrim;
+	cl_float fakeLightsIntensity;
+	cl_float fakeLightsVisibility;
+	cl_float fakeLightsVisibilitySize;
+
 	cl_float3 vp;
 	cl_float3 glowColour1;
 	cl_float3 glowColour2;
@@ -146,6 +153,7 @@ typedef struct
 	cl_float3 fogColour1;
 	cl_float3 fogColour2;
 	cl_float3 fogColour3;
+	cl_float3 fakeLightsOrbitTrap;
 } sClParams;
 
 typedef struct
@@ -174,6 +182,7 @@ typedef struct
 {
 	cl_uint N;
 	cl_int randomSeed;
+	cl_float3 orbitTrap;
 } sClCalcParams;
 
 typedef struct
