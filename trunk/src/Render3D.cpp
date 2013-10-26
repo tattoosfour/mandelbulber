@@ -2165,7 +2165,7 @@ void MainRender(void)
 						WriteLog("Stereo image made");
 						if (!noGUI) StereoPreview(&mainImage, stereoImage);
 						filename2 = IndexFilename(fractParam.file_destination, "jpg", index);
-						SaveJPEG(filename2.c_str(), 100, width * 2, height, (JSAMPLE*) stereoImage);
+						SaveJPEG(filename2.c_str(), 95, width * 2, height, (JSAMPLE*) stereoImage);
 						WriteLog("Stereo image saved");
 						if (!noGUI)
 						{
@@ -2193,7 +2193,7 @@ void MainRender(void)
 							if (Interface_data.imageFormat == imgFormatJPG)
 							{
 								filename2 = IndexFilename(fractParam.file_destination, "jpg", index2);
-								SaveJPEG(filename2.c_str(), 100, width, height, (JSAMPLE*) rgbbuf2);
+								SaveJPEG(filename2.c_str(), 95, width, height, (JSAMPLE*) rgbbuf2);
 							}
 							else if (Interface_data.imageFormat == imgFormatPNG)
 							{

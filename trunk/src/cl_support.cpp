@@ -10,18 +10,12 @@
 #include "interface.h"
 #include "settings.h"
 #include "cl_support.hpp"
+#include <sstream>
 
 CclSupport *clSupport;
 
 #ifdef CLSUPPORT
-void checkErr(cl_int err, const char * name)
-{
-	if (err != CL_SUCCESS)
-	{
-		std::cerr << "ERROR: " << name << " (" << err << ")" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-}
+
 
 
 CclSupport::CclSupport(void)
@@ -45,14 +39,49 @@ CclSupport::CclSupport(void)
 	rgbbuff = NULL;
 	inCLBuffer1 = NULL;
 	reflectBuffer = NULL;
+	inCLConstBuffer1 = NULL;
+	program = NULL;
+	source = NULL;
+	source2 = NULL;
+	queue = NULL;
 	memset(&lastParams, sizeof(lastParams), 0);
 	memset(&lastFractal, sizeof(lastFractal), 0);
 	isNVIDIA = false;
 }
 
+bool CclSupport::checkErr(cl_int err, const char * name)
+{
+	if (err != CL_SUCCESS)
+	{
+		std::stringstream errorMessageStream;
+		errorMessageStream << "ERROR: " << name << " (" << err << ")";
+		std::string errorMessage;
+		errorMessage = errorMessageStream.str();
+		std::cerr << errorMessage << std::endl;
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, errorMessage.c_str());
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		ready = false;
+		enabled = false;
+		recompileRequest = true;
+
+#ifdef WIN32
+		SetCurrentDirectory(data_directory);
+#else
+		chdir(data_directory);
+#endif
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable), false);
+		return false;
+	}
+	else
+		return true;
+}
+
 void CclSupport::Init(void)
 {
 	cl_int err;
+
+	ready = false;
 
 	char progressText[1000];
 	sprintf(progressText, "OpenCL - initialization");
@@ -68,7 +97,7 @@ void CclSupport::Init(void)
 #endif
 
 	cl::Platform::get(&platformList);
-	checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
+	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
 	std::cout << "OpenCL Platform number is: " << platformList.size() << std::endl;
 
 	platformList[0].getInfo((cl_platform_info) CL_PLATFORM_VENDOR, &platformVendor);
@@ -86,11 +115,11 @@ void CclSupport::Init(void)
 	}
 
 	context = new cl::Context(CL_DEVICE_TYPE_GPU, cprops, NULL, NULL, &err);
-	checkErr(err, "Context::Context()");
+	if(!checkErr(err, "Context::Context()")) return;
 	printf("OpenCL contexts created\n");
 
 	devices = context->getInfo<CL_CONTEXT_DEVICES>();
-	checkErr(devices.size() > 0 ? CL_SUCCESS : -1, "devices.size() > 0");
+	if(!checkErr(devices.size() > 0 ? CL_SUCCESS : -1, "devices.size() > 0")) return;
 
 	devices[0].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &numberOfComputeUnits);;
 	printf("OpenCL Number of compute units: %d\n", numberOfComputeUnits);
@@ -114,6 +143,16 @@ void CclSupport::Init(void)
 	printf("OpenCL Max constant buffer size  %ld kB\n", maxConstantBufferSize/1024);
 
 	printf("OpenCL Constant buffer used  %ld kB\n", sizeof(sClInConstants)/1024);
+
+	char text[1000];
+	sprintf(text,"OpenCL platform by: %s", platformVendor.c_str());
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClPlatformBy), text);
+	sprintf(text,"GPU frequency: %d MHz", maxClockFrequency);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMaxClock), text);
+	sprintf(text,"GPU memory: %ld MB", memorySize/1024/1024);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMemorySize), text);
+	sprintf(text,"Number of computing units: %d", numberOfComputeUnits);
+	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClComputingUnits), text);
 
 	std::string clDir = std::string(sharedDir) + "cl/";
 
@@ -141,7 +180,7 @@ void CclSupport::Init(void)
 	else if(engineNumber == 2)	strFileEngine += "cl_engine_full.cl";
 
 	std::ifstream fileEngine(strFileEngine.c_str());
-	checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str());
+	if(!checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str())) return;
 
 	std::string strFileDistance = clDir;
 	if(lastFormula == xenodreambuie || lastFormula == hypercomplex)
@@ -149,29 +188,29 @@ void CclSupport::Init(void)
 	else
 		strFileDistance += "cl_distance.cl";
 	std::ifstream fileDistance(strFileDistance.c_str());
-	checkErr(fileDistance.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileDistance).c_str());
+	if(!checkErr(fileDistance.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileDistance).c_str())) return;
 
 	std::string strFileFormulaBegin;
 	if(lastFractal.juliaMode) strFileFormulaBegin  = clDir + "cl_formulaBegin" + "Julia" + ".cl";
 	else  strFileFormulaBegin = clDir + "cl_formulaBegin" + ".cl";
 	std::ifstream fileFormulaBegin(strFileFormulaBegin.c_str());
-	checkErr(fileFormulaBegin.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaBegin).c_str());
+	if(!checkErr(fileFormulaBegin.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaBegin).c_str())) return;
 
 	std::string strFileFormulaInit = clDir + "cl_" + strFormula + "Init.cl";
 	std::ifstream fileFormulaInit(strFileFormulaInit.c_str());
-	checkErr(fileFormulaInit.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaInit).c_str());
+	if(!checkErr(fileFormulaInit.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaInit).c_str())) return;
 
 	std::string strFileFormulaFor = clDir + "cl_formulaFor.cl";
 	std::ifstream fileFormulaFor(strFileFormulaFor.c_str());
-	checkErr(fileFormulaFor.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaFor).c_str());
+	if(!checkErr(fileFormulaFor.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaFor).c_str())) return;
 
 	std::string strFileFormula = clDir + "cl_" + strFormula + ".cl";
 	std::ifstream fileFormula(strFileFormula.c_str());
-	checkErr(fileFormula.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormula).c_str());
+	if(!checkErr(fileFormula.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormula).c_str())) return;
 
 	std::string strFileFormulaEnd = clDir + "cl_formulaEnd.cl";
 	std::ifstream fileFormulaEnd(strFileFormulaEnd.c_str());
-	checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str());
+	if(!checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str())) return;
 
 	std::string progEngine(std::istreambuf_iterator<char>(fileEngine), (std::istreambuf_iterator<char>()));
 	std::string progDistance(std::istreambuf_iterator<char>(fileDistance), (std::istreambuf_iterator<char>()));
@@ -192,7 +231,7 @@ void CclSupport::Init(void)
 	printf("OpenCL Number of loaded sources %ld\n", sources.size());
 
 	program = new cl::Program(*context, sources, &err);
-	checkErr(err, "Program()");
+	if(!checkErr(err, "Program()")) return;
 	//program->getInfo(CL_PROGRAM_SOURCE, )
 	//std::cout << "Program source:\t" << program->getInfo<CL_PROGRAM_SOURCE>() << std::endl;
 
@@ -218,8 +257,31 @@ void CclSupport::Init(void)
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
 	printf("OpenCL build params:%s\n", buildParams.c_str());
 	err = program->build(devices, buildParams.c_str());
-	std::cout << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
-	checkErr(err, "Program::build()");
+
+	std::stringstream errorMessageStream;
+	errorMessageStream << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+	std::string buildLogText;
+	buildLogText = errorMessageStream.str();
+	std::cout << buildLogText;
+
+	if(!checkErr(err, "Program::build()"))
+	{
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+				"Program build log:");
+		GtkWidget *messageArea = gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(dialog));
+
+		GtkTextBuffer *textBuffer = gtk_text_buffer_new(NULL);
+		gtk_text_buffer_set_text(textBuffer, buildLogText.c_str(), buildLogText.length());
+
+		GtkWidget *textView = gtk_text_view_new_with_buffer(textBuffer);
+		gtk_box_pack_start(GTK_BOX(messageArea), textView, false, false, 1);
+		gtk_widget_show(textView);
+
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		return;
+	}
+
 	printf("OpenCL program built done\n");
 
 #ifdef WIN32
@@ -229,12 +291,11 @@ void CclSupport::Init(void)
 #endif
 
 	kernel = new cl::Kernel(*program, "fractal3D", &err);
-	checkErr(err, "Kernel::Kernel()");
+	if(!checkErr(err, "Kernel::Kernel()")) return;
 	printf("OpenCL kernel opened\n");
 
 	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
-
 
 	int pixelsPerJob =  workGroupSize * numberOfComputeUnits;
 	steps = height * width / pixelsPerJob + 1;
@@ -243,37 +304,30 @@ void CclSupport::Init(void)
 	buffSize = stepSize * sizeof(sClPixel);
 	rgbbuff = new sClPixel[buffSize];
 
-
 	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
-	printf("reflectBuffer size = %d kB\n", reflectBufferSize / 1024);
 	reflectBuffer = new sClReflect[reflectBufferSize];
 	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err)")) return;
 
 	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
+	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err)")) return;
+
 	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
+	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err)")) return;
 
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
-	checkErr(err, "Buffer::Buffer()");
+	if(!checkErr(err, "*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err")) return;
+
 	printf("OpenCL buffers created\n");
 
 	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
-	checkErr(err, "CommandQueue::CommandQueue()");
+	if(!checkErr(err, "CommandQueue::CommandQueue()"))return;
 	printf("OpenCL command queue prepared\n");
-
 
 	sprintf(progressText, "OpenCL - ready");
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
 
-	char text[1000];
-	sprintf(text,"OpenCL platform by: %s", platformVendor.c_str());
-	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClPlatformBy), text);
-	sprintf(text,"GPU frequency: %d MHz", maxClockFrequency);
-	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMaxClock), text);
-	sprintf(text,"GPU memory: %ld MB", memorySize/1024/1024);
-	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMemorySize), text);
-	sprintf(text,"Number of computing units: %d", numberOfComputeUnits);
-	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClComputingUnits), text);
 	sprintf(text,"Max workgroup size: %d", maxMaxWorkGroupSize[0]);
 	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClMaxWorkgroup), text);
 	sprintf(text,"Actual workgroup size: %ld", workGroupSize);
@@ -342,15 +396,15 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
 
-			size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect);
+			size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
 			size_t jobSizeLimit;
 			if (maxAllocMemSize > 0)
 			{
-				jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75 / 10; //10 because max nuber of reflections is 10
+				jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75; //10 because max nuber of reflections is 10
 			}
 			else
 			{
-				jobSizeLimit = 262144;
+				jobSizeLimit = 65536;
 			}
 			//printf("job size limit: %ld\n", jobSizeLimit);
 			int pixelsLeft = width * height - pixelIndex;
@@ -367,13 +421,18 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			rgbbuff = new sClPixel[buffSize];
 			outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err);
 
+			char errorText[1000];
+			sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err), buffSize = %ld", buffSize);
+			if(!checkErr(err, errorText)) return;
+
 			reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 			//printf("reflectBuffer size = %d\n", reflectBufferSize);
 			reflectBuffer = new sClReflect[10 * stepSize];
 			auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+			sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err), reflectBufferSize = %ld", reflectBufferSize);
+			if(!checkErr(err, errorText)) return;
 
-			checkErr(err, "Buffer::Buffer()");
-			//printf("OpenCL buffers created\n");
+			size_t usedGPUdMem = sizeOfPixel * stepSize;
 
 			err = kernel->setArg(0, *outCL);
 			err = kernel->setArg(1, *inCLBuffer1);
@@ -384,26 +443,28 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
 			err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
-			checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+			sprintf(errorText, "ComamndQueue::enqueueWriteBuffer(inCLBuffer1), used GPU mem = %ld", usedGPUdMem);
+			if(!checkErr(err, errorText)) return;
+
 			err = queue->finish();
-			checkErr(err, "ComamndQueue::finish() - CLBuffer");
+			if(!checkErr(err, "ComamndQueue::finish() - CLBuffer")) return;
 
 			err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
-			checkErr(err, "ComamndQueue::enqueueWriteBuffer()");
+			if(!checkErr(err, "ComamndQueue::enqueueWriteBuffer(inCLConstBuffer1)")) return;
 			err = queue->finish();
-			checkErr(err, "ComamndQueue::finish() - ConstBuffer");
+			if(!checkErr(err, "ComamndQueue::finish() - ConstBuffer")) return;
 
-			//cl::Event event;
-			err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));	//, NULL, &event);
-			checkErr(err, "ComamndQueue::enqueueNDRangeKernel() ");
-			//event.wait();
+			err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+			sprintf(errorText, "ComamndQueue::nqueueNDRangeKernel(jobSize), jobSize = %d", stepSize);
+			if(!checkErr(err, errorText)) return;
+
 			err = queue->finish();
-			checkErr(err, "ComamndQueue::finish() - Kernel");
+			if(!checkErr(err, "ComamndQueue::finish() - Kernel")) return;
 
 			err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
-			checkErr(err, "ComamndQueue::enqueueReadBuffer()");
+			if(!checkErr(err, "ComamndQueue::enqueueReadBuffer()")) return;
 			err = queue->finish();
-			checkErr(err, "ComamndQueue::finish() - ReadBuffer");
+			if(!checkErr(err, "ComamndQueue::finish() - ReadBuffer")) return;
 
 			unsigned int offset = pixelIndex;
 
@@ -450,8 +511,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			int time_s = (int) time % 60;
 			int time_min = (int) (time / 60) % 60;
 			int time_h = time / 3600;
-			sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, job size %d", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
-					time_min, time_s, stepSize);
+			sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, used GPU mem %ld MB", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
+					time_min, time_s, usedGPUdMem/1024/1024);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
 
@@ -494,15 +555,24 @@ void CclSupport::Enable(void)
 
 void CclSupport::Disable(void)
 {
-	delete context;
-	delete[] rgbbuff;
-	delete outCL;
-	delete program;
-	delete kernel;
-	delete queue;
-	delete inCLBuffer1;
-	delete inCLConstBuffer1;
-	delete[] reflectBuffer;
+	if(context) delete context;
+	context = NULL;
+	if(rgbbuff) delete[] rgbbuff;
+	rgbbuff = NULL;
+	if(outCL) delete outCL;
+	outCL = NULL;
+	if(program) delete program;
+	program = NULL;
+	if(kernel) delete kernel;
+	kernel = NULL;
+	if(queue)	delete queue;
+	queue = NULL;
+	if (inCLBuffer1)delete inCLBuffer1;
+	inCLBuffer1 = NULL;
+	if(inCLConstBuffer1) delete inCLConstBuffer1;
+	inCLConstBuffer1 = NULL;
+	if(reflectBuffer) delete[] reflectBuffer;
+	reflectBuffer = NULL;
 	enabled = false;
 	ready = false;
 }

@@ -37,6 +37,7 @@ class CclSupport
 {
 public:
 	CclSupport();
+	bool checkErr(cl_int err, const char * name);
 	void Init(void);
 	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
@@ -76,10 +77,10 @@ private:
 
 	int width;
 	int height;
-	unsigned int buffSize;
+	size_t buffSize;
 	unsigned int stepSize;
 	unsigned int steps;
-	unsigned int reflectBufferSize;
+	size_t reflectBufferSize;
 	cl_int numberOfComputeUnits;
 	cl_int maxWorkItemDimmensions;
 	cl_int maxMaxWorkGroupSize[3];
