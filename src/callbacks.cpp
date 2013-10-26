@@ -792,7 +792,7 @@ void PressedSaveImage(GtkWidget *widget, gpointer data)
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		const char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		SaveJPEG(filename, 100, mainImage.GetWidth(), mainImage.GetHeight(), (JSAMPLE*) mainImage.ConvertTo8bit());
+		SaveJPEG(filename, 98, mainImage.GetWidth(), mainImage.GetHeight(), (JSAMPLE*) mainImage.ConvertTo8bit());
 		strcpy(lastFilenameImage, filename);
 	}
 	gtk_widget_destroy(dialog);
