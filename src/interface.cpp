@@ -1426,8 +1426,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClSwitches1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClInformation = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsV = gtk_vbox_new(FALSE, 1);
-	Interface.boxOpenClEngineSettingsH1 = gtk_vbox_new(FALSE, 1);
-	Interface.boxOpenClEngineSettingsH2 = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH1 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH2 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH3 = gtk_hbox_new(FALSE, 1);
 	Interface.boxNetRenderClientV = gtk_vbox_new(FALSE, 1);
 	Interface.boxNetRenderClientH1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxNetRenderServerV = gtk_vbox_new(FALSE, 1);
@@ -1813,6 +1814,8 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
 	Interface.edit_OpenCLProcessingCycleTime = gtk_entry_new();
+	Interface.edit_OpenCLMaxMem = gtk_entry_new();
+	Interface.edit_OpenCLTextEditor = gtk_entry_new();
 
 	Interface.edit_netRenderClientName = gtk_entry_new();
 	Interface.edit_netRenderClientPort = gtk_entry_new();
@@ -1900,6 +1903,25 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Normal: shadows, glow, fast AO");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Full: all shaders");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine), 0);
+
+	Interface.comboOpenCLDeviceIndex = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "0");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "3");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), 0);
+
+	Interface.comboOpenCLPlatformIndex = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "0");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "3");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), 0);
+
+	Interface.comboOpenCLGPUCPU = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), "GPU");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), "CPU");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), 0);
 
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
@@ -2885,7 +2907,14 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, Interface.edit_OpenCLProcessingCycleTime), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", Interface.comboOpenCLGPUCPU), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Platform index:", Interface.comboOpenCLPlatformIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device index:", Interface.comboOpenCLDeviceIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateEdit("256", "Max GPU mem to use [MB]:", 6, Interface.edit_OpenCLMaxMem), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH2), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, Interface.edit_OpenCLProcessingCycleTime), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("/usr/bin/kate", "Text editor:", 40, Interface.edit_OpenCLTextEditor), false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
