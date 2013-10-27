@@ -9,6 +9,7 @@
 #define SETTINGS_H_
 
 #include "Render3D.h"
+#include "interface.h"
 
 extern char data_directory[1000];
 
@@ -25,4 +26,7 @@ void MorphToIFS(double *IFSdouble, sFractal &fractal);
 void MakePaletteString(const sRGB *palette, char *paletteString);
 void GetPaletteFromString(sRGB *palette, const char *paletteString);
 void KeepOtherSettings(sParamRender *params);
+void SaveAppSettings(const char *filename, const sAppSettings& appParams);
+bool LoadAppSettings(char *filename, sAppSettings &appParams);
+
 #endif /* SETTINGS_H_ */

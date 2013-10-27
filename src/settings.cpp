@@ -560,6 +560,54 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	delete[] paletteString;
 }
 
+void SaveAppSettings(const char *filename, const sAppSettings& appParams)
+{
+	FILE * fileSettings;
+	fileSettings = fopen(filename, "w");
+
+	fprintfInt(fileSettings, "absolute_movement_enable", appParams.absoluteMovementModeEnabled, -1, true);
+	fprintfInt(fileSettings, "zoom_by_mouse_click_enable", appParams.zoomByMouseClickEnabled, -1, true);
+	fprintfDot(fileSettings, "camera_movement_relative_step", appParams.cameraMoveStepRelative, -1, true);
+	fprintfDot(fileSettings, "camera_movement_absolute_step", appParams.cameraMoveStepAbsolute, -1, true);
+	fprintfDot(fileSettings, "camera_rotation_step", appParams.rotationStep, -1, true);
+	fprintfDot(fileSettings, "mouse_close_up_ratio", appParams.mouseCloseUpRatio, -1, true);
+	fprintf(fileSettings, "net_render_client_port %s;\n", appParams.netRenderClientPort.c_str());
+	fprintf(fileSettings, "net_render_client_IP %s;\n", appParams.netRenderClientIP.c_str());
+	fprintf(fileSettings, "net_render_server_port %s;\n", appParams.netRenderServerPort.c_str());
+
+#ifdef CLSUPPORT
+	fprintfInt(fileSettings, "openCL_use_CPU", appParams.oclUseCPU, -1, true);
+	fprintfInt(fileSettings, "openCL_platform_index", appParams.oclPlatformIndex, -1, true);
+	fprintfInt(fileSettings, "openCL_device_index", appParams.oclDeviceIndex, -1, true);
+	fprintfInt(fileSettings, "openCL_engine", appParams.oclEngineSelection, -1, true);
+	fprintfDot(fileSettings, "openCL_cycle_time", appParams.oclCycleTime, -1, true);
+	fprintfInt(fileSettings, "openCL_memory_limit", appParams.oclMemoryLimit, -1, true);
+	fprintf(fileSettings, "openCL_text_editor %s;\n", appParams.oclTextEditor.c_str());
+#endif
+
+#ifdef CLSUPPORT
+	bool oclUseCPU;
+	int oclDeviceIndex;
+	int oclPlatformIndex;
+	int oclEngineSelection;
+	double oclCycleTime;
+	double oclMemoryLimit;
+	std::string oclTextEditor;
+#endif
+	bool absoluteMovementModeEnabled;
+	bool zoomByMouseClickEnabled;
+	bool goCloseToSurfaceEnabled;
+	double cameraMoveStepRelative;
+	double cameraMoveStepAbsolute;
+	double rotationStep;
+	double mouseCloseUpRatio;
+  std::string netRenderClientPort;
+	std::string netRenderClientIP;
+	std::string netRenderServerPort;
+
+	fclose(fileSettings);
+}
+
 bool LoadSettings(const char *filename, sParamRender &params, bool disableMessages)
 {
 	string defaultsFilename = string(data_directory);
@@ -1124,6 +1172,71 @@ void LoadSettingsPost(sParamRender &params)
 	}
 
 	lightsPlaced = 0;
+}
+
+bool LoadAppSettings(char *filename, sAppSettings &appParams)
+{
+
+	bool locale_dot = false;
+	char str1[100];
+	char str2[2000];
+	char str3[100];
+
+	FILE * fileSettings;
+	fileSettings = fopen(filename, "r");
+
+	int lineCounter = 0;
+
+	if (fileSettings)
+	{
+		while (!feof(fileSettings))
+		{
+			lineCounter++;
+			int c = fscanf(fileSettings, "%s", str1);
+			if (c > 0)
+			{
+				c = fscanf(fileSettings, "%[ ]", str2);
+				c = fscanf(fileSettings, "%[^;]", str2);
+
+				     if (!strcmp(str1, "absolute_movement_enable")) appParams.absoluteMovementModeEnabled = atoi(str2);
+				else if (!strcmp(str1, "zoom_by_mouse_click_enable")) appParams.zoomByMouseClickEnabled = atoi(str2);
+				else if (!strcmp(str1, "camera_movement_relative_step")) appParams.cameraMoveStepRelative = atof2(str2);
+				else if (!strcmp(str1, "camera_movement_absolute_step")) appParams.cameraMoveStepAbsolute = atof2(str2);
+				else if (!strcmp(str1, "camera_rotation_step")) appParams.rotationStep = atof2(str2);
+				else if (!strcmp(str1, "mouse_close_up_ratio")) appParams.mouseCloseUpRatio = atof2(str2);
+
+				else if (!strcmp(str1, "net_render_client_port")) appParams.netRenderClientPort = str2;
+				else if (!strcmp(str1, "net_render_client_IP")) appParams.netRenderClientIP = str2;
+				else if (!strcmp(str1, "net_render_server_port")) appParams.netRenderServerPort = str2;
+
+#ifdef CLSUPPORT
+				else if (!strcmp(str1, "openCL_use_CPU")) appParams.oclUseCPU = atoi(str2);
+				else if (!strcmp(str1, "openCL_platform_index")) appParams.oclPlatformIndex = atoi(str2);
+				else if (!strcmp(str1, "openCL_device_index")) appParams.oclDeviceIndex = atoi(str2);
+				else if (!strcmp(str1, "openCL_engine")) appParams.oclEngineSelection = atoi(str2);
+				else if (!strcmp(str1, "openCL_cycle_time")) appParams.oclCycleTime = atof2(str2);
+				else if (!strcmp(str1, "openCL_memory_limit")) appParams.oclMemoryLimit = atoi(str2);
+
+				else if (!strcmp(str1, "openCL_text_editor")) appParams.oclTextEditor = str2;
+#endif
+				else
+				{
+					printf("Warning! Unknown parameter: %s %s\n", str1, str2);
+					WriteLog("Warning! Unknown parameter:");
+					WriteLog(str1);
+				}
+
+				c = fscanf(fileSettings, "%[^\n]", str2);
+			}
+		}
+		fclose(fileSettings);
+		return true;
+	}
+	else
+	{
+		printf("Can't open application settings file: %s\n", filename);
+		return false;
+	}
 }
 
 void KeepOtherSettings(sParamRender *params)

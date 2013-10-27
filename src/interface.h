@@ -853,6 +853,30 @@ struct sNoGUIdata
 	sParamRender fractparams;
 	std::vector<const char *> overrideStrings;
 };
+
+struct sAppSettings
+{
+#ifdef CLSUPPORT
+	bool oclUseCPU;
+	int oclDeviceIndex;
+	int oclPlatformIndex;
+	int oclEngineSelection;
+	double oclCycleTime;
+	double oclMemoryLimit;
+	std::string oclTextEditor;
+#endif
+	bool absoluteMovementModeEnabled;
+	bool zoomByMouseClickEnabled;
+	bool goCloseToSurfaceEnabled;
+	double cameraMoveStepRelative;
+	double cameraMoveStepAbsolute;
+	double rotationStep;
+	double mouseCloseUpRatio;
+  std::string netRenderClientPort;
+	std::string netRenderClientIP;
+	std::string netRenderServerPort;
+};
+
 //Global variables
 
 extern sMainWindow renderWindow;
@@ -903,5 +927,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
 cl_float4 CVector2float3(CVector3 vect);
 cl_float4 sRGB2float3(sRGB colour, double factor);
+void ReadInterfaceAppSettings(sAppSettings *appParams);
+void WriteInterfaceAppSettings(sAppSettings *appParams);
 #endif
 #endif /* INTERFACE_H_ */

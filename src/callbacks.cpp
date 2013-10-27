@@ -547,6 +547,20 @@ gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 		gtk_widget_destroy(dialog);
 		programClosed = true;
 		StopRendering(widget, data);
+
+		if (netRender->IsClient())
+		{
+			netRender->DeleteClient();
+		}
+
+		sAppSettings appParams;
+		ReadInterfaceAppSettings(&appParams);
+#ifdef CLSUPPORT
+		SaveAppSettings("mandelbulber_ocl_settings", appParams);
+#else
+		SaveAppSettings("mandelbulber_settings", appParams);
+#endif
+
 		gtk_main_quit();
 		printf("Quitting\n");
 	}
