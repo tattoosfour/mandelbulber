@@ -392,7 +392,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			delete[] reflectBuffer;
 
 			double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
-			if (processingCycleTime < 0.1) processingCycleTime = 0.1;
+			if (processingCycleTime < 0.02) processingCycleTime = 0.02;
 
 			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
 

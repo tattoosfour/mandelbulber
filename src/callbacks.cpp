@@ -540,10 +540,20 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 //----------- close program
 gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-	programClosed = true;
-	StopRendering(widget, data);
-	gtk_main_quit();
-	printf("Quitting\n");
+	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Do yoy really want to close Mandelbulber?");
+	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+	if(result == GTK_RESPONSE_YES)
+	{
+		gtk_widget_destroy(dialog);
+		programClosed = true;
+		StopRendering(widget, data);
+		gtk_main_quit();
+		printf("Quitting\n");
+	}
+	else
+	{
+		gtk_widget_destroy(dialog);
+	}
 	return true;
 }
 
