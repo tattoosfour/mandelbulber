@@ -250,6 +250,7 @@ struct sInterface
 	GtkWidget *boxOpenClEngineSettingsV;
 	GtkWidget *boxOpenClEngineSettingsH1;
 	GtkWidget *boxOpenClEngineSettingsH2;
+	GtkWidget *boxOpenClEngineSettingsH3;
 	GtkWidget *boxNetRenderServerV;
 	GtkWidget *boxNetRenderClientV;
 	GtkWidget *boxNetRenderServerH1;
@@ -593,6 +594,8 @@ struct sInterface
 	GtkWidget *edit_tiles;
 	GtkWidget *edit_OpenCLPixelsPerJob;
 	GtkWidget *edit_OpenCLProcessingCycleTime;
+	GtkWidget *edit_OpenCLMaxMem;
+	GtkWidget *edit_OpenCLTextEditor;
 	GtkWidget *edit_iterFogOpacityTrim;
 	GtkWidget *edit_iterFogOpacity;
 	GtkWidget *edit_netRenderServerPort;
@@ -655,6 +658,9 @@ struct sInterface
 	GtkWidget *comboImageProportion;
 	GtkWidget *comboGeneralizedFoldBoxType;
 	GtkWidget *comboOpenCLEngine;
+	GtkWidget *comboOpenCLDeviceIndex;
+	GtkWidget *comboOpenCLPlatformIndex;
+	GtkWidget *comboOpenCLGPUCPU;
 
 	GtkWidget *progressBar;
 

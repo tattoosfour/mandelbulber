@@ -77,6 +77,9 @@ private:
 
 	int width;
 	int height;
+	unsigned int deviceIndex;
+	unsigned int platformIndex;
+	bool useCPU;
 	size_t buffSize;
 	unsigned int stepSize;
 	unsigned int steps;
@@ -87,6 +90,7 @@ private:
 	cl_int maxClockFrequency;
 	size_t memorySize;
 	size_t maxAllocMemSize;
+	size_t memoryLimitByUser;
 	size_t workGroupSize;
 	size_t maxConstantBufferSize;
 

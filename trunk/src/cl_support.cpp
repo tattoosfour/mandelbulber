@@ -96,13 +96,23 @@ void CclSupport::Init(void)
 	std::cout << clewErrorString(err) << std::endl;
 #endif
 
+	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
+	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
+	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+
 	cl::Platform::get(&platformList);
 	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
 	std::cout << "OpenCL Platform number is: " << platformList.size() << std::endl;
 
-	platformList[0].getInfo((cl_platform_info) CL_PLATFORM_VENDOR, &platformVendor);
+	if(platformIndex > platformList.size()-1)
+	{
+		platformIndex = platformList.size()-1;
+		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), platformIndex);
+	}
+
+	platformList[platformIndex].getInfo((cl_platform_info) CL_PLATFORM_VENDOR, &platformVendor);
 	std::cout << "OpenCL Platform is by: " << platformVendor << "\n";
-	cl_context_properties cprops[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) (platformList[0])(), 0 };
+	cl_context_properties cprops[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) (platformList[platformIndex])(), 0 };
 	if(platformVendor.find("NVIDIA") != std::string::npos)
 	{
 		isNVIDIA = true;
@@ -114,32 +124,45 @@ void CclSupport::Init(void)
 		printf("AMD OpenCL library is detected\n");
 	}
 
-	context = new cl::Context(CL_DEVICE_TYPE_GPU, cprops, NULL, NULL, &err);
+	if(useCPU)
+	{
+		context = new cl::Context(CL_DEVICE_TYPE_CPU, cprops, NULL, NULL, &err);
+	}
+	else
+	{
+		context = new cl::Context(CL_DEVICE_TYPE_GPU, cprops, NULL, NULL, &err);
+	}
 	if(!checkErr(err, "Context::Context()")) return;
 	printf("OpenCL contexts created\n");
 
 	devices = context->getInfo<CL_CONTEXT_DEVICES>();
+	if(deviceIndex > devices.size()-1)
+	{
+		deviceIndex = devices.size()-1;
+		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), deviceIndex);
+	}
+
 	if(!checkErr(devices.size() > 0 ? CL_SUCCESS : -1, "devices.size() > 0")) return;
 
-	devices[0].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &numberOfComputeUnits);;
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &numberOfComputeUnits);;
 	printf("OpenCL Number of compute units: %d\n", numberOfComputeUnits);
 
-	devices[0].getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &maxWorkItemDimmensions);
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &maxWorkItemDimmensions);
 	printf("OpenCL Max work item dimmensions: %d\n", maxWorkItemDimmensions);
 
-	devices[0].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &maxMaxWorkGroupSize);
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &maxMaxWorkGroupSize);
 	printf("OpenCL Max work group size: %d\n", maxMaxWorkGroupSize[0]);
 
-	devices[0].getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &maxClockFrequency);
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &maxClockFrequency);
 	printf("OpenCL Max clock frequency  %d MHz\n", maxClockFrequency);
 
-	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memorySize);
+	devices[deviceIndex].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memorySize);
 	printf("OpenCL Memory size  %ld MB\n", memorySize/1024/1024);
 
-	devices[0].getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &maxAllocMemSize);
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &maxAllocMemSize);
 	printf("OpenCL Max size of memory object allocation %ld MB\n", maxAllocMemSize/1024/1024);
 
-	devices[0].getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &maxConstantBufferSize);
+	devices[deviceIndex].getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &maxConstantBufferSize);
 	printf("OpenCL Max constant buffer size  %ld kB\n", maxConstantBufferSize/1024);
 
 	printf("OpenCL Constant buffer used  %ld kB\n", sizeof(sClInConstants)/1024);
@@ -259,7 +282,7 @@ void CclSupport::Init(void)
 	err = program->build(devices, buildParams.c_str());
 
 	std::stringstream errorMessageStream;
-	errorMessageStream << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+	errorMessageStream << "OpenCL Build log:\t" << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[deviceIndex]) << std::endl;
 	std::string buildLogText;
 	buildLogText = errorMessageStream.str();
 	std::cout << buildLogText;
@@ -294,7 +317,7 @@ void CclSupport::Init(void)
 	if(!checkErr(err, "Kernel::Kernel()")) return;
 	printf("OpenCL kernel opened\n");
 
-	kernel->getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
+	kernel->getWorkGroupInfo(devices[deviceIndex], CL_KERNEL_WORK_GROUP_SIZE, &workGroupSize);
 	printf("OpenCL workgroup size: %ld\n", workGroupSize);
 
 	int pixelsPerJob =  workGroupSize * numberOfComputeUnits;
@@ -320,7 +343,7 @@ void CclSupport::Init(void)
 
 	printf("OpenCL buffers created\n");
 
-	queue = new cl::CommandQueue(*context, devices[0], 0, &err);
+	queue = new cl::CommandQueue(*context, devices[deviceIndex], 0, &err);
 	if(!checkErr(err, "CommandQueue::CommandQueue()"))return;
 	printf("OpenCL command queue prepared\n");
 
