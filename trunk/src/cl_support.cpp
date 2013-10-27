@@ -99,6 +99,7 @@ void CclSupport::Init(void)
 	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
 	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
 	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+	memoryLimitByUser = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem))) * 1024 * 1024;
 
 	cl::Platform::get(&platformList);
 	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
@@ -401,6 +402,23 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	int nDof = 1;
 	if(lastParams.DOFEnabled) nDof = 256;
 
+	size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
+	size_t jobSizeLimit;
+	if (maxAllocMemSize > 0)
+	{
+		if(maxAllocMemSize * 0.75 < memoryLimitByUser)
+		{
+			jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75;
+		}
+		else
+		{
+			jobSizeLimit = memoryLimitByUser / sizeOfPixel;
+		}
+	}
+	else
+	{
+		jobSizeLimit = memoryLimitByUser / sizeOfPixel;
+	}
 
 	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
 
@@ -419,16 +437,6 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
 
-			size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
-			size_t jobSizeLimit;
-			if (maxAllocMemSize > 0)
-			{
-				jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75; //10 because max nuber of reflections is 10
-			}
-			else
-			{
-				jobSizeLimit = 65536;
-			}
 			//printf("job size limit: %ld\n", jobSizeLimit);
 			int pixelsLeft = width * height - pixelIndex;
 			int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
@@ -439,7 +447,6 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			constantsBuffer1->params.randomSeed = rand();
 
 			stepSize = workGroupSize * workGroupSizeMultiplier;
-			//printf("OpenCL Job size: %d\n", stepSize);
 			buffSize = stepSize * sizeof(sClPixel);
 			rgbbuff = new sClPixel[buffSize];
 			outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err);

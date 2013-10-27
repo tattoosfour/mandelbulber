@@ -19,7 +19,7 @@
 #include <cstdlib>
 
 #include "interface.h"
-
+#include "settings.h"
 
 #define CONNECT_SIGNAL(object, callback, event) g_signal_connect(G_OBJECT(object), event, G_CALLBACK(callback), NULL)
 #define CONNECT_SIGNAL_CLICKED(x, y) CONNECT_SIGNAL(x, y, "clicked")
@@ -711,6 +711,52 @@ void ReadInterface(sParamRender *params)
 
 	RecalculateIFSParams(params->fractal);
 	CreateFormulaSequence(params->fractal);
+}
+
+void ReadInterfaceAppSettings(sAppSettings *appParams)
+{
+#ifdef CLSUPPORT
+	appParams->oclUseCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
+	appParams->oclDeviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
+	appParams->oclPlatformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+	appParams->oclEngineSelection = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
+	appParams->oclCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+	appParams->oclMemoryLimit = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem)));
+	appParams->oclTextEditor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
+#endif
+	appParams->absoluteMovementModeEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorAbsoluteDistance));
+	appParams->zoomByMouseClickEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable));
+	appParams->goCloseToSurfaceEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface));
+	appParams->cameraMoveStepRelative = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_step_forward)));
+	appParams->cameraMoveStepAbsolute = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_NavigatorAbsoluteDistance)));
+	appParams->rotationStep = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_step_rotation)));
+	appParams->mouseCloseUpRatio = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_mouse_click_distance)));
+	appParams->netRenderClientPort = gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientPort));
+	appParams->netRenderClientIP = gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderClientName));
+	appParams->netRenderServerPort = gtk_entry_get_text(GTK_ENTRY(Interface.edit_netRenderServerPort));
+}
+
+void WriteInterfaceAppSettings(sAppSettings *appParams)
+{
+#ifdef CLSUPPORT
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), appParams->oclUseCPU);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), appParams->oclDeviceIndex);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), appParams->oclPlatformIndex);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine), appParams->oclEngineSelection);
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime), DoubleToString(appParams->oclCycleTime));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem), IntToString(appParams->oclMemoryLimit));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor), appParams->oclTextEditor.c_str());
+#endif
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorAbsoluteDistance), appParams->absoluteMovementModeEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable), appParams->zoomByMouseClickEnabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorGoToSurface), appParams->goCloseToSurfaceEnabled);
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_step_forward), DoubleToString(appParams->cameraMoveStepRelative));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_NavigatorAbsoluteDistance), DoubleToString(appParams->cameraMoveStepAbsolute));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_step_rotation), DoubleToString(appParams->rotationStep));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_mouse_click_distance), DoubleToString(appParams->mouseCloseUpRatio));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_netRenderClientPort), appParams->netRenderClientPort.c_str());
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_netRenderClientName), appParams->netRenderClientIP.c_str());
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_netRenderServerPort), appParams->netRenderServerPort.c_str());
 }
 
 char* DoubleToString(double value)
@@ -1501,9 +1547,9 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frPrimitiveInvertedSphere = gtk_frame_new("Inverted sphere");
 	Interface.frPrimitiveWater = gtk_frame_new("Water");
 	Interface.frMeasure = gtk_frame_new("Coordinate measurement");
-	Interface.frOpenClSettings = gtk_frame_new("OpenCL settings");
+	Interface.frOpenClSettings = gtk_frame_new("OpenCL kernel");
 	Interface.frOpenClInformation = gtk_frame_new("OpenCL information");
-	Interface.frOpenClEngineSettings = gtk_frame_new("Engine settings");
+	Interface.frOpenClEngineSettings = gtk_frame_new("OpenCL engine settings");
 	Interface.frNetRender = gtk_frame_new("Rendering via network");
 	Interface.frFakeLights = gtk_frame_new("Fake lights based on orbit traps");
 	Interface.frImageAdjustments = gtk_frame_new("Image adjustments");
@@ -2994,6 +3040,21 @@ void CreateInterface(sParamRender *default_settings)
 	WriteInterface(default_settings);
 	interfaceCreated = true;
 	renderRequest = false;
+
+	//load app settings
+	sAppSettings appParams;
+#ifdef CLSUPPORT
+	if(LoadAppSettings("mandelbulber_ocl_settings", appParams))
+#else
+	if(LoadAppSettings("mandelbulber_settings", appParams))
+#endif
+	{
+		WriteInterfaceAppSettings(&appParams);
+	}
+	else
+	{
+		printf("Will be used default settings\n");
+	}
 
   g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
   g_timeout_add (100,(GSourceFunc)CallerTimerLoopWindowRefresh,NULL);
