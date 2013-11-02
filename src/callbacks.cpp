@@ -1236,6 +1236,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 	gtk_widget_set_sensitive(Interface.comboGeneralizedFoldBoxType, formula == generalizedFoldBox);
 	gtk_widget_set_sensitive(Interface.edit_mandelboxSolid, formula == generalizedFoldBox);
 	gtk_widget_set_sensitive(Interface.edit_mandelboxMelt, formula == generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.comboFractType, true);
 }
 
 void ChangedTgladFoldingMode(GtkWidget *widget, gpointer data)
@@ -2800,6 +2801,37 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 	{
 		clSupport->Disable();
 	}
+}
+
+void ChangedOpenClCustomEnable(GtkWidget *widget, gpointer data)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	{
+		gtk_widget_set_sensitive(Interface.tab_box_mandelbox, true);
+		gtk_widget_set_sensitive(Interface.tab_box_IFS, true);
+		gtk_widget_set_sensitive(Interface.edit_power, true);
+		gtk_widget_set_sensitive(Interface.edit_cadd, true);
+		gtk_widget_set_sensitive(Interface.tab_box_hybrid, false);
+		gtk_widget_set_sensitive(Interface.edit_mandelboxSharpness, false);
+		gtk_widget_set_sensitive(Interface.comboGeneralizedFoldBoxType, false);
+		gtk_widget_set_sensitive(Interface.edit_mandelboxSolid, false);
+		gtk_widget_set_sensitive(Interface.edit_mandelboxMelt, false);
+		gtk_widget_set_sensitive(Interface.comboFractType, false);
+	}
+	else
+	{
+		ChangedComboFormula(Interface.comboFractType, NULL);
+	}
+}
+
+void ChangedComboOpenCLCustomFormulas(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		clSupport->customFormulas->SetActual(gtk_combo_box_get_active(GTK_COMBO_BOX(widget)));
+	}
+#endif
 }
 
 void ChangedIterFogEnable(GtkWidget *widget, gpointer data)

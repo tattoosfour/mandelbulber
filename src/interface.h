@@ -99,6 +99,9 @@ struct sInterface
 	GtkWidget *tabsNetRender;
 	GtkWidget *tab_label_server;
 	GtkWidget *tab_label_client;
+	GtkWidget *tabsOpenCL;
+	GtkWidget *tab_label_openclEngine;
+	GtkWidget *tab_label_openclCustom;
 
 	GtkWidget *tab_box_view;
 	GtkWidget *tab_box_fractal;
@@ -121,6 +124,8 @@ struct sInterface
 	GtkWidget *tab_box_openCL;
 	GtkWidget *tab_box_server;
 	GtkWidget *tab_box_client;
+	GtkWidget *tab_box_openclEngine;
+	GtkWidget *tab_box_openclCustom;
 
 	GtkWidget *boxMain;
 	GtkWidget *boxButtons;
@@ -251,6 +256,10 @@ struct sInterface
 	GtkWidget *boxOpenClEngineSettingsH1;
 	GtkWidget *boxOpenClEngineSettingsH2;
 	GtkWidget *boxOpenClEngineSettingsH3;
+	GtkWidget *boxOpenClCustomV1;
+	GtkWidget *boxOpenClCustomH11;
+	GtkWidget *boxOpenClCustomH12;
+
 	GtkWidget *boxNetRenderServerV;
 	GtkWidget *boxNetRenderClientV;
 	GtkWidget *boxNetRenderServerH1;
@@ -325,6 +334,8 @@ struct sInterface
 	GtkWidget *frOpenClSettings;
 	GtkWidget *frOpenClInformation;
 	GtkWidget *frOpenClEngineSettings;
+	GtkWidget *frOpenClCustomSelection;
+	GtkWidget *frOpenClCustomParams;
 	GtkWidget *frNetRender;
 	GtkWidget *frFakeLights;
 	GtkWidget *frImageAdjustments;
@@ -410,6 +421,10 @@ struct sInterface
 	GtkWidget *buAutoFog;
 	GtkWidget *buMeasureActivation;
 	GtkWidget *buSaveAllImageLayers;
+	GtkWidget *buOpenCLNewFormula;
+	GtkWidget *buOpenCLDeleteFormula;
+	GtkWidget *buOpenCLEditFormula;
+	GtkWidget *buOpenCLRecompile;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;
@@ -661,6 +676,7 @@ struct sInterface
 	GtkWidget *comboOpenCLDeviceIndex;
 	GtkWidget *comboOpenCLPlatformIndex;
 	GtkWidget *comboOpenCLGPUCPU;
+	GtkWidget *comboOpenCLCustomFormulas;
 
 	GtkWidget *progressBar;
 
@@ -714,6 +730,7 @@ struct sInterface
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
 	GtkWidget *checkOpenClEnable;
+	GtkWidget *checkOpenClCustomEnable;
 	GtkWidget *checkIterFogEnable;
 	GtkWidget *checkNetRenderServerEnable;
 	GtkWidget *checkNetRenderServerScan;

@@ -10,7 +10,12 @@
 #include "interface.h"
 #include "settings.h"
 #include "cl_support.hpp"
+
+#include <dirent.h>
 #include <sstream>
+#include <sys/stat.h>
+#include <glib.h>
+
 
 CclSupport *clSupport;
 
@@ -44,9 +49,23 @@ CclSupport::CclSupport(void)
 	source = NULL;
 	source2 = NULL;
 	queue = NULL;
+	reflectBufferSize = 0;
+	maxClockFrequency = 0;
+	maxAllocMemSize = 0;
+	platformIndex = 0;
+	memoryLimitByUser = 0;
+	useCPU = false;
+	deviceIndex = 0;
+	workGroupSize = 0;
+	numberOfComputeUnits = 0;
+	stepSize = 0;
+	memorySize = 0;
+	maxWorkItemDimmensions = 0;
+	maxConstantBufferSize = 0;
 	memset(&lastParams, sizeof(lastParams), 0);
 	memset(&lastFractal, sizeof(lastFractal), 0);
 	isNVIDIA = false;
+	customFormulas = NULL;
 }
 
 bool CclSupport::checkErr(cl_int err, const char * name)
@@ -95,6 +114,11 @@ void CclSupport::Init(void)
 	err = clewInit(opencldll.c_str());
 	std::cout << clewErrorString(err) << std::endl;
 #endif
+
+	if(!customFormulas)
+	{
+		customFormulas = new CCustomFormulas(data_directory);
+	}
 
 	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
 	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
@@ -220,7 +244,17 @@ void CclSupport::Init(void)
 	std::ifstream fileFormulaBegin(strFileFormulaBegin.c_str());
 	if(!checkErr(fileFormulaBegin.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaBegin).c_str())) return;
 
-	std::string strFileFormulaInit = clDir + "cl_" + strFormula + "Init.cl";
+	std::string strFileFormulaInit;
+	std::string strFileFormula;
+	if(lastFormula == ocl_custom)
+	{
+		customFormulas->GetActual(&strFormula, &strFileFormula, &strFileFormulaInit);
+	}
+	else
+	{
+		strFileFormulaInit = clDir + "cl_" + strFormula + "Init.cl";
+		strFileFormula = clDir + "cl_" + strFormula + ".cl";
+	}
 	std::ifstream fileFormulaInit(strFileFormulaInit.c_str());
 	if(!checkErr(fileFormulaInit.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaInit).c_str())) return;
 
@@ -228,7 +262,6 @@ void CclSupport::Init(void)
 	std::ifstream fileFormulaFor(strFileFormulaFor.c_str());
 	if(!checkErr(fileFormulaFor.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaFor).c_str())) return;
 
-	std::string strFileFormula = clDir + "cl_" + strFormula + ".cl";
 	std::ifstream fileFormula(strFileFormula.c_str());
 	if(!checkErr(fileFormula.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormula).c_str())) return;
 
@@ -612,6 +645,86 @@ void CclSupport::SetSize(int w, int h)
 	//if(width != w || height != h) recompileRequest = true;
 	width = w;
 	height = h;
+}
+
+
+//------------------------------------ custom formulas -----------------------------
+CCustomFormulas::CCustomFormulas(std::string dataDir)
+{
+	customFormulasPath = dataDir + "/custom_ocl_formulas";
+	actualIndex = 0;
+	count = 1;
+	listOfFiles.clear();
+	listOfNames.clear();
+
+	printf("Custom formulas path: %s\n", customFormulasPath.c_str());
+
+	//create directory for custom formulas if not exists
+	DIR *dir;
+	dir = opendir(customFormulasPath.c_str());
+	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else mkdir(customFormulasPath.c_str());
+#else
+	else mkdir(customFormulasPath.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
+
+	RefreshList();
+}
+
+void CCustomFormulas::RefreshList(void)
+{
+	listOfFiles.clear();
+	listOfNames.clear();
+
+	GError *error = NULL;
+	GDir *dir = g_dir_open(customFormulasPath.c_str(), 0, &error);
+
+	if(count > 0)
+	{
+		for(int i = count -1; count >=0; count--)
+		{
+			gtk_combo_box_remove_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), i);
+		}
+	}
+
+	if(!error)
+	{
+		gchar *filename;
+		do
+		{
+			filename = (gchar*)g_dir_read_name(dir);
+			if(filename)
+			{
+				std::string sFilename(filename);
+				if(sFilename.find("Init.c") == std::string::npos)
+				{
+					listOfFiles.push_back(sFilename);
+					std::string name;
+					name = sFilename.substr(3, sFilename.length()-3-2);
+					listOfNames.push_back(name);
+					gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), name.c_str());
+					count++;
+				}
+			}
+		}
+		while(filename);
+	}
+
+	if(count > 0)
+	{
+		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), actualIndex);
+	}
+
+	if(dir) g_dir_close(dir);
+}
+
+void CCustomFormulas::GetActual(std::string *name, std::string *formulaFile, std::string *iniFile)
+{
+	if(name) *name = listOfNames[actualIndex];
+	std::string filename = listOfFiles[actualIndex];
+	if(formulaFile) *formulaFile = customFormulasPath + "/" + filename;
+	if(iniFile) *iniFile = customFormulasPath + "/cl_" + (*name) + "Init.c";
 }
 
 #endif
