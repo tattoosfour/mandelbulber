@@ -111,7 +111,8 @@ void PressedSaveAllImageLayers(GtkWidget *widget, gpointer data);
 void PressedServerEnable(GtkWidget *widget, gpointer data);
 void PressedClientEnable(GtkWidget *widget, gpointer data);
 void PressedServerScan(GtkWidget *widget, gpointer data);
-
+void ChangedOpenClCustomEnable(GtkWidget *widget, gpointer data);
+void ChangedComboOpenCLCustomFormulas(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

@@ -33,6 +33,22 @@
 
 #include "mandelbulber_cl_data.h"
 
+class CCustomFormulas
+{
+public:
+	CCustomFormulas(std::string dataDir);
+	~CCustomFormulas();
+	void SetActual(int index) {actualIndex = index;}
+	void GetActual(std::string *name, std::string *formulaFile, std::string *iniFile);
+private:
+	void RefreshList(void);
+	std::vector<std::string> listOfFiles;
+	std::vector<std::string> listOfNames;
+	int count;
+	int actualIndex;
+	std::string customFormulasPath;
+};
+
 class CclSupport
 {
 public:
@@ -52,6 +68,7 @@ public:
 	void RecopileRequest(void);
 	sClInBuff* GetInBuffer1(void) {return inBuffer1;}
 	sClInConstants* GetInConstantBuffer1(void) {return constantsBuffer1;}
+	CCustomFormulas *customFormulas;
 
 private:
 	bool enabled;
@@ -101,6 +118,8 @@ private:
 	enumFractalFormula lastFormula;
 	int lastStepSize;
 	int lastEngineNumber;
+
+
 };
 
 #else
@@ -118,5 +137,7 @@ public:
 #endif
 
 extern CclSupport *clSupport;
+
+
 
 #endif /* CL_SUPPORT_HPP_ */

@@ -605,6 +605,10 @@ void ReadInterface(sParamRender *params)
 		if (formula == 19) params->fractal.formula = hybrid;
 		if (formula == 20) params->fractal.formula = generalizedFoldBox;
 
+#ifdef CLSUPPORT
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable))) params->fractal.formula = ocl_custom;
+#endif
+
 		CheckPrameters(params);
 
 		for (int i = 0; i < HYBRID_COUNT; ++i)
@@ -1346,6 +1350,17 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_server), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_client), 5);
 
+	Interface.tabsOpenCL = gtk_notebook_new();
+
+	Interface.tab_label_openclEngine = gtk_label_new("Engine");
+	Interface.tab_label_openclCustom = gtk_label_new("Custom formulas");
+
+	Interface.tab_box_openclEngine = gtk_vbox_new(FALSE, 1);
+	Interface.tab_box_openclCustom = gtk_vbox_new(FALSE, 1);
+
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_openclEngine), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(Interface.tab_box_openclCustom), 5);
+
 	//boxes
 	Interface.boxMain = gtk_vbox_new(FALSE, 1);
 	Interface.boxButtons = gtk_hbox_new(FALSE, 1);
@@ -1475,6 +1490,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClEngineSettingsH1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH3 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClCustomV1 = gtk_vbox_new(FALSE, 1);
+	Interface.boxOpenClCustomH11 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClCustomH12 = gtk_hbox_new(FALSE, 1);
+
 	Interface.boxNetRenderClientV = gtk_vbox_new(FALSE, 1);
 	Interface.boxNetRenderClientH1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxNetRenderServerV = gtk_vbox_new(FALSE, 1);
@@ -1555,6 +1574,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frImageAdjustments = gtk_frame_new("Image adjustments");
 	Interface.frShadersSurface = gtk_frame_new("Surface");
 	Interface.frShadersVolumetric = gtk_frame_new("Volumetric");
+	Interface.frOpenClCustomSelection = gtk_frame_new("Formula management");
+	Interface.frOpenClCustomParams = gtk_frame_new("Custom parameters for custom formula");
 
 	//separators
 	Interface.hSeparator1 = gtk_hseparator_new();
@@ -1655,6 +1676,10 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buAutoFog = gtk_button_new_with_label("Auto fog");
 	Interface.buMeasureActivation = gtk_button_new_with_label("Activate measurement");
 	Interface.buSaveAllImageLayers = gtk_button_new_with_label("Save all layers");
+	Interface.buOpenCLNewFormula = gtk_button_new_with_label("New");
+	Interface.buOpenCLEditFormula = gtk_button_new_with_label("Edit");
+	Interface.buOpenCLDeleteFormula = gtk_button_new_with_label("Delete");
+	Interface.buOpenCLRecompile = gtk_button_new_with_label("Recompile");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -1969,6 +1994,10 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), "CPU");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), 0);
 
+	Interface.comboOpenCLCustomFormulas = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), "Enable OpenCL to get list");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), 0);
+
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
 
@@ -2023,6 +2052,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.checkPrimitiveInvertedSphereEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkPrimitiveWaterEnabled = gtk_check_button_new_with_label("Enabled");
 	Interface.checkOpenClEnable = gtk_check_button_new_with_label("OpenCL Enable");
+	Interface.checkOpenClCustomEnable = gtk_check_button_new_with_label("Use custom formula");
 	Interface.checkIterFogEnable = gtk_check_button_new_with_label("Iteration fog");
 	Interface.checkNetRenderClientEnable = gtk_check_button_new_with_label("Client enable");
 	Interface.checkNetRenderServerEnable = gtk_check_button_new_with_label("Server enable");
@@ -2178,6 +2208,8 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoFog, PressedAutoFog);
 	CONNECT_SIGNAL_CLICKED(Interface.buMeasureActivation, PressedMeasureActivation);
 	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClEnable, ChangedOpenClEnabled);
+	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClCustomEnable, ChangedOpenClCustomEnable);
+	CONNECT_SIGNAL(Interface.comboOpenCLCustomFormulas, ChangedComboOpenCLCustomFormulas, "changed");
 	CONNECT_SIGNAL_CLICKED(Interface.checkIterFogEnable, ChangedIterFogEnable);
 	CONNECT_SIGNAL_CLICKED(Interface.buSaveAllImageLayers, PressedSaveAllImageLayers);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerEnable, PressedServerEnable);
@@ -2934,13 +2966,15 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
 
 	//tab OpenCL
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClSettings, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.tabsOpenCL, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.comboOpenCLEngine, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClInformation, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClInformation, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClPlatformBy, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxClock, false, false, 1);
@@ -2950,7 +2984,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClWorkgroupSize, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClStatus, false, false, 1);
 
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.frOpenClEngineSettings, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", Interface.comboOpenCLGPUCPU), false, false, 1);
@@ -2961,6 +2995,19 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH2), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, Interface.edit_OpenCLProcessingCycleTime), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH3, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("/usr/bin/kate", "Text editor:", 40, Interface.edit_OpenCLTextEditor), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH11, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.comboOpenCLCustomFormulas, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLNewFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), Interface.checkOpenClCustomEnable, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomParams, false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
@@ -3005,6 +3052,8 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
 #ifdef CLSUPPORT
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_openCL, Interface.tab_label_openCL);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclEngine, Interface.tab_label_openclEngine);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclCustom, Interface.tab_label_openclCustom);
 #endif
 	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
 

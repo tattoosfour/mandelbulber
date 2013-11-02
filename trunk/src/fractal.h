@@ -55,7 +55,8 @@ enum enumFractalFormula
 	angleMultiplyX = 34,
 	angleMultiplyY = 35,
 	angleMultiplyZ = 36,
-	generalizedFoldBox = 37
+	generalizedFoldBox = 37,
+	ocl_custom = 38
 };
 
 enum enumCalculationMode

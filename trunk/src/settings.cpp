@@ -567,6 +567,7 @@ void SaveAppSettings(const char *filename, const sAppSettings& appParams)
 
 	fprintfInt(fileSettings, "absolute_movement_enable", appParams.absoluteMovementModeEnabled, -1, true);
 	fprintfInt(fileSettings, "zoom_by_mouse_click_enable", appParams.zoomByMouseClickEnabled, -1, true);
+	fprintfInt(fileSettings, "go_close_to_surface", appParams.goCloseToSurfaceEnabled, -1, true);
 	fprintfDot(fileSettings, "camera_movement_relative_step", appParams.cameraMoveStepRelative, -1, true);
 	fprintfDot(fileSettings, "camera_movement_absolute_step", appParams.cameraMoveStepAbsolute, -1, true);
 	fprintfDot(fileSettings, "camera_rotation_step", appParams.rotationStep, -1, true);
@@ -574,6 +575,7 @@ void SaveAppSettings(const char *filename, const sAppSettings& appParams)
 	fprintf(fileSettings, "net_render_client_port %s;\n", appParams.netRenderClientPort.c_str());
 	fprintf(fileSettings, "net_render_client_IP %s;\n", appParams.netRenderClientIP.c_str());
 	fprintf(fileSettings, "net_render_server_port %s;\n", appParams.netRenderServerPort.c_str());
+
 
 #ifdef CLSUPPORT
 	fprintfInt(fileSettings, "openCL_use_CPU", appParams.oclUseCPU, -1, true);
@@ -1200,6 +1202,7 @@ bool LoadAppSettings(char *filename, sAppSettings &appParams)
 
 				     if (!strcmp(str1, "absolute_movement_enable")) appParams.absoluteMovementModeEnabled = atoi(str2);
 				else if (!strcmp(str1, "zoom_by_mouse_click_enable")) appParams.zoomByMouseClickEnabled = atoi(str2);
+				else if (!strcmp(str1, "go_close_to_surface")) appParams.goCloseToSurfaceEnabled = atoi(str2);
 				else if (!strcmp(str1, "camera_movement_relative_step")) appParams.cameraMoveStepRelative = atof2(str2);
 				else if (!strcmp(str1, "camera_movement_absolute_step")) appParams.cameraMoveStepAbsolute = atof2(str2);
 				else if (!strcmp(str1, "camera_rotation_step")) appParams.rotationStep = atof2(str2);
