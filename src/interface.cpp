@@ -1677,7 +1677,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buMeasureActivation = gtk_button_new_with_label("Activate measurement");
 	Interface.buSaveAllImageLayers = gtk_button_new_with_label("Save all layers");
 	Interface.buOpenCLNewFormula = gtk_button_new_with_label("New");
-	Interface.buOpenCLEditFormula = gtk_button_new_with_label("Edit");
+	Interface.buOpenCLEditFormula = gtk_button_new_with_label("Edit formula");
+	Interface.buOpenCLEditFormulaInit = gtk_button_new_with_label("Edit formula Init");
 	Interface.buOpenCLDeleteFormula = gtk_button_new_with_label("Delete");
 	Interface.buOpenCLRecompile = gtk_button_new_with_label("Recompile");
 
@@ -2215,6 +2216,11 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerEnable, PressedServerEnable);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerScan, PressedServerScan);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderClientEnable, PressedClientEnable);
+	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLEditFormula, PressedOpenCLEditFormula);
+	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLEditFormulaInit, PressedOpenCLEditFormulaInit);
+	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLNewFormula, PressedOpenCLNewFormula);
+	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLDeleteFormula, PressedOpenCLDeleteFormula);
+	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLRecompile, PressedRecompile);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 
@@ -3002,6 +3008,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.comboOpenCLCustomFormulas, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLNewFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormulaInit, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);

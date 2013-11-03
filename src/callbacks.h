@@ -113,6 +113,11 @@ void PressedClientEnable(GtkWidget *widget, gpointer data);
 void PressedServerScan(GtkWidget *widget, gpointer data);
 void ChangedOpenClCustomEnable(GtkWidget *widget, gpointer data);
 void ChangedComboOpenCLCustomFormulas(GtkWidget *widget, gpointer data);
+void PressedOpenCLEditFormula(GtkWidget *widget, gpointer data);
+void PressedOpenCLEditFormulaInit(GtkWidget *widget, gpointer data);
+void PressedOpenCLNewFormula(GtkWidget *widget, gpointer data);
+void PressedOpenCLDeleteFormula(GtkWidget *widget, gpointer data);
+void PressedRecompile(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);
