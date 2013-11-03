@@ -540,7 +540,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 //----------- close program
 gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Do yoy really want to close Mandelbulber?");
+	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Do you really want to close Mandelbulber?");
 	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 	if(result == GTK_RESPONSE_YES)
 	{
@@ -1127,7 +1127,17 @@ void PressedNavigatorInit(GtkWidget *widget, gpointer data)
 	ReadInterface(&params);
 	undoBuffer.SaveUndo(&params);
 
-	double objectSize = ScanSizeOfFractal(&params);
+	double objectSize;
+
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable)))
+	{
+		objectSize = 10.0;
+	}
+	else
+	{
+		objectSize = ScanSizeOfFractal(&params);
+	}
+
 	double initCameraDistance = objectSize + objectSize / params.doubles.persp * 1.2 * params.image_width/params.image_height;
 
 	CVector3 initVector(0,-initCameraDistance,0);
@@ -3080,4 +3090,92 @@ bool GetSettingsfromServer(char *data, size_t size)
 		//remove("settings/.temp_rcv");
 	}
 	return true;
+}
+
+void PressedOpenCLEditFormula(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
+		std::string fileToEdit;
+		clSupport->customFormulas->GetActual(NULL, &fileToEdit, NULL);
+		if(!fork())
+		{
+			execlp(editor, editor, fileToEdit.c_str(), NULL);
+			_exit(0);
+		}
+	}
+#endif
+}
+
+void PressedOpenCLEditFormulaInit(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
+		std::string fileToEdit;
+		clSupport->customFormulas->GetActual(NULL, NULL, &fileToEdit);
+		if(!fork())
+		{
+			execlp(editor, editor, fileToEdit.c_str(), NULL);
+			_exit(0);
+		}
+	}
+#endif
+}
+
+void PressedOpenCLNewFormula(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+				"Enter name of new formula:");
+		GtkWidget *messageArea = gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(dialog));
+
+		GtkWidget *editField = gtk_entry_new();
+		gtk_box_pack_start(GTK_BOX(messageArea), CreateEdit("newfractal", "name: ", 50, editField), false, false, 1);
+		gtk_widget_show_all(messageArea);
+
+		gtk_dialog_run(GTK_DIALOG(dialog));
+
+		const char *newName = gtk_entry_get_text(GTK_ENTRY(editField));
+		clSupport->customFormulas->NewFormula(std::string(newName));
+
+		gtk_widget_destroy(dialog);
+	}
+#endif
+}
+
+void PressedOpenCLDeleteFormula(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		std::string name;
+		clSupport->customFormulas->GetActual(&name, NULL, NULL);
+		std::string text("Do you really want to delete custom formula \"");
+		text += name + "\"?";
+
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Do you really want to delete formula?");
+		gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+		if(result == GTK_RESPONSE_YES)
+		{
+			clSupport->customFormulas->DeleteFormula();
+		}
+		gtk_widget_destroy(dialog);
+	}
+#endif
+}
+
+void PressedRecompile(GtkWidget *widget, gpointer data)
+{
+#ifdef CLSUPPORT
+	if(clSupport->customFormulas)
+	{
+		clSupport->Recompile();
+	}
+#endif
 }

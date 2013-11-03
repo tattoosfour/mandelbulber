@@ -40,6 +40,8 @@ public:
 	~CCustomFormulas();
 	void SetActual(int index) {actualIndex = index;}
 	void GetActual(std::string *name, std::string *formulaFile, std::string *iniFile);
+	void NewFormula(std::string newName);
+	void DeleteFormula(void);
 private:
 	void RefreshList(void);
 	std::vector<std::string> listOfFiles;
@@ -66,6 +68,7 @@ public:
 	int GetHeight() {return height;}
 	void SetSize(int w, int h);
 	void RecopileRequest(void);
+	void Recompile(void);
 	sClInBuff* GetInBuffer1(void) {return inBuffer1;}
 	sClInConstants* GetInConstantBuffer1(void) {return constantsBuffer1;}
 	CCustomFormulas *customFormulas;

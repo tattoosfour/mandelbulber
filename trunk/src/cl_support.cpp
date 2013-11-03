@@ -16,6 +16,8 @@
 #include <sys/stat.h>
 #include <glib.h>
 
+#include "files.h"
+
 
 CclSupport *clSupport;
 
@@ -412,16 +414,21 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	lastFormula = formula;
 }
 
+void CclSupport::Recompile(void)
+{
+	Disable();
+	Enable();
+	Init();
+	recompileRequest = false;
+}
+
 void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
 
 	if(recompileRequest)
 	{
-		Disable();
-		Enable();
-		Init();
-		recompileRequest = false;
+		Recompile();
 	}
 
 	stepSize = workGroupSize;
@@ -680,6 +687,9 @@ void CCustomFormulas::RefreshList(void)
 	GError *error = NULL;
 	GDir *dir = g_dir_open(customFormulasPath.c_str(), 0, &error);
 
+	gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model (GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas))));
+
+	/*
 	if(count > 0)
 	{
 		for(int i = count -1; count >=0; count--)
@@ -687,6 +697,10 @@ void CCustomFormulas::RefreshList(void)
 			gtk_combo_box_remove_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), i);
 		}
 	}
+*/
+	count = 0;
+
+	int indexTemp = actualIndex;
 
 	if(!error)
 	{
@@ -713,7 +727,8 @@ void CCustomFormulas::RefreshList(void)
 
 	if(count > 0)
 	{
-		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), actualIndex);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), indexTemp);
+		actualIndex = indexTemp;
 	}
 
 	if(dir) g_dir_close(dir);
@@ -724,7 +739,55 @@ void CCustomFormulas::GetActual(std::string *name, std::string *formulaFile, std
 	if(name) *name = listOfNames[actualIndex];
 	std::string filename = listOfFiles[actualIndex];
 	if(formulaFile) *formulaFile = customFormulasPath + "/" + filename;
-	if(iniFile) *iniFile = customFormulasPath + "/cl_" + (*name) + "Init.c";
+	if(iniFile) *iniFile = customFormulasPath + "/cl_" + listOfNames[actualIndex] + "Init.c";
 }
 
+void CCustomFormulas::NewFormula(std::string newName)
+{
+	std::string formulaFile = customFormulasPath + "/cl_" + newName + ".c";
+	std::string formulaInitFile = customFormulasPath + "/cl_" + newName + "Init.c";
+
+	std::string actualName, actualFormula, actualIni;
+	GetActual(&actualName, &actualFormula, &actualIni);
+
+	int result = fcopy(actualFormula.c_str(), formulaFile.c_str());
+	if(result) printf("Cannot create new formula\n");
+
+	result = fcopy(actualIni.c_str(), formulaInitFile.c_str());
+	if(result) printf("Cannot create new formula\n");
+
+	RefreshList();
+
+	for(int i=0; i<count; i++)
+	{
+		if(newName == listOfNames[i])
+		{
+			gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), i);
+		}
+	}
+
+	const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
+	if(!fork())
+	{
+		execlp(editor, editor, formulaFile.c_str(), NULL);
+		_exit(0);
+	}
+
+	if(!fork())
+	{
+		execlp(editor, editor, formulaInitFile.c_str(), NULL);
+		_exit(0);
+	}
+}
+
+void CCustomFormulas::DeleteFormula(void)
+{
+	std::string actualName, actualFormula, actualIni;
+	GetActual(&actualName, &actualFormula, &actualIni);
+	remove(actualFormula.c_str());
+	remove(actualIni.c_str());
+	RefreshList();
+	actualIndex = 0;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), actualIndex);
+}
 #endif
