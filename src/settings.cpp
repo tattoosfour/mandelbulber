@@ -239,7 +239,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "main_light_colour_R", params.effectColours.mainLightColour.R, 0xFFFF, compare);
 	fprintfInt(fileSettings, "main_light_colour_G", params.effectColours.mainLightColour.G, 0xFFFF, compare);
 	fprintfInt(fileSettings, "main_light_colour_B", params.effectColours.mainLightColour.B, 0xFFFF, compare);
-	if(!compare || params.auxLightPreEnabled[0] || params.auxLightPreEnabled[1] || params.auxLightPreEnabled[2] || params.auxLightPreEnabled[3] || params.auxLightNumber >0)
+	if(!compare || params.auxLightPreEnabled[0] || params.auxLightPreEnabled[1] || params.auxLightPreEnabled[2] || params.auxLightPreEnabled[3] || params.auxLightNumber >0 || params.fractal.formula == ocl_custom)
 	{
 		fprintfDot(fileSettings, "aux_light_intensity", params.doubles.auxLightIntensity, 1.0, compare);
 		fprintfInt(fileSettings, "aux_light_random_seed", params.auxLightRandomSeed, 1234, compare);
@@ -284,7 +284,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "aux_light_random_center_Z", params.doubles.auxLightRandomCenter.z, 0, compare);
 	}
 
-	if(!compare || params.fractal.formula == kaleidoscopic || params.fractal.formula == hybrid || params.fractal.IFS.foldingMode)
+	if(!compare || params.fractal.formula == kaleidoscopic || params.fractal.formula == hybrid || params.fractal.IFS.foldingMode || params.fractal.formula == ocl_custom)
 	{
 		fprintfDot(fileSettings, "IFS_scale", params.fractal.IFS.doubles.scale, 2, compare);
 		fprintfDot(fileSettings, "IFS_rot_alfa", params.fractal.IFS.doubles.rotationAlfa, 0, compare);
@@ -327,7 +327,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "end_frame", params.endFrame, 1000, compare);
 	fprintfInt(fileSettings, "frames_per_keyframe", params.framesPerKeyframe, 100, compare);
 
-	if (!compare || params.fractal.formula == hybrid)
+	if (!compare || params.fractal.formula == hybrid || params.fractal.formula == ocl_custom)
 	{
 		for (int i = 1; i <= HYBRID_COUNT; ++i)
 		{
@@ -356,7 +356,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfDot(fileSettings, "stereo_eye_distance", params.doubles.stereoEyeDistance, 0.1, compare);
 	fprintfInt(fileSettings, "stereo_enabled", params.stereoEnabled, false, compare);
 
-	if (!compare || params.fractal.formula == tglad || params.fractal.formula == smoothMandelbox || params.fractal.formula == mandelboxVaryScale4D || params.fractal.formula == generalizedFoldBox || params.fractal.formula == hybrid)
+	if (!compare || params.fractal.formula == tglad || params.fractal.formula == smoothMandelbox || params.fractal.formula == mandelboxVaryScale4D || params.fractal.formula == generalizedFoldBox || params.fractal.formula == hybrid || params.fractal.formula == ocl_custom)
 	{
 		fprintfDot(fileSettings, "mandelbox_scale", params.fractal.mandelbox.doubles.scale, 2.0, compare);
 		fprintfDot(fileSettings, "mandelbox_folding_limit", params.fractal.mandelbox.doubles.foldingLimit, 1.0, compare);
@@ -432,7 +432,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 
 	fprintfInt(fileSettings, "primitive_only_plane", params.fractal.primitives.onlyPlane, false, compare);
 
-	if (!compare || params.fractal.primitives.planeEnable)
+	if (!compare || params.fractal.primitives.planeEnable || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "primitive_plane_enabled", params.fractal.primitives.planeEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_plane_centre_X", params.fractal.doubles.primitives.planeCentre.x, 0.0, compare);
@@ -447,7 +447,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_plane_reflect", params.doubles.primitivePlaneReflect, 0.0, compare);
 	}
 
-	if (!compare || params.fractal.primitives.boxEnable)
+	if (!compare || params.fractal.primitives.boxEnable || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "primitive_box_enabled", params.fractal.primitives.boxEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_box_centre_X", params.fractal.doubles.primitives.boxCentre.x, 0.0, compare);
@@ -462,7 +462,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_box_reflect", params.doubles.primitiveBoxReflect, 0.0, compare);
 	}
 
-	if (!compare || params.fractal.primitives.invertedBoxEnable)
+	if (!compare || params.fractal.primitives.invertedBoxEnable || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "primitive_invertedBox_enabled", params.fractal.primitives.invertedBoxEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_invertedBox_centre_X", params.fractal.doubles.primitives.invertedBoxCentre.x, 0.0, compare);
@@ -477,7 +477,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_invertedBox_reflect", params.doubles.primitiveInvertedBoxReflect, 0.0, compare);
 	}
 
-	if (!compare || params.fractal.primitives.sphereEnable)
+	if (!compare || params.fractal.primitives.sphereEnable || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "primitive_sphere_enabled", params.fractal.primitives.sphereEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_sphere_centre_X", params.fractal.doubles.primitives.sphereCentre.x, 0.0, compare);
@@ -503,7 +503,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_invertedSphere_reflect", params.doubles.primitiveInvertedSphereReflect, 0.0, compare);
 	}
 
-	if (!compare || params.fractal.primitives.waterEnable)
+	if (!compare || params.fractal.primitives.waterEnable || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "primitive_water_enabled", params.fractal.primitives.waterEnable, false, compare);
 		fprintfDot(fileSettings, "primitive_water_level", params.fractal.doubles.primitives.waterHeight, 0.0, compare);
@@ -517,7 +517,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_water_reflect", params.doubles.primitiveWaterReflect, 0.7, compare);
 	}
 
-	if (!compare || params.fakeLightsEnabled)
+	if (!compare || params.fakeLightsEnabled || params.fractal.formula == ocl_custom)
 	{
 		fprintfInt(fileSettings, "fake_lights_enabled", params.fakeLightsEnabled, false, compare);
 		fprintfDot(fileSettings, "fake_lights_intensity", params.doubles.fakeLightsIntensity, 1.0, compare);
