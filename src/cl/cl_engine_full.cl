@@ -289,6 +289,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		{
 			distThresh = scan * resolution * consts->params.persp / consts->params.quality + distThreshInit;
 		}
+		calcParam->distThresh = distThresh;
 		//conts->fractal.detailSize = distThresh;
 		formulaOut outF;
 		outF = CalculateDistance(consts, point, calcParam);
@@ -879,8 +880,6 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		if(consts->fractal.constantDEThreshold) input->delta = scan * input->resolution * consts->params.persp;
 		else input->delta = distThresh * consts->params.quality;
 		delta = input->delta;
-		
-		
 		
 		//------------------- glow
 		float glowOpacity = glow * step / input->depth;

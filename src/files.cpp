@@ -559,6 +559,7 @@ int fcopy(const char *source, const char *dest)
 	if (result != lSize)
 	{
 		printf("Can't read source file for copying: %s\n", source);
+		delete[] buffer;
 		return 2;
 	}
 	fclose(pFile);
@@ -569,6 +570,7 @@ int fcopy(const char *source, const char *dest)
 	if (pFile == NULL)
 	{
 		printf("Can't open destination file for copying: %s\n", dest);
+		delete[] buffer;
 		return 3;
 	}
 	fwrite(buffer, 1, lSize, pFile);

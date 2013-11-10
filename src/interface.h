@@ -259,6 +259,8 @@ struct sInterface
 	GtkWidget *boxOpenClCustomV1;
 	GtkWidget *boxOpenClCustomH11;
 	GtkWidget *boxOpenClCustomH12;
+	GtkWidget *boxOpenClCustomH13;
+	GtkWidget *boxOpenClCustomV2;
 
 	GtkWidget *boxNetRenderServerV;
 	GtkWidget *boxNetRenderClientV;
@@ -286,6 +288,7 @@ struct sInterface
 	GtkWidget *tableIFSParams;
 	GtkWidget *tableHybridParams;
 	GtkWidget *tableMandelboxRotations;
+	GtkWidget *tableOpenCLCustom;
 
 	GtkWidget *frCoordinates;
 	GtkWidget *fr3Dnavigator;
@@ -626,6 +629,7 @@ struct sInterface
 	GtkWidget *edit_fakeLightsMinIter;
 	GtkWidget *edit_fakeLightsMaxIter;
 	GtkWidget *edit_shadowConeAngle;
+	GtkWidget *edit_customParameters[15];
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -678,6 +682,7 @@ struct sInterface
 	GtkWidget *comboOpenCLPlatformIndex;
 	GtkWidget *comboOpenCLGPUCPU;
 	GtkWidget *comboOpenCLCustomFormulas;
+	GtkWidget *comboOpenCLDEMode;
 
 	GtkWidget *progressBar;
 

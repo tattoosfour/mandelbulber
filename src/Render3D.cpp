@@ -1610,34 +1610,42 @@ void InitMainParameters(sParamRender *fractParam)
 }
 
 //Init main image and window
-void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea)
+bool InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea)
 {
-	image->ChangeSize(width, height);
-	WriteLog("complexImage allocated");
-	printf("Memory for image: %d MB\n", image->GetUsedMB());
-
-	if(!noGUI)
-		image->CreatePreview(previewScale);
-
-	if (!noGUI)
+	if(!image->ChangeSize(width, height))
 	{
-		gtk_widget_set_size_request(drawingArea, image->GetPreviewWidth(), image->GetPreviewHeight());
+		printf("Cannot allocate memory. Maybe image is too big");
+		return false;
 	}
-
-	WriteLog("rgbbuf allocated");
-
-	//waiting for refresh window
-	//g_usleep(100000);
-	if (!noGUI)
+	else
 	{
-		for (int i = 0; i < 10; i++)
+		WriteLog("complexImage allocated");
+		printf("Memory for image: %d MB\n", image->GetUsedMB());
+
+		if(!noGUI)
+			image->CreatePreview(previewScale);
+
+		if (!noGUI)
 		{
-			while (gtk_events_pending())
-				gtk_main_iteration();
+			gtk_widget_set_size_request(drawingArea, image->GetPreviewWidth(), image->GetPreviewHeight());
 		}
+
+		WriteLog("rgbbuf allocated");
+
+		//waiting for refresh window
+		//g_usleep(100000);
+		if (!noGUI)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
+		}
+		WriteLog("Windows refreshed");
+		printf("Memory for image reallocated\n");
+		return true;
 	}
-	WriteLog("Windows refreshed");
-	printf("Memory for image reallocated\n");
 }
 
 bool LoadTextures(sParamRender *params)
@@ -1755,7 +1763,21 @@ void MainRender(void)
 	//image size
 	int width = fractParam.image_width;
 	int height = fractParam.image_height;
-	InitMainImage(&mainImage, width, height, Interface_data.imageScale, renderWindow.drawingArea);
+	if(!InitMainImage(&mainImage, width, height, Interface_data.imageScale, renderWindow.drawingArea))
+	{
+		int neededMem = mainImage.GetUsedMB();
+		InitMainImage(&mainImage, 800, 600, Interface_data.imageScale, renderWindow.drawingArea);
+		if (!noGUI)
+		{
+			GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL, "Error allocating memory\nMaybe image was set too big\nNeeded %d MB", neededMem);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		isRendering = false;
+		programClosed = true;
+		return;
+	}
+
 
 	if (!noGUI)
 	{

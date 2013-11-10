@@ -39,6 +39,7 @@ public:
 	CCustomFormulas(std::string dataDir);
 	~CCustomFormulas();
 	void SetActual(int index) {actualIndex = index;}
+	bool SetActualByName(std::string name);
 	void GetActual(std::string *name, std::string *formulaFile, std::string *iniFile);
 	void NewFormula(std::string newName);
 	void DeleteFormula(void);

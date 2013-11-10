@@ -530,6 +530,24 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "fake_lights_max_iter", params.fractal.fakeLightsMaxIter, 2, compare);
 	}
 
+#ifdef CLSUPPORT
+	if (!compare || params.fractal.formula == ocl_custom)
+	{
+		fprintfInt(fileSettings, "ocl_custom_DE_mode", params.fractal.customOCLFormulaDEMode, false, compare);
+
+		if(!compare)
+			fprintf(fileSettings, "ocl_custom_formula_name %s;\n", "example");
+		else
+			fprintf(fileSettings, "ocl_custom_formula_name %s;\n", params.fractal.customOCLFormulaName);
+
+		for (int i = 0; i < 15; ++i)
+		{
+			sprintf(parameterName, "ocl_custom_par_%d", i);
+			fprintfDot(fileSettings, parameterName, params.fractal.doubles.customParameters[i], 0.0, compare);
+		}
+	}
+#endif
+
 	fprintfInt(fileSettings, "frame_no", params.fractal.frameNo, 0, compare);
 	fprintfInt(fileSettings, "tile_no", params.tileCount, 0, compare);
 
@@ -586,26 +604,6 @@ void SaveAppSettings(const char *filename, const sAppSettings& appParams)
 	fprintfInt(fileSettings, "openCL_memory_limit", appParams.oclMemoryLimit, -1, true);
 	fprintf(fileSettings, "openCL_text_editor %s;\n", appParams.oclTextEditor.c_str());
 #endif
-
-#ifdef CLSUPPORT
-	bool oclUseCPU;
-	int oclDeviceIndex;
-	int oclPlatformIndex;
-	int oclEngineSelection;
-	double oclCycleTime;
-	double oclMemoryLimit;
-	std::string oclTextEditor;
-#endif
-	bool absoluteMovementModeEnabled;
-	bool zoomByMouseClickEnabled;
-	bool goCloseToSurfaceEnabled;
-	double cameraMoveStepRelative;
-	double cameraMoveStepAbsolute;
-	double rotationStep;
-	double mouseCloseUpRatio;
-  std::string netRenderClientPort;
-	std::string netRenderClientIP;
-	std::string netRenderServerPort;
 
 	fclose(fileSettings);
 }
@@ -1076,6 +1074,11 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fake_lights_orbit_trap_Y")) params.fractal.doubles.fakeLightsOrbitTrap.y = atof2(str2);
 	else if (!strcmp(str1, "fake_lights_orbit_trap_Z")) params.fractal.doubles.fakeLightsOrbitTrap.z = atof2(str2);
 
+#ifdef CLSUPPORT
+	else if (!strcmp(str1, "ocl_custom_DE_mode")) params.fractal.customOCLFormulaDEMode = (enumOCLDEMode)atoi(str2);
+	else if (!strcmp(str1, "ocl_custom_formula_name")) strcpy(params.fractal.customOCLFormulaName,str2);
+#endif
+
 	else if (!strcmp(str1, "frame_no")) params.fractal.frameNo = atoi(str2);
 	else if (!strcmp(str1, "tile_no")) params.tileCount = atoi(str2);
 
@@ -1154,6 +1157,18 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 			if (matched) break;
 		}
 
+#ifdef CLSUPPORT
+		for (int i = 0; i < 15; ++i)
+		{
+			sprintf(buf, "ocl_custom_par_%d", i);
+			if (!strcmp(str1, buf))
+			{
+				params.fractal.doubles.customParameters[i] = atof2(str2);
+				matched = true;
+			}
+		}
+#endif
+
 		if (!matched) {
 			printf("Warning! Unknown parameter: %s %s\n", str1, str2);
 			WriteLog("Warning! Unknown parameter:");
@@ -1178,11 +1193,8 @@ void LoadSettingsPost(sParamRender &params)
 
 bool LoadAppSettings(char *filename, sAppSettings &appParams)
 {
-
-	bool locale_dot = false;
 	char str1[100];
 	char str2[2000];
-	char str3[100];
 
 	FILE * fileSettings;
 	fileSettings = fopen(filename, "r");
@@ -1208,9 +1220,9 @@ bool LoadAppSettings(char *filename, sAppSettings &appParams)
 				else if (!strcmp(str1, "camera_rotation_step")) appParams.rotationStep = atof2(str2);
 				else if (!strcmp(str1, "mouse_close_up_ratio")) appParams.mouseCloseUpRatio = atof2(str2);
 
-				else if (!strcmp(str1, "net_render_client_port")) appParams.netRenderClientPort = str2;
-				else if (!strcmp(str1, "net_render_client_IP")) appParams.netRenderClientIP = str2;
-				else if (!strcmp(str1, "net_render_server_port")) appParams.netRenderServerPort = str2;
+				else if (!strcmp(str1, "net_render_client_port")) appParams.netRenderClientPort = std::string(str2);
+				else if (!strcmp(str1, "net_render_client_IP")) appParams.netRenderClientIP = std::string(str2);
+				else if (!strcmp(str1, "net_render_server_port")) appParams.netRenderServerPort = std::string(str2);
 
 #ifdef CLSUPPORT
 				else if (!strcmp(str1, "openCL_use_CPU")) appParams.oclUseCPU = atoi(str2);
@@ -1220,7 +1232,7 @@ bool LoadAppSettings(char *filename, sAppSettings &appParams)
 				else if (!strcmp(str1, "openCL_cycle_time")) appParams.oclCycleTime = atof2(str2);
 				else if (!strcmp(str1, "openCL_memory_limit")) appParams.oclMemoryLimit = atoi(str2);
 
-				else if (!strcmp(str1, "openCL_text_editor")) appParams.oclTextEditor = str2;
+				else if (!strcmp(str1, "openCL_text_editor")) appParams.oclTextEditor = std::string(str2);
 #endif
 				else
 				{

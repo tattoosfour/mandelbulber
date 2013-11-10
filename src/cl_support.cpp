@@ -64,8 +64,8 @@ CclSupport::CclSupport(void)
 	memorySize = 0;
 	maxWorkItemDimmensions = 0;
 	maxConstantBufferSize = 0;
-	memset(&lastParams, sizeof(lastParams), 0);
-	memset(&lastFractal, sizeof(lastFractal), 0);
+	memset(&lastParams, 0, sizeof(lastParams));
+	memset(&lastFractal, 0, sizeof(lastFractal));
 	isNVIDIA = false;
 	customFormulas = NULL;
 }
@@ -233,10 +233,34 @@ void CclSupport::Init(void)
 	if(!checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str())) return;
 
 	std::string strFileDistance = clDir;
-	if(lastFormula == xenodreambuie || lastFormula == hypercomplex)
-		strFileDistance += "cl_distance_deltaDE.cl";
+	if(lastFormula == ocl_custom)
+	{
+		switch ((enumOCLDEMode) lastFractal.customOCLFormulaDEMode)
+		{
+			case calculated:
+			{
+				strFileDistance += "cl_distance.cl";
+				break;
+			}
+			case deltaDE:
+			{
+				strFileDistance += "cl_distance_deltaDE.cl";
+				break;
+			}
+			case noDE:
+			{
+				strFileDistance += "cl_distance_noDE.cl";
+				break;
+			}
+		}
+	}
 	else
-		strFileDistance += "cl_distance.cl";
+	{
+		if(lastFormula == xenodreambuie || lastFormula == hypercomplex)
+			strFileDistance += "cl_distance_deltaDE.cl";
+		else
+			strFileDistance += "cl_distance.cl";
+	}
 	std::ifstream fileDistance(strFileDistance.c_str());
 	if(!checkErr(fileDistance.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileDistance).c_str())) return;
 
@@ -251,6 +275,7 @@ void CclSupport::Init(void)
 	if(lastFormula == ocl_custom)
 	{
 		customFormulas->GetActual(&strFormula, &strFileFormula, &strFileFormulaInit);
+
 	}
 	else
 	{
@@ -404,6 +429,7 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->params.auxLightNumber != lastParams.auxLightNumber) recompileRequest = true;
 	if(inConstants->fractal.mandelbox.rotEnabled != lastFractal.mandelbox.rotEnabled) recompileRequest = true;
 	if(inConstants->params.fakeLightsEnabled != lastParams.fakeLightsEnabled) recompileRequest = true;
+	if(inConstants->fractal.customOCLFormulaDEMode != lastFractal.customOCLFormulaDEMode) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -426,191 +452,193 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
 
-	if(recompileRequest)
+	if (recompileRequest)
 	{
 		Recompile();
 	}
 
-	stepSize = workGroupSize;
-	int workGroupSizeMultiplier = 1;
-
-	double startTime = real_clock();
-	double lastTime = startTime;
-	double lastTimeProcessing = startTime;
-	double lastProcessingTime = 1.0;
-
-	int nDof = 1;
-	if(lastParams.DOFEnabled) nDof = 256;
-
-	size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
-	size_t jobSizeLimit;
-	if (maxAllocMemSize > 0)
+	if (ready)
 	{
-		if(maxAllocMemSize * 0.75 < memoryLimitByUser)
+		stepSize = workGroupSize;
+		int workGroupSizeMultiplier = 1;
+
+		double startTime = real_clock();
+		double lastTime = startTime;
+		double lastTimeProcessing = startTime;
+		double lastProcessingTime = 1.0;
+
+		int nDof = 1;
+		if (lastParams.DOFEnabled) nDof = 256;
+
+		size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
+		size_t jobSizeLimit;
+		if (maxAllocMemSize > 0)
 		{
-			jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75;
+			if (maxAllocMemSize * 0.75 < memoryLimitByUser)
+			{
+				jobSizeLimit = maxAllocMemSize / sizeOfPixel * 0.75;
+			}
+			else
+			{
+				jobSizeLimit = memoryLimitByUser / sizeOfPixel;
+			}
 		}
 		else
 		{
 			jobSizeLimit = memoryLimitByUser / sizeOfPixel;
 		}
-	}
-	else
-	{
-		jobSizeLimit = memoryLimitByUser / sizeOfPixel;
-	}
 
-	srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
+		srand((unsigned int) ((double) clock() * 1000.0 / CLOCKS_PER_SEC));
 
-	for(int dofLoop = 1; dofLoop <= nDof; dofLoop++)
-	{
-		for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
+		for (int dofLoop = 1; dofLoop <= nDof; dofLoop++)
 		{
-
-			delete outCL;
-			delete[] rgbbuff;
-			delete auxReflectBuffer;
-			delete[] reflectBuffer;
-
-			double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
-			if (processingCycleTime < 0.02) processingCycleTime = 0.02;
-
-			workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
-
-			//printf("job size limit: %ld\n", jobSizeLimit);
-			int pixelsLeft = width * height - pixelIndex;
-			int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
-			if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
-			if (workGroupSizeMultiplier *  workGroupSize > jobSizeLimit) workGroupSizeMultiplier = jobSizeLimit / workGroupSize;
-			if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
-
-			constantsBuffer1->params.randomSeed = rand();
-
-			stepSize = workGroupSize * workGroupSizeMultiplier;
-			buffSize = stepSize * sizeof(sClPixel);
-			rgbbuff = new sClPixel[buffSize];
-			outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err);
-
-			char errorText[1000];
-			sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err), buffSize = %ld", buffSize);
-			if(!checkErr(err, errorText)) return;
-
-			reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
-			//printf("reflectBuffer size = %d\n", reflectBufferSize);
-			reflectBuffer = new sClReflect[10 * stepSize];
-			auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
-			sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err), reflectBufferSize = %ld", reflectBufferSize);
-			if(!checkErr(err, errorText)) return;
-
-			size_t usedGPUdMem = sizeOfPixel * stepSize;
-
-			err = kernel->setArg(0, *outCL);
-			err = kernel->setArg(1, *inCLBuffer1);
-			err = kernel->setArg(2, *inCLConstBuffer1);
-			err = kernel->setArg(3, *auxReflectBuffer);
-			err = kernel->setArg(4, pixelIndex);
-
-			//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
-
-			err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
-			sprintf(errorText, "ComamndQueue::enqueueWriteBuffer(inCLBuffer1), used GPU mem = %ld", usedGPUdMem);
-			if(!checkErr(err, errorText)) return;
-
-			err = queue->finish();
-			if(!checkErr(err, "ComamndQueue::finish() - CLBuffer")) return;
-
-			err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
-			if(!checkErr(err, "ComamndQueue::enqueueWriteBuffer(inCLConstBuffer1)")) return;
-			err = queue->finish();
-			if(!checkErr(err, "ComamndQueue::finish() - ConstBuffer")) return;
-
-			err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));
-			sprintf(errorText, "ComamndQueue::nqueueNDRangeKernel(jobSize), jobSize = %d", stepSize);
-			if(!checkErr(err, errorText)) return;
-
-			err = queue->finish();
-			if(!checkErr(err, "ComamndQueue::finish() - Kernel")) return;
-
-			err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
-			if(!checkErr(err, "ComamndQueue::enqueueReadBuffer()")) return;
-			err = queue->finish();
-			if(!checkErr(err, "ComamndQueue::finish() - ReadBuffer")) return;
-
-			unsigned int offset = pixelIndex;
-
-			for (unsigned int i = 0; i < stepSize; i++)
+			for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
 			{
-				unsigned int a = offset + i;
-				sRGBfloat pixel = { rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B };
-				int x = a % width;
-				int y = a / width;
 
-				if(lastParams.DOFEnabled)
+				delete outCL;
+				delete[] rgbbuff;
+				delete auxReflectBuffer;
+				delete[] reflectBuffer;
+
+				double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+				if (processingCycleTime < 0.02) processingCycleTime = 0.02;
+
+				workGroupSizeMultiplier *= processingCycleTime / lastProcessingTime;
+
+				//printf("job size limit: %ld\n", jobSizeLimit);
+				int pixelsLeft = width * height - pixelIndex;
+				int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
+				if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
+				if (workGroupSizeMultiplier * workGroupSize > jobSizeLimit) workGroupSizeMultiplier = jobSizeLimit / workGroupSize;
+				if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+
+				constantsBuffer1->params.randomSeed = rand();
+
+				stepSize = workGroupSize * workGroupSizeMultiplier;
+				buffSize = stepSize * sizeof(sClPixel);
+				rgbbuff = new sClPixel[buffSize];
+				outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err);
+
+				char errorText[1000];
+				sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize, rgbbuff, &err), buffSize = %ld", buffSize);
+				if (!checkErr(err, errorText)) return;
+
+				reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
+				//printf("reflectBuffer size = %d\n", reflectBufferSize);
+				reflectBuffer = new sClReflect[10 * stepSize];
+				auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+				sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err), reflectBufferSize = %ld", reflectBufferSize);
+				if (!checkErr(err, errorText)) return;
+
+				size_t usedGPUdMem = sizeOfPixel * stepSize;
+
+				err = kernel->setArg(0, *outCL);
+				err = kernel->setArg(1, *inCLBuffer1);
+				err = kernel->setArg(2, *inCLConstBuffer1);
+				err = kernel->setArg(3, *auxReflectBuffer);
+				err = kernel->setArg(4, pixelIndex);
+
+				//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
+
+				err = queue->enqueueWriteBuffer(*inCLBuffer1, CL_TRUE, 0, sizeof(sClInBuff), inBuffer1);
+				sprintf(errorText, "ComamndQueue::enqueueWriteBuffer(inCLBuffer1), used GPU mem = %ld", usedGPUdMem);
+				if (!checkErr(err, errorText)) return;
+
+				err = queue->finish();
+				if (!checkErr(err, "ComamndQueue::finish() - CLBuffer")) return;
+
+				err = queue->enqueueWriteBuffer(*inCLConstBuffer1, CL_TRUE, 0, sizeof(sClInConstants), constantsBuffer1);
+				if (!checkErr(err, "ComamndQueue::enqueueWriteBuffer(inCLConstBuffer1)")) return;
+				err = queue->finish();
+				if (!checkErr(err, "ComamndQueue::finish() - ConstBuffer")) return;
+
+				err = queue->enqueueNDRangeKernel(*kernel, cl::NullRange, cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+				sprintf(errorText, "ComamndQueue::nqueueNDRangeKernel(jobSize), jobSize = %d", stepSize);
+				if (!checkErr(err, errorText)) return;
+
+				err = queue->finish();
+				if (!checkErr(err, "ComamndQueue::finish() - Kernel")) return;
+
+				err = queue->enqueueReadBuffer(*outCL, CL_TRUE, 0, buffSize, rgbbuff);
+				if (!checkErr(err, "ComamndQueue::enqueueReadBuffer()")) return;
+				err = queue->finish();
+				if (!checkErr(err, "ComamndQueue::finish() - ReadBuffer")) return;
+
+				unsigned int offset = pixelIndex;
+
+				for (unsigned int i = 0; i < stepSize; i++)
 				{
-					sRGBfloat oldPixel = image->GetPixelImage(x,y);
-					sRGBfloat newPixel;
-					newPixel.R = oldPixel.R * (1.0 - 1.0/dofLoop) + pixel.R * (1.0/dofLoop);
-					newPixel.G = oldPixel.G * (1.0 - 1.0/dofLoop) + pixel.G * (1.0/dofLoop);
-					newPixel.B = oldPixel.B * (1.0 - 1.0/dofLoop) + pixel.B * (1.0/dofLoop);
-					image->PutPixelImage(x, y, newPixel);
-					image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+					unsigned int a = offset + i;
+					sRGBfloat pixel = { rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B };
+					int x = a % width;
+					int y = a / width;
+
+					if (lastParams.DOFEnabled)
+					{
+						sRGBfloat oldPixel = image->GetPixelImage(x, y);
+						sRGBfloat newPixel;
+						newPixel.R = oldPixel.R * (1.0 - 1.0 / dofLoop) + pixel.R * (1.0 / dofLoop);
+						newPixel.G = oldPixel.G * (1.0 - 1.0 / dofLoop) + pixel.G * (1.0 / dofLoop);
+						newPixel.B = oldPixel.B * (1.0 - 1.0 / dofLoop) + pixel.B * (1.0 / dofLoop);
+						image->PutPixelImage(x, y, newPixel);
+						image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+					}
+					else
+					{
+						image->PutPixelImage(x, y, pixel);
+						image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+					}
+				}
+
+				char progressText[1000];
+				double percent;
+				if (lastParams.DOFEnabled)
+				{
+					percent = (double) (dofLoop - 1.0) / nDof + (double) (pixelIndex + stepSize) / (width * height) / nDof;
 				}
 				else
 				{
-					image->PutPixelImage(x, y, pixel);
-					image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+					percent = (double) (pixelIndex + stepSize) / (width * height);
 				}
-			}
+				if (percent > 1.0) percent = 1.0;
+				double time = real_clock() - startTime;
+				double time_to_go = (1.0 - percent) * time / percent;
+				int togo_time_s = (int) time_to_go % 60;
+				int togo_time_min = (int) (time_to_go / 60) % 60;
+				int togo_time_h = time_to_go / 3600;
+				int time_s = (int) time % 60;
+				int time_min = (int) (time / 60) % 60;
+				int time_h = time / 3600;
+				sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, used GPU mem %ld MB", percent * 100.0, togo_time_h, togo_time_min, togo_time_s,
+						time_h, time_min, time_s, usedGPUdMem / 1024 / 1024);
+				gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
 
-			char progressText[1000];
-			double percent;
-			if(lastParams.DOFEnabled)
-			{
-				percent = (double) (dofLoop - 1.0) / nDof + (double) (pixelIndex + stepSize) / (width * height) / nDof;
-			}
-			else
-			{
-				percent = (double) (pixelIndex + stepSize) / (width * height);
-			}
-			if (percent > 1.0) percent = 1.0;
-			double time = real_clock() - startTime;
-			double time_to_go = (1.0 - percent) * time / percent;
-			int togo_time_s = (int) time_to_go % 60;
-			int togo_time_min = (int) (time_to_go / 60) % 60;
-			int togo_time_h = time_to_go / 3600;
-			int time_s = (int) time % 60;
-			int time_min = (int) (time / 60) % 60;
-			int time_h = time / 3600;
-			sprintf(progressText, "OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds, used GPU mem %ld MB", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h,
-					time_min, time_s, usedGPUdMem/1024/1024);
-			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+				lastProcessingTime = time - lastTimeProcessing;
+				lastTimeProcessing = time;
 
-			lastProcessingTime = time - lastTimeProcessing;
-			lastTimeProcessing = time;
-
-			if (real_clock() - lastTime > 30.0)
-			{
-				if (image->IsPreview())
+				if (real_clock() - lastTime > 30.0)
 				{
-					image->CompileImage();
-					image->ConvertTo8bit();
-					image->UpdatePreview();
-					image->RedrawInWidget(outputDarea);
-					while (gtk_events_pending())
-						gtk_main_iteration();
+					if (image->IsPreview())
+					{
+						image->CompileImage();
+						image->ConvertTo8bit();
+						image->UpdatePreview();
+						image->RedrawInWidget(outputDarea);
+						while (gtk_events_pending())
+							gtk_main_iteration();
+					}
+					lastTime = real_clock();
 				}
-				lastTime = real_clock();
+
+				if (programClosed) break;
+
+				while (gtk_events_pending())
+					gtk_main_iteration();
 			}
-
 			if (programClosed) break;
-
-			while (gtk_events_pending())
-				gtk_main_iteration();
 		}
-		if (programClosed) break;
 	}
-
 	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
 	//		clSupport->GetRgbBuff(), clSupport->GetWidth() * 3);
 }
@@ -758,13 +786,7 @@ void CCustomFormulas::NewFormula(std::string newName)
 
 	RefreshList();
 
-	for(int i=0; i<count; i++)
-	{
-		if(newName == listOfNames[i])
-		{
-			gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), i);
-		}
-	}
+	SetActualByName(newName);
 
 	const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
 	if(!fork())
@@ -778,6 +800,21 @@ void CCustomFormulas::NewFormula(std::string newName)
 		execlp(editor, editor, formulaInitFile.c_str(), NULL);
 		_exit(0);
 	}
+}
+
+bool CCustomFormulas::SetActualByName(std::string name)
+{
+	bool result = false;
+	for (int i = 0; i < count; i++)
+	{
+		if (name == listOfNames[i])
+		{
+			gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), i);
+			actualIndex = i;
+			result = true;
+		}
+	}
+	return result;
 }
 
 void CCustomFormulas::DeleteFormula(void)

@@ -74,7 +74,7 @@ void MainRender(void);
 void *MainThread(void *ptr);
 void Render(sParamRender param, cImage *image, GtkWidget *outputDarea);
 void InitMainParameters(sParamRender *fractParam);
-void InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
+bool InitMainImage(cImage *image, int width, int height, double previewScale, GtkWidget *drawingArea);
 bool LoadTextures(sParamRender *params);
 void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode);
 void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage);
