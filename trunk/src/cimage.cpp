@@ -12,6 +12,8 @@
 #include <math.h>
 #include "cimage.hpp"
 
+#include <iostream>
+#include <new>
 
 cImage::cImage(int w, int h, bool low_mem)
 {
@@ -26,33 +28,51 @@ cImage::cImage(int w, int h, bool low_mem)
 
 cImage::~cImage()
 {
-	delete[] imageFloat;
-	delete[] image16;
-	delete[] image8;
-	delete[] alphaBuffer;
-	delete[] opacityBuffer;
-	delete[] colourBuffer;
-	delete[] zBuffer;
-	delete[] gammaTable;
+	if(imageFloat) delete[] imageFloat;
+	imageFloat = NULL;
+	if(image16) delete[] image16;
+	image16 = NULL;
+	if(image8) delete[] image8;
+	image8 = NULL;
+	if(alphaBuffer) delete[] alphaBuffer;
+	alphaBuffer = NULL;
+	if(opacityBuffer) delete[] opacityBuffer;
+	opacityBuffer = NULL;
+	if(colourBuffer) delete[] colourBuffer;
+	colourBuffer = NULL;
+	if(zBuffer) delete[] zBuffer;
+	zBuffer = NULL;
+	if(gammaTable) delete[] gammaTable;
+	gammaTable = NULL;
 	if (previewAllocated)
 	{
-		delete[] preview;
-		delete[] preview2;
+		if(preview) delete[] preview;
+		preview = NULL;
+		if(preview2) delete[] preview2;
+		preview2 = NULL;
 	}
 }
 
-void cImage::AllocMem(void)
+bool cImage::AllocMem(void)
 {
 	if (width > 0 && height > 0)
 	{
-		imageFloat =  new sRGBfloat[width * height];
-		image16 = new sRGB16[width * height];
-		image8 = new sRGB8[width * height];
-		zBuffer = new float[width * height];
-		alphaBuffer = new unsigned short[width * height];
-		opacityBuffer = new unsigned short[width * height];
-		colourBuffer = new sRGB8[width * height];
-		ClearImage();
+		try
+		{
+			imageFloat = new sRGBfloat[width * height];
+			image16 = new sRGB16[width * height];
+			image8 = new sRGB8[width * height];
+			zBuffer = new float[width * height];
+			alphaBuffer = new unsigned short[width * height];
+			opacityBuffer = new unsigned short[width * height];
+			colourBuffer = new sRGB8[width * height];
+			ClearImage();
+		}
+		catch (std::bad_alloc& ba)
+		{
+			std::cerr << "bad_alloc caught: " << ba.what() << std::endl;
+			return false;
+		}
 	}
 	else
 	{
@@ -68,21 +88,28 @@ void cImage::AllocMem(void)
 
 	preview = NULL;
 	preview2 = NULL;
+	return true;
 }
 
-void cImage::ChangeSize(int w, int h)
+bool cImage::ChangeSize(int w, int h)
 {
-	if(!lowMem)
-	delete[] imageFloat;
-	delete[] image16;
-	delete[] image8;
-	delete[] alphaBuffer;
-	delete[] opacityBuffer;
-	delete[] colourBuffer;
-	delete[] zBuffer;
+	if (imageFloat) delete[] imageFloat;
+	imageFloat = NULL;
+	if (image16) delete[] image16;
+	image16 = NULL;
+	if (image8) delete[] image8;
+	image8 = NULL;
+	if (alphaBuffer) delete[] alphaBuffer;
+	alphaBuffer = NULL;
+	if (opacityBuffer) delete[] opacityBuffer;
+	opacityBuffer = NULL;
+	if (colourBuffer) delete[] colourBuffer;
+	colourBuffer = NULL;
+	if (zBuffer) delete[] zBuffer;
+	zBuffer = NULL;
 	width = w;
 	height = h;
-	AllocMem();
+	return AllocMem();
 }
 
 void cImage::ClearImage(void)

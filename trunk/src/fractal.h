@@ -12,6 +12,7 @@
 #include "common_math.h"
 #include "fractparams.h"
 #include <stddef.h>
+#include <string>
 
 const int IFS_VECTOR_COUNT = 9;
 const int HYBRID_COUNT = 5;
@@ -85,6 +86,13 @@ enum enumObjectType
 	objSphereInv = 4,
 	objBox = 5,
 	objBoxInv = 6
+};
+
+enum enumOCLDEMode
+{
+	calculated = 0,
+	deltaDE = 1,
+	noDE = 2
 };
 
 struct sFractalIFSD
@@ -226,6 +234,9 @@ struct sFractalD
 	double power;		 //power of fractal formula
 	double cadd;
 	double hybridPower[HYBRID_COUNT];
+#ifdef CLSUPPORT
+	double customParameters[15];
+#endif
 	CVector3 julia; // Julia constant
 	CVector3 fakeLightsOrbitTrap;
 	sFractalPrimitivesD primitives;
@@ -248,6 +259,7 @@ struct sFractal
 	bool hybridCyclic;
 	bool linearDEmode;
 	bool constantDEThreshold;
+	bool useCustomOCLFormula;
 
 	enumFractalFormula formula;
 
@@ -256,6 +268,8 @@ struct sFractal
 
 	std::vector<enumFractalFormula> formulaSequence;
 	std::vector<double> hybridPowerSequence;
+	char customOCLFormulaName[100];
+	enumOCLDEMode customOCLFormulaDEMode;
 
 	sFractalIFS IFS;
 	sFractalMandelbox mandelbox;

@@ -392,7 +392,7 @@ void cTimeline::GetFrameParamsInterpolated(int index, int framesPerKey, sParamRe
 	}
 	else
 	{
-		memset(params, sizeof(sParamRenderD), 0);
+		memset(params, 0, sizeof(sParamRenderD));
 	}
 }
 

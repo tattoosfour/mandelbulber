@@ -233,16 +233,18 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		
 		sClCalcParams calcParam;
 		calcParam.N = consts->fractal.N;
+		distThresh = 1e-6f;
 		
 		formulaOut outF;
 		//ray-marching
 		for(count = 0; count < MAX_RAYMARCHING; count++)
 		{
 			point = start + viewVector * scan;
+			calcParam.distThresh = distThresh;
 			outF = CalculateDistance(consts, point, &calcParam);
 			distance = outF.distance;
 			distThresh = scan * resolution * consts->params.persp;
-			
+
 			if(distance < distThresh)
 			{
 				found = true;

@@ -89,7 +89,7 @@ class cImage
 public:
 	cImage(int w, int h, bool low_mem = false);
 	~cImage();
-	void ChangeSize(int w, int h);
+	bool ChangeSize(int w, int h);
 	void ClearImage(void);
 	inline void PutPixelImage(int x, int y, sRGBfloat pixel)	{if (x >= 0 && x < width && y >= 0 && y < height) imageFloat[x + y * width] = pixel;}
 	inline void PutPixelImage16(int x, int y, sRGB16 pixel)	{if (x >= 0 && x < width && y >= 0 && y < height) image16[x + y * width] = pixel;}
@@ -139,7 +139,7 @@ public:
 
 private:
   sRGB8 Interpolation(float x, float y);
-	void AllocMem(void);
+	bool AllocMem(void);
 	inline sRGB16 Black16(void) {sRGB16 black = {0,0,0};return black;}
 	inline sRGB8 Black8(void) {sRGB8 black = {0,0,0};return black;}
 	inline sRGBfloat BlackFloat(void) {sRGBfloat black = {0.0,0.0,0.0};return black;}

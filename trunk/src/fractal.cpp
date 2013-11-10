@@ -1107,6 +1107,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			case none:
 				break;
+			case ocl_custom:
+				break;
 		}
 
 		//************************** iteration terminate conditions *****************

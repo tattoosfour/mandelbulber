@@ -70,10 +70,13 @@ typedef struct
 	cl_int constantDEThreshold;
 	cl_int fakeLightsMinIter;
 	cl_int fakeLightsMaxIter;
+	cl_int customOCLFormulaDEMode;
+	cl_int linearDEmode;
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
 	cl_float fractalConstantFactor;
+	cl_float custom[15];
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;
@@ -183,6 +186,7 @@ typedef struct
 	cl_uint N;
 	cl_int randomSeed;
 	cl_float3 orbitTrap;
+	cl_float distThresh;
 } sClCalcParams;
 
 typedef struct
@@ -204,8 +208,6 @@ typedef struct
 	cl_int stepCount;
 	//enumObjectType objectType;
 } sClShaderInputData;
-
-
 
 typedef struct
 {

@@ -540,6 +540,20 @@ void ReadInterface(sParamRender *params)
 
 		params->doubles.shadowConeAngle = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_shadowConeAngle)));
 
+#ifdef CLSUPPORT
+		params->fractal.useCustomOCLFormula = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable));
+		params->fractal.customOCLFormulaDEMode = (enumOCLDEMode)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode));
+		if(clSupport->customFormulas)
+		{
+			std::string actualName, actualFormula, actualIni;
+			clSupport->customFormulas->GetActual(&actualName, &actualFormula, &actualIni);
+			strcpy(params->fractal.customOCLFormulaName, actualName.c_str());
+
+			for(int i=0; i<15; i++)
+				params->fractal.doubles.customParameters[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_customParameters[i])));
+		}
+#endif
+
 		GdkColor color;
 		gtk_color_button_get_color(GTK_COLOR_BUTTON(Interface.buColorGlow1), &color);
 		params->effectColours.glow_color1 = GdkColor2sRGB(color);
@@ -1046,6 +1060,39 @@ void WriteInterface(sParamRender *params)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.IFSParams[i].checkIFSenabled), params->fractal.IFS.enabled[i]);
 	}
 
+#ifdef CLSUPPORT
+
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), params->fractal.customOCLFormulaDEMode);
+	params->fractal.useCustomOCLFormula = false;
+	if(params->fractal.formula == ocl_custom) params->fractal.useCustomOCLFormula = true;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable), params->fractal.useCustomOCLFormula);
+
+	if (params->fractal.useCustomOCLFormula)
+	{
+		if (!clSupport->IsEnabled())
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable), true);
+		}
+		if (clSupport->customFormulas)
+		{
+			bool result = clSupport->customFormulas->SetActualByName(params->fractal.customOCLFormulaName);
+			if(!result)
+			{
+				printf("Formula %s doesn't exists in your library\n", params->fractal.customOCLFormulaName);
+				if (!noGUI)
+				{
+					GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CANCEL,
+							"Formula %s doesn't exists in your library\n", params->fractal.customOCLFormulaName);
+					gtk_dialog_run(GTK_DIALOG(dialog));
+					gtk_widget_destroy(dialog);
+				}
+			}
+			for (int i = 0; i < 15; i++)
+				gtk_entry_set_text(GTK_ENTRY(Interface.edit_customParameters[i]), DoubleToString(params->fractal.doubles.customParameters[i]));
+		}
+	}
+#endif
+
 	enumPerspectiveType perspTypeTemp = params->perspectiveType;
 	if(params->fishEyeCut && perspTypeTemp == fishEye) perspTypeTemp = fishEyeCut;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), perspTypeTemp);
@@ -1493,6 +1540,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClCustomV1 = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClCustomH11 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClCustomH12 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClCustomH13 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClCustomV2 = gtk_vbox_new(FALSE, 1);
 
 	Interface.boxNetRenderClientV = gtk_vbox_new(FALSE, 1);
 	Interface.boxNetRenderClientH1 = gtk_hbox_new(FALSE, 1);
@@ -1521,6 +1570,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.tableIFSParams = gtk_table_new(9, 9, false);
 	Interface.tableHybridParams = gtk_table_new(5, 3, false);
 	Interface.tableMandelboxRotations = gtk_table_new(5, 7, false);
+	Interface.tableOpenCLCustom = gtk_table_new(5, 3, false);
 
 	//frames
 	Interface.frCoordinates = gtk_frame_new("Viewpoint coordinates");
@@ -1574,7 +1624,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frImageAdjustments = gtk_frame_new("Image adjustments");
 	Interface.frShadersSurface = gtk_frame_new("Surface");
 	Interface.frShadersVolumetric = gtk_frame_new("Volumetric");
-	Interface.frOpenClCustomSelection = gtk_frame_new("Formula management");
+	Interface.frOpenClCustomSelection = gtk_frame_new("Custom formula management");
 	Interface.frOpenClCustomParams = gtk_frame_new("Custom parameters for custom formula");
 
 	//separators
@@ -1904,6 +1954,9 @@ void CreateInterface(sParamRender *default_settings)
 
 	Interface.edit_shadowConeAngle = gtk_entry_new();
 
+	for(int i=0; i<15; i++)
+		Interface.edit_customParameters[i] = gtk_entry_new();
+
 	//combo
 	//		fract type
 	Interface.comboFractType = gtk_combo_box_new_text();
@@ -1998,6 +2051,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.comboOpenCLCustomFormulas = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), "Enable OpenCL to get list");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), 0);
+
+	Interface.comboOpenCLDEMode = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "Calculated DE in formula");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "Delta DE");
+	//gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "no DE");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), 0);
 
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
@@ -3012,9 +3071,21 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), Interface.checkOpenClCustomEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), CreateWidgetWithLabel("Distance estimation method:", Interface.comboOpenCLDEMode), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH13, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH13), Interface.checkOpenClCustomEnable, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomParams, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomParams), Interface.boxOpenClCustomV2);
+	for(int i=0; i<15; i++)
+	{
+		char text[100];
+		int row = i / 3;
+		int column = i % 3;
+		sprintf(text, "consts->fractal.custom[%2d]:", i);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableOpenCLCustom), CreateEdit("0", text, 6, Interface.edit_customParameters[i]), column, column+1, row, row+1);
+	}
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV2), Interface.tableOpenCLCustom, false, false, 1);
 
 	//tab About...
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
@@ -3607,6 +3678,12 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 
 	clFractal->fakeLightsMinIter = params->fractal.fakeLightsMinIter;
 	clFractal->fakeLightsMaxIter = params->fractal.fakeLightsMaxIter;
+
+	clFractal->customOCLFormulaDEMode = params->fractal.customOCLFormulaDEMode;
+	clFractal->linearDEmode = params->fractal.linearDEmode;
+
+	for(int i=0; i<15; i++)
+		clFractal->custom[i] = params->fractal.doubles.customParameters[i];
 
 	for(int i=0; i<256; i++)
 	{

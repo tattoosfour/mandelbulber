@@ -2918,7 +2918,7 @@ void PressedClientEnable(GtkWidget *widget, gpointer data)
 						GetSettingsfromServer(buffer, size);
 						while (gtk_events_pending())
 							gtk_main_iteration();
-						delete buffer;
+						delete[] buffer;
 					}
 					if (!strcmp(command, "run"))
 					{
@@ -2974,7 +2974,7 @@ void NoGUIClientEnable(void)
 					char *buffer = new char[size];
 					netRender->GetData(buffer);
 					GetSettingsfromServer(buffer, size);
-					delete buffer;
+					delete[] buffer;
 				}
 				if (!strcmp(command, "run"))
 				{
@@ -3159,7 +3159,7 @@ void PressedOpenCLDeleteFormula(GtkWidget *widget, gpointer data)
 		std::string text("Do you really want to delete custom formula \"");
 		text += name + "\"?";
 
-		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Do you really want to delete formula?");
+		GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, text.c_str());
 		gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 		if(result == GTK_RESPONSE_YES)
 		{
