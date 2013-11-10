@@ -1481,12 +1481,37 @@ int main(int argc, char *argv[])
 #endif
 	WriteLog("Undo directory");
 
+	//copy defaults settings
 	string defaults = string(data_directory) + "/.defaults";
 	if(!FileIfExists(defaults.c_str()))
 	{
 		fcopy((string(sharedDir)+"/defaults").c_str(),defaults.c_str());
 		WriteLog("Defaults copied");
 	}
+
+#ifdef CLSUPPORT
+	//create and copy of example custom formulas
+	string oclDir = string(data_directory) + "/custom_ocl_formulas";
+	dir = opendir(oclDir.c_str());
+	if (dir != NULL) (void) closedir(dir);
+#ifdef WIN32
+	else
+	{
+		mkdir(oclDir.c_str());
+#else
+	else
+	{
+		mkdir(oclDir.c_str(), (S_IRUSR | S_IWUSR | S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
+#endif
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example1.c").c_str(),(oclDir + "/cl_example1.c").c_str());
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example2.c").c_str(),(oclDir + "/cl_example2.c").c_str());
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example3.c").c_str(),(oclDir + +"/cl_example3.c").c_str());
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example1Init.c").c_str(),(oclDir + "/cl_example1Init.c").c_str());
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example2Init.c").c_str(),(oclDir + "/cl_example2Init.c").c_str());
+		fcopy((string(sharedDir)+"/exampleOCLformulas/cl_example3Init.c").c_str(),(oclDir + "/cl_example3Init.c").c_str());
+	}
+	WriteLog("Custom formulas directory");
+#endif
 
 	strcpy(lastFilenameSettings, "settings/default.fract");
 	strcpy(lastFilenameImage, "images/image.jpg");
