@@ -17,7 +17,9 @@
 #include <glib.h>
 
 #include "files.h"
-
+#ifdef WIN32
+#include <process.h>
+#endif
 
 CclSupport *clSupport;
 
@@ -789,17 +791,25 @@ void CCustomFormulas::NewFormula(std::string newName)
 	SetActualByName(newName);
 
 	const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
+#ifdef WIN32
+	spawnlp(P_NOWAIT, editor, editor, formulaFile.c_str(), NULL);
+#else
 	if(!fork())
 	{
 		execlp(editor, editor, formulaFile.c_str(), NULL);
 		_exit(0);
 	}
+#endif
 
+#ifdef WIN32
+	spawnlp(P_NOWAIT, editor, editor, formulaInitFile.c_str(), NULL);
+#else
 	if(!fork())
 	{
 		execlp(editor, editor, formulaInitFile.c_str(), NULL);
 		_exit(0);
 	}
+#endif
 }
 
 bool CCustomFormulas::SetActualByName(std::string name)

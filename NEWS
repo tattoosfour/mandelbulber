@@ -1,5 +1,19 @@
 Version history
 
+v1.19
+- OpenCL - added management for user defined formulas
+- added showing of light animation paths in image window
+- improved algorithm for fake lights based on orbit traps
+- OpenCL - implemented fake lights in "full" kernel
+- OpenCL - added error handling and messages for most of errors. Program is not terminated when error occurs
+- OpenCL - added setting for max GPU memory intented to use with OpenCL. Can be helpful when program cannot detect avilable memomy.
+- added quit confirmation dialog
+- OpenCL - added selection for OpenCL platform, device and switching between use of GPU or CPU
+- added loading at program startup and saving at program exit of several application settings
+- added error handling for lack of memory errors
+- fixed bug: when in NetRender the client was enabled there was not possible to close the program
+- fixed bug: applied patches for memory leaks
+
 v1.18
 - added 3D pointer in image preview window
 - added showing of animation path in image preview window
@@ -11,7 +25,6 @@ v1.18
 - fixed bug: OpenCL - main volumetric light wasn't rendered when no aux lights were enabled
 - fixed bug: OpenCL - wrong calculation of focus point for DOF
 - fixed bug: OpenCL - reduced noise on depth zooms - linited "delta" from very small values
-
 
 v1.17.2
 - fixed bug: OpenCL - include path compatible with nVidia-win32 driver requirements

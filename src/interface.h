@@ -16,8 +16,8 @@
 #include "shaders.h"
 #include "morph.hpp"
 
-#define MANDELBULBER_VERSION 1.18
-#define MANDELBULBER_VERSION_STR "1.18"
+#define MANDELBULBER_VERSION 1.19
+#define MANDELBULBER_VERSION_STR "1.19"
 
 #ifndef SHARED_DIR
 	#ifndef WIN32
@@ -945,12 +945,12 @@ void CheckPrameters(sParamRender *params);
 sRGB GdkColor2sRGB(GdkColor color);
 GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
+void ReadInterfaceAppSettings(sAppSettings *appParams);
+void WriteInterfaceAppSettings(sAppSettings *appParams);
 #ifdef CLSUPPORT
 void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *clConstantsBuff);
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
 cl_float4 CVector2float3(CVector3 vect);
 cl_float4 sRGB2float3(sRGB colour, double factor);
-void ReadInterfaceAppSettings(sAppSettings *appParams);
-void WriteInterfaceAppSettings(sAppSettings *appParams);
 #endif
 #endif /* INTERFACE_H_ */
