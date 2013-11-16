@@ -108,7 +108,7 @@ void GetPaletteFromString(sRGB *palette, const char *paletteString)
 		palette[index] = rgbColour;
 		//printf("R = %d, G = %d, B = %d\n", rgbColour.R, rgbColour.G, rgbColour.B);
 
-		while (paletteString[i] != ' ' && i < 2000)
+		while (i < 2000 && paletteString[i] != ' ')
 		{
 			i++;
 		}

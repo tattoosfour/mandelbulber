@@ -1,4 +1,4 @@
-MANDELBULBER 1.18
+MANDELBULBER 1.19
 project leader: Krzysztof Marczak
 project members: knighty, makemeunsee, Marius Schilder, Ryan Hitchman, Jeff Epler, Martin Reinecke, Quazgaa
 

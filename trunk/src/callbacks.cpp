@@ -3100,11 +3100,15 @@ void PressedOpenCLEditFormula(GtkWidget *widget, gpointer data)
 		const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
 		std::string fileToEdit;
 		clSupport->customFormulas->GetActual(NULL, &fileToEdit, NULL);
+#ifdef WIN32
+		spawnlp(P_NOWAIT, editor, editor, fileToEdit.c_str(), NULL);
+#else
 		if(!fork())
 		{
 			execlp(editor, editor, fileToEdit.c_str(), NULL);
 			_exit(0);
 		}
+#endif		
 	}
 #endif
 }
@@ -3117,11 +3121,15 @@ void PressedOpenCLEditFormulaInit(GtkWidget *widget, gpointer data)
 		const char *editor = gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLTextEditor));
 		std::string fileToEdit;
 		clSupport->customFormulas->GetActual(NULL, NULL, &fileToEdit);
+#ifdef WIN32
+		spawnlp(P_NOWAIT, editor, editor, fileToEdit.c_str(), NULL);
+#else
 		if(!fork())
 		{
 			execlp(editor, editor, fileToEdit.c_str(), NULL);
 			_exit(0);
 		}
+#endif
 	}
 #endif
 }
