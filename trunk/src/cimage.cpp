@@ -463,8 +463,6 @@ void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z
 		double deltaY = y2 - y1;
 		if (deltaX != 0 || deltaY != 0)
 		{
-
-			int max;
 			double a_deltaX = fabs(deltaX);
 			double a_deltaY = fabs(deltaY);
 
@@ -477,13 +475,11 @@ void cImage::AntiAliasedLine(double x1, double y1, double x2, double y2, float z
 			{
 				x1 += 0.5;
 				x2 += 0.5;
-				max = abs((int) x2 - (int) x1);
 			}
 			else
 			{
 				y1 += 0.5;
 				y2 += 0.5;
-				max = abs((int) y2 - (int) y1);
 			}
 
 			if (a_deltaX > a_deltaY)
