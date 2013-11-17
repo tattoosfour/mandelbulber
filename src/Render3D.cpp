@@ -1404,8 +1404,8 @@ int main(int argc, char *argv[])
 	//clSupport->Init();
 
 	sParamRender fractParamDefault;
-	memset(&fractParamDefault, 0, sizeof(sParamRender));
-	WriteLog("allocated memory for default parameters");
+	//memset(&fractParamDefault, 0, sizeof(sParamRender));
+	//WriteLog("allocated memory for default parameters");
 
 	//data directory location
 #ifdef WIN32 /* WINDOWS */
