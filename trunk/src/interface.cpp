@@ -2027,6 +2027,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Fast: no effects");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Normal: shadows, glow, fast AO");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Full: all shaders");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "No DE");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine), 0);
 
 	Interface.comboOpenCLDeviceIndex = gtk_combo_box_new_text();

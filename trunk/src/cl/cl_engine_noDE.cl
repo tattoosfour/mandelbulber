@@ -6,7 +6,7 @@ typedef unsigned short cl_ushort;
 
 #include "mandelbulber_cl_data.h"
 
-#define MAX_RAYMARCHING 10000
+#define MAX_RAYMARCHING 100000
 
 typedef struct
 {
@@ -112,6 +112,11 @@ float4 quaternionSqr(float4 q)
 	return result;
 }
 
+formulaOut CalculateFractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
+{
+	formulaOut out = Fractal(consts, point, calcParam);
+	return out;
+}
 
 /*
 float PrimitivePlane(float3 point, float3 centre, float3 normal)
@@ -183,61 +188,27 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 {
 	float3 normal = 0.0f;
 	//calculating normal vector based on distance estimation (gradient of distance function)
-	if (!consts->params.slowShading)
+
+	float result2;
+	bool max_iter;
+
+	float3 point2;
+	float3 point3;
+	for (point2.x = -1.0f; point2.x <= 1.0f; point2.x += 0.2f)//+0.2
 	{
-		float delta = input->delta;
-		//if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
-
-		float s1, s2, s3, s4;
-		input->calcParam->N *= 5;
-		//input.calcParam->minN = 0;
-
-		bool maxIter;
-
-		s1 = CalculateDistance(consts, input->point, input->calcParam).distance;
-
-		float3 deltax = (float3) {delta, 0.0f, 0.0f};
-		s2 = CalculateDistance(consts, input->point + deltax, input->calcParam).distance;
-
-		float3 deltay = (float3) {0.0f, delta, 0.0f};
-		s3 = CalculateDistance(consts, input->point + deltay, input->calcParam).distance;
-
-		float3 deltaz = (float3) {0.0f, 0.0f, delta};
-		s4 = CalculateDistance(consts, input->point + deltaz, input->calcParam).distance;
-
-		normal.x = s2 - s1;
-		normal.y = s3 - s1;
-		normal.z = s4 - s1;
-		input->calcParam->N /= 5;
-		//input.calcParam->minN = input.param->fractal.minN;
-	}
-
-	//calculating normal vector based on average value of binary central difference
-	else
-	{
-		float result2;
-		bool max_iter;
-
-		float3 point2;
-		float3 point3;
-		for (point2.x = -1.0f; point2.x <= 1.0f; point2.x += 0.2f) //+0.2
+		for (point2.y = -1.0f; point2.y <= 1.0f; point2.y += 0.2f)
 		{
-			for (point2.y = -1.0f; point2.y <= 1.0f; point2.y += 0.2f)
+			for (point2.z = -1.0f; point2.z <= 1.0f; point2.z += 0.2f)
 			{
-				for (point2.z = -1.0f; point2.z <= 1.0f; point2.z += 0.2f)
-				{
-					point3 = input->point + point2 * input->delta;
+				point3 = input->point + point2 * input->delta;
 
-					float dist = CalculateDistance(consts, point3, input->calcParam).distance;
+				float N = CalculateFractal(consts, point3, input->calcParam).iters;
 
-					if (dist < input->dist_thresh || max_iter) result2 = 0.0f;
-					else result2 = 1.0f;
-
-					normal += (point2 * result2);
-				}
+				normal -= (point2 * N);
 			}
 		}
 	}
+	
 
 	if(normal.x == 0.0f && normal.y == 0.0f && normal.z == 0.0f)
 	{
@@ -257,55 +228,37 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 {
 	float3 point;
 	bool found = false;
-	float scan = 1e-10f;
-	float distThresh = *distThreshOut;
+	float scan = 1e-5f;
 	float dist = 0.0f;
-	float search_accuracy = 0.01f * consts->params.quality;
-	//printf("consts->params.quality %f, start %f %f %f\n", consts->params.quality, start.x, start.y, start.z);
-	float search_limit = 1.0f - search_accuracy;
 	float step = 1e-10f;
 	float resolution = 1.0f/consts->params.width;
 	*stepCount = 0;
 	int count = 0;
-	float distThreshInit = *distThreshOut;
-	//printf("DE_factor %f\n", consts->params.DEfactor);
 	
-	//printf("Start, start.x = %g, start.y = %g, start.z = %g\n", start.x, start.y, start.z);
 	for (int i = 0; i < MAX_RAYMARCHING; i++)
 	{
 		point = start + direction * scan;
-		//printf("viewVector %f %f %f\n", direction.x, direction.y, direction.z);
-		//printf("scan %f\n", scan);
-		//printf("DE_factor %f\n", consts->params.DEfactor);
-		
-		bool max_iter = false;
 
 		if (consts->fractal.constantDEThreshold)
 		{
-			distThresh = consts->params.quality;
-			//printf("DistThresh = %f\n", distThresh);
+			dist = consts->params.quality;
 		}
 		else
 		{
-			distThresh = scan * resolution * consts->params.persp / consts->params.quality + distThreshInit;
+			dist = scan * resolution * consts->params.persp / consts->params.quality * consts->params.DEfactor;
 		}
-		calcParam->distThresh = distThresh;
-		//conts->fractal.detailSize = distThresh;
-		formulaOut outF;
-		outF = CalculateDistance(consts, point, calcParam);
-		dist = outF.distance;
-		
-		//printf("Distance = %f\n", dist/distThresh);
 
-		if (dist > 3.0f) dist = 3.0f;
-		if (dist < distThresh)
+		formulaOut outF;
+		outF = CalculateFractal(consts, point, calcParam);
+
+		if(outF.iters == calcParam->N)
 		{
 			found = true;
 			break;
 		}
-		//printf("DE_factor %f\n", consts->params.DEfactor);
-		step = (dist - 0.5f * distThresh) * consts->params.DEfactor;
-		scan += step;
+
+		scan += dist;
+
 		if (scan > maxScan)
 		{
 			break;
@@ -316,36 +269,30 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 	
 	if (found && binaryEnable)
 	{
-		float step = distThresh * 0.5f;
-		for (int i = 0; i < 10; i++)
+		float step = dist * 0.5f;
+		bool max_iter = true;
+		for (int i = 0; i < 20; i++)
 		{
-			if (dist < distThresh && dist > distThresh * search_limit)
+			if (!max_iter)
 			{
-				break;
+				scan += step;
+				point = start + direction * scan;
 			}
 			else
 			{
-				if (dist > distThresh)
-				{
-					scan += step;
-					point = start + direction * scan;
-				}
-				else if (dist < distThresh * search_limit)
-				{
-					scan -= step;
-					point = start + direction * scan;
-				}
+				scan -= step;
+				point = start + direction * scan;
 			}
+
 			formulaOut outF;
-			outF = CalculateDistance(consts, point, calcParam);
-					dist = outF.distance;
-			//printf("Distance binary = %g\n", dist/distThresh);
+			outF = CalculateFractal(consts, point, calcParam);
+			max_iter = (outF.iters == calcParam->N); 
 			step *= 0.5f;
 		}
 	}
 
 	*foundOut = found;
-	*distThreshOut = distThresh;
+	*distThreshOut = dist;
 	*lastDistOut = dist;
 	*depthOut = scan;
 	return point;
@@ -361,7 +308,7 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	bool max_iter;
 	float factor = input->delta / input->resolution;
 	if (!consts->params.penetratingLights) factor = consts->params.viewDistanceMax;
-	float dist = input->dist_thresh;
+	float dist = 0.0f;
 
 	float DE_factor = consts->params.DEfactor;
 	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny) DE_factor = 1.0;
@@ -371,42 +318,19 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 
 	float opacity = 0.0f;
 	float shadowTemp = 1.0f;
-
-	float softRange = tan(consts->params.shadowConeAngle / 180.0f * 3.14f);
-	float maxSoft = 0.0f;
-
-	bool bSoft = (!consts->params.iterFogEnabled /*&& !input.calcParam->limits_enabled && !input.calcParam->iterThresh*/) && softRange > 0.0;
-	
-	float distThresh;
 	
 	for (float i = start; i < factor; i += dist * DE_factor)
 	{
 		point2 = input->point + input->lightVect * i;
 
-		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
-		dist = out.distance;
-		
-		if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
-		{
-			if (!consts->fractal.constantDEThreshold)
-				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
-			else
-				distThresh = consts->params.quality;
-		}
+		if (!consts->fractal.constantDEThreshold)
+			dist = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
 		else
-			distThresh = input->dist_thresh;
+			dist = consts->params.quality;
 		
-		if (bSoft)
-		{
-			float angle = (dist - distThresh) / i;
-			if (angle < 0.0f) angle = 0.0f;
-			if (dist < distThresh) angle = 0.0f;
-			float softShadow = (1.0f - angle / softRange);
-			if (consts->params.penetratingLights) softShadow *= (factor - i) / factor;
-			if (softShadow < 0.0f) softShadow = 0.0f;
-			if (softShadow > maxSoft) maxSoft = softShadow;
-		}
-
+		formulaOut out = CalculateFractal(consts, point2, input->calcParam);
+		max_iter = (out.iters == consts->fractal.N);
+				
 		if (consts->params.iterFogEnabled)
 		{
 			opacity = IterOpacity(dist * DE_factor, out.iters, consts->fractal.N, consts->params.iterFogOpacityTrim,
@@ -418,7 +342,7 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 		}
 		shadowTemp -= opacity * (factor - i) / factor;
 		
-		if (dist < distThresh || shadowTemp < 0.0f)
+		if (max_iter || shadowTemp < 0.0f)
 		{
 			shadowTemp -= (factor - i) / factor;
 			if (!consts->params.penetratingLights) shadowTemp = 0.0f;
@@ -426,14 +350,8 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 			break;
 		}
 	}
-	if (!bSoft)
-	{
-		shadow = shadowTemp;
-	}
-	else
-	{
-		shadow = (1.0f - maxSoft);
-	}
+	shadow = shadowTemp;
+	
 	return shadow;
 }
 
@@ -452,31 +370,13 @@ float3 MainSpecular(sClShaderInputData *input)
 
 float3 SurfaceColour(__constant sClInConstants *consts, sClShaderInputData *input, global cl_float3 *palette)
 {
+	input->calcParam->N = consts->fractal.N + 1;
 	formulaOut outF = Fractal(consts, input->point, input->calcParam);
-	int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0 * consts->params.colouringOffset;
-	float3 surfaceColour = 1.0;
+	input->calcParam->N = consts->fractal.N;
+	int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
+	float3 surfaceColour = 1.0f;
 	if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, palette);
 	return surfaceColour;
-}
-
-float3 FastAmbientOcclusion2(__constant sClInConstants *consts, sClShaderInputData *input)
-{
-	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
-
-	float delta = input->dist_thresh;
-	float aoTemp = 0.0f;
-	int quality = consts->params.globalIlumQuality;
-	for (int i = 1; i < quality * quality; i++)
-	{
-		float scan = i * i * delta;
-		float3 pointTemp = input->point + input->normal * scan;
-		float 		dist = CalculateDistance(consts, pointTemp, input->calcParam).distance;
-		aoTemp += 1.0f / (pow(2.0f, i)) * (scan - consts->params.fastAoTune * dist) / input->dist_thresh;
-	}
-	float ao = 1.0f - 0.2f * aoTemp;
-	if (ao < 0.0f) ao = 0.0f;
-	float3 output = ao;
-	return output;
 }
 
 #if _SlowAOEnabled
@@ -487,7 +387,7 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	float start_dist = input->delta;
 	float end_dist = input->delta / input->resolution;
 	float intense = 0.0f;
-	float distThresh;
+	bool max_iter;
 	
 	for (int i = 0; i < input->vectorsCount; i++)
 	{
@@ -506,8 +406,13 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 		{
 			float3 point2 = input->point + v * r;
 
-			formulaOut out = CalculateDistance(consts, point2, input->calcParam);
-			dist = out.distance;
+			formulaOut out = CalculateFractal(consts, point2, input->calcParam);
+			max_iter = (out.iters == consts->fractal.N);
+			
+			if (!consts->fractal.constantDEThreshold)
+				dist = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality;
+			else
+				dist = consts->params.quality;
 
 			if (consts->params.iterFogEnabled)
 			{
@@ -519,24 +424,14 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 				opacity = 0.0;
 			}
 			shadowTemp -= opacity * (end_dist - r) / end_dist;
-
-			if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
-			{
-				if (!consts->fractal.constantDEThreshold)
-					distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
-				else
-					distThresh = consts->params.quality;
-			}
-			else
-				distThresh = input->dist_thresh;
 			
-			if (dist < distThresh || shadowTemp < 0.0)
+			if (max_iter || shadowTemp < 0.0)
 			{
 				shadowTemp -= (end_dist - r) / end_dist;
 				if (shadowTemp < 0.0) shadowTemp = 0.0;
 				break;
 			}
-			if (count > 100) break;
+			if (count > 1000) break;
 		}
 
 		intense = shadowTemp;
@@ -561,21 +456,23 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 	float opacity = 0.0f;
 	float shadowTemp = 1.0f;
 
-	//float DE_factor = consts->params.DEfactor;
 	float DE_factor = 1.0;
+	bool max_iter;
 	
-	float distThresh;
-
 	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0f;
 	int count = 0;
-	//printf("start, thresh = %f, distance = %f\n", input->dist_thresh, distanceToLight);
+
 	for (float i = input->delta; i < distanceToLight; i += dist * DE_factor)
 	{
-		//printf("i = %f, dist = %f\n", i, dist);
 		float3 point2 = input->point + lightVector * i;
 
 		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
-		dist = out.distance;
+		max_iter = (out.iters == consts->fractal.N);
+		
+		if (!consts->fractal.constantDEThreshold)
+			dist = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
+		else
+			dist = consts->params.quality;
 		
 		if (consts->params.iterFogEnabled)
 		{
@@ -587,18 +484,8 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 			opacity = 0.0f;
 		}
 		shadowTemp -= opacity * (distanceToLight - i) / distanceToLight;
-
-		if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabledAny)
-		{
-			if (!consts->fractal.constantDEThreshold)
-				distThresh = distance(input->eyePoint, point2) * input->resolution * consts->params.persp / consts->params.quality * 0.707106f;
-			else
-				distThresh = consts->params.quality;
-		}
-		else
-			distThresh = input->dist_thresh;
 		
-		if (dist < distThresh || shadowTemp < 0.0f || count > 1000)
+		if (max_iter || shadowTemp < 0.0f || count > 100000)
 		{
 			if (consts->params.penetratingLights)
 			{
@@ -776,7 +663,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	float3 ambient = 0.0f;
 	if(consts->params.fastAmbientOcclusionEnabled)
 	{
-		ambient = FastAmbientOcclusion2(consts, input);
+		//ambient = FastAmbientOcclusion2(consts, input);
 	}
 	else if(consts->params.slowAmbientOcclusionEnabled)
 	{
@@ -830,7 +717,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 	float3 output = oldPixel;
 	float scan = input->depth;
 	if(scan > consts->params.viewDistanceMax) scan = consts->params.viewDistanceMax;
-	float dist = input->lastDist;
+	float dist = input->delta;
 	float distThresh = input->dist_thresh;
 	float delta = input->delta;
 	bool end = false;
@@ -847,13 +734,17 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 	float fogReduce = consts->params.fogDistanceFactor;
 	float fogIntensity = consts->params.fogDensity;
   
+	//printf("Start, view = %v3f, depth = %f\n", input->viewVector, scan);
+	
 	for(int i=0; i<MAX_RAYMARCHING; i++)
 	{
 		//calculate back step
-		float step = dist * consts->params.DEfactor * (0.9f + 0.2f * rand(&input->calcParam->randomSeed)/65536.0);
+		
+
+		float step = 100.0f * dist * consts->params.DEfactor;// * (0.9f + 0.2f * rand(&input->calcParam->randomSeed)/65536.0f);
 
 		if(step < 1.0e-6f) step = 1.0e-6f;
-		if(step > scan) 
+		if(scan < 1e-6) 
 		{
 			step = scan;
 			end = true;
@@ -864,27 +755,20 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		float3 point = input->startPoint + input->viewVector * scan;
 		input->point = point;
 		
-		formulaOut out = CalculateDistance(consts, point, input->calcParam);
-		dist = out.distance;
-		
 		if (consts->fractal.constantDEThreshold)
 		{
-			distThresh = consts->params.quality;
+			dist = consts->params.quality;
 		}
 		else
 		{
-			distThresh = distance(point, input->eyePoint) * input->resolution * consts->params.persp / consts->params.quality;
+			dist = distance(point, input->eyePoint) * input->resolution * consts->params.persp / consts->params.quality;
 		}
-		input->dist_thresh = distThresh;
+
+		//printf("scan = %f, step = %g\n", scan, step);
 		
 		if(consts->fractal.constantDEThreshold) input->delta = scan * input->resolution * consts->params.persp;
-		else input->delta = distThresh * consts->params.quality;
-		delta = input->delta;
-		
-		//------------------- glow
-		float glowOpacity = glow * step / input->depth;
-		output = glowOpacity * glowColour + (1.0f - glowOpacity) * output;
-	
+		else input->delta = dist * consts->params.quality;
+		delta = distThresh = input->delta;
 		
 		//------------------ visible light
 		if (consts->params.auxLightVisibility > 0.0f)
@@ -955,9 +839,9 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			input->calcParam->orbitTrap = 0.0f;
 		}
 #endif		
+		
 		//---------------------- volumetric lights with shadows in fog
-
-
+		/*
 		for (int i = 0; i < 5; i++)
 		{
 			if (i == 0 && consts->params.volumetricLightEnabled[0])
@@ -985,7 +869,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			}
 #endif
 		}
-
+		*/
 		
 		//----------------------- basic fog
 		if(consts->params.fogEnabled)
@@ -995,32 +879,11 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			output = fogDensity * consts->params.fogColour + (1.0f - fogDensity) * output;
 		}
 		
-		
-		//-------------------- volumetric fog
-		if(fogIntensity > 0.0f)
-		{
-			float densityTemp = (step * fogReduce) / (dist * dist + fogReduce * fogReduce);
-
-			float k = dist / colourThresh;
-			if (k > 1.0f) k = 1.0f;
-			float kn = 1.0f - k;
-			float3 fogTemp = (consts->params.fogColour1 * kn + consts->params.fogColour2 * k);
-
-			float k2 = dist / colourThresh2 * k;
-			if (k2 > 1.0f) k2 = 1.0f;
-			kn = 1.0f - k2;
-			fogTemp = fogTemp * kn + consts->params.fogColour3 * k2;
-
-			float fogDensity = 0.3f * fogIntensity * densityTemp / (1.0f + fogIntensity * densityTemp);
-			if(fogDensity > 1.0f) fogDensity = 1.0f;
-
-			output = fogDensity * fogTemp + (1.0 - fogDensity) * output;
-		}
-		
 		//iter fog
 		
 		if (consts->params.iterFogEnabled)
 		{
+			formulaOut out = CalculateFractal(consts, point, input->calcParam);
 			int L = out.iters;
 			float opacity = IterOpacity(step, L, consts->fractal.N, consts->params.iterFogOpacityTrim, consts->params.iterFogOpacity);
 

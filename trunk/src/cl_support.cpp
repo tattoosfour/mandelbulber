@@ -230,6 +230,7 @@ void CclSupport::Init(void)
 	if		 (engineNumber == 0) 	strFileEngine += "cl_engine_fast.cl";
 	else if(engineNumber == 1)	strFileEngine += "cl_engine.cl";
 	else if(engineNumber == 2)	strFileEngine += "cl_engine_full.cl";
+	else if(engineNumber == 3)	strFileEngine += "cl_engine_noDE.cl";
 
 	std::ifstream fileEngine(strFileEngine.c_str());
 	if(!checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str())) return;
