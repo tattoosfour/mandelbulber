@@ -1,3 +1,13 @@
+/*********************************************************
+ /                   MANDELBULBER
+ / data structures for data exchange between maon program
+ / and OpenCL kernels
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 typedef struct
 {

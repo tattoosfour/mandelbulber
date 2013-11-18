@@ -1,9 +1,13 @@
-/*
- * cl_support.hpp
- *
- *  Created on: 18-09-2011
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / classes for OpenCL support
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef CL_SUPPORT_HPP_
 #define CL_SUPPORT_HPP_

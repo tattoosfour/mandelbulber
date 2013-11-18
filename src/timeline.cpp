@@ -1,9 +1,13 @@
-/*
- * timeline.cpp
- *
- *  Created on: 2010-09-20
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for animation timeline
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include <cstdlib>
 #include <cstring>

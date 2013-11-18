@@ -1,9 +1,13 @@
-/*
- * cimage.cpp
- *
- *  Created on: 2010-08-29
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / cImage class for offline and multiple layer image
+ / handling
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include <gtk/gtk.h>
 #include <string.h>

@@ -1,9 +1,13 @@
-/*
- * files.h
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / functions for operating on files, image loading and
+ / saving
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef FILES_H_
 #define FILES_H_

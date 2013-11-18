@@ -1,10 +1,13 @@
-/********************************************************
-/                   MANDELBULBER                        *
-/                                                       *
-/ author: Krzysztof Marczak                             *
-/ contact: buddhi1980@gmail.com                         *
-/ licence: GNU GPL                                      *
-********************************************************/
+/*********************************************************
+ /                   MANDELBULBER
+ / some functions for different calculations
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 /*
  * common_math.cpp

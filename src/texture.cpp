@@ -1,9 +1,14 @@
-/*
- * texture.cpp
- *
- *  Created on: 2010-02-07
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for bitmap textures
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
+
 #include <stdio.h>
 #include <cstring>
 #include "texture.hpp"

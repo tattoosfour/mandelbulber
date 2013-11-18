@@ -1,9 +1,13 @@
-/*
- * netrender.cpp
- *
- *  Created on: 28-09-2012
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for rendering with several network clients
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include "netrender.hpp"
 #include <stdio.h>

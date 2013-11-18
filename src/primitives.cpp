@@ -1,9 +1,13 @@
-/*
- * primitives.cpp
- *
- *  Created on: 15-08-2011
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / functions for calculating shapes of primitive objects
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include "primitives.h"
 #include <math.h>

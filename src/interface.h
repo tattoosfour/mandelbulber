@@ -1,9 +1,13 @@
-/*
- * interface.h
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / definition of user interface and functions
+ / for parameters handling
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef INTERFACE_H_
 #define INTERFACE_H_

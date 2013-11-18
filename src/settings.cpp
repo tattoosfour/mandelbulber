@@ -1,17 +1,14 @@
-/********************************************************
- /                   MANDELBULBER                        *
- /                                                       *
- / author: Krzysztof Marczak                             *
- / contact: buddhi1980@gmail.com                         *
- / licence: GNU GPL                                      *
+/*********************************************************
+ /                   MANDELBULBER
+ / functions loading and saving parameters
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ / many improvements done by Rayan Hitchman
  ********************************************************/
-
-/*
- * settings.cpp
- *
- *  Created on: 2010-01-24
- *      Author: krzysztof
- */
 
 #include <cstdlib>
 #include <locale.h>
