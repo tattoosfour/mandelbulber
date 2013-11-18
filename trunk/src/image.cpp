@@ -1,17 +1,14 @@
-/********************************************************
- /                   MANDELBULBER                        *
- /                                                       *
- / author: Krzysztof Marczak                             *
- / contact: buddhi1980@gmail.com                         *
- / licence: GNU GPL                                      *
+/*********************************************************
+ /                   MANDELBULBER
+ / functions for image post-processing
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
  ********************************************************/
 
-/*
- * image.cpp
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof
- */
 
 #include <string.h>
 

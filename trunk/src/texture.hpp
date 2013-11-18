@@ -1,9 +1,13 @@
-/*
- * texture.hpp
- *
- *  Created on: 2010-02-07
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for bitmap textures
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef TEXTURE_HPP_
 #define TEXTURE_HPP_

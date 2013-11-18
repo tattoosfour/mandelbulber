@@ -1,9 +1,13 @@
-/*
- * fractal.h
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / definition of structures for fractal parameters
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef FRACTAL_H_
 #define FRACTAL_H_

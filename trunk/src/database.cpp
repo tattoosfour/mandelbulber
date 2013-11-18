@@ -1,10 +1,13 @@
-/*
- * database.cpp
- *
- *  Created on: 2010-09-21
- *      Author: krzysztof marczak
- *      licence: GNU GPL v3.0
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class similar to std::vector, but much simplier
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include "database.hpp"
 

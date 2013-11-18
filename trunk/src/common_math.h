@@ -1,9 +1,13 @@
-/*
- * common_math.h
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / some functions for different calculations
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef COMMON_MATH_H_
 #define COMMON_MATH_H_

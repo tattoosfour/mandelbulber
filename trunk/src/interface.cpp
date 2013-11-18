@@ -1,17 +1,13 @@
-/********************************************************
- /                   MANDELBULBER                        *
- /                                                       *
- / author: Krzysztof Marczak                             *
- / contact: buddhi1980@gmail.com                         *
- / licence: GNU GPL                                      *
+/*********************************************************
+ /                   MANDELBULBER
+ / definition of user interface and functions
+ / for parameters handling
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
  ********************************************************/
-
-/*
- * interface.cpp
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof
- */
 
 
 #include <string.h>

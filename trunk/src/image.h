@@ -1,10 +1,13 @@
-/*
- * image.h
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof marczak
- */
-
+/*********************************************************
+ /                   MANDELBULBER
+ / functions for image post-processing
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef IMAGE_H_
 #define IMAGE_H_

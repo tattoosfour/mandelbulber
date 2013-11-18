@@ -1,9 +1,13 @@
-/*
- * morph.hpp
- *
- *  Created on: 2010-05-30
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for animation keyframe interpolation
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef MORPH_HPP_
 #define MORPH_HPP_

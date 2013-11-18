@@ -1,9 +1,13 @@
-/*
- * shaders.cpp
- *
- *  Created on: 2010-04-24
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / shaders for rendering engine
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include <cstdlib>
 

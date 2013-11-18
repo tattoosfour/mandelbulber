@@ -1,10 +1,13 @@
-/*
- * cl_support.cpp
- *
- *  Created on: 18-09-2011
- *      Author: krzysztof marczak
- *      some small parts of code taken from: http://www.codeproject.com/KB/GPU-Programming/IntroToOpenCL.aspx
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / classes for OpenCL support
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include <string>
 #include "interface.h"

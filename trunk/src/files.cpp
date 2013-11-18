@@ -1,17 +1,13 @@
-/********************************************************
- /                   MANDELBULBER                        *
- /                                                       *
- / author: Krzysztof Marczak                             *
- / contact: buddhi1980@gmail.com                         *
- / licence: GNU GPL                                      *
+/*********************************************************
+ /                   MANDELBULBER
+ / functions for operating on files, image loading and
+ / saving
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
  ********************************************************/
-
-/*
- * files.cpp
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof
- */
 
 #include <cstdio>
 #include <string.h>

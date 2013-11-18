@@ -1,9 +1,14 @@
-/*
- * settings.h
- *
- *  Created on: 2010-01-24
- *      Author: krzysztof marczak
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / functions loading and saving parameters
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ / many improvements done by Rayan Hitchman
+ ********************************************************/
 
 #ifndef SETTINGS_H_
 #define SETTINGS_H_

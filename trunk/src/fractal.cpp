@@ -1,31 +1,18 @@
-/********************************************************
- /                   MANDELBULBER                        *
- /                                                       *
- / author: Krzysztof Marczak                             *
- / contact: buddhi1980@gmail.com                         *
- / licence: GNU GPL                                      *
+/*********************************************************
+ /                   MANDELBULBER
+ / fractal iteration functions and distance estimation
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
  ********************************************************/
-
-/*
- * fractal.cpp
- *
- *  Created on: 2010-01-23
- *      Author: krzysztof
- */
 
 #include "Render3D.h"
 #include "interface.h"
 #include "primitives.h"
 #include <stdlib.h>
-
-/**
- * Compute the fractal at the point, in one of the various modes
- *
- * Mode: normal: Returns distance
- *		 fake_ao: Returns minimum radius
- *		 colouring: Returns colour index
- *		 delta_DE1, delta_DE2: Returns radius
- */
 
 unsigned int MixNumbers(double a, double b, double c)
 {
@@ -41,6 +28,14 @@ int Noise(int seed)
 	return abs((x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff);
 }
 
+/**
+ * Compute the fractal at the point, in one of the various modes
+ *
+ * Mode: normal: Returns distance
+ *		 fake_ao: Returns minimum radius
+ *		 colouring: Returns colour index
+ *		 delta_DE1, delta_DE2: Returns radius
+ */
 
 template<int Mode>
 double Compute(CVector3 z, const sFractal &par, int *iter_count)

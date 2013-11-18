@@ -1,9 +1,13 @@
-/*
- * fractparams.h
- *
- *  Created on: 2010-05-03
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / definition of structures for image and effect
+ / parameters
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #ifndef FRACTPARAMS_H_
 #define FRACTPARAMS_H_

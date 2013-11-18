@@ -1,9 +1,13 @@
-/*
- * undo.cpp
- *
- *  Created on: 2010-06-05
- *      Author: krzysztof
- */
+/*********************************************************
+ /                   MANDELBULBER
+ / class for undo buffer
+ /
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
 
 #include "undo.hpp"
 #include "settings.h"
