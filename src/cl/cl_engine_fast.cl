@@ -1,3 +1,14 @@
+/*********************************************************
+ /                   MANDELBULBER
+ / fast kernel for image rendering
+ / 
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
+
 typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;
@@ -281,6 +292,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			distance = outF.distance;
 			step *= 0.5f;
 		}
+		
 		
 		float zBuff = scan;
 		

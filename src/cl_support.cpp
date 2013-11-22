@@ -332,7 +332,7 @@ void CclSupport::Init(void)
 #endif
 
 	std::string buildParams;
-	buildParams = "-w ";
+	buildParams = "-w -cl-single-precision-constant -cl-denorms-are-zero ";
 #ifdef WIN32
 	if(!isNVIDIA)
 	{

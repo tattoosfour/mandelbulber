@@ -1,3 +1,14 @@
+/*********************************************************
+ /                   MANDELBULBER
+ / function to calculate extimated distance
+ / using "delta DE" method
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
+
 formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam)
 {
 	float distance;
