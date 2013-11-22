@@ -624,7 +624,7 @@ void ReadInterface(sParamRender *params)
 		for (int i = 0; i < HYBRID_COUNT; ++i)
 			params->fractal.hybridFormula[i] = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
 
-		double imageScale;
+		double imageScale = 0;
 		int scale = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboImageScale));
 		if (scale == 0) imageScale = 1.0/10.0;
 		if (scale == 1) imageScale = 1.0/8.0;
@@ -3593,6 +3593,7 @@ GdkColor sRGB2GdkColor(sRGB color)
 	color2.red = color.R;
 	color2.green = color.G;
 	color2.blue = color.B;
+	color2.pixel = 0;
 	return color2;
 }
 

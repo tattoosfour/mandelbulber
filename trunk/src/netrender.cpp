@@ -197,7 +197,7 @@ bool CNetRender::SetClient(char *portNo, char*name, char *statusOut)
 		}
 		else if(!strcmp("bad", command))
 		{
-    	int serverVersion;
+    	int serverVersion = 0;
     	if(recvd_bytes == sizeof(int)) GetData(&serverVersion);
 			printf("Client version refused. Server version is %f\n", serverVersion/1000.0);
   		isClient = false;
