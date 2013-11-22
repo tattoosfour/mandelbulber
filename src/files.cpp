@@ -348,6 +348,8 @@ void SaveFromTilesPNG16(const char *filename, int width, int height, int tiles)
 				if (result != sizeof(sRGB16) * width)
 				{
 					printf("Reading error of image tile files");
+					for (int tile2 = 0; tile2 < tile2; tile2++)
+						fclose(files[tile2]);
 					return;
 				}
 			}
@@ -375,6 +377,7 @@ void SaveFromTilesPNG16(const char *filename, int width, int height, int tiles)
 	png_write_end(png_ptr, NULL);
 
 	delete[] rowBuffer;
+	delete[] files;
 
 	fclose(fp);
 }
