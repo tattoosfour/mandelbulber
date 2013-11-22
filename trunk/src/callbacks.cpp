@@ -2304,9 +2304,9 @@ void UpdatePreviewImageDialog(GtkFileChooser *file_chooser, gpointer data)
 				}
 			}
 			gdk_draw_rgb_image(preview->window, preview->style->fg_gc[GTK_STATE_NORMAL], 0, 0, size, size, GDK_RGB_DITHER_MAX, (guchar*) smallImage, size * 3);
-			delete image;
 			delete[] smallImage;
 		}
+		delete image;
 	}
 }
 

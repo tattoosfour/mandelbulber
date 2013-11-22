@@ -17,6 +17,7 @@
 //constructor
 cTexture::cTexture(const char *filename)
 {
+	bitmap = NULL;
 	if (CheckJPEGsize(filename, &width, &height))
 	{
 
@@ -75,7 +76,7 @@ cTexture::cTexture(void)
 //destructor
 cTexture::~cTexture(void)
 {
-	delete[] bitmap;
+	if (bitmap) delete[] bitmap;
 }
 
 //read pixel

@@ -1125,6 +1125,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		delete[] Thread;
 		delete[] err;
 		delete[] linesToSend;
+		delete[] thread_done_from_server;
 		if (lineOfImage) delete[] lineOfImage;
 	}
 	else
@@ -2046,10 +2047,10 @@ void MainRender(void)
 				fractParam.doubles.vp.z += delta_z;
 
 				//saving coordinates to file
-				pFile_coordinates = fopen(fractParam.file_path, "a");
-				fprintf(pFile_coordinates, "%.11f %.11f %.11f %f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alpha,
+				FILE *pFile_coordinates2 = fopen(fractParam.file_path, "a");
+				fprintf(pFile_coordinates2, "%.11f %.11f %.11f %f %f %f\n", fractParam.doubles.vp.x, fractParam.doubles.vp.y, fractParam.doubles.vp.z, fractParam.doubles.alpha,
 						fractParam.doubles.beta, fractParam.doubles.gamma);
-				fclose(pFile_coordinates);
+				fclose(pFile_coordinates2);
 				WriteLog("Coordinates saved");
 			}
 

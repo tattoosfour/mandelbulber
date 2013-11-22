@@ -192,8 +192,6 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 		input->calcParam->N *= 5;
 		//input.calcParam->minN = 0;
 
-		bool maxIter;
-
 		s1 = CalculateDistance(consts, input->point, input->calcParam).distance;
 
 		float3 deltax = (float3) {delta, 0.0f, 0.0f};
@@ -277,8 +275,6 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		//printf("viewVector %f %f %f\n", direction.x, direction.y, direction.z);
 		//printf("scan %f\n", scan);
 		//printf("DE_factor %f\n", consts->params.DEfactor);
-		
-		bool max_iter = false;
 
 		if (consts->fractal.constantDEThreshold)
 		{
@@ -358,7 +354,6 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	//starting point
 	float3 point2;
 
-	bool max_iter;
 	float factor = input->delta / input->resolution;
 	if (!consts->params.penetratingLights) factor = consts->params.viewDistanceMax;
 	float dist = input->dist_thresh;
