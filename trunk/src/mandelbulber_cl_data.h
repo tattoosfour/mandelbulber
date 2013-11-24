@@ -82,11 +82,18 @@ typedef struct
 	cl_int fakeLightsMaxIter;
 	cl_int customOCLFormulaDEMode;
 	cl_int linearDEmode;
+	cl_int limitsEnabled;
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
 	cl_float fractalConstantFactor;
 	cl_float custom[15];
+	cl_float amin;  //fractal limits
+	cl_float amax;
+	cl_float bmin;
+	cl_float bmax;
+	cl_float cmin;
+	cl_float cmax;
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;

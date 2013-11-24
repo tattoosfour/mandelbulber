@@ -244,6 +244,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		
 		sClCalcParams calcParam;
 		calcParam.N = consts->fractal.N;
+		calcParam.orbitTrap = 0.0f;
 		distThresh = 1e-6f;
 		
 		formulaOut outF;
@@ -255,7 +256,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			outF = CalculateDistance(consts, point, &calcParam);
 			distance = outF.distance;
 			distThresh = scan * resolution * consts->params.persp;
-
+			
 			if(distance < distThresh)
 			{
 				found = true;
@@ -270,29 +271,31 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		
 		
 		//binary searching
-		float step = distThresh;
-		for(int i=0; i<10; i++)
+		if(found)
 		{
-			if(distance < distThresh && distance > distThresh * 0.95f)
+			float step = distThresh;
+			for(int i=0; i<10; i++)
 			{
-				break;
-			}
-			else
-			{
-				if(distance > distThresh)
+				if(distance < distThresh && distance > distThresh * 0.95f)
 				{
-					point += viewVector * step;
+					break;
 				}
-				else if(distance < distThresh * 0.95f)
+				else
 				{
-					point -= viewVector * step;
+					if(distance > distThresh)
+					{
+						point += viewVector * step;
+					}
+					else if(distance < distThresh * 0.95f)
+					{
+						point -= viewVector * step;
+					}
 				}
+				outF = CalculateDistance(consts, point, &calcParam);
+				distance = outF.distance;
+				step *= 0.5f;
 			}
-			outF = CalculateDistance(consts, point, &calcParam);
-			distance = outF.distance;
-			step *= 0.5f;
 		}
-		
 		
 		float zBuff = scan;
 		

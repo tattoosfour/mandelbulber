@@ -189,9 +189,9 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 		//if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
 
 		float s1, s2, s3, s4;
-		input->calcParam->N *= 5;
+		input->calcParam->N *= 5.0;
 		//input.calcParam->minN = 0;
-
+		input->calcParam->distThresh = input->dist_thresh;
 		s1 = CalculateDistance(consts, input->point, input->calcParam).distance;
 
 		float3 deltax = (float3) {delta, 0.0f, 0.0f};
@@ -206,7 +206,7 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		input->calcParam->N /= 5;
+		input->calcParam->N /= 5.0;
 		//input.calcParam->minN = input.param->fractal.minN;
 	}
 
@@ -218,6 +218,7 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 
 		float3 point2;
 		float3 point3;
+		input->calcParam->distThresh = input->delta;
 		for (point2.x = -1.0f; point2.x <= 1.0f; point2.x += 0.2f) //+0.2
 		{
 			for (point2.y = -1.0f; point2.y <= 1.0f; point2.y += 0.2f)
@@ -288,6 +289,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		calcParam->distThresh = distThresh;
 		//conts->fractal.detailSize = distThresh;
 		formulaOut outF;
+		calcParam->distThresh = distThresh;
 		outF = CalculateDistance(consts, point, calcParam);
 		dist = outF.distance;
 		
@@ -370,14 +372,14 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 	float softRange = tan(consts->params.shadowConeAngle / 180.0f * 3.14f);
 	float maxSoft = 0.0f;
 
-	bool bSoft = (!consts->params.iterFogEnabled /*&& !input.calcParam->limits_enabled && !input.calcParam->iterThresh*/) && softRange > 0.0;
+	bool bSoft = (!consts->params.iterFogEnabled && !consts->fractal.limitsEnabled /*&& !input.calcParam->iterThresh*/) && softRange > 0.0;
 	
-	float distThresh;
+	float distThresh =  input->dist_thresh;
 	
 	for (float i = start; i < factor; i += dist * DE_factor)
 	{
 		point2 = input->point + input->lightVect * i;
-
+		input->calcParam->distThresh = distThresh;
 		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
 		dist = out.distance;
 		
@@ -447,7 +449,9 @@ float3 MainSpecular(sClShaderInputData *input)
 
 float3 SurfaceColour(__constant sClInConstants *consts, sClShaderInputData *input, global cl_float3 *palette)
 {
+	input->calcParam->N *= 10;
 	formulaOut outF = Fractal(consts, input->point, input->calcParam);
+	input->calcParam->N /= 10;
 	int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0 * consts->params.colouringOffset;
 	float3 surfaceColour = 1.0;
 	if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, palette);
@@ -461,6 +465,7 @@ float3 FastAmbientOcclusion2(__constant sClInConstants *consts, sClShaderInputDa
 	float delta = input->dist_thresh;
 	float aoTemp = 0.0f;
 	int quality = consts->params.globalIlumQuality;
+	input->calcParam->distThresh = delta;
 	for (int i = 1; i < quality * quality; i++)
 	{
 		float scan = i * i * delta;
@@ -482,7 +487,7 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 	float start_dist = input->delta;
 	float end_dist = input->delta / input->resolution;
 	float intense = 0.0f;
-	float distThresh;
+	float distThresh = input->dist_thresh;
 	
 	for (int i = 0; i < input->vectorsCount; i++)
 	{
@@ -501,6 +506,7 @@ float3 AmbientOcclusion(__constant sClInConstants *consts, sClShaderInputData *i
 		{
 			float3 point2 = input->point + v * r;
 
+			input->calcParam->distThresh = distThresh;
 			formulaOut out = CalculateDistance(consts, point2, input->calcParam);
 			dist = out.distance;
 
@@ -559,7 +565,7 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 	//float DE_factor = consts->params.DEfactor;
 	float DE_factor = 1.0;
 	
-	float distThresh;
+	float distThresh = input->dist_thresh;
 
 	if(consts->params.iterFogEnabled || consts->params.volumetricLightEnabled[0]) DE_factor = 1.0f;
 	int count = 0;
@@ -569,6 +575,7 @@ float AuxShadow(__constant sClInConstants *consts, sClShaderInputData *input, fl
 		//printf("i = %f, dist = %f\n", i, dist);
 		float3 point2 = input->point + lightVector * i;
 
+		input->calcParam->distThresh = distThresh;
 		formulaOut out = CalculateDistance(consts, point2, input->calcParam);
 		dist = out.distance;
 		
@@ -859,6 +866,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		float3 point = input->startPoint + input->viewVector * scan;
 		input->point = point;
 		
+		input->calcParam->distThresh = distThresh;
 		formulaOut out = CalculateDistance(consts, point, input->calcParam);
 		dist = out.distance;
 		
