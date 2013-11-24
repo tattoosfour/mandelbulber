@@ -1449,36 +1449,29 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	}
 
 	if (distance < 0) distance = 0;
-	if (max_iter != NULL)
-	{
 
-		if (*max_iter)
+	if (distance < params.doubles.detailSize)
+	{
+		if (params.limits_enabled)
 		{
-			if (params.limits_enabled)
+			double distance_a1 = fabs(params.doubles.amin - point.x);
+			double distance_a2 = fabs(params.doubles.amax - point.x);
+			double distance_b1 = fabs(params.doubles.bmin - point.y);
+			double distance_b2 = fabs(params.doubles.bmax - point.y);
+			double distance_c1 = fabs(params.doubles.cmin - point.z);
+			double distance_c2 = fabs(params.doubles.cmax - point.z);
+			double min1 = dMin(distance_a1, distance_b1, distance_c1);
+			double min2 = dMin(distance_a2, distance_b2, distance_c2);
+			double min = MIN(min1, min2);
+			if (min < params.doubles.detailSize)
 			{
-				double distance_a1 = fabs(params.doubles.amin - point.x);
-				double distance_a2 = fabs(params.doubles.amax - point.x);
-				double distance_b1 = fabs(params.doubles.bmin - point.y);
-				double distance_b2 = fabs(params.doubles.bmax - point.y);
-				double distance_c1 = fabs(params.doubles.cmin - point.z);
-				double distance_c2 = fabs(params.doubles.cmax - point.z);
-				double min1 = dMin(distance_a1, distance_b1, distance_c1);
-				double min2 = dMin(distance_a2, distance_b2, distance_c2);
-				double min = MIN(min1, min2);
-				if(min < params.doubles.detailSize)
-				{
-					distance = min;
-				}
-			}
-			else
-			{
-				//distance = params.doubles.detailSize * 0.5;
-				distance = 0.0;
+				distance = min;
 			}
 		}
-
-
 	}
+
+
+
 	return distance;
 }
 

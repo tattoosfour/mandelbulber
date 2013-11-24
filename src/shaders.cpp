@@ -681,7 +681,7 @@ CVector3 CalculateNormals(sShaderInputData input)
 		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
 
 		double s1, s2, s3, s4;
-		input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
+		//input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
 		input.calcParam->minN = 0;
 
 		bool maxIter;
@@ -700,7 +700,7 @@ CVector3 CalculateNormals(sShaderInputData input)
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		input.calcParam->doubles.N = input.param->fractal.doubles.N;
+		//input.calcParam->doubles.N = input.param->fractal.doubles.N;
 		input.calcParam->minN = input.param->fractal.minN;
 		//calcParam->DE_threshold = DEthreshold_temp;
 	}

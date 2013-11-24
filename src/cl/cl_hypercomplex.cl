@@ -6,6 +6,7 @@
 		z4 = newz + c4;
 		r = length(z4);
 		if (r < colourMin) colourMin = r;
+		z = (float3){z4.x, z4.y, z4.z};
 		if(r>40.0f || any(isinf(z4))) 
 		{
 			dist = r;

@@ -3687,6 +3687,14 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	for(int i=0; i<15; i++)
 		clFractal->custom[i] = params->fractal.doubles.customParameters[i];
 
+	clFractal->amin = params->fractal.doubles.amin;
+	clFractal->amax = params->fractal.doubles.amax;
+	clFractal->bmin = params->fractal.doubles.bmin;
+	clFractal->bmax = params->fractal.doubles.bmax;
+	clFractal->cmin = params->fractal.doubles.cmin;
+	clFractal->cmax = params->fractal.doubles.cmax;
+	clFractal->limitsEnabled = params->fractal.limits_enabled;
+
 	for(int i=0; i<256; i++)
 	{
 		clInBuff->palette[i].x = params->palette[i].R/256.0;
@@ -3738,7 +3746,6 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->DOFEnabled = params->DOFEnabled;
 	clParams->DOFFocus = pow(10, params->doubles.DOFFocus / 10.0 - 16.0);
 	clParams->DOFRadius = params->doubles.DOFRadius;
-
 
   clParams->auxLightVisibility = params->doubles.auxLightVisibility;
 

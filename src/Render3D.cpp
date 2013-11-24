@@ -464,6 +464,7 @@ void *MainThread(void *ptr)
 							shaderInputData.calcParam = &calcParam;
 							shaderInputData.param = &param;
 							shaderInputData.dist_thresh = reflectBuff[ray].distThresh;
+							shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
 							shaderInputData.lightVect = shadowVector;
 							shaderInputData.point = point;
 							shaderInputData.viewVector = viewVector;

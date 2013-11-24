@@ -345,6 +345,7 @@ void CclSupport::Init(void)
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
+	if(lastFractal.limitsEnabled) buildParams += "-D_LimitsEnabled ";
 	printf("OpenCL build params:%s\n", buildParams.c_str());
 	err = program->build(devices, buildParams.c_str());
 
@@ -436,6 +437,7 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->fractal.mandelbox.rotEnabled != lastFractal.mandelbox.rotEnabled) recompileRequest = true;
 	if(inConstants->params.fakeLightsEnabled != lastParams.fakeLightsEnabled) recompileRequest = true;
 	if(inConstants->fractal.customOCLFormulaDEMode != lastFractal.customOCLFormulaDEMode) recompileRequest = true;
+	if(inConstants->fractal.limitsEnabled != lastFractal.limitsEnabled) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
