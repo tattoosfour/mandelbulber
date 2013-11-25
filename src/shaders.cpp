@@ -488,12 +488,14 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	double factor = input.delta / input.param->doubles.resolution;
 	if (!input.param->penetratingLights) factor = input.param->doubles.viewDistanceMax;
 	double dist = input.dist_thresh;
+	input.calcParam->doubles.detailSize = input.dist_thresh;
 
 	double DE_factor = input.param->doubles.DE_factor;
 	if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled) DE_factor = 1.0;
 
-	double start = input.delta;
-	if (input.calcParam->interiorMode) start = input.dist_thresh * DE_factor * 0.5;
+	//double start = input.delta;
+	double start = input.dist_thresh;
+	if (input.calcParam->interiorMode) start = input.dist_thresh * DE_factor;
 
 	double opacity = 0.0;
 	double shadowTemp = 1.0;
@@ -507,8 +509,6 @@ sShaderOutput MainShadow(sShaderInputData &input)
 	{
 		point2 = input.point + input.lightVect * i;
 
-		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
-
 		float dist_thresh;
 		if(input.param->imageSwitches.iterFogEnabled || input.param->imageSwitches.volumetricLightEnabled)
 		{
@@ -519,6 +519,9 @@ sShaderOutput MainShadow(sShaderInputData &input)
 		}
 		else
 			dist_thresh = input.dist_thresh;
+
+		input.calcParam->doubles.detailSize = dist_thresh;
+		dist = CalculateDistance(point2, *input.calcParam, &max_iter);
 
 
 		if (bSoft)
@@ -678,11 +681,12 @@ CVector3 CalculateNormals(sShaderInputData input)
 		//calcParam->DE_threshold = 0;
 		//double delta = param->resolution * param->zoom * wsp_persp;
 		double delta = input.delta * input.param->doubles.smoothness;
-		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
+		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2 * input.param->doubles.smoothness;
 
 		double s1, s2, s3, s4;
-		//input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
+		input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
 		input.calcParam->minN = 0;
+		input.calcParam->normalCalculationMode = true;
 
 		bool maxIter;
 
@@ -700,8 +704,9 @@ CVector3 CalculateNormals(sShaderInputData input)
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		//input.calcParam->doubles.N = input.param->fractal.doubles.N;
+		input.calcParam->doubles.N = input.param->fractal.doubles.N;
 		input.calcParam->minN = input.param->fractal.minN;
+		input.calcParam->normalCalculationMode = false;
 		//calcParam->DE_threshold = DEthreshold_temp;
 	}
 
@@ -713,25 +718,32 @@ CVector3 CalculateNormals(sShaderInputData input)
 
 		CVector3 point2;
 		CVector3 point3;
+		input.calcParam->normalCalculationMode = true;
+
+		double delta = input.delta * input.param->doubles.smoothness;
+		input.calcParam->doubles.N = input.param->fractal.doubles.N * 5;
+		if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2 * input.param->doubles.smoothness;
+
 		for (point2.x = -1.0; point2.x <= 1.0; point2.x += 0.2) //+0.2
 		{
 			for (point2.y = -1.0; point2.y <= 1.0; point2.y += 0.2)
 			{
 				for (point2.z = -1.0; point2.z <= 1.0; point2.z += 0.2)
 				{
-					point3 = input.point + point2 * input.delta;
+					point3 = input.point + point2 * delta;
 
 					double dist = CalculateDistance(point3, *input.calcParam, &max_iter);
 
-					if (dist < input.dist_thresh || max_iter) result2 = 0.0;
-					else result2 = 1.0;
+					//if (dist < input.dist_thresh || max_iter) result2 = 0.0;
+					//else result2 = 1.0;
 
-					normal += (point2 * result2);
+					normal += (point2 * dist);
 				}
 			}
 		}
+		input.calcParam->normalCalculationMode = false;
+		input.calcParam->doubles.N = input.param->fractal.doubles.N;
 	}
-
 	if(normal.x == 0 && normal.y == 0 && normal.z == 0)
 	{
 		normal.x = 1;

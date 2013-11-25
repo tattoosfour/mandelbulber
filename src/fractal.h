@@ -264,6 +264,7 @@ struct sFractal
 	bool linearDEmode;
 	bool constantDEThreshold;
 	bool useCustomOCLFormula;
+	bool normalCalculationMode;
 
 	enumFractalFormula formula;
 

@@ -124,7 +124,14 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 		}
 
 		stepBuff[i].step = step;
-		step = (dist - 0.5 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
+		if(param->fractal.interiorMode)
+		{
+			step = (dist - 0.8 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
+		}
+		else
+		{
+			step = (dist - 0.5 * distThresh) * param->doubles.DE_factor * (1.0 - Random(1000)/10000.0);;
+		}
 		stepBuff[i].point = point;
 		(*buffCount)++;
 		scan += step;
@@ -315,6 +322,7 @@ void *MainThread(void *ptr)
 
 	//parameters for iteration functions
 	sFractal calcParam = param.fractal;
+	calcParam.normalCalculationMode = false;
 
 	WriteLogDouble("All vectors and matrices prepared", thread_number);
 
