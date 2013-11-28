@@ -6,7 +6,7 @@ typedef unsigned short cl_ushort;
 
 #include "mandelbulber_cl_data.h"
 
-#define MAX_RAYMARCHING 10000
+#define MAX_RAYMARCHING 100000
 
 typedef struct
 {
@@ -186,12 +186,13 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 	if (!consts->params.slowShading)
 	{
 		float delta = input->delta;
-		//if(input.calcParam->interiorMode) delta = input.dist_thresh * input.param->doubles.quality * 0.2;
+		if(consts->fractal.interiorMode) delta = input->delta * consts->params.quality * 0.2f;
 
 		float s1, s2, s3, s4;
-		input->calcParam->N *= 5.0;
+		input->calcParam->N *= 5.0f;
 		//input.calcParam->minN = 0;
 		input->calcParam->distThresh = input->dist_thresh;
+		input->calcParam->normalCalculationMode = true;
 		s1 = CalculateDistance(consts, input->point, input->calcParam).distance;
 
 		float3 deltax = (float3) {delta, 0.0f, 0.0f};
@@ -206,7 +207,8 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 		normal.x = s2 - s1;
 		normal.y = s3 - s1;
 		normal.z = s4 - s1;
-		input->calcParam->N /= 5.0;
+		input->calcParam->N = consts->fractal.N;
+		input->calcParam->normalCalculationMode = false;
 		//input.calcParam->minN = input.param->fractal.minN;
 	}
 
@@ -219,6 +221,7 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 		float3 point2;
 		float3 point3;
 		input->calcParam->distThresh = input->delta;
+		input->calcParam->normalCalculationMode = true;
 		for (point2.x = -1.0f; point2.x <= 1.0f; point2.x += 0.2f) //+0.2
 		{
 			for (point2.y = -1.0f; point2.y <= 1.0f; point2.y += 0.2f)
@@ -236,6 +239,7 @@ float3 CalculateNormals(__constant sClInConstants *consts, sClShaderInputData *i
 				}
 			}
 		}
+		input->calcParam->normalCalculationMode = false;
 	}
 
 	if(normal.x == 0.0f && normal.y == 0.0f && normal.z == 0.0f)
@@ -256,7 +260,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 {
 	float3 point;
 	bool found = false;
-	float scan = 1e-10f;
+	float scan = length(start)*5.0e-6f;
 	float distThresh = *distThreshOut;
 	float dist = 0.0f;
 	float search_accuracy = 0.01f * consts->params.quality;
@@ -286,10 +290,11 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		{
 			distThresh = scan * resolution * consts->params.persp / consts->params.quality + distThreshInit;
 		}
-		calcParam->distThresh = distThresh;
+
 		//conts->fractal.detailSize = distThresh;
 		formulaOut outF;
 		calcParam->distThresh = distThresh;
+		calcParam->normalCalculationMode = false;
 		outF = CalculateDistance(consts, point, calcParam);
 		dist = outF.distance;
 		
@@ -861,7 +866,10 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			end = true;
 		}
 		//else if(step > 100.0f * distThresh) step = 100.0f * distThresh;
+		
+		if(step < distThresh) step = distThresh;
 		scan -= step;
+		//printf("scan = %g, step = %g, distThresh = %g, dist = %g\n", scan, step, distThresh, dist);
 		
 		float3 point = input->startPoint + input->viewVector * scan;
 		input->point = point;
