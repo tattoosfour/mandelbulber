@@ -3694,6 +3694,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->cmin = params->fractal.doubles.cmin;
 	clFractal->cmax = params->fractal.doubles.cmax;
 	clFractal->limitsEnabled = params->fractal.limits_enabled;
+	clFractal->interiorMode = params->fractal.interiorMode;
 
 	for(int i=0; i<256; i++)
 	{

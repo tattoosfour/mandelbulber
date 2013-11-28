@@ -1263,7 +1263,6 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 					*max_iter = false;
 			return limitBoxDist;
 		}
-
 	}
 
 	if(!params.primitives.onlyPlane)

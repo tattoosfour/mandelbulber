@@ -83,6 +83,7 @@ typedef struct
 	cl_int customOCLFormulaDEMode;
 	cl_int linearDEmode;
 	cl_int limitsEnabled;
+	cl_int interiorMode;
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
@@ -204,6 +205,7 @@ typedef struct
 	cl_int randomSeed;
 	cl_float3 orbitTrap;
 	cl_float distThresh;
+	cl_float normalCalculationMode;
 } sClCalcParams;
 
 typedef struct
