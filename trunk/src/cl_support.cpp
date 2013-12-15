@@ -238,6 +238,10 @@ void CclSupport::Init(void)
 	std::ifstream fileEngine(strFileEngine.c_str());
 	if(!checkErr(fileEngine.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileEngine).c_str())) return;
 
+	std::string strFilePrimitives = clDir + "cl_primitives.cl";
+	std::ifstream filePrimitives(strFilePrimitives.c_str());
+	if(!checkErr(filePrimitives.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFilePrimitives).c_str())) return;
+
 	std::string strFileDistance = clDir;
 	if(lastFormula == ocl_custom)
 	{
@@ -303,6 +307,7 @@ void CclSupport::Init(void)
 	if(!checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str())) return;
 
 	std::string progEngine(std::istreambuf_iterator<char>(fileEngine), (std::istreambuf_iterator<char>()));
+	std::string progPrimitives(std::istreambuf_iterator<char>(filePrimitives), (std::istreambuf_iterator<char>()));
 	std::string progDistance(std::istreambuf_iterator<char>(fileDistance), (std::istreambuf_iterator<char>()));
 	std::string progFormulaBegin(std::istreambuf_iterator<char>(fileFormulaBegin), (std::istreambuf_iterator<char>()));
 	std::string progFormulaInit(std::istreambuf_iterator<char>(fileFormulaInit), (std::istreambuf_iterator<char>()));
@@ -312,6 +317,7 @@ void CclSupport::Init(void)
 
 	cl::Program::Sources sources;
 	sources.push_back(std::make_pair(progEngine.c_str(), progEngine.length()));
+	sources.push_back(std::make_pair(progPrimitives.c_str(), progPrimitives.length()));
 	sources.push_back(std::make_pair(progDistance.c_str(), progDistance.length()));
 	sources.push_back(std::make_pair(progFormulaBegin.c_str(), progFormulaBegin.length()));
 	sources.push_back(std::make_pair(progFormulaInit.c_str(), progFormulaInit.length()));
@@ -346,6 +352,12 @@ void CclSupport::Init(void)
 	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
 	if(lastFractal.limitsEnabled) buildParams += "-D_LimitsEnabled ";
+	if(lastFractal.primitives.planeEnable) buildParams += "-D_primitivePlane ";
+	if(lastFractal.primitives.boxEnable) buildParams += "-D_primitiveBox ";
+	if(lastFractal.primitives.invertedBoxEnable) buildParams += "-D_primitiveInvertedBox ";
+	if(lastFractal.primitives.sphereEnable) buildParams += "-D_primitiveSphere ";
+	if(lastFractal.primitives.invertedSphereEnable) buildParams += "-D_primitiveInvertedSphere ";
+	if(lastFractal.primitives.waterEnable) buildParams += "-D_primitiveWater ";
 	printf("OpenCL build params:%s\n", buildParams.c_str());
 	err = program->build(devices, buildParams.c_str());
 
@@ -438,6 +450,12 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->params.fakeLightsEnabled != lastParams.fakeLightsEnabled) recompileRequest = true;
 	if(inConstants->fractal.customOCLFormulaDEMode != lastFractal.customOCLFormulaDEMode) recompileRequest = true;
 	if(inConstants->fractal.limitsEnabled != lastFractal.limitsEnabled) recompileRequest = true;
+	if(inConstants->fractal.primitives.planeEnable != lastFractal.primitives.planeEnable) recompileRequest = true;
+	if(inConstants->fractal.primitives.boxEnable != lastFractal.primitives.boxEnable) recompileRequest = true;
+	if(inConstants->fractal.primitives.invertedBoxEnable != lastFractal.primitives.invertedBoxEnable) recompileRequest = true;
+	if(inConstants->fractal.primitives.sphereEnable != lastFractal.primitives.sphereEnable) recompileRequest = true;
+	if(inConstants->fractal.primitives.invertedSphereEnable != lastFractal.primitives.invertedSphereEnable) recompileRequest = true;
+	if(inConstants->fractal.primitives.waterEnable != lastFractal.primitives.waterEnable) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;

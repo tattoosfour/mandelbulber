@@ -90,7 +90,48 @@ formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sC
 			out.distance = calcParam->distThresh - out.distance;
 		}
 	}
+#endif
 	
+#if _primitivePlane	
+	float planeDistance = PrimitivePlane(point, consts->fractal.primitives.planeCentre, consts->fractal.primitives.planeNormal);
+	if (planeDistance < out.distance) out.objectOut = clObjPlane;
+	out.distance = min(planeDistance, out.distance);
+#endif	
+	
+#if _primitiveBox	
+	float boxDistance = PrimitiveBox(point, consts->fractal.primitives.boxCentre, consts->fractal.primitives.boxSize);
+	if (boxDistance < out.distance) out.objectOut = clObjBox;
+	out.distance = min(boxDistance, out.distance);
+#endif	
+	
+#if _primitiveInvertedBox	
+	float boxInvDistance = PrimitiveInvertedBox(point, consts->fractal.primitives.invertedBoxCentre, consts->fractal.primitives.invertedBoxSize);
+	if (boxInvDistance < out.distance) out.objectOut = clObjBoxInv;
+	out.distance = min(boxInvDistance, out.distance);
+#endif
+	
+#if _primitiveSphere	
+	float sphereDistance = PrimitiveSphere(point, consts->fractal.primitives.sphereCentre, consts->fractal.primitives.sphereRadius);
+	if (sphereDistance < out.distance) out.objectOut = clObjSphere;
+	out.distance = min(sphereDistance, out.distance);
+#endif
+	
+#if _primitiveInvertedSphere	
+	float sphereInvDistance = PrimitiveInvertedSphere(point, consts->fractal.primitives.invertedSphereCentre, consts->fractal.primitives.invertedSphereRadius);
+	if (sphereInvDistance < out.distance) out.objectOut = clObjSphereInv;
+	out.distance = min(sphereInvDistance, out.distance);
+#endif
+	
+#if _primitiveWater	
+	float waterDistance = PrimitiveWater(point, consts->fractal.primitives.waterHeight, 
+			consts->fractal.primitives.waterAmplitude, consts->fractal.primitives.waterLength, 
+			consts->fractal.primitives.waterRotation, consts->fractal.primitives.waterIterations, 
+			0.1f, consts->fractal.frameNo);
+	if (waterDistance < out.distance) out.objectOut = clObjWater;
+	out.distance = min(waterDistance, out.distance);
+#endif
+	
+#if _LimitsEnabled
 	if (limitBoxDist < calcParam->distThresh)
 	{
 		out.distance = max(out.distance, limitBoxDist);
