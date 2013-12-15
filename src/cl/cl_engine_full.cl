@@ -1,3 +1,14 @@
+/*********************************************************
+ /                   MANDELBULBER
+ / full kernel for image rendering
+ / 
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
+
 typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;
@@ -15,6 +26,7 @@ typedef struct
 	float distance;
 	float colourIndex;
 	float distFromOrbitTrap;
+	enumClObjectType objectOut;
 } formulaOut;
 
 static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
@@ -24,12 +36,10 @@ int rand(int* seed)
 {
     int s = *seed;
     int i = 0;
-    for(i = 0; i< 3; i++)
-    {
-    	int const a = 15484817;
-    	int const m = 6571759; 
-    	s = ((long)(s * a)) % m;
-    }
+   	int const a = 15484817;
+   	int const m = 6571759; 
+   	s = ((long)(s * a)) % m;
+  
     *seed = s;
     return(s % 65536);
 }
@@ -111,42 +121,6 @@ float4 quaternionSqr(float4 q)
 	result.yzw = 2.0f * q.x * q.yzw;
 	return result;
 }
-
-
-/*
-float PrimitivePlane(float3 point, float3 centre, float3 normal)
-{
-	float3 plane = normal;
-	plane = plane * (1.0/ length(plane));
-	float planeDistance = dot(plane, point - centre);
-	return planeDistance;
-}
-
-float PrimitiveBox(float3 point, float3 center, float3 size)
-{
-	float distance, planeDistance;
-	float3 corner1 = (float3){center.x - 0.5f*size.x, center.y - 0.5f*size.y, center.z - 0.5f*size.z};
-	float3 corner2 = (float3){center.x + 0.5f*size.x, center.y + 0.5f*size.y, center.z + 0.5f*size.z};
-
-	planeDistance = PrimitivePlane(point, corner1, (float3){-1,0,0});
-	distance = planeDistance;
-	planeDistance = PrimitivePlane(point, corner2, (float3){1,0,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	planeDistance = PrimitivePlane(point, corner1, (float3){0,-1,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-	planeDistance = PrimitivePlane(point, corner2, (float3){0,1,0});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	planeDistance = PrimitivePlane(point, corner1, (float3){0,0,-1});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-	planeDistance = PrimitivePlane(point, corner2, (float3){0,0,1});
-	distance = (planeDistance > distance) ? planeDistance : distance;
-
-	return distance;
-}
-*/
-
 
 float3 IndexToColour(int index, global float3 *palette)
 {
@@ -274,6 +248,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 	//printf("DE_factor %f\n", consts->params.DEfactor);
 	
 	//printf("Start, start.x = %g, start.y = %g, start.z = %g\n", start.x, start.y, start.z);
+	formulaOut outF;
 	for (int i = 0; i < MAX_RAYMARCHING; i++)
 	{
 		point = start + direction * scan;
@@ -292,7 +267,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		}
 
 		//conts->fractal.detailSize = distThresh;
-		formulaOut outF;
+
 		calcParam->distThresh = distThresh;
 		calcParam->normalCalculationMode = false;
 		outF = CalculateDistance(consts, point, calcParam);
@@ -307,7 +282,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 			break;
 		}
 		//printf("DE_factor %f\n", consts->params.DEfactor);
-		step = (dist - 0.5f * distThresh) * consts->params.DEfactor;
+		step = (dist - 0.5f * distThresh) * consts->params.DEfactor;// * (0.9f + 0.2f * rand(&calcParam->randomSeed)/65536.0);
 		scan += step;
 		if (scan > maxScan)
 		{
@@ -339,14 +314,15 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 					point = start + direction * scan;
 				}
 			}
-			formulaOut outF;
 			outF = CalculateDistance(consts, point, calcParam);
-					dist = outF.distance;
+			dist = outF.distance;
 			//printf("Distance binary = %g\n", dist/distThresh);
+
 			step *= 0.5f;
 		}
 	}
 
+	calcParam->objectType = outF.objectOut;
 	*foundOut = found;
 	*distThreshOut = distThresh;
 	*lastDistOut = dist;
@@ -454,12 +430,50 @@ float3 MainSpecular(sClShaderInputData *input)
 
 float3 SurfaceColour(__constant sClInConstants *consts, sClShaderInputData *input, global cl_float3 *palette)
 {
-	input->calcParam->N *= 10;
-	formulaOut outF = Fractal(consts, input->point, input->calcParam);
-	input->calcParam->N /= 10;
-	int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0 * consts->params.colouringOffset;
-	float3 surfaceColour = 1.0;
-	if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, palette);
+	float3 surfaceColour = 0.0f;
+	switch(input->objectType)
+	{
+		case clObjFractal:
+		{
+			input->calcParam->N *= 10;
+			formulaOut outF = Fractal(consts, input->point, input->calcParam);
+			input->calcParam->N /= 10;
+			int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0 * consts->params.colouringOffset;
+			surfaceColour = 1.0;
+			if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, palette);
+			break;
+		}
+		case clObjPlane:
+		{
+			surfaceColour = consts->fractal.primitives.primitivePlaneColour;
+			break;
+		}
+		case clObjBox:
+		{
+			surfaceColour = consts->fractal.primitives.primitiveBoxColour;
+			break;
+		}
+		case clObjBoxInv:
+		{
+			surfaceColour = consts->fractal.primitives.primitiveInvertedBoxColour;
+			break;
+		}
+		case clObjSphere:
+		{
+			surfaceColour = consts->fractal.primitives.primitiveSphereColour;
+			break;
+		}
+		case clObjSphereInv:
+		{
+			surfaceColour = consts->fractal.primitives.primitiveInvertedSphereColour;
+			break;
+		}
+		case clObjWater:
+		{
+			surfaceColour = consts->fractal.primitives.primitiveWaterColour;
+			break;
+		}
+	}
 	return surfaceColour;
 }
 
@@ -1154,13 +1168,15 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		sClCalcParams calcParam;
 		calcParam.N = consts->fractal.N;
 		calcParam.orbitTrap = (float3){0.0f, 0.0f, 0.0f};
-
+		calcParam.randomSeed = seed;
+		calcParam.objectType = clObjFractal;
+		
 		float3 colour = 0.0f;
 		float3 resultShader = 0.0f;
 		
 		
 		//DOF effect
-		#if _DOFEnabled
+#if _DOFEnabled
 		int blurIndex = 0;
 		float3 totalColour = (float3) {0.0f, 0.0f, 0.0f};
 		float focus = consts->params.DOFFocus;
@@ -1295,14 +1311,33 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			reflectBuff[ray + local_offset].point = point;
 			reflectBuff[ray + local_offset].distThresh = distThresh;
 			reflectBuff[ray + local_offset].stepCount = stepCount;
-
+			reflectBuff[ray + local_offset].objectType = calcParam.objectType;
+			
+			if(calcParam.objectType == clObjFractal) reflectBuff[ray + local_offset].reflect = consts->params.reflect;
+#if _primitivePlane
+			if(calcParam.objectType == clObjPlane) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitivePlaneReflect;
+#endif
+#if _primitiveBox
+			if(calcParam.objectType == clObjBox) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitiveBoxReflect;
+#endif
+#if _primitiveInvertedBox
+			if(calcParam.objectType == clObjBoxInv) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitiveInvertedBoxReflect;
+#endif
+#if _primitiveSphere
+			if(calcParam.objectType == clObjSphere) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitiveSphereReflect;
+#endif
+#if _primitiveInvertedSphere
+			if(calcParam.objectType == clObjSphereInv) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitiveInvertedSphereReflect;
+#endif
+#if _primitiveWater
+			if(calcParam.objectType == clObjWater) reflectBuff[ray + local_offset].reflect = consts->fractal.primitives.primitiveWaterReflect;
+#endif
+			
 			//printf("reflectBuff[ray].distThresh %f\n", reflectBuff[ray + local_offset].distThresh);
-
-			//reflectBuff[ray].objectType = calcParam.objectOut;
 
 			rayEnd = ray;
 			if(!found) break;
-			//if(reflectBuff[ray].reflect == 0) break;
+			if(reflectBuff[ray + local_offset].reflect == 0) break;
 
 			//calculate new ray direction and start point
 			startRay = point;
@@ -1348,8 +1383,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			shaderInputData.stepCount = reflectBuff[ray + local_offset].stepCount;
 			shaderInputData.resolution = resolution;
 			//shaderInputData.envMappingTexture = param.envmapTexture;
-			//shaderInputData.objectType = reflectBuff[ray].objectType;
-			//shaderInputData.calcParam->doubles.detailSize = reflectBuff[ray].distThresh;
+			shaderInputData.objectType = reflectBuff[ray + local_offset].objectType;
 
 			if(reflectBuff[ray + local_offset].found)
 			{
@@ -1362,10 +1396,11 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 				reflectBuff[ray + local_offset].depth = 1e20f;
 			}
 
+			float reflect = reflectBuff[ray + local_offset].reflect;
 			if (maxRay > 0 && rayEnd > 0 && ray != rayEnd)
 			{
-				colour = resultShader * consts->params.reflect;
-				colour += (1.0f - consts->params.reflect) * (objectShader + backgroudShader) + specular;
+				colour = resultShader * reflect;
+				colour += (1.0f - reflect) * (objectShader + backgroudShader) + specular;
 			}
 			else
 			{

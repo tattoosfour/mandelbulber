@@ -1,3 +1,14 @@
+/*********************************************************
+ /                   MANDELBULBER
+ / noDE kernel for image rendering
+ / 
+ /
+ / author: Krzysztof Marczak
+ / contact: buddhi1980@gmail.com
+ / licence: GNU GPL v3.0
+ /
+ ********************************************************/
+
 typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;
@@ -265,8 +276,9 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 		}
 		count = i;
 	}
+		
 	*stepCount = count;
-	
+	//binaryEnable = false;
 	if (found && binaryEnable)
 	{
 		float step = dist * 0.5f;
@@ -1006,6 +1018,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		sClCalcParams calcParam;
 		calcParam.N = consts->fractal.N;
 		calcParam.orbitTrap = (float3){0.0f, 0.0f, 0.0f};
+		calcParam.randomSeed = seed;
 
 		float3 colour = 0.0f;
 		float3 resultShader = 0.0f;

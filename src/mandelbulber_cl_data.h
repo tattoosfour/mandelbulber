@@ -9,6 +9,17 @@
  /
  ********************************************************/
 
+typedef enum
+{
+	clObjFractal = 0,
+	clObjPlane = 1,
+	clObjWater = 2,
+	clObjSphere = 3,
+	clObjSphereInv = 4,
+	clObjBox = 5,
+	clObjBoxInv = 6
+}enumClObjectType;
+
 typedef struct
 {
 	cl_float3 m1;
@@ -74,6 +85,46 @@ typedef struct
 
 typedef struct
 {
+	cl_float3 planeCentre;
+	cl_float3 planeNormal;
+	cl_float3 boxCentre;
+	cl_float3 boxSize;
+	cl_float3 invertedBoxCentre;
+	cl_float3 invertedBoxSize;
+	cl_float3 sphereCentre;
+	cl_float3 invertedSphereCentre;
+	cl_float sphereRadius;
+	cl_float invertedSphereRadius;
+	cl_float waterHeight;
+	cl_float waterAmplitude;
+	cl_float waterLength;
+	cl_float waterRotation;
+
+	cl_float3 primitivePlaneColour;
+	cl_float3 primitiveBoxColour;
+	cl_float3 primitiveInvertedBoxColour;
+	cl_float3 primitiveSphereColour;
+	cl_float3 primitiveInvertedSphereColour;
+	cl_float3 primitiveWaterColour;
+
+	cl_float primitivePlaneReflect;
+	cl_float primitiveBoxReflect;
+	cl_float primitiveInvertedBoxReflect;
+	cl_float primitiveSphereReflect;
+	cl_float primitiveInvertedSphereReflect;
+	cl_float primitiveWaterReflect;
+
+	cl_int planeEnable;
+	cl_int boxEnable;
+	cl_int invertedBoxEnable;
+	cl_int sphereEnable;
+	cl_int invertedSphereEnable;
+	cl_int waterEnable;
+	cl_int waterIterations;
+} sClPrimitives;
+
+typedef struct
+{
 	cl_uint N;
 	cl_int formula;
 	cl_int juliaMode;
@@ -84,6 +135,7 @@ typedef struct
 	cl_int linearDEmode;
 	cl_int limitsEnabled;
 	cl_int interiorMode;
+	cl_int frameNo;
 	cl_float power;
 	cl_float opacity;
 	cl_float opacityTrim;
@@ -98,6 +150,7 @@ typedef struct
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;
+	sClPrimitives primitives;
 } sClFractal;
 
 typedef struct
@@ -206,6 +259,7 @@ typedef struct
 	cl_float3 orbitTrap;
 	cl_float distThresh;
 	cl_float normalCalculationMode;
+	enumClObjectType objectType;
 } sClCalcParams;
 
 typedef struct
@@ -225,7 +279,7 @@ typedef struct
 	//cTexture *envMappingTexture;
 	cl_float depth;
 	cl_int stepCount;
-	//enumObjectType objectType;
+	enumClObjectType objectType;
 } sClShaderInputData;
 
 typedef struct
@@ -238,7 +292,7 @@ typedef struct
 	cl_float depth;
 	cl_float lastDist;
 	cl_float distThresh;
-	//enumObjectType objectType;
-	//cl_float reflect;
+	enumClObjectType objectType;
+	cl_float reflect;
 	cl_int found;
 } sClReflect;

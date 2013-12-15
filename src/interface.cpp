@@ -3696,6 +3696,45 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->limitsEnabled = params->fractal.limits_enabled;
 	clFractal->interiorMode = params->fractal.interiorMode;
 
+	clFractal->primitives.planeEnable = params->fractal.primitives.planeEnable;
+	clFractal->primitives.boxEnable = params->fractal.primitives.boxEnable;
+	clFractal->primitives.invertedBoxEnable = params->fractal.primitives.invertedBoxEnable;
+	clFractal->primitives.sphereEnable = params->fractal.primitives.sphereEnable;
+	clFractal->primitives.invertedSphereEnable = params->fractal.primitives.invertedSphereEnable;
+	clFractal->primitives.waterEnable = params->fractal.primitives.waterEnable;
+
+	clFractal->primitives.planeCentre = CVector2float3(params->fractal.doubles.primitives.planeCentre);
+	clFractal->primitives.planeNormal = CVector2float3(params->fractal.doubles.primitives.planeNormal);
+	clFractal->primitives.boxCentre = CVector2float3(params->fractal.doubles.primitives.boxCentre);
+	clFractal->primitives.boxSize = CVector2float3(params->fractal.doubles.primitives.boxSize);
+	clFractal->primitives.invertedBoxCentre = CVector2float3(params->fractal.doubles.primitives.invertedBoxCentre);
+	clFractal->primitives.invertedBoxSize = CVector2float3(params->fractal.doubles.primitives.invertedBoxSize);
+	clFractal->primitives.sphereCentre = CVector2float3(params->fractal.doubles.primitives.sphereCentre);
+	clFractal->primitives.invertedSphereCentre = CVector2float3(params->fractal.doubles.primitives.invertedSphereCentre);
+	clFractal->primitives.sphereRadius = params->fractal.doubles.primitives.sphereRadius;
+	clFractal->primitives.invertedSphereRadius = params->fractal.doubles.primitives.invertedSphereRadius;
+	clFractal->primitives.waterHeight = params->fractal.doubles.primitives.waterHeight;
+	clFractal->primitives.waterAmplitude = params->fractal.doubles.primitives.waterAmplitude;
+	clFractal->primitives.waterLength = params->fractal.doubles.primitives.waterLength;
+	clFractal->primitives.waterRotation = params->fractal.doubles.primitives.waterRotation;
+	clFractal->primitives.waterIterations = params->fractal.primitives.waterIterations;
+
+	clFractal->primitives.primitivePlaneReflect = params->doubles.primitivePlaneReflect;
+	clFractal->primitives.primitiveBoxReflect = params->doubles.primitiveBoxReflect;
+	clFractal->primitives.primitiveInvertedBoxReflect = params->doubles.primitiveInvertedBoxReflect;
+	clFractal->primitives.primitiveSphereReflect = params->doubles.primitiveSphereReflect;
+	clFractal->primitives.primitiveInvertedSphereReflect = params->doubles.primitiveInvertedSphereReflect;
+	clFractal->primitives.primitiveWaterReflect = params->doubles.primitiveWaterReflect;
+
+	clFractal->primitives.primitivePlaneColour = sRGB2float3(params->primitivePlaneColour, 65536.0);
+	clFractal->primitives.primitiveBoxColour = sRGB2float3(params->primitiveBoxColour, 65536.0);
+	clFractal->primitives.primitiveInvertedBoxColour = sRGB2float3(params->primitiveInvertedBoxColour, 65536.0);
+	clFractal->primitives.primitiveSphereColour = sRGB2float3(params->primitiveSphereColour, 65536.0);
+	clFractal->primitives.primitiveInvertedSphereColour = sRGB2float3(params->primitiveInvertedSphereColour, 65536.0);
+	clFractal->primitives.primitiveWaterColour = sRGB2float3(params->primitiveWaterColour, 65536.0);
+
+	clFractal->frameNo = params->fractal.frameNo;
+
 	for(int i=0; i<256; i++)
 	{
 		clInBuff->palette[i].x = params->palette[i].R/256.0;

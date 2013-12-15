@@ -26,6 +26,7 @@ typedef struct
 	float distance;
 	float colourIndex;
 	float distFromOrbitTrap;
+	enumClObjectType objectOut;
 } formulaOut;
 
 static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
@@ -159,20 +160,16 @@ float3 IndexToColour(int index, global float3 *palette)
 {
 	float3 colOut, col1, col2, colDiff;
 
-	if (index < 0)
-	{
-		colOut = palette[255];
-	}
-	else
-	{
-		int index2 = index % 65280;
-		int no = index2 / 256;
-		col1 = palette[no];
-		col2 = palette[no+1];
-		colDiff = col2 - col1;
-		float delta = (index2 % 256)/256.0;
-		colOut = col1 + colDiff * delta;
-	}
+	index = max(0, index);
+
+	int index2 = index % 65280;
+	int no = index2 / 256;
+	col1 = palette[no];
+	col2 = palette[no+1];
+	colDiff = col2 - col1;
+	float delta = (index2 % 256)/256.0;
+	colOut = col1 + colDiff * delta;
+
 	return colOut;
 }
 
@@ -201,148 +198,154 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 {
 	int cl_offset = Gcl_offset;
 	
-	const unsigned int i = get_global_id(0) + cl_offset;
-	const unsigned int imageX = i % consts->params.width;
-	const unsigned int imageY = i / consts->params.width;
-	const unsigned int buffIndex = (i - cl_offset);
+	const int i = get_global_id(0) + cl_offset;
+	const int imageX = i % consts->params.width;
+	const int imageYtemp = i / consts->params.width;
+	const int buffIndex = (i - cl_offset);
 	
-	if(imageY < consts->params.height)
+	const int imageY = clamp(imageYtemp, 0, consts->params.height-1);
+
+	float2 screenPoint = (float2)
+	{ convert_float(imageX), convert_float(imageY)};
+	float width = convert_float(consts->params.width);
+	float height = convert_float(consts->params.height);
+	float resolution = 1.0f/width;
+
+	const float3 one = (float3)
+	{ 1.0f, 0.0f, 0.0f};
+	const float3 ones = 1.0f;
+
+	matrix33 rot;
+	rot.m1 = (float3)
+	{ 1.0f, 0.0f, 0.0f};
+	rot.m2 = (float3)
+	{ 0.0f, 1.0f, 0.0f};
+	rot.m3 = (float3)
+	{ 0.0f, 0.0f, 1.0f};
+	rot = RotateZ(rot, consts->params.alpha);
+	rot = RotateX(rot, consts->params.beta);
+	rot = RotateY(rot, consts->params.gamma);
+
+	float3 back = (float3)
+	{ 0.0f, 1.0f, 0.0f}/ consts->params.persp * consts->params.zoom;
+	float3 start = consts->params.vp - Matrix33MulFloat3(rot, back);
+
+	float aspectRatio = width / height;
+	float x2,z2;
+	x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
+	z2 = (screenPoint.y / height - 0.5f);
+	float3 viewVector = (float3)
+	{ x2 * consts->params.persp, 1.0f, z2 * consts->params.persp};
+	viewVector = Matrix33MulFloat3(rot, viewVector);
+
+	bool found = false;
+	int count;
+
+	float3 point;
+	float scan, distThresh, distance;
+
+	scan = 1e-10f;
+
+	sClCalcParams calcParam;
+	calcParam.N = consts->fractal.N;
+	calcParam.orbitTrap = 0.0f;
+	distThresh = 1e-6f;
+
+	formulaOut outF;
+	//ray-marching
+	for(count = 0; count < MAX_RAYMARCHING && scan < 50.0f; count++)
 	{
-		float2 screenPoint = (float2) {convert_float(imageX), convert_float(imageY)};
-		float width = convert_float(consts->params.width);
-		float height = convert_float(consts->params.height);
-		float resolution = 1.0f/width;
-		
-		const float3 one = (float3) {1.0f, 0.0f, 0.0f};
-		const float3 ones = 1.0f;
-		
-		matrix33 rot;
-		rot.m1 = (float3){1.0f, 0.0f, 0.0f};
-		rot.m2 = (float3){0.0f, 1.0f, 0.0f};
-		rot.m3 = (float3){0.0f, 0.0f, 1.0f};
-		rot = RotateZ(rot, consts->params.alpha);
-		rot = RotateX(rot, consts->params.beta);
-		rot = RotateY(rot, consts->params.gamma);
-		
-		float3 back = (float3) {0.0f, 1.0f, 0.0f} / consts->params.persp * consts->params.zoom;
-		float3 start = consts->params.vp - Matrix33MulFloat3(rot, back);
-		
-		float aspectRatio = width / height;
-		float x2,z2;
-		x2 = (screenPoint.x / width - 0.5f) * aspectRatio;
-		z2 = (screenPoint.y / height - 0.5f);
-		float3 viewVector = (float3) {x2 * consts->params.persp, 1.0f, z2 * consts->params.persp}; 
-		viewVector = Matrix33MulFloat3(rot, viewVector);
-		
-		bool found = false;
-		int count;
-		
-		float3 point;
-		float scan, distThresh, distance;
-		
-		scan = 1e-10f;
-		
-		sClCalcParams calcParam;
-		calcParam.N = consts->fractal.N;
-		calcParam.orbitTrap = 0.0f;
-		distThresh = 1e-6f;
-		
-		formulaOut outF;
-		//ray-marching
-		for(count = 0; count < MAX_RAYMARCHING; count++)
+		point = start + viewVector * scan;
+		calcParam.distThresh = distThresh;
+		outF = CalculateDistance(consts, point, &calcParam);
+		distance = outF.distance;
+		distThresh = scan * resolution * consts->params.persp;
+
+		if(distance < distThresh)
 		{
-			point = start + viewVector * scan;
-			calcParam.distThresh = distThresh;
-			outF = CalculateDistance(consts, point, &calcParam);
-			distance = outF.distance;
-			distThresh = scan * resolution * consts->params.persp;
-			
-			if(distance < distThresh)
+			found = true;
+			break;
+		}
+
+		float step = (distance - 0.5f*distThresh) * consts->params.DEfactor;
+		scan += step;
+	}
+
+	
+	//binary searching
+	if(found)
+	{
+		float step = distThresh;
+		for(int i=0; i<5; i++)
+		{
+			if(distance < distThresh && distance > distThresh * 0.95f)
 			{
-				found = true;
 				break;
 			}
-					
-			float step = (distance  - 0.5f*distThresh) * consts->params.DEfactor;			
-			scan += step;
-			
-			if(scan > 50.0f) break;
-		}
-		
-		
-		//binary searching
-		if(found)
-		{
-			float step = distThresh;
-			for(int i=0; i<10; i++)
+			else
 			{
-				if(distance < distThresh && distance > distThresh * 0.95f)
+				if(distance > distThresh)
 				{
-					break;
+					point += viewVector * step;
 				}
-				else
+				else if(distance < distThresh * 0.95f)
 				{
-					if(distance > distThresh)
-					{
-						point += viewVector * step;
-					}
-					else if(distance < distThresh * 0.95f)
-					{
-						point -= viewVector * step;
-					}
+					point -= viewVector * step;
 				}
-				outF = CalculateDistance(consts, point, &calcParam);
-				distance = outF.distance;
-				step *= 0.5f;
 			}
+			outF = CalculateDistance(consts, point, &calcParam);
+			distance = outF.distance;
+			step *= 0.5f;
 		}
-		
-		float zBuff = scan;
-		
-		float3 colour = 0.0f;
-		if(found)
-		{
-			float3 normal = NormalVector(consts, point, distance, distThresh, &calcParam);
-			
-			float3 lightVector = (float3) {
-				cos(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta), 
-				sin(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta), 
-				sin(-consts->params.mainLightBeta)};
-			lightVector = Matrix33MulFloat3(rot, lightVector);
-			float shade = dot(lightVector, normal);
-			if(shade<0.0f) shade = 0.0f;
-			
-			float3 half = lightVector - viewVector;
-			half = fast_normalize(half);
-			float specular = dot(normal, half);
-			if (specular < 0.0f) specular = 0.0f;
-			specular = pown(specular, 30.0f);
-			if (specular > 15.0f) specular = 15.0f;
-						
-			int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
-			float3 surfaceColour = 1.0;
-			if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
-			
-			colour = (shade * surfaceColour + specular);
-		}
-		else
-		{
-			colour = Background(viewVector, &consts->params);
-		}
-		
-		float glow = count / 2560.0f;
-		float glowN = 1.0f - glow;
-		if(glowN < 0.0f) glowN = 0.0f;
-		float3 glowColor;
-		glowColor.x = 1.0f * glowN + 1.0f * glow;
-		glowColor.y = 0.0f * glowN + 1.0f * glow;
-		glowColor.z = 0.0f * glowN + 0.0f * glow;
-		colour += glowColor * glow;
-		
-		out[buffIndex].R = colour.x;
-		out[buffIndex].G = colour.y;
-		out[buffIndex].B = colour.z;
-		out[buffIndex].zBuffer = zBuff;
 	}
+
+	float zBuff = scan;
+
+	float3 colour = 0.0f;
+	if(found)
+	{
+		float3 normal = NormalVector(consts, point, distance, distThresh, &calcParam);
+
+		float3 lightVector = (float3)
+		{
+			cos(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
+			sin(consts->params.mainLightAlfa - 0.5f * M_PI_F) * cos(-consts->params.mainLightBeta),
+			sin(-consts->params.mainLightBeta)};
+		lightVector = Matrix33MulFloat3(rot, lightVector);
+		float shade = dot(lightVector, normal);
+		if(shade<0.0f) shade = 0.0f;
+
+		float3 half = lightVector - viewVector;
+		half = fast_normalize(half);
+		float specular = dot(normal, half);
+		if (specular < 0.0f) specular = 0.0f;
+		specular = pown(specular, 30.0f);
+		if (specular > 15.0f) specular = 15.0f;
+
+		int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
+		float3 surfaceColour = 1.0;
+		if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
+
+		colour = (shade * surfaceColour + specular);
+	}
+	else
+	{
+		colour = Background(viewVector, &consts->params);
+	}
+
+	float glow = count / 2560.0f;
+	float glowN = 1.0f - glow;
+	if(glowN < 0.0f) glowN = 0.0f;
+	float3 glowColor;
+	glowColor.x = 1.0f * glowN + 1.0f * glow;
+	glowColor.y = 0.0f * glowN + 1.0f * glow;
+	glowColor.z = 0.0f * glowN + 0.0f * glow;
+	colour += glowColor * glow;
+
+	out[buffIndex].R = colour.x;
+	out[buffIndex].G = colour.y;
+	out[buffIndex].B = colour.z;
+	out[buffIndex].zBuffer = zBuff;
+	
 }
 
