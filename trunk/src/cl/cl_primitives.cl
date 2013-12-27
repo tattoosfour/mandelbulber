@@ -107,8 +107,8 @@ float PrimitiveWater(float3 point, float height, float amplitude, float length, 
 		for(int i=1; i <= iterations; i++)
 		{
 			float shift = phase / (i/3.0f + 1.0f);
-			waveXtemp = sin(i + 0.4f*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p + shift)/p;
-			waveYtemp = cos(i + 0.4f*(waveY)*p + sin(point.x / length*p) + k*point.y/length*p + shift*0.23f)/p;
+			waveXtemp = sin(i + 0.4f*(waveX)*p + sin(k* point2.y / length*p) + point2.x/length*p + shift)/p;
+			waveYtemp = cos(i + 0.4f*(waveY)*p + sin(point2.x / length*p) + k*point2.y/length*p + shift*0.23f)/p;
 			waveX+=waveXtemp;
 			waveY+=waveYtemp;
 			p *= 1.872f;

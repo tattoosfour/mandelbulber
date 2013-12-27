@@ -1,10 +1,21 @@
+//*********************************************************
+//                   MANDELBULBER
+// fast kernel for image rendering
+// 
+//
+// author: Krzysztof Marczak
+// contact: buddhi1980@gmail.com
+// licence: GNU GPL v3.0
+//
+//*********************************************************
+
 typedef float3 cl_float3;
 typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
 
-#include "mandelbulber_cl_data.h"
+#include INCLUDE_PATH_CL_DATA
 
 #define MAX_RAYMARCHING 500
 

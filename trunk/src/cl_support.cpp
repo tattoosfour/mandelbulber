@@ -306,6 +306,14 @@ void CclSupport::Init(void)
 	std::ifstream fileFormulaEnd(strFileFormulaEnd.c_str());
 	if(!checkErr(fileFormulaEnd.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileFormulaEnd).c_str())) return;
 
+	std::string progPathHeader("#define INCLUDE_PATH_CL_DATA \"");
+#ifdef WIN32
+	progPathHeader += std::string(sharedDir) + "cl\\mandelbulber_cl_data.h\"";
+#else
+	progPathHeader += std::string(sharedDir) + "cl/mandelbulber_cl_data.h\"";
+#endif
+	printf("OpenCL progHeader: %s\n", progPathHeader.c_str());
+
 	std::string progEngine(std::istreambuf_iterator<char>(fileEngine), (std::istreambuf_iterator<char>()));
 	std::string progPrimitives(std::istreambuf_iterator<char>(filePrimitives), (std::istreambuf_iterator<char>()));
 	std::string progDistance(std::istreambuf_iterator<char>(fileDistance), (std::istreambuf_iterator<char>()));
@@ -316,6 +324,7 @@ void CclSupport::Init(void)
 	std::string progFormulaEnd(std::istreambuf_iterator<char>(fileFormulaEnd), (std::istreambuf_iterator<char>()));
 
 	cl::Program::Sources sources;
+	sources.push_back(std::make_pair(progPathHeader.c_str(), progPathHeader.length()));
 	sources.push_back(std::make_pair(progEngine.c_str(), progEngine.length()));
 	sources.push_back(std::make_pair(progPrimitives.c_str(), progPrimitives.length()));
 	sources.push_back(std::make_pair(progDistance.c_str(), progDistance.length()));
@@ -339,14 +348,7 @@ void CclSupport::Init(void)
 
 	std::string buildParams;
 	buildParams = "-w -cl-single-precision-constant -cl-denorms-are-zero ";
-#ifdef WIN32
-	if(!isNVIDIA)
-	{
-		buildParams += "-I\"" + std::string(sharedDir) + "cl\" ";
-	}
-#else
-	buildParams += "-I\"" + std::string(sharedDir) + "cl\" ";
-#endif
+
 	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";

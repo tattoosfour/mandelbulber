@@ -1,13 +1,13 @@
-/*********************************************************
- /                   MANDELBULBER
- / full kernel for image rendering
- / 
- /
- / author: Krzysztof Marczak
- / contact: buddhi1980@gmail.com
- / licence: GNU GPL v3.0
- /
- ********************************************************/
+//*********************************************************
+//                   MANDELBULBER
+// full kernel for image rendering
+// 
+//
+// author: Krzysztof Marczak
+// contact: buddhi1980@gmail.com
+// licence: GNU GPL v3.0
+//
+//*********************************************************
 
 typedef float3 cl_float3;
 typedef float cl_float;
@@ -15,7 +15,7 @@ typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
 
-#include "mandelbulber_cl_data.h"
+#include INCLUDE_PATH_CL_DATA
 
 #define MAX_RAYMARCHING 100000
 
@@ -960,7 +960,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 						float lightSize = inBuff->lights[i].intensity * consts->params.auxLightIntensity * consts->params.auxLightVisibility;
 						float r2 = lightDist / lightSize;
 						if (r2 > 1.0f) r2 = 1.0f;
-						float bellFunction = (cos(r2 * M_PI_F) + 1.0f) / (r2 * r2 + 0.02f) * 0.3f;
+						float bellFunction = (cos(r2 * M_PI_F) + 1.0f) / (r2 * r2 + 0.02f) * 1.0f;
 						float lightDensity = step2 * bellFunction / lightSize;
 
 						output += lightDensity * inBuff->lights[i].colour;
