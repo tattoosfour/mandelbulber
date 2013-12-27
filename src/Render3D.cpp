@@ -1811,6 +1811,9 @@ void MainRender(void)
 		}
 		isRendering = false;
 		programClosed = true;
+		Interface_data.animMode = false;
+		Interface_data.playMode = false;
+		Interface_data.recordMode = false;
 		return;
 	}
 
@@ -1948,6 +1951,9 @@ void MainRender(void)
 			if (n <= 0)
 			{
 				fclose(pFile_coordinates);
+				Interface_data.animMode = false;
+				Interface_data.playMode = false;
+				Interface_data.recordMode = false;
 				return;
 			}
 		}
@@ -2316,6 +2322,10 @@ void MainRender(void)
 	}
 	printf("Rendering finished\n");
 	WriteLog("Rendering completely finished");
+
+	Interface_data.animMode = false;
+	Interface_data.playMode = false;
+	Interface_data.recordMode = false;
 	isRendering = false;
 }
 
