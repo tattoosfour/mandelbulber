@@ -32,7 +32,7 @@ formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sC
 #endif 
 	
 	float distance;
-	float delta = length(point)*1e-5f;
+	float delta = length(point)*consts->fractal.deltaDEStep;
 	float3 dr = 0.0;
 	out = Fractal(consts, point, calcParam);
 

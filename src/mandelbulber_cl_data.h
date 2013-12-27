@@ -147,6 +147,7 @@ typedef struct
 	cl_float bmax;
 	cl_float cmin;
 	cl_float cmax;
+	cl_float deltaDEStep;
 	cl_float3 julia;
 	sClMandelbox mandelbox;
 	sClIFS ifs;

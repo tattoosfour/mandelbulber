@@ -519,7 +519,6 @@ void ReadInterface(sParamRender *params)
 
 		params->OpenCLEngine = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 		params->OpenCLPixelsPerJob = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
-
 		params->doubles.iterFogOpacityTrim = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_iterFogOpacityTrim)));
 		params->doubles.iterFogOpacity = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_iterFogOpacity)));
 		params->imageSwitches.iterFogEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterFogEnable));
@@ -548,6 +547,7 @@ void ReadInterface(sParamRender *params)
 			for(int i=0; i<15; i++)
 				params->fractal.doubles.customParameters[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_customParameters[i])));
 		}
+		params->fractal.doubles.deltaDEStep = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLDeltaDEStep)));
 #endif
 
 		GdkColor color;
@@ -1087,6 +1087,8 @@ void WriteInterface(sParamRender *params)
 				gtk_entry_set_text(GTK_ENTRY(Interface.edit_customParameters[i]), DoubleToString(params->fractal.doubles.customParameters[i]));
 		}
 	}
+
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_OpenCLDeltaDEStep), DoubleToString(params->fractal.doubles.deltaDEStep));
 #endif
 
 	enumPerspectiveType perspTypeTemp = params->perspectiveType;
@@ -1533,6 +1535,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.boxOpenClEngineSettingsH1 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH2 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClEngineSettingsH3 = gtk_hbox_new(FALSE, 1);
+	Interface.boxOpenClEngineSettingsH4 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClCustomV1 = gtk_vbox_new(FALSE, 1);
 	Interface.boxOpenClCustomH11 = gtk_hbox_new(FALSE, 1);
 	Interface.boxOpenClCustomH12 = gtk_hbox_new(FALSE, 1);
@@ -1934,6 +1937,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_OpenCLProcessingCycleTime = gtk_entry_new();
 	Interface.edit_OpenCLMaxMem = gtk_entry_new();
 	Interface.edit_OpenCLTextEditor = gtk_entry_new();
+	Interface.edit_OpenCLDeltaDEStep = gtk_entry_new();
 
 	Interface.edit_netRenderClientName = gtk_entry_new();
 	Interface.edit_netRenderClientPort = gtk_entry_new();
@@ -3061,6 +3065,8 @@ void CreateInterface(sParamRender *default_settings)
 #else	
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("/usr/bin/kate", "Text editor:", 40, Interface.edit_OpenCLTextEditor), false, false, 1);
 #endif
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH4, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4), CreateEdit("1e-5", "Delta for DeltaDE distance estimation:", 6, Interface.edit_OpenCLDeltaDEStep), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
@@ -3734,6 +3740,8 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->primitives.primitiveWaterColour = sRGB2float3(params->primitiveWaterColour, 65536.0);
 
 	clFractal->frameNo = params->fractal.frameNo;
+
+	clFractal->deltaDEStep = params->fractal.doubles.deltaDEStep;
 
 	for(int i=0; i<256; i++)
 	{

@@ -240,6 +240,7 @@ struct sFractalD
 	double hybridPower[HYBRID_COUNT];
 #ifdef CLSUPPORT
 	double customParameters[15];
+	double deltaDEStep;
 #endif
 	CVector3 julia; // Julia constant
 	CVector3 fakeLightsOrbitTrap;
