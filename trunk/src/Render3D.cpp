@@ -1270,15 +1270,15 @@ void DrawHud(sParamRender *param, cImage *image, GtkWidget *outputDarea)
 		int index2 = (i + 1) % steps;
 		point1 = CalcPointPersp(circlePoint1[index1], mRotInv, persp) * (height * 0.2) + center;
 		point2 = CalcPointPersp(circlePoint1[index2], mRotInv, persp) * (height * 0.2) + center;
-		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 255, 0, 0 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 255, 0, 0 }, 0.5, 0);
 
 		point1 = CalcPointPersp(circlePoint2[index1], mRotInv, persp) * (height * 0.2) + center;
 		point2 = CalcPointPersp(circlePoint2[index2], mRotInv, persp) * (height * 0.2) + center;
-		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 255, 0 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 255, 0 }, 0.5, 0);
 
 		point1 = CalcPointPersp(circlePoint3[index1], mRotInv, persp) * (height * 0.2) + center;
 		point2 = CalcPointPersp(circlePoint3[index2], mRotInv, persp) * (height * 0.2) + center;
-		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 100, 255 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 100, 255 }, 0.5, 0);
 	}
 
 	CVector3 point1, point2;

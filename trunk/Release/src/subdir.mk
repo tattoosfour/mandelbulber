@@ -9,7 +9,6 @@ CPP_SRCS += \
 ../src/callbacks.cpp \
 ../src/cimage.cpp \
 ../src/cl_support.cpp \
-../src/clew.cpp \
 ../src/common_math.cpp \
 ../src/database.cpp \
 ../src/files.cpp \
@@ -31,7 +30,6 @@ OBJS += \
 ./src/callbacks.o \
 ./src/cimage.o \
 ./src/cl_support.o \
-./src/clew.o \
 ./src/common_math.o \
 ./src/database.o \
 ./src/files.o \
@@ -53,7 +51,6 @@ CPP_DEPS += \
 ./src/callbacks.d \
 ./src/cimage.d \
 ./src/cl_support.d \
-./src/clew.d \
 ./src/common_math.d \
 ./src/database.d \
 ./src/files.d \
@@ -74,7 +71,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -O3 -msse2 -ffast-math -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" $(CXXFLAGS) $(CPPFLAGS) -o  "$@" "$<"
+	g++ -I/usr/include/atk-1.0 -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/gtk-2.0 -I/usr/include/glib-2.0 -I/usr/include/libpng12 -O3 -msse2 -ffast-math -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" $(CXXFLAGS) $(CPPFLAGS) -o  "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
