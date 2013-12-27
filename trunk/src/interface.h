@@ -260,6 +260,7 @@ struct sInterface
 	GtkWidget *boxOpenClEngineSettingsH1;
 	GtkWidget *boxOpenClEngineSettingsH2;
 	GtkWidget *boxOpenClEngineSettingsH3;
+	GtkWidget *boxOpenClEngineSettingsH4;
 	GtkWidget *boxOpenClCustomV1;
 	GtkWidget *boxOpenClCustomH11;
 	GtkWidget *boxOpenClCustomH12;
@@ -619,6 +620,7 @@ struct sInterface
 	GtkWidget *edit_OpenCLProcessingCycleTime;
 	GtkWidget *edit_OpenCLMaxMem;
 	GtkWidget *edit_OpenCLTextEditor;
+	GtkWidget *edit_OpenCLDeltaDEStep;
 	GtkWidget *edit_iterFogOpacityTrim;
 	GtkWidget *edit_iterFogOpacity;
 	GtkWidget *edit_netRenderServerPort;

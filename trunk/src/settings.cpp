@@ -543,6 +543,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 			fprintfDot(fileSettings, parameterName, params.fractal.doubles.customParameters[i], 0.0, compare);
 		}
 	}
+	fprintfDot(fileSettings, "ocl_delta_DE_step", params.fractal.doubles.deltaDEStep, 1.0e-5, compare);
 #endif
 
 	fprintfInt(fileSettings, "frame_no", params.fractal.frameNo, 0, compare);
@@ -1074,6 +1075,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 #ifdef CLSUPPORT
 	else if (!strcmp(str1, "ocl_custom_DE_mode")) params.fractal.customOCLFormulaDEMode = (enumOCLDEMode)atoi(str2);
 	else if (!strcmp(str1, "ocl_custom_formula_name")) strcpy(params.fractal.customOCLFormulaName,str2);
+	else if (!strcmp(str1, "ocl_delta_DE_step")) params.fractal.doubles.deltaDEStep = atof2(str2);
 #endif
 
 	else if (!strcmp(str1, "frame_no")) params.fractal.frameNo = atoi(str2);
