@@ -1203,7 +1203,10 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		{
 			image->ConvertTo8bit();
 			image->UpdatePreview();
-			image->RedrawInWidget(outputDarea);
+			if(!Interface_data.recordMode)
+			{
+				image->RedrawInWidget(outputDarea);
+			}
 			while (gtk_events_pending())
 				gtk_main_iteration();
 		}
@@ -1219,79 +1222,173 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 	}
 
 	//render camera and light flyight patha on preview
-	if (image->IsPreview() && !param.quiet)
+	if (image->IsPreview() && !param.quiet && !Interface_data.recordMode)
 	{
-		CRotationMatrix mRotInv;
-		mRotInv.RotateY(-param.doubles.gamma);
-		mRotInv.RotateX(-param.doubles.beta);
-		mRotInv.RotateZ(-param.doubles.alpha);
+		DrawKeyframePaths(&param, image, outputDarea);
+	}
 
-		CVector3 pointPrevFrame, pointActFrame;
-		CVector3 lightPrevFrame[4], lightActFrame[4];
-		for (int index = 0; index < timeline->GetKeyframeCount(); index++)
+	if (image->IsPreview() && !param.quiet && Interface_data.recordMode)
+	{
+		DrawHud(&param, image, outputDarea);
+	}
+}
+
+void DrawHud(sParamRender *param, cImage *image, GtkWidget *outputDarea)
+{
+	CRotationMatrix mRotInv;
+	mRotInv.RotateY(-param->doubles.gamma);
+	mRotInv.RotateX(-param->doubles.beta);
+	mRotInv.RotateZ(-param->doubles.alpha);
+	double width = image->GetPreviewWidth();
+	double height = image->GetPreviewHeight();
+	CVector3 center = CVector3(width * 0.5, height * 0.5, 0.0);
+
+	const int steps = 100;
+	const double persp = 0.2;
+	CVector3 circlePoint1[steps];
+	CVector3 circlePoint2[steps];
+	CVector3 circlePoint3[steps];
+
+	for(int i = 0; i<steps; i++)
+	{
+		double angle = i * 2.0 * M_PI / steps;
+
+		circlePoint1[i].x = cos(angle);
+		circlePoint1[i].y = sin(angle);
+		circlePoint1[i].z = 0.0;
+		circlePoint2[i].x = 0;
+		circlePoint2[i].y = sin(angle);
+		circlePoint2[i].z = cos(angle);
+		circlePoint3[i].x = cos(angle);
+		circlePoint3[i].y = 0.0;
+		circlePoint3[i].z = sin(angle);
+	}
+	for(int i = 0; i<steps; i++)
+	{
+		CVector3 point1, point2;
+		int index1 = i;
+		int index2 = (i + 1) % steps;
+		point1 = CalcPointPersp(circlePoint1[index1], mRotInv, persp) * (height * 0.2) + center;
+		point2 = CalcPointPersp(circlePoint1[index2], mRotInv, persp) * (height * 0.2) + center;
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 255, 0, 0 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+
+		point1 = CalcPointPersp(circlePoint2[index1], mRotInv, persp) * (height * 0.2) + center;
+		point2 = CalcPointPersp(circlePoint2[index2], mRotInv, persp) * (height * 0.2) + center;
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 255, 0 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+
+		point1 = CalcPointPersp(circlePoint3[index1], mRotInv, persp) * (height * 0.2) + center;
+		point2 = CalcPointPersp(circlePoint3[index2], mRotInv, persp) * (height * 0.2) + center;
+		image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 100, 255 }, (0.5 - circlePoint1[index1].z * 0.4), 0);
+	}
+
+	CVector3 point1, point2;
+	point1 = CalcPointPersp(CVector3(1.0, 0.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(-1.0, 0.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 255, 0, 0 }, 0.2, 0);
+	point1 = CalcPointPersp(CVector3(0.0, 1.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(0.0, -1.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 255, 0, 0 }, 0.2, 0);
+
+	point1 = CalcPointPersp(CVector3(0.0, 0.0, 1.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(0.0, 0.0, -1.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 255, 0 }, 0.2, 0);
+	point1 = CalcPointPersp(CVector3(0.0, 1.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(0.0, -1.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 255, 0 }, 0.2, 0);
+
+	point1 = CalcPointPersp(CVector3(1.0, 0.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(-1.0, 0.0, 0.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 100, 255 }, 0.2, 0);
+	point1 = CalcPointPersp(CVector3(0.0, 0.0, -1.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	point2 = CalcPointPersp(CVector3(0.0, 0.0, 1.0), mRotInv, 0.2)  * (height * 0.2) + center;
+	image->AntiAliasedLine(point1.x, point1.y, point2.x, point2.y, -1.0, -1.0, (sRGB8 ) { 0, 100, 255 }, 0.2, 0);
+
+	image->RedrawInWidget(outputDarea);
+}
+
+CVector3 CalcPointPersp(CVector3 point, CRotationMatrix rot, double persp)
+{
+	CVector3 vect;
+	CVector3 out;
+	vect = rot.RotateVector(point);
+	out.x = vect.x / (1.0 + vect.y * persp);
+	out.y = vect.z / (1.0 + vect.y * persp);
+	return out;
+}
+
+void DrawKeyframePaths(sParamRender *param, cImage *image, GtkWidget *outputDarea)
+{
+	CRotationMatrix mRotInv;
+	mRotInv.RotateY(-param->doubles.gamma);
+	mRotInv.RotateX(-param->doubles.beta);
+	mRotInv.RotateZ(-param->doubles.alpha);
+
+	CVector3 pointPrevFrame, pointActFrame;
+	CVector3 lightPrevFrame[4], lightActFrame[4];
+	for (int index = 0; index < timeline->GetKeyframeCount(); index++)
+	{
+		for (int frame = 0; frame < 100; frame++)
 		{
-			for (int frame = 0; frame < 100; frame++)
+			sParamRenderD paramsInterpol;
+			timeline->GetFrameParamsInterpolated(index * 100 + frame, 100, &paramsInterpol);
+			pointActFrame = InvProjection3D(paramsInterpol.vp, param->doubles.vp, mRotInv, param->perspectiveType, param->doubles.persp, param->doubles.zoom, image->GetPreviewWidth(),
+					image->GetPreviewHeight());
+
+			for (int l = 0; l < 4; l++)
 			{
-				sParamRenderD paramsInterpol;
-				timeline->GetFrameParamsInterpolated(index * 100 + frame, 100, &paramsInterpol);
-				pointActFrame = InvProjection3D(paramsInterpol.vp, param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom, image->GetPreviewWidth(),
-						image->GetPreviewHeight());
+				if (param->auxLightPreEnabled[l])
+				{
+					lightActFrame[l] = InvProjection3D(paramsInterpol.auxLightPre[l], param->doubles.vp, mRotInv, param->perspectiveType, param->doubles.persp, param->doubles.zoom,
+							image->GetPreviewWidth(), image->GetPreviewHeight());
+				}
+				else
+				{
+					lightActFrame[l] = (CVector3 ) { 0.0, 0.0, -1.0 };
+				}
+			}
+
+			if (index > 0 || frame > 0)
+			{
+				if (pointActFrame.z > 0.0)
+				{
+					unsigned char R = (int) 255 * index / timeline->GetKeyframeCount();
+					unsigned char G = (int) 255 * frame / 100;
+					unsigned char B = (int) 255 - 255 * index / timeline->GetKeyframeCount();
+					image->AntiAliasedLine(pointPrevFrame.x, pointPrevFrame.y, pointActFrame.x, pointActFrame.y, pointPrevFrame.z, pointActFrame.z, (sRGB8 ) { R, G, B }, 0.9, 0);
+				}
 
 				for (int l = 0; l < 4; l++)
 				{
-					if (param.auxLightPreEnabled[l])
+					if (lightActFrame[l].z > 0.0)
 					{
-						lightActFrame[l] = InvProjection3D(paramsInterpol.auxLightPre[l], param.doubles.vp, mRotInv, param.perspectiveType, param.doubles.persp, param.doubles.zoom,
-								image->GetPreviewWidth(), image->GetPreviewHeight());
-					}
-					else
-					{
-						lightActFrame[l] = (CVector3){0.0, 0.0, -1.0};
-					}
-				}
-
-				if (index > 0 || frame > 0)
-				{
-					if (pointActFrame.z > 0.0)
-					{
-						unsigned char R = (int) 255 * index / timeline->GetKeyframeCount();
-						unsigned char G = (int) 255 * frame / 100;
-						unsigned char B = (int) 255 - 255 * index / timeline->GetKeyframeCount();
-						image->AntiAliasedLine(pointPrevFrame.x, pointPrevFrame.y, pointActFrame.x, pointActFrame.y, pointPrevFrame.z, pointActFrame.z, (sRGB8 ) { R, G, B }, 0.9, 0);
-					}
-
-					for (int l = 0; l < 4; l++)
-					{
-						if (lightActFrame[l].z > 0.0)
-						{
-							unsigned char R = 255 - param.auxLightPreColour[l].R/256;
-							unsigned char G = 255 - param.auxLightPreColour[l].G/256;
-							unsigned char B = 255 - param.auxLightPreColour[l].B/256;
-							image->AntiAliasedLine(lightPrevFrame[l].x, lightPrevFrame[l].y, lightActFrame[l].x, lightActFrame[l].y, lightPrevFrame[l].z, lightActFrame[l].z, (sRGB8 ) { R, G, B }, 0.9, 0);
-						}
-					}
-
-				}
-				if (frame == 0)
-				{
-					if (pointActFrame.z > 0.0) image->CircleBorder(pointActFrame.x, pointActFrame.y, pointActFrame.z, 5.0, (sRGB8 ) { 255, 0, 0 }, 2.0, 1.0, 0);
-					for (int l = 0; l < 4; l++)
-					{
-						unsigned char R = param.auxLightPreColour[l].R/256;
-						unsigned char G = param.auxLightPreColour[l].G/256;
-						unsigned char B = param.auxLightPreColour[l].B/256;
-						if (lightActFrame[l].z > 0.0) image->CircleBorder(lightActFrame[l].x, lightActFrame[l].y, lightActFrame[l].z, 3.0, (sRGB8 ) { R, G, B }, 1.0, 1.0, 0);
+						unsigned char R = 255 - param->auxLightPreColour[l].R / 256;
+						unsigned char G = 255 - param->auxLightPreColour[l].G / 256;
+						unsigned char B = 255 - param->auxLightPreColour[l].B / 256;
+						image->AntiAliasedLine(lightPrevFrame[l].x, lightPrevFrame[l].y, lightActFrame[l].x, lightActFrame[l].y, lightPrevFrame[l].z, lightActFrame[l].z, (sRGB8 ) { R, G, B },
+								0.9, 0);
 					}
 				}
-
-				pointPrevFrame = pointActFrame;
-				for (int l = 0; l < 4; l++)
-					lightPrevFrame[l] = lightActFrame[l];
 
 			}
+			if (frame == 0)
+			{
+				if (pointActFrame.z > 0.0) image->CircleBorder(pointActFrame.x, pointActFrame.y, pointActFrame.z, 5.0, (sRGB8 ) { 255, 0, 0 }, 2.0, 1.0, 0);
+				for (int l = 0; l < 4; l++)
+				{
+					unsigned char R = param->auxLightPreColour[l].R / 256;
+					unsigned char G = param->auxLightPreColour[l].G / 256;
+					unsigned char B = param->auxLightPreColour[l].B / 256;
+					if (lightActFrame[l].z > 0.0) image->CircleBorder(lightActFrame[l].x, lightActFrame[l].y, lightActFrame[l].z, 3.0, (sRGB8 ) { R, G, B }, 1.0, 1.0, 0);
+				}
+			}
+
+			pointPrevFrame = pointActFrame;
+			for (int l = 0; l < 4; l++)
+				lightPrevFrame[l] = lightActFrame[l];
+
 		}
-		image->RedrawInWidget(outputDarea);
 	}
+	image->RedrawInWidget(outputDarea);
 }
 
 //******************************** Get number of CPU cores *************

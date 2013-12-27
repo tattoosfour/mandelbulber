@@ -12,6 +12,7 @@
 #ifndef RENDER3D_H_
 #define RENDER3D_H_
 
+#include "algebra.hpp"
 #include "image.h"
 #include "texture.hpp"
 #include "fractparams.h"
@@ -83,4 +84,7 @@ void ThumbnailRender(const char *settingsFile, cImage *miniImage, int mode);
 void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage);
 CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, CVector3 direction, double maxScan, bool binaryEnable, sStep *stepBuff, int *buffCount,
 		double *distThreshOut, double *lastDistOut, bool *foundOut, double *depthOut);
+void DrawKeyframePaths(sParamRender *param, cImage *image, GtkWidget *outputDarea);
+void DrawHud(sParamRender *param, cImage *image, GtkWidget *outputDarea);
+CVector3 CalcPointPersp(CVector3 point, CRotationMatrix rot, double persp);
 #endif /* RENDER3D_H_ */
