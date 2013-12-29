@@ -2043,8 +2043,8 @@ void MainRender(void)
 		for (int i = 0; i < startFrame; i++)
 		{
 			int n;
-			n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alpha,
-					&fractParam.doubles.beta);
+			n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alpha,
+					&fractParam.doubles.beta, &fractParam.doubles.gamma);
 			if (n <= 0)
 			{
 				fclose(pFile_coordinates);
