@@ -4,6 +4,7 @@
 	out.iters = i;
 	out.z = z;
 	out.distFromOrbitTrap = distFromOrbitTrap;
+	out.minOrbitTrapDist = minOrbitTrapDist;
 	out.objectOut = clObjFractal;
 	return out;
 }

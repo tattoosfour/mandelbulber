@@ -508,6 +508,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfDot(fileSettings, "primitive_water_length", params.fractal.doubles.primitives.waterLength, 0.2, compare);
 		fprintfInt(fileSettings, "primitive_water_iterations", params.fractal.primitives.waterIterations, 5, compare);
 		fprintfDot(fileSettings, "primitive_water_rotation", params.fractal.doubles.primitives.waterRotation, 0.0, compare);
+		fprintfDot(fileSettings, "primitive_water_anim_speed", params.fractal.doubles.primitives.waterAnimSpeed, 0.1, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_R", params.primitiveWaterColour.R, 0, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_G", params.primitiveWaterColour.G, 5000, compare);
 		fprintfInt(fileSettings, "primitive_water_colour_B", params.primitiveWaterColour.B, 10000, compare);
@@ -519,7 +520,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		fprintfInt(fileSettings, "fake_lights_enabled", params.fakeLightsEnabled, false, compare);
 		fprintfDot(fileSettings, "fake_lights_intensity", params.doubles.fakeLightsIntensity, 1.0, compare);
 		fprintfDot(fileSettings, "fake_lights_visibility", params.doubles.fakeLightsVisibility, 1.0, compare);
-		fprintfDot(fileSettings, "fake_lights_visibility_size", params.doubles.fakeLightsVisibilitySize, 1.0, compare);
+		fprintfDot(fileSettings, "fake_lights_visibility_size", params.doubles.fakeLightsVisibilitySize, 5.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_X", params.fractal.doubles.fakeLightsOrbitTrap.x, 2.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_Y", params.fractal.doubles.fakeLightsOrbitTrap.y, 0.0, compare);
 		fprintfDot(fileSettings, "fake_lights_orbit_trap_Z", params.fractal.doubles.fakeLightsOrbitTrap.z, 0.0, compare);
@@ -1057,6 +1058,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "primitive_water_length")) params.fractal.doubles.primitives.waterLength = atof2(str2);
 	else if (!strcmp(str1, "primitive_water_iterations")) params.fractal.primitives.waterIterations = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_rotation")) params.fractal.doubles.primitives.waterRotation = atof2(str2);
+	else if (!strcmp(str1, "primitive_water_anim_speed")) params.fractal.doubles.primitives.waterAnimSpeed = atof2(str2);
 	else if (!strcmp(str1, "primitive_water_colour_R")) params.primitiveWaterColour.R = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_G")) params.primitiveWaterColour.G = atoi(str2);
 	else if (!strcmp(str1, "primitive_water_colour_B")) params.primitiveWaterColour.B = atoi(str2);

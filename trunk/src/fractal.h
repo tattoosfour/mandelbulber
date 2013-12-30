@@ -204,6 +204,7 @@ struct sFractalPrimitivesD
 	double waterAmplitude;
 	double waterLength;
 	double waterRotation;
+	double waterAnimSpeed;
 };
 
 struct sFractalPrimitives

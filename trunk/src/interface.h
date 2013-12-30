@@ -636,6 +636,7 @@ struct sInterface
 	GtkWidget *edit_fakeLightsMaxIter;
 	GtkWidget *edit_shadowConeAngle;
 	GtkWidget *edit_customParameters[15];
+	GtkWidget *edit_primitiveWaterAnimSpeed;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;

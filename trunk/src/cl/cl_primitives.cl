@@ -89,7 +89,7 @@ float PrimitiveInvertedSphere(float3 point, float3 center, float radius)
 float PrimitiveWater(float3 point, float height, float amplitude, float length, float rotation, int iterations, float animSpeed, int frame)
 {
 	float planeDistance = height - point.z;
-	if(planeDistance < amplitude * 10.0f)
+	if(planeDistance < amplitude * 20.0f)
 	{
 		float angle = rotation/180.0*M_PI_F;
 		float2 rotm1 = (float2){cos(angle), -sin(angle)};
@@ -104,13 +104,16 @@ float PrimitiveWater(float3 point, float height, float amplitude, float length, 
 		float waveX = 0.0f;
 		float waveY = 0.0f;
 		float p = 1.0f;
+		float p2 = 0.05;
 		for(int i=1; i <= iterations; i++)
 		{
+			float p3 = p * p2;
 			float shift = phase / (i/3.0f + 1.0f);
-			waveXtemp = sin(i + 0.4f*(waveX)*p + sin(k* point2.y / length*p) + point2.x/length*p + shift)/p;
-			waveYtemp = cos(i + 0.4f*(waveY)*p + sin(point2.x / length*p) + k*point2.y/length*p + shift*0.23f)/p;
+			waveXtemp = sin(i + 0.4f*(waveX)*p3 + sin(k* point2.y / length*p3) + point2.x/length*p3 + shift)/p;
+			waveYtemp = cos(i + 0.4f*(waveY)*p3 + sin(point2.x / length*p3) + k*point2.y/length*p3 + shift*0.23f)/p;
 			waveX+=waveXtemp;
 			waveY+=waveYtemp;
+			p2 = p2 + (1.0f - p2)*0.7f;
 			p *= 1.872f;
 		}
 		planeDistance += (waveX + waveY) * amplitude;

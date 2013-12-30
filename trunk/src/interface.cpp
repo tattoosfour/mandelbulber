@@ -511,6 +511,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.doubles.primitives.waterAmplitude = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterAmplitude)));
 		params->fractal.doubles.primitives.waterLength = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterLength)));
 		params->fractal.doubles.primitives.waterRotation = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterRotation)));
+		params->fractal.doubles.primitives.waterAnimSpeed = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterAnimSpeed)));
 		params->doubles.primitiveWaterReflect = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterReflect)));
 		params->fractal.primitives.waterIterations = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations)));
 		params->fractal.primitives.waterEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled));
@@ -974,6 +975,7 @@ void WriteInterface(sParamRender *params)
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterRotation), DoubleToString(params->fractal.doubles.primitives.waterRotation));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations), IntToString(params->fractal.primitives.waterIterations));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterReflect), DoubleToString(params->doubles.primitiveWaterReflect));
+	gtk_entry_set_text(GTK_ENTRY(Interface.edit_primitiveWaterAnimSpeed), DoubleToString(params->fractal.doubles.primitives.waterAnimSpeed));
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacity), DoubleToString(params->doubles.iterFogOpacity));
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_iterFogOpacityTrim), DoubleToString(params->doubles.iterFogOpacityTrim));
@@ -1923,6 +1925,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.edit_primitiveWaterRotation = gtk_entry_new();
 	Interface.edit_primitiveWaterIterations = gtk_entry_new();
 	Interface.edit_primitiveWaterReflect = gtk_entry_new();
+	Interface.edit_primitiveWaterAnimSpeed = gtk_entry_new();
 
 	Interface.edit_measureX = gtk_entry_new();
 	Interface.edit_measureY = gtk_entry_new();
@@ -2443,6 +2446,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.buColorPrimitiveWater, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,7", "Reflect:", 5, Interface.edit_primitiveWaterReflect), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,1", "Waves anim speed:", 5, Interface.edit_primitiveWaterAnimSpeed), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.checkPrimitiveWaterEnabled, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBox), Interface.frPrimitiveBox, false, false, 1);
@@ -3723,6 +3727,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clFractal->primitives.waterAmplitude = params->fractal.doubles.primitives.waterAmplitude;
 	clFractal->primitives.waterLength = params->fractal.doubles.primitives.waterLength;
 	clFractal->primitives.waterRotation = params->fractal.doubles.primitives.waterRotation;
+	clFractal->primitives.waterAnimSpeed = params->fractal.doubles.primitives.waterAnimSpeed;
 	clFractal->primitives.waterIterations = params->fractal.primitives.waterIterations;
 
 	clFractal->primitives.primitivePlaneReflect = params->doubles.primitivePlaneReflect;
