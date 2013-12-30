@@ -26,6 +26,7 @@ typedef struct
 	float distance;
 	float colourIndex;
 	float distFromOrbitTrap;
+	float minOrbitTrapDist;
 	enumClObjectType objectOut;
 } formulaOut;
 
@@ -749,6 +750,8 @@ float3 FakeLights(__constant sClInConstants *consts, sClShaderInputData *input, 
 		fakeLightNormal = normalize(fakeLightNormal);
 	}
 
+	fakeLight = sqrt(fakeLight);
+	
 	float fakeLight2 = fakeLight * dot(input->normal, fakeLightNormal);
 	if(fakeLight2 < 0.0f) fakeLight2 = 0.0f;
 	fakeLights = fakeLight2;
@@ -867,12 +870,14 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 	float colourThresh2 = consts->params.fogColour2Distance;
 	float fogReduce = consts->params.fogDistanceFactor;
 	float fogIntensity = consts->params.fogDensity;
+	
+	float lastOrbitTrapDist = 1.0e3f;
   
 	for(int i=0; i<MAX_RAYMARCHING; i++)
 	{
 		//calculate back step
-		float step = dist * consts->params.DEfactor * (0.9f + 0.2f * rand(&input->calcParam->randomSeed)/65536.0);
-
+		float step = min(dist, lastOrbitTrapDist) * consts->params.DEfactor * (0.9f + 0.2f * rand(&input->calcParam->randomSeed)/65536.0);
+		
 		if(step < 1.0e-6f) step = 1.0e-6f;
 		if(step > scan) 
 		{
@@ -978,6 +983,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			float fakeLight = 1.0f / (pow(r, 10.0f / consts->params.fakeLightsVisibilitySize) * pow(10.0f, 10.0f / consts->params.fakeLightsVisibilitySize) + 1e-20f);
 			output += fakeLight * step * consts->params.fakeLightsVisibility;
 			input->calcParam->orbitTrap = 0.0f;
+			lastOrbitTrapDist = out.minOrbitTrapDist / pow(10.0f, 10.0f / consts->params.fakeLightsVisibilitySize);
 		}
 #endif		
 		//---------------------- volumetric lights with shadows in fog

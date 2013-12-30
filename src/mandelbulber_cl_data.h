@@ -99,6 +99,7 @@ typedef struct
 	cl_float waterAmplitude;
 	cl_float waterLength;
 	cl_float waterRotation;
+	cl_float waterAnimSpeed;
 
 	cl_float3 primitivePlaneColour;
 	cl_float3 primitiveBoxColour;

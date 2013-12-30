@@ -126,7 +126,7 @@ formulaOut CalculateDistance(__constant sClInConstants *consts, float3 point, sC
 	float waterDistance = PrimitiveWater(point, consts->fractal.primitives.waterHeight, 
 			consts->fractal.primitives.waterAmplitude, consts->fractal.primitives.waterLength, 
 			consts->fractal.primitives.waterRotation, consts->fractal.primitives.waterIterations, 
-			0.1f, consts->fractal.frameNo);
+			consts->fractal.primitives.waterAnimSpeed, consts->fractal.frameNo);
 	if (waterDistance < out.distance) out.objectOut = clObjWater;
 	out.distance = min(waterDistance, out.distance);
 #endif

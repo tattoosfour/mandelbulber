@@ -98,14 +98,17 @@ double PrimitiveWater(CVector3 point, double height, double amplitude, double le
 		double waveYtemp = point.y;
 		double waveX = 0;
 		double waveY = 0;
-		double p = 1;
+		double p = 1.0;
+		double p2 = 0.05;
 		for(int i=1; i<=iterations; i++)
 		{
+			float p3 = p * p2;
 			double shift = phase / (i/3.0 + 1.0);
-			waveXtemp = sin(i + 0.4*(waveX)*p + sin(k* point.y / length*p) + point.x/length*p + shift)/p;
-			waveYtemp = cos(i + 0.4*(waveY)*p + sin(point.x / length*p) + k*point.y/length*p + shift*0.23)/p;
+			waveXtemp = sin(i + 0.4*(waveX)*p3 + sin(k* point.y / length*p3) + point.x/length*p3 + shift)/p;
+			waveYtemp = cos(i + 0.4*(waveY)*p3 + sin(point.x / length*p3) + k*point.y/length*p3 + shift*0.23)/p;
 			waveX+=waveXtemp;
 			waveY+=waveYtemp;
+			p2 = p2 + (1.0 - p2) * 0.7;
 			p *= 1.872;
 		}
 

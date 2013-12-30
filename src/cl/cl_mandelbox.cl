@@ -21,7 +21,7 @@
 		colourMin += fabs(m);
 		
 #if _orbitTrapsEnabled
-		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) distFromOrbitTrap += (1.0f/(r*r));
+		if (i >= consts->fractal.fakeLightsMinIter && i <= consts->fractal.fakeLightsMaxIter) {distFromOrbitTrap += (1.0f/(r*r)); minOrbitTrapDist = min(minOrbitTrapDist, r);}
 #endif
 		
 		if(r>1024.0f) 
