@@ -179,6 +179,7 @@ typedef struct
 	cl_int hdrEnabled;
 	cl_int randomSeed;
 	cl_int fakeLightsEnabled;
+	cl_int texturedBackground;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;

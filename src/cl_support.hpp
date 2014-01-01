@@ -33,7 +33,7 @@
 
 //#include "fractal.h"
 #include "cimage.hpp"
-
+#include "texture.hpp"
 
 #include "mandelbulber_cl_data.h"
 
@@ -65,6 +65,8 @@ public:
 	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
+	void PrepareBackgroundTexture(cTexture *texture);
+	void AssignBackgroundTexture(cTexture *texture) {	backgroundTextureSource = texture;}
 	bool IsReady(void) {return ready;}
 	bool IsEnabled(void) {return enabled;}
 	void Enable(void);
@@ -86,6 +88,7 @@ private:
 	sClInBuff *inBuffer1;
 	sClReflect *reflectBuffer;
 	sClInConstants *constantsBuffer1;
+	cl_float4 *backgroungImageBuffer;
 	std::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
@@ -93,6 +96,9 @@ private:
 	cl::Buffer *inCLBuffer1;
 	cl::Buffer *inCLConstBuffer1;
 	cl::Buffer *auxReflectBuffer;
+	cl::Image2D *backgroundImage2D;
+	size_t backgroundImage2DWidth;
+	size_t backgroundImage2DHeight;
 	std::vector<cl::Device> devices;
 	cl::Program::Sources *source;
 	cl::Program::Sources *source2;
@@ -118,6 +124,8 @@ private:
 	size_t memoryLimitByUser;
 	size_t workGroupSize;
 	size_t maxConstantBufferSize;
+
+	cTexture *backgroundTextureSource;
 
 	bool isNVIDIA;
 

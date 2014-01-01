@@ -9,8 +9,8 @@
 
 		float rr = dot(z,z);
 		float m = scale;
-		if (rr < mr2)	m = native_divide(scale, mr2);
-		else if (rr < fr2)	m = native_divide(scale,rr);
+		if (rr < mr2)	m *= native_divide(fr2, mr2);
+		else if (rr < fr2)	m *= native_divide(fr2, rr);
 		
 		z = Matrix33MulFloat3(consts->fractal.mandelbox.mainRot, z);
 		

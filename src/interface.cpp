@@ -289,7 +289,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.iterThresh = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkIterThresh));
 		params->fractal.juliaMode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkJulia));
 		params->slowShading = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading));
-		params->textured_background = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground));
+		params->texturedBackground = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground));
 		params->background_as_fulldome = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackgroundFulldome));
 		params->fractal.doubles.julia.x = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_a)));
 		params->fractal.doubles.julia.y = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_julia_b)));
@@ -998,7 +998,7 @@ void WriteInterface(sParamRender *params)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkJulia), params->fractal.juliaMode);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkSlowShading), params->slowShading);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkLimits), params->fractal.limits_enabled);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground), params->textured_background);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackground), params->texturedBackground);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkBitmapBackgroundFulldome), params->background_as_fulldome);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkColoring), params->imageSwitches.coloringEnabled);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkTgladMode), params->fractal.tgladFoldingMode);
@@ -3842,6 +3842,8 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->fakeLightsVisibility = params->doubles.fakeLightsVisibility;
 	clParams->fakeLightsVisibilitySize = params->doubles.fakeLightsVisibilitySize;
 	clParams->fakeLightsOrbitTrap = CVector2float3(params->fractal.doubles.fakeLightsOrbitTrap);
+
+	clParams->texturedBackground = params->texturedBackground;
 }
 
 matrix33 RotMatrix2matrix33(CRotationMatrix rot)

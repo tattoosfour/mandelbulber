@@ -115,7 +115,7 @@ sShaderOutput BackgroundShader(sShaderInputData input)
 {
 	sShaderOutput pixel2;
 
-	if (input.param->textured_background)
+	if (input.param->texturedBackground)
 	{
 		if(input.param->background_as_fulldome)
 		{
@@ -928,7 +928,7 @@ sShaderOutput SurfaceColour(sShaderInputData &input)
 sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 {
 	sShaderOutput pixel2;
-	if (param->textured_background)
+	if (param->texturedBackground)
 	{
 		if(param->background_as_fulldome)
 		{

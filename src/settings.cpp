@@ -208,7 +208,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "fog_colour_3_B", params.fogColour3.B, 65535, compare);
 	fprintfInt(fileSettings, "background_color_1_G", params.background_color1.G, 38306, compare);
 	fprintfInt(fileSettings, "background_color_1_B", params.background_color1.B, 65535, compare);
-	fprintfInt(fileSettings, "textured_background", params.textured_background, false, compare);
+	fprintfInt(fileSettings, "textured_background", params.texturedBackground, false, compare);
 	fprintfInt(fileSettings, "background_as_fuldome", params.background_as_fulldome, false, compare);
 	fprintfInt(fileSettings, "shadows_enabled", params.shadow, true, compare);
 	fprintfInt(fileSettings, "ambient_occlusion_enabled", params.global_ilumination, false, compare);
@@ -564,7 +564,7 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 		else
 		{
 			fprintf(fileSettings, "file_destination %s;\n", params.file_destination);
-			if(params.textured_background) fprintf(fileSettings, "file_background %s;\n", params.file_background);
+			if(params.texturedBackground) fprintf(fileSettings, "file_background %s;\n", params.file_background);
 			if(params.doubles.imageAdjustments.reflect > 0 && !params.imageSwitches.raytracedReflections) fprintf(fileSettings, "file_envmap %s;\n", params.file_envmap);
 			if(params.global_ilumination && !params.fastGlobalIllumination) fprintf(fileSettings, "file_lightmap %s;\n", params.file_lightmap);
 			fprintf(fileSettings, "file_animation_path %s;\n", params.file_path);
@@ -847,7 +847,7 @@ bool LoadOneSetting(const char* str1, const char *str2, sParamRender &params, bo
 	else if (!strcmp(str1, "fog_colour_3_R")) params.fogColour3.R = atoi(str2);
 	else if (!strcmp(str1, "fog_colour_3_G")) params.fogColour3.G = atoi(str2);
 	else if (!strcmp(str1, "fog_colour_3_B")) params.fogColour3.B = atoi(str2);
-	else if (!strcmp(str1, "textured_background")) params.textured_background = atoi(str2);
+	else if (!strcmp(str1, "textured_background")) params.texturedBackground = atoi(str2);
 	else if (!strcmp(str1, "background_as_fuldome")) params.background_as_fulldome = atoi(str2);
 	else if (!strcmp(str1, "shadows_enabled")) params.shadow = atoi(str2);
 	else if (!strcmp(str1, "ambient_occlusion_enabled")) params.global_ilumination = atoi(str2);
