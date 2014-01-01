@@ -970,7 +970,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 }
 
 //------------------ MAIN RENDER FUNCTION --------------------
-kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __constant sClInConstants *consts, __global sClReflect *reflectBuff, int Gcl_offset)
+kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __constant sClInConstants *consts, __global sClReflect *reflectBuff, image2d_t imageBackground, int Gcl_offset)
 {
 	
 	int cl_offset = Gcl_offset;

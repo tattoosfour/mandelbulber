@@ -1191,6 +1191,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		//printf("Ambient occlusion counter %d\n", counter);
 
 		clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
+		if(param.backgroundTexture->IsLoaded())clSupport->AssignBackgroundTexture(param.backgroundTexture);
 		start_time = real_clock();
 
 		image->progressiveFactor = 1;
@@ -1844,7 +1845,7 @@ bool LoadTextures(sParamRender *params)
 	}
 
 	//reading background texture
-	if(params->textured_background)
+	if(params->texturedBackground)
 	{
 		params->backgroundTexture = new cTexture(params->file_background);
 		if (params->backgroundTexture->IsLoaded())

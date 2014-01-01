@@ -73,6 +73,10 @@ CclSupport::CclSupport(void)
 	memset(&lastFractal, 0, sizeof(lastFractal));
 	isNVIDIA = false;
 	customFormulas = NULL;
+	backgroundImage2D = NULL;
+	backgroundImage2DHeight = 10;
+	backgroundImage2DWidth = 10;
+	backgroungImageBuffer = new cl_float4[10*10];
 }
 
 bool CclSupport::checkErr(cl_int err, const char * name)
@@ -353,6 +357,7 @@ void CclSupport::Init(void)
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
+	if(lastParams.texturedBackground) buildParams += "-D_texturedBackground ";
 	if(lastFractal.limitsEnabled) buildParams += "-D_LimitsEnabled ";
 	if(lastFractal.primitives.planeEnable) buildParams += "-D_primitivePlane ";
 	if(lastFractal.primitives.boxEnable) buildParams += "-D_primitiveBox ";
@@ -458,6 +463,7 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->fractal.primitives.sphereEnable != lastFractal.primitives.sphereEnable) recompileRequest = true;
 	if(inConstants->fractal.primitives.invertedSphereEnable != lastFractal.primitives.invertedSphereEnable) recompileRequest = true;
 	if(inConstants->fractal.primitives.waterEnable != lastFractal.primitives.waterEnable) recompileRequest = true;
+	if(inConstants->params.texturedBackground != lastParams.texturedBackground) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -495,6 +501,12 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		double lastTimeProcessing = startTime;
 		double lastProcessingTime = 1.0;
 
+		if(backgroundImage2D) delete backgroundImage2D; backgroundImage2D = NULL;
+		if(lastParams.texturedBackground) PrepareBackgroundTexture(backgroundTextureSource);
+		backgroundImage2D = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_FLOAT), backgroundImage2DWidth, backgroundImage2DHeight,
+				backgroundImage2DWidth * sizeof(cl_float4), backgroungImageBuffer, &err);
+		if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
+
 		int nDof = 1;
 		if (lastParams.DOFEnabled) nDof = 256;
 
@@ -523,10 +535,10 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
 			{
 
-				delete outCL;
-				delete[] rgbbuff;
-				delete auxReflectBuffer;
-				delete[] reflectBuffer;
+				if(outCL) delete outCL; outCL = NULL;
+				if(rgbbuff) delete[] rgbbuff; rgbbuff = NULL;
+				if(auxReflectBuffer) delete auxReflectBuffer; auxReflectBuffer = NULL;
+				if(reflectBuffer) delete[] reflectBuffer; reflectBuffer = NULL;
 
 				double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
 				if (processingCycleTime < 0.02) processingCycleTime = 0.02;
@@ -564,7 +576,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 				err = kernel->setArg(1, *inCLBuffer1);
 				err = kernel->setArg(2, *inCLConstBuffer1);
 				err = kernel->setArg(3, *auxReflectBuffer);
-				err = kernel->setArg(4, pixelIndex);
+				err = kernel->setArg(4, *backgroundImage2D);
+				err = kernel->setArg(5, pixelIndex);
 
 				//printf("size of inputs: %ld\n", sizeof(lastParams) + sizeof(lastFractal));
 
@@ -667,6 +680,12 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 			if (programClosed) break;
 		}
 	}
+
+	if(outCL) delete outCL; outCL = NULL;
+	if(rgbbuff) delete[] rgbbuff; rgbbuff = NULL;
+	if(auxReflectBuffer) delete auxReflectBuffer; auxReflectBuffer = NULL;
+	if(reflectBuffer) delete[] reflectBuffer; reflectBuffer = NULL;
+	if(backgroundImage2D) delete backgroundImage2D; backgroundImage2D = NULL;
 	//gdk_draw_rgb_image(outputDarea->window, renderWindow.drawingArea->style->fg_gc[GTK_STATE_NORMAL], 0, 0, clSupport->GetWidth(), clSupport->GetHeight(), GDK_RGB_DITHER_NONE,
 	//		clSupport->GetRgbBuff(), clSupport->GetWidth() * 3);
 }
@@ -699,6 +718,13 @@ void CclSupport::Disable(void)
 	inCLConstBuffer1 = NULL;
 	if(reflectBuffer) delete[] reflectBuffer;
 	reflectBuffer = NULL;
+	if(backgroungImageBuffer) delete[] backgroungImageBuffer;
+	backgroungImageBuffer = NULL;
+	if(backgroundImage2D) delete backgroundImage2D;
+	backgroundImage2D = NULL;
+	backgroundImage2DHeight = 10;
+	backgroundImage2DWidth = 10;
+	backgroungImageBuffer = new cl_float4[10*10];
 	enabled = false;
 	ready = false;
 }
@@ -710,6 +736,28 @@ void CclSupport::SetSize(int w, int h)
 	height = h;
 }
 
+void CclSupport::PrepareBackgroundTexture(cTexture *texture)
+{
+	int width = texture->Width();
+	int height = texture->Height();
+
+	if(backgroungImageBuffer) delete[] backgroungImageBuffer;
+	backgroungImageBuffer = new cl_float4[width * height];
+	backgroundImage2DWidth = width;
+	backgroundImage2DHeight = height;
+
+	for(int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			sRGB8 pixel = texture->FastPixel(x,y);
+			backgroungImageBuffer[x + y * width].s0 = pixel.R / 256.0;
+			backgroungImageBuffer[x + y * width].s1 = pixel.G / 256.0;
+			backgroungImageBuffer[x + y * width].s2 = pixel.B / 256.0;
+			backgroungImageBuffer[x + y * width].s3 = 1.0;
+		}
+	}
+}
 
 //------------------------------------ custom formulas -----------------------------
 CCustomFormulas::CCustomFormulas(std::string dataDir)
