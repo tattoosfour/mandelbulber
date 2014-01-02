@@ -1206,7 +1206,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		float3 totalColour = (float3) {0.0f, 0.0f, 0.0f};
 		float focus = consts->params.DOFFocus;
 
-		float randR = 0.003f * consts->params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0f + 0.5f);
+		float randR = 0.001f * consts->params.DOFRadius*focus * sqrt(rand(&seed) / 65536.0 / 2.0f + 0.5f);
 		float randAngle = rand(&seed);
 		float randX = randR * sin(randAngle);
 		float randZ = randR * cos(randAngle);

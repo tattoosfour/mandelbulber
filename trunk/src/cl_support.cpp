@@ -76,7 +76,7 @@ CclSupport::CclSupport(void)
 	backgroundImage2D = NULL;
 	backgroundImage2DHeight = 10;
 	backgroundImage2DWidth = 10;
-	backgroungImageBuffer = new cl_float4[10*10];
+	backgroungImageBuffer = new cl_uchar4[10*10];
 }
 
 bool CclSupport::checkErr(cl_int err, const char * name)
@@ -503,8 +503,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 		if(backgroundImage2D) delete backgroundImage2D; backgroundImage2D = NULL;
 		if(lastParams.texturedBackground) PrepareBackgroundTexture(backgroundTextureSource);
-		backgroundImage2D = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_FLOAT), backgroundImage2DWidth, backgroundImage2DHeight,
-				backgroundImage2DWidth * sizeof(cl_float4), backgroungImageBuffer, &err);
+		backgroundImage2D = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_UNORM_INT8), backgroundImage2DWidth, backgroundImage2DHeight,
+				backgroundImage2DWidth * sizeof(cl_uchar4), backgroungImageBuffer, &err);
 		if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
 
 		int nDof = 1;
@@ -724,7 +724,7 @@ void CclSupport::Disable(void)
 	backgroundImage2D = NULL;
 	backgroundImage2DHeight = 10;
 	backgroundImage2DWidth = 10;
-	backgroungImageBuffer = new cl_float4[10*10];
+	backgroungImageBuffer = new cl_uchar4[10*10];
 	enabled = false;
 	ready = false;
 }
@@ -742,7 +742,7 @@ void CclSupport::PrepareBackgroundTexture(cTexture *texture)
 	int height = texture->Height();
 
 	if(backgroungImageBuffer) delete[] backgroungImageBuffer;
-	backgroungImageBuffer = new cl_float4[width * height];
+	backgroungImageBuffer = new cl_uchar4[width * height];
 	backgroundImage2DWidth = width;
 	backgroundImage2DHeight = height;
 
@@ -751,10 +751,10 @@ void CclSupport::PrepareBackgroundTexture(cTexture *texture)
 		for (int x = 0; x < width; x++)
 		{
 			sRGB8 pixel = texture->FastPixel(x,y);
-			backgroungImageBuffer[x + y * width].s0 = pixel.R / 256.0;
-			backgroungImageBuffer[x + y * width].s1 = pixel.G / 256.0;
-			backgroungImageBuffer[x + y * width].s2 = pixel.B / 256.0;
-			backgroungImageBuffer[x + y * width].s3 = 1.0;
+			backgroungImageBuffer[x + y * width].s0 = pixel.R;
+			backgroungImageBuffer[x + y * width].s1 = pixel.G;
+			backgroungImageBuffer[x + y * width].s2 = pixel.B;
+			backgroungImageBuffer[x + y * width].s3 = CL_UCHAR_MAX;
 		}
 	}
 }

@@ -88,7 +88,7 @@ private:
 	sClInBuff *inBuffer1;
 	sClReflect *reflectBuffer;
 	sClInConstants *constantsBuffer1;
-	cl_float4 *backgroungImageBuffer;
+	cl_uchar4 *backgroungImageBuffer;
 	std::vector<cl::Platform> platformList;
 	std::string platformVendor;
 	cl::Context *context;
