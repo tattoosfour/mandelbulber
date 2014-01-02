@@ -2115,17 +2115,25 @@ void MainRender(void)
 
 				fractParam.doubles.gamma -= deltaXm * rotation_step * 300.0;
 
-				CRotationMatrix mRot;
-				mRot.RotateZ(fractParam.doubles.alpha);
-				mRot.RotateX(fractParam.doubles.beta);
-				mRot.RotateY(fractParam.doubles.gamma);
-				mRot.RotateX(-deltaYm2 * rotation_step);
-				mRot.RotateZ(-deltaXm2 * rotation_step);
+				if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkStraightRotation)))
+				{
+					fractParam.doubles.alpha -= deltaXm2 * rotation_step;
+					fractParam.doubles.beta += deltaYm2 * rotation_step;
+					fractParam.doubles.gamma = 0.0f;
+				}
+				else
+				{
+					CRotationMatrix mRot;
+					mRot.RotateZ(fractParam.doubles.alpha);
+					mRot.RotateX(fractParam.doubles.beta);
+					mRot.RotateY(fractParam.doubles.gamma);
+					mRot.RotateX(-deltaYm2 * rotation_step);
+					mRot.RotateZ(-deltaXm2 * rotation_step);
 
-				fractParam.doubles.alpha = -mRot.GetAlfa();
-				fractParam.doubles.beta = -mRot.GetBeta();
+					fractParam.doubles.alpha = -mRot.GetAlfa();
+					fractParam.doubles.beta = -mRot.GetBeta();
 				fractParam.doubles.gamma = -mRot.GetGamma();
-
+				}
 			}
 
 			//calculation of distance to fractal surface
@@ -2133,10 +2141,22 @@ void MainRender(void)
 			WriteLogDouble("Distance calculated", distance);
 
 			sprintf(label_text, "Estimated distance to fractal surface: %g", distance);
-			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_animationDistance), label_text);
+			if (!noGUI)
+			{
+				gtk_label_set_text(GTK_LABEL(Interface.label_animationDistance), label_text);
 
-			sprintf(label_text, "Flight speed: %g", distance * speed);
-			if (!noGUI) gtk_label_set_text(GTK_LABEL(Interface.label_animationSpeed), label_text);
+				speed = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationDESpeed)));
+
+				if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorAbsoluteDistance)))
+				{
+					sprintf(label_text, "Flight speed: %g", speed);
+				}
+				else
+				{
+					sprintf(label_text, "Flight speed: %g", distance * speed);
+				}
+				gtk_label_set_text(GTK_LABEL(Interface.label_animationSpeed), label_text);
+			}
 
 			if (distance > 5.0) distance = 5.0;
 
@@ -2147,17 +2167,25 @@ void MainRender(void)
 			if (fractParam.recordMode && foundLastFrame)
 			{
 
-				speed = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationDESpeed)));
 
 				//calculation of step direction vector
-				double delta_x = -sin(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * distance * speed;
-				double delta_y = cos(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * distance * speed;
-				double delta_z = sin(fractParam.doubles.beta) * distance * speed;
+
+				CVector3 delta;
+				if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkNavigatorAbsoluteDistance)))
+				{
+					delta.x = -sin(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * speed;
+					delta.y = cos(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * speed;
+					delta.z = sin(fractParam.doubles.beta) * speed;
+				}
+				else
+				{
+					delta.x = -sin(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * distance * speed;
+					delta.y = cos(fractParam.doubles.alpha) * cos(fractParam.doubles.beta) * distance * speed;
+					delta.z = sin(fractParam.doubles.beta) * distance * speed;
+				}
 
 				//step
-				fractParam.doubles.vp.x += delta_x;
-				fractParam.doubles.vp.y += delta_y;
-				fractParam.doubles.vp.z += delta_z;
+				fractParam.doubles.vp += delta;
 
 				//saving coordinates to file
 				FILE *pFile_coordinates2 = fopen(fractParam.file_path, "a");
