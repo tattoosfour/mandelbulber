@@ -26,6 +26,7 @@ typedef struct
 	float distance;
 	float colourIndex;
 	float distFromOrbitTrap;
+	float minOrbitTrapDist;
 	enumClObjectType objectOut;
 } formulaOut;
 
