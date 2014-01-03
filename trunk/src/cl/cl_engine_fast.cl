@@ -14,6 +14,7 @@ typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
+typedef unsigned char cl_uchar;
 
 #include INCLUDE_PATH_CL_DATA
 
@@ -301,8 +302,10 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	}
 
 	float zBuff = scan;
-
+	if(!found) zBuff = 1e5f;
+	
 	float3 colour = 0.0f;
+	float3 surfaceColour = 1.0f;
 	if(found)
 	{
 		float3 normal = NormalVector(consts, point, distance, distThresh, &calcParam);
@@ -324,7 +327,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		if (specular > 15.0f) specular = 15.0f;
 
 		int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
-		float3 surfaceColour = 1.0;
+
 		if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
 
 		colour = (shade * surfaceColour + specular);
@@ -343,10 +346,18 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	glowColor.z = 0.0f * glowN + 0.0f * glow;
 	colour += glowColor * glow;
 
-	out[buffIndex].R = colour.x;
-	out[buffIndex].G = colour.y;
-	out[buffIndex].B = colour.z;
-	out[buffIndex].zBuffer = zBuff;
+	sClPixel pixel;
 	
+	pixel.R = colour.x;
+	pixel.G = colour.y;
+	pixel.B = colour.z;
+	pixel.zBuffer = zBuff;
+	pixel.colR = surfaceColour.x*255;
+	pixel.colG = surfaceColour.y*255;
+	pixel.colB = surfaceColour.z*255;
+	pixel.opacity = 0;
+	pixel.alpha = 65535;
+	
+	out[buffIndex] = pixel;
 }
 

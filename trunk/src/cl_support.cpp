@@ -28,6 +28,14 @@ CclSupport *clSupport;
 
 #ifdef CLSUPPORT
 
+struct sClParamsSSAO
+{
+	cl_int width;
+	cl_int height;
+	cl_int quality;
+	cl_float fov;
+	cl_float intensity;
+};
 
 
 CclSupport::CclSupport(void)
@@ -53,8 +61,6 @@ CclSupport::CclSupport(void)
 	reflectBuffer = NULL;
 	inCLConstBuffer1 = NULL;
 	program = NULL;
-	source = NULL;
-	source2 = NULL;
 	queue = NULL;
 	reflectBufferSize = 0;
 	maxClockFrequency = 0;
@@ -77,6 +83,12 @@ CclSupport::CclSupport(void)
 	backgroundImage2DHeight = 10;
 	backgroundImage2DWidth = 10;
 	backgroungImageBuffer = new cl_uchar4[10*10];
+	backgroundTextureSource = NULL;
+
+	programSSAO = NULL;
+	kernelSSAO = NULL;
+	queueSSAO = NULL;
+	SSAOprepared = false;
 }
 
 bool CclSupport::checkErr(cl_int err, const char * name)
@@ -213,7 +225,7 @@ void CclSupport::Init(void)
 	sprintf(text,"Number of computing units: %d", numberOfComputeUnits);
 	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClComputingUnits), text);
 
-	std::string clDir = std::string(sharedDir) + "cl/";
+	clDir = std::string(sharedDir) + "cl/";
 
 	std::string strFormula = "mandelbulb";
 
@@ -434,6 +446,8 @@ void CclSupport::Init(void)
 	if(!checkErr(err, "CommandQueue::CommandQueue()"))return;
 	printf("OpenCL command queue prepared\n");
 
+	SSAOPrepare();
+
 	sprintf(progressText, "OpenCL - ready");
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
@@ -610,7 +624,10 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 				for (unsigned int i = 0; i < stepSize; i++)
 				{
 					unsigned int a = offset + i;
-					sRGBfloat pixel = { rgbbuff[i].R, rgbbuff[i].G, rgbbuff[i].B };
+					sClPixel pixelCl = rgbbuff[i];
+					sRGBfloat pixel = { pixelCl.R, pixelCl.G, pixelCl.B };
+					sRGB8 color = {pixelCl.colR, pixelCl.colG, pixelCl.colB};
+					unsigned short opacity = pixelCl.opacity;
 					int x = a % width;
 					int y = a / width;
 
@@ -628,6 +645,8 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 					{
 						image->PutPixelImage(x, y, pixel);
 						image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+						image->PutPixelColour(x, y, color);
+						image->PutPixelOpacity(x, y, opacity);
 					}
 				}
 
@@ -725,6 +744,13 @@ void CclSupport::Disable(void)
 	backgroundImage2DHeight = 10;
 	backgroundImage2DWidth = 10;
 	backgroungImageBuffer = new cl_uchar4[10*10];
+	if(programSSAO) delete programSSAO;
+	programSSAO = NULL;
+	if(kernelSSAO) delete kernelSSAO;
+	kernelSSAO = NULL;
+	if(queueSSAO) delete queueSSAO;
+	queueSSAO = NULL;
+	SSAOprepared = false;
 	enabled = false;
 	ready = false;
 }
@@ -757,6 +783,156 @@ void CclSupport::PrepareBackgroundTexture(cTexture *texture)
 			backgroungImageBuffer[x + y * width].s3 = CL_UCHAR_MAX;
 		}
 	}
+}
+
+void CclSupport::SSAOPrepare(void)
+{
+	if(!SSAOprepared)
+	{
+		cl_int err;
+		std::string strFileSSAO = clDir + "cl_SSAO.cl";
+		std::ifstream fileSSAO(strFileSSAO.c_str());
+		if(!checkErr(fileSSAO.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileSSAO).c_str())) return;
+		std::string progSSAO(std::istreambuf_iterator<char>(fileSSAO), (std::istreambuf_iterator<char>()));
+		cl::Program::Sources sources;
+		sources.push_back(std::make_pair(progSSAO.c_str(), progSSAO.length()));
+
+		programSSAO = new cl::Program(*context, sources, &err);
+		if(!checkErr(err, "ProgramSSAO()")) return;
+
+		std::string buildParams = "-w -cl-single-precision-constant -cl-denorms-are-zero ";
+		err = programSSAO->build(devices, buildParams.c_str());
+
+		std::stringstream errorMessageStream;
+		errorMessageStream << "OpenCL Build log:\t" << programSSAO->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[deviceIndex]) << std::endl;
+		std::string buildLogText;
+		buildLogText = errorMessageStream.str();
+		std::cout << buildLogText;
+
+		if(!checkErr(err, "ProgramSSAO::build()")) return;
+		printf("OpenCL SSAO program built done\n");
+
+		kernelSSAO = new cl::Kernel(*programSSAO, "SSAO", &err);
+		if(!checkErr(err, "Kernel::Kernel()")) return;
+		printf("OpenCL SSAO kernel opened\n");
+
+		queueSSAO = new cl::CommandQueue(*context, devices[deviceIndex], 0, &err);
+		if(!checkErr(err, "CommandQueueSSAO::CommandQueue()"))return;
+		printf("OpenCL SSAO command queue prepared\n");
+	}
+}
+
+void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
+{
+	cl_int err;
+	char errorText[1000];
+
+	char progressText[1000];
+	sprintf(progressText, "Rendering Screen Space Ambient Occlussion with OpenCL");
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+
+	float *zBuffer = image->GetZBufferPtr();
+	size_t zBufferSize = image->GetZBufferSize();
+	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err);
+	sprintf(errorText, "zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	size_t size = width * height;
+	cl_ushort3 *imageBuffer = new cl_ushort3[size];
+	cl_uchar3 *colorBuffer = new cl_uchar3[size];
+	cl_ushort *opacityBuffer = new cl_ushort[size];
+
+	sRGB16 *image16 = image->GetImage16Ptr();
+	sRGB8 *imageColour = image->GetColorPtr();
+	unsigned short *imageOpacity = image->GetOpacityPtr();
+	for (size_t i=0; i < size; i++)
+	{
+		sRGB16 pixel = image16[i];
+		cl_ushort3 pixelCl;
+		pixelCl.s0 = pixel.R;
+		pixelCl.s1 = pixel.G;
+		pixelCl.s2 = pixel.B;
+		imageBuffer[i] = pixelCl;
+
+		sRGB8 color = imageColour[i];
+		cl_uchar3 colorCl;
+		colorCl.s0 = color.R;
+		colorCl.s1 = color.G;
+		colorCl.s2 = color.B;
+		colorBuffer[i] = colorCl;
+
+		opacityBuffer[i] = imageOpacity[i];
+	}
+	cl::Buffer *imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err);
+	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	cl::Buffer *colorBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_uchar3)*size, colorBuffer, &err);
+	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	cl::Buffer *opacityBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort)*size, opacityBuffer, &err);
+	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueSSAO->enqueueWriteBuffer(*zBufferCl, CL_TRUE, 0, zBufferSize, zBuffer);
+	sprintf(errorText, "ComamndQueueSSAO(zBuffer)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueSSAO->enqueueWriteBuffer(*imageBufferCl, CL_TRUE, 0, sizeof(cl_ushort3)*size, imageBuffer);
+	sprintf(errorText, "ComamndQueueSSAO(imageBuffer)");
+	if (!checkErr(err, errorText)) return;
+
+	sClParamsSSAO paramsSSAO;
+	paramsSSAO.width = width;
+	paramsSSAO.height = height;
+	paramsSSAO.fov = lastParams.persp;
+	paramsSSAO.quality = lastParams.SSAOquality;
+	paramsSSAO.intensity = lastParams.ambientOcclusionIntensity;
+
+	err = kernelSSAO->setArg(0, *imageBufferCl);
+	err = kernelSSAO->setArg(1, *zBufferCl);
+	err = kernelSSAO->setArg(2, *colorBufferCl);
+	err = kernelSSAO->setArg(3, *opacityBufferCl);
+	err = kernelSSAO->setArg(4, paramsSSAO);
+
+	err = queueSSAO->enqueueNDRangeKernel(*kernelSSAO, cl::NullRange, cl::NDRange(size), cl::NDRange(workGroupSize));
+	sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueSSAO->finish();
+	if (!checkErr(err, "ComamndQueueSSAO::finish() - Kernel")) return;
+
+	err = queueSSAO->enqueueReadBuffer(*imageBufferCl, CL_TRUE, 0, sizeof(cl_ushort3)*size, imageBuffer);
+	if (!checkErr(err, "ComamndQueueSSAO::enqueueReadBuffer()")) return;
+	err = queueSSAO->finish();
+
+	for (size_t i=0; i < size; i++)
+	{
+		sRGB16 pixel;
+		cl_ushort3 pixelCl = imageBuffer[i];
+		pixel.R = pixelCl.s0;
+		pixel.G = pixelCl.s1;
+		pixel.B = pixelCl.s2;
+		image16[i] = pixel;
+	}
+
+	sprintf(progressText, "Rendering Screen Space Ambient Occlussion done");
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+
+	delete zBufferCl;
+	delete[] imageBuffer;
+	delete[] colorBuffer;
+	delete[] opacityBuffer;
+	delete imageBufferCl;
+	delete colorBufferCl;
+	delete opacityBufferCl;
 }
 
 //------------------------------------ custom formulas -----------------------------

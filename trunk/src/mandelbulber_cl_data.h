@@ -180,6 +180,7 @@ typedef struct
 	cl_int randomSeed;
 	cl_int fakeLightsEnabled;
 	cl_int texturedBackground;
+	cl_int SSAOquality;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;
@@ -239,6 +240,11 @@ typedef struct
 	cl_float G;
 	cl_float B;
 	cl_float zBuffer;
+	cl_ushort opacity;
+	cl_ushort alpha;
+	cl_uchar colR;
+	cl_uchar colG;
+	cl_uchar colB;
 } sClPixel;
 
 typedef struct
