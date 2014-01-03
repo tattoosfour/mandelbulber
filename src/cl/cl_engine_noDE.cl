@@ -20,6 +20,10 @@ typedef unsigned char cl_uchar;
 
 #define MAX_RAYMARCHING 100000
 
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_TRUE |
+                               CLK_ADDRESS_REPEAT |
+                               CLK_FILTER_LINEAR;
+
 typedef struct
 {
 	float3 z;
@@ -709,12 +713,24 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	return output;
 }
 
-float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *input)
+float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *input, image2d_t imageBackground)
 {
+	float3 colour;
+#if	_texturedBackground
+	float alfaTexture = fmod(atan2(input->viewVector.y, input->viewVector.x) + 2.5f * M_PI, 2.0f * M_PI_F);
+	float betaTexture = atan2(input->viewVector.z, length(input->viewVector.xy));
+	if (betaTexture > 0.5f * M_PI_F) betaTexture = 0.5f * M_PI_F - betaTexture;
+	if (betaTexture < -0.5f * M_PI_F) betaTexture = -0.5f * M_PI_F + betaTexture;
+	float2 texCord;
+	texCord.x = alfaTexture / (2.0f * M_PI_F);
+	texCord.y = (betaTexture / (M_PI_F) + 0.5f);
+	float4 pixel = read_imagef(imageBackground, sampler, texCord);
+	colour = pixel.xyz;
+#else
 	float3 vector = { 0.0f, 0.0f, -1.0f };
 	vector = normalize(vector);
 	float grad = dot(input->viewVector, vector) + 1.0f;
-	float3 colour;
+
 	if (grad < 1.0f)
 	{
 		float ngrad = 1.0f - grad;
@@ -726,6 +742,7 @@ float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *i
 		float ngrad = 1.0f - grad;
 		colour = consts->params.backgroundColour2 * ngrad + consts->params.backgroundColour1 * grad;
 	}
+#endif
 	return colour;
 }
 
@@ -1229,7 +1246,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			}
 			else
 			{
-				backgroudShader = BackgroundShader(consts, &shaderInputData);
+				backgroudShader = BackgroundShader(consts, &shaderInputData, imageBackground);
 				reflectBuff[ray + local_offset].depth = 1e20f;
 			}
 
