@@ -10,4 +10,4 @@ formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParam
 	float colourMin = 1e8f;
 	float3 orbitTrap = calcParam->orbitTrap;
 	float distFromOrbitTrap = 0.0f;
-	
+	float minOrbitTrapDist = 1e10f;

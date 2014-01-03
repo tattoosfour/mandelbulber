@@ -14,6 +14,7 @@ typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
+typedef unsigned char cl_uchar;
 
 #include INCLUDE_PATH_CL_DATA
 
@@ -27,6 +28,7 @@ typedef struct
 	float colourIndex;
 	float distFromOrbitTrap;
 	float minOrbitTrapDist;
+	enumClObjectType objectOut;
 } formulaOut;
 
 static formulaOut Fractal(__constant sClInConstants *consts, float3 point, sClCalcParams *calcParam);
@@ -646,7 +648,7 @@ float3 FakeLights(__constant sClInConstants *consts, sClShaderInputData *input, 
 }
 #endif
 
-float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClInBuff *inBuff)
+float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, float3 *colourOut, global sClInBuff *inBuff)
 {
 	float3 output;
 
@@ -700,7 +702,9 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	fakeLights = FakeLights(consts, input, &fakeLightsSpecular);
 #endif
 	
-	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + (auxLights + fakeLights) * colour + auxLightsSpecular + fakeLightsSpecular;
+	output = mainLight * shadow * (shade * colour) + ambient2 * colour + (auxLights + fakeLights) * colour;
+	(*specularOut) = mainLight * shadow * specular + auxLightsSpecular + fakeLightsSpecular;
+	(*colourOut) = colour;
 	
 	return output;
 }
@@ -1186,6 +1190,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			startRay = startRay + viewVector * distThresh;
 		}
 
+		float3 surfaceColour;
 		for(int ray = rayEnd; ray >= 0; ray--)
 		{
 			sClShaderInputData shaderInputData;
@@ -1220,7 +1225,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			if(reflectBuff[ray + local_offset].found)
 			{
 				//printf("Last dist %f = \n", lastDist / distThresh);	
-				objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff);
+				objectShader = ObjectShader(consts, &shaderInputData, &specular, &surfaceColour, inBuff);
 			}
 			else
 			{
@@ -1247,10 +1252,19 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 		float3 finallColour = resultShader;
 		
-		out[buffIndex].R = finallColour.x;
-		out[buffIndex].G = finallColour.y;
-		out[buffIndex].B = finallColour.z;
-		out[buffIndex].zBuffer = zBuff;
+		sClPixel pixel;
+		
+		pixel.R = finallColour.x;
+		pixel.G = finallColour.y;
+		pixel.B = finallColour.z;
+		pixel.zBuffer = zBuff;
+		pixel.colR = convert_uchar(surfaceColour.x*255.0f);
+		pixel.colG = convert_uchar(surfaceColour.y*255.0f);
+		pixel.colB = convert_uchar(surfaceColour.z*255.0f);
+		pixel.opacity = 0;
+		pixel.alpha = 65535;
+		
+		out[buffIndex] = pixel;
 		
 	}
 }
