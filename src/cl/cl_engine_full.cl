@@ -14,6 +14,7 @@ typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
+typedef unsigned char cl_uchar;
 
 #include INCLUDE_PATH_CL_DATA
 
@@ -774,7 +775,7 @@ float3 FakeLights(__constant sClInConstants *consts, sClShaderInputData *input, 
 }
 #endif
 
-float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, global sClInBuff *inBuff)
+float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input, float3 *specularOut, float3 *colourOut, global sClInBuff *inBuff)
 {
 	float3 output;
 
@@ -799,6 +800,7 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	
 	//calculate surface colour
 	float3 colour = SurfaceColour(consts, input, inBuff->palette);
+	
 	
 	//ambient occlusion
 	float3 ambient = 0.0f;
@@ -828,7 +830,9 @@ float3 ObjectShader(__constant sClInConstants *consts, sClShaderInputData *input
 	fakeLights = FakeLights(consts, input, &fakeLightsSpecular);
 #endif
 	
-	output = mainLight * shadow * (shade * colour + specular) + ambient2 * colour + (auxLights + fakeLights) * colour + auxLightsSpecular + fakeLightsSpecular;
+	output = mainLight * shadow * (shade * colour) + ambient2 * colour + (auxLights + fakeLights) * colour;
+	(*specularOut) = mainLight * shadow * specular + auxLightsSpecular + fakeLightsSpecular;
+	(*colourOut) = colour;
 	
 	return output;
 }
@@ -866,7 +870,7 @@ float3 BackgroundShader(__constant sClInConstants *consts, sClShaderInputData *i
 	return colour;
 }
 
-float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *input, global sClInBuff *inBuff, float3 oldPixel)
+float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *input, global sClInBuff *inBuff, float3 oldPixel, float *opacityOut, float *alphaOut)
 {
 	float3 output = oldPixel;
 	float scan = input->depth;
@@ -875,6 +879,8 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 	float distThresh = input->dist_thresh;
 	float delta = input->delta;
 	bool end = false;
+	float alpha = 0.0f;
+	float totalOpacity = 0.0f;
 	
 	//glow init
   float glow = input->stepCount * consts->params.glowIntensity / 512.0f * consts->params.DEfactor;
@@ -931,7 +937,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		//------------------- glow
 		float glowOpacity = glow * step / input->depth;
 		output = glowOpacity * glowColour + (1.0f - glowOpacity) * output;
-	
+		alpha += glowOpacity;
 		
 		//------------------ visible light
 		if (consts->params.auxLightVisibility > 0.0f)
@@ -986,6 +992,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 						float lightDensity = step2 * bellFunction / lightSize;
 
 						output += lightDensity * inBuff->lights[i].colour;
+						alpha += lightDensity;
 					}
 				}
 			}
@@ -999,6 +1006,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			float r = sqrt(1.0f/(out.distFromOrbitTrap + 1.0e-10f));
 			float fakeLight = 1.0f / (pow(r, 10.0f / consts->params.fakeLightsVisibilitySize) * pow(10.0f, 10.0f / consts->params.fakeLightsVisibilitySize) + 1e-20f);
 			output += fakeLight * step * consts->params.fakeLightsVisibility;
+			alpha += fakeLight * step * consts->params.fakeLightsVisibility;
 			input->calcParam->orbitTrap = 0.0f;
 			lastOrbitTrapDist = out.minOrbitTrapDist / pow(10.0f, 10.0f / consts->params.fakeLightsVisibilitySize);
 		}
@@ -1012,6 +1020,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			{
 				float3 shadowOutputTemp = MainShadow(consts, input);
 				output += shadowOutputTemp * step * consts->params.volumetricLightIntensity[0] * consts->params.mainLightColour;
+				alpha += (shadowOutputTemp.x + shadowOutputTemp.y + shadowOutputTemp.z)/3.0 * step * consts->params.volumetricLightIntensity[0];
 			}
 #if _AuxLightsEnabled
 			if (i > 0)
@@ -1028,6 +1037,7 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 						float light = AuxShadow(consts, input, distance, lightVectorTemp);
 						//float light = 1.0;
 						output += light * inBuff->lights[i - 1].colour * consts->params.volumetricLightIntensity[i] * step / distance2;
+						alpha += light * consts->params.volumetricLightIntensity[i] * step / distance2;
 					}
 				}
 			}
@@ -1041,6 +1051,8 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			float fogDensity = step / consts->params.fogVisibility;
 			if(fogDensity > 1.0f) fogDensity = 1.0f;
 			output = fogDensity * consts->params.fogColour + (1.0f - fogDensity) * output;
+			totalOpacity += fogDensity + (1.0f - fogDensity) * totalOpacity;
+			alpha += fogDensity + (1.0f - fogDensity) * alpha;
 		}
 		
 		
@@ -1063,6 +1075,9 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			if(fogDensity > 1.0f) fogDensity = 1.0f;
 
 			output = fogDensity * fogTemp + (1.0 - fogDensity) * output;
+			
+			totalOpacity = fogDensity + (1.0 - fogDensity) * totalOpacity;
+			alpha = fogDensity + (1.0 - fogDensity) * alpha;
 		}
 		
 		//iter fog
@@ -1132,6 +1147,8 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 				if (opacity > 1.0f) opacity = 1.0f;
 
 				output = output * (1.0f - opacity) + newColour * opacity * fogCol;
+				totalOpacity = opacity + (1.0f - opacity) * totalOpacity;
+				alpha = opacity + (1.0f - opacity) * alpha;
 			}
 		}
 		
@@ -1139,6 +1156,10 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 		if(end) break;
 	}
 
+	alpha = min(1.0f, alpha);
+	(*alphaOut) = alpha;
+	totalOpacity = min(1.0f, totalOpacity);
+	(*opacityOut) = totalOpacity;
 	return output;
 }
 
@@ -1380,6 +1401,9 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			startRay = startRay + viewVector * distThresh;
 		}
 
+		float3 surfaceColour = 0.0f;
+		float alphaChannel = 0.0f;
+		float opacity = 0.0f;
 		for(int ray = rayEnd; ray >= 0; ray--)
 		{
 			sClShaderInputData shaderInputData;
@@ -1413,7 +1437,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			if(reflectBuff[ray + local_offset].found)
 			{
 				//printf("Last dist %f = \n", lastDist / distThresh);	
-				objectShader = ObjectShader(consts, &shaderInputData, &specular, inBuff);
+				objectShader = ObjectShader(consts, &shaderInputData, &specular, &surfaceColour, inBuff);
 			}
 			else
 			{
@@ -1431,7 +1455,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			{
 				colour = objectShader + backgroudShader + specular;
 			}
-			resultShader = VolumetricShader(consts, &shaderInputData, inBuff, colour);
+			resultShader = VolumetricShader(consts, &shaderInputData, inBuff, colour, &opacity, &alphaChannel);
 			//resultShader = colour;
 
 			//seed = shaderInputData.calcParam->randomSeed;
@@ -1441,10 +1465,19 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 		float3 finallColour = resultShader;
 		
-		out[buffIndex].R = finallColour.x;
-		out[buffIndex].G = finallColour.y;
-		out[buffIndex].B = finallColour.z;
-		out[buffIndex].zBuffer = zBuff;
+		sClPixel pixel;
+		
+		pixel.R = finallColour.x;
+		pixel.G = finallColour.y;
+		pixel.B = finallColour.z;
+		pixel.zBuffer = zBuff;
+		pixel.colR = convert_uchar(surfaceColour.x*255.0f);
+		pixel.colG = convert_uchar(surfaceColour.y*255.0f);
+		pixel.colB = convert_uchar(surfaceColour.z*255.0f);
+		pixel.opacity = convert_ushort(opacity * 65535.0f);
+		pixel.alpha = convert_ushort(alphaChannel * 65535.0f);
+		
+		out[buffIndex] = pixel;
 	}
 }
 

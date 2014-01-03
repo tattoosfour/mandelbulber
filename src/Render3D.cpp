@@ -1197,9 +1197,13 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		image->progressiveFactor = 1;
 		clSupport->Render(image, outputDarea);
 
+		image->CompileImage();
+		if(param.SSAOEnabled)
+		{
+			clSupport->SSAORender(image, outputDarea);
+		}
 		double time = real_clock() - start_time;
 
-		image->CompileImage();
 		if (image->IsPreview())
 		{
 			image->ConvertTo8bit();

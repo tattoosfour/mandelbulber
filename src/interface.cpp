@@ -3764,7 +3764,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->shading = params->doubles.imageAdjustments.shading;
 	clParams->glowIntensity = params->doubles.imageAdjustments.glow_intensity;
 	clParams->colouringEnabled = params->imageSwitches.coloringEnabled;
-	clParams->fastAmbientOcclusionEnabled = (params->fastGlobalIllumination || params->SSAOEnabled);
+	clParams->fastAmbientOcclusionEnabled = (params->fastGlobalIllumination);
 	clParams->slowAmbientOcclusionEnabled = params->global_ilumination && !params->fastGlobalIllumination;
 	clParams->shadowConeAngle = params->doubles.shadowConeAngle;
 	clParams->penetratingLights = params->penetratingLights;
@@ -3778,6 +3778,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->fogVisibility = pow(10.0, params->doubles.imageAdjustments.fogVisibility / 10 - 16.0);
 	clParams->fogEnabled = params->imageSwitches.fogEnabled;
 	clParams->auxLightIntensity = params->doubles.auxLightIntensity;
+	clParams->SSAOquality = params->SSAOQuality;
 
 	clParams->fogColour = sRGB2float3(params->effectColours.fogColor, 65536.0);
 	clParams->glowColour1 = sRGB2float3(params->effectColours.glow_color1, 65536.0);

@@ -1403,7 +1403,21 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		if (SSAOEnabled)
 		{
-			PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
+			if(clSupport->IsReady())
+			{
+				clSupport->SetSize(mainImage.GetWidth(), mainImage.GetHeight());
+				sClInBuff *inCLBuff = clSupport->GetInBuffer1();
+				sClInConstants *inCLConstants = clSupport->GetInConstantBuffer1();
+				sParamRender param;
+				ReadInterface(&param);
+				Params2Cl(&param, inCLBuff, inCLConstants);
+				clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
+				clSupport->SSAORender(&mainImage, renderWindow.drawingArea);
+			}
+			else
+			{
+				PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
+			}
 		}
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();

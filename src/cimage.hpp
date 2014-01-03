@@ -111,6 +111,10 @@ public:
 
   sRGB16* GetImage16Ptr(void) {return image16;}
   unsigned short* GetAlphaBufPtr(void) {return alphaBuffer;}
+  float* GetZBufferPtr(void) {return zBuffer;}
+  sRGB8* GetColorPtr(void) {return colourBuffer;}
+  unsigned short* GetOpacityPtr(void) {return opacityBuffer;}
+  size_t GetZBufferSize(void) {return sizeof(float) * height * width;}
 
   void CompileImage(void);
 

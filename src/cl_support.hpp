@@ -80,6 +80,9 @@ public:
 	sClInConstants* GetInConstantBuffer1(void) {return constantsBuffer1;}
 	CCustomFormulas *customFormulas;
 
+	void SSAOPrepare(void);
+	void SSAORender(cImage *image, GtkWidget *outputDarea);
+
 private:
 	bool enabled;
 	bool ready;
@@ -100,11 +103,17 @@ private:
 	size_t backgroundImage2DWidth;
 	size_t backgroundImage2DHeight;
 	std::vector<cl::Device> devices;
-	cl::Program::Sources *source;
-	cl::Program::Sources *source2;
 	cl::Program *program;
 	cl::Kernel *kernel;
 	cl::CommandQueue *queue;
+
+	cl::Program *programSSAO;
+	cl::Kernel *kernelSSAO;
+	cl::CommandQueue *queueSSAO;
+
+	bool SSAOprepared;
+
+	std::string clDir;
 
 	int width;
 	int height;

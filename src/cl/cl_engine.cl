@@ -14,6 +14,7 @@ typedef float cl_float;
 typedef int cl_int;
 typedef unsigned int cl_uint;
 typedef unsigned short cl_ushort;
+typedef unsigned char cl_uchar;
 
 #include INCLUDE_PATH_CL_DATA
 
@@ -184,7 +185,7 @@ float Shadow(__constant sClInConstants *consts, float3 point, float3 lightVector
 	return shadow;
 }
 
-
+/*
 float FastAmbientOcclusion(__constant sClInConstants *consts, float3 point, float3 normal, float dist_thresh, float tune, int quality, sClCalcParams *calcParam)
 {
 	//reference: http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf (Iñigo Quilez – iq/rgba)
@@ -202,6 +203,7 @@ float FastAmbientOcclusion(__constant sClInConstants *consts, float3 point, floa
 	if(ao < 0.0f) ao = 0.0f;
 	return ao;
 }
+*/
 
 float3 IndexToColour(int index, global float3 *palette)
 {
@@ -344,6 +346,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		float zBuff = scan;
 		
 		float3 colour = 0.0f;
+		float3 surfaceColour = 1.0;
 		if(found)
 		{
 			float3 normal = NormalVector(consts, point, distance, distThresh, &calcParam);
@@ -367,13 +370,13 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			specular = pown(specular, 30.0f);
 			if (specular > 15.0f) specular = 15.0f;
 			
-			float ao = FastAmbientOcclusion(consts, point, normal, distThresh, 1.0f, 3, &calcParam);
+			//float ao = FastAmbientOcclusion(consts, point, normal, distThresh, 1.0f, 3, &calcParam);
 			
 			int colourNumber = outF.colourIndex * consts->params.colouringSpeed + 256.0f * consts->params.colouringOffset;
-			float3 surfaceColour = 1.0;
+
 			if (consts->params.colouringEnabled) surfaceColour = IndexToColour(colourNumber, inBuff->palette);
 			
-			colour = (shade * surfaceColour + specular * consts->params.specularIntensity) * shadow * consts->params.mainLightIntensity + ao * surfaceColour * consts->params.ambientOcclusionIntensity;
+			colour = (shade * surfaceColour + specular * consts->params.specularIntensity) * shadow * consts->params.mainLightIntensity;// + ao * surfaceColour * consts->params.ambientOcclusionIntensity;
 		}
 		else
 		{
@@ -389,10 +392,19 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 		glowColor.z = 0.0f * glowN + 0.0f * glow;
 		colour += glowColor * glow;
 		
-		out[buffIndex].R = colour.x;
-		out[buffIndex].G = colour.y;
-		out[buffIndex].B = colour.z;
-		out[buffIndex].zBuffer = zBuff;
+		sClPixel pixel;
+		
+		pixel.R = colour.x;
+		pixel.G = colour.y;
+		pixel.B = colour.z;
+		pixel.zBuffer = zBuff;
+		pixel.colR = surfaceColour.x*255;
+		pixel.colG = surfaceColour.y*255;
+		pixel.colB = surfaceColour.z*255;
+		pixel.opacity = 0;
+		pixel.alpha = 65535;
+		
+		out[buffIndex] = pixel;
 	}
 }
 
