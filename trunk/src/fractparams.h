@@ -87,6 +87,7 @@ struct sParamRender
 
 	int OpenCLEngine;
 	int OpenCLPixelsPerJob;
+	int OpenCLDOFMethod;
 
 	enumPerspectiveType perspectiveType;
 

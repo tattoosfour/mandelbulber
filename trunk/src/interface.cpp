@@ -549,6 +549,7 @@ void ReadInterface(sParamRender *params)
 				params->fractal.doubles.customParameters[i] = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_customParameters[i])));
 		}
 		params->fractal.doubles.deltaDEStep = atofData(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLDeltaDEStep)));
+		params->OpenCLDOFMethod = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode));
 #endif
 
 		GdkColor color;
@@ -1091,6 +1092,7 @@ void WriteInterface(sParamRender *params)
 	}
 
 	gtk_entry_set_text(GTK_ENTRY(Interface.edit_OpenCLDeltaDEStep), DoubleToString(params->fractal.doubles.deltaDEStep));
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode), params->OpenCLDOFMethod);
 #endif
 
 	enumPerspectiveType perspTypeTemp = params->perspectiveType;
@@ -2061,6 +2063,12 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "Delta DE");
 	//gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "no DE");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), 0);
+
+	Interface.comboOpenCLDOFMode = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode), "Post effect");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode), "Monte Carlo");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), 0);
+
 
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
@@ -3071,6 +3079,7 @@ void CreateInterface(sParamRender *default_settings)
 #endif
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH4, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4), CreateEdit("1e-5", "Delta for DeltaDE distance estimation:", 6, Interface.edit_OpenCLDeltaDEStep), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4),  CreateWidgetWithLabel("DOF effect method:", Interface.comboOpenCLDOFMode), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
@@ -3800,6 +3809,7 @@ void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *
 	clParams->DOFEnabled = params->DOFEnabled;
 	clParams->DOFFocus = pow(10, params->doubles.DOFFocus / 10.0 - 16.0);
 	clParams->DOFRadius = params->doubles.DOFRadius;
+	clParams->DOFmethod = params->OpenCLDOFMethod;
 
   clParams->auxLightVisibility = params->doubles.auxLightVisibility;
 

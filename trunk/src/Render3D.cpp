@@ -1202,6 +1202,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 		{
 			clSupport->SSAORender(image, outputDarea);
 		}
+
+		if(param.DOFEnabled && param.OpenCLDOFMethod == 0)
+		{
+			clSupport->DOFRender(image, outputDarea);
+		}
 		double time = real_clock() - start_time;
 
 		if (image->IsPreview())

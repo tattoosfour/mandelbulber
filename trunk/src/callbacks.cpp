@@ -2824,7 +2824,10 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable)))
 	{
 		clSupport->SetSize(atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth))), atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight))));
-		clSupport->Init();
+		clSupport->InitDevice();
+		clSupport->InitFractal();
+		clSupport->SSAOPrepare();
+		clSupport->DOFPrepare();
 		clSupport->Enable();
 	}
 	else
