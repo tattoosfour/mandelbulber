@@ -690,6 +690,7 @@ struct sInterface
 	GtkWidget *comboOpenCLGPUCPU;
 	GtkWidget *comboOpenCLCustomFormulas;
 	GtkWidget *comboOpenCLDEMode;
+	GtkWidget *comboOpenCLDOFMode;
 
 	GtkWidget *progressBar;
 

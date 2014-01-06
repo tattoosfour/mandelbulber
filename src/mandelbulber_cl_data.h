@@ -181,6 +181,7 @@ typedef struct
 	cl_int fakeLightsEnabled;
 	cl_int texturedBackground;
 	cl_int SSAOquality;
+	cl_int DOFmethod;
 	cl_float alpha;
 	cl_float beta;
 	cl_float gamma;

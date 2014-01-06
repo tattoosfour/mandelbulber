@@ -20,6 +20,8 @@
 #include <glib.h>
 
 #include "files.h"
+#include "common_math.h"
+
 #ifdef WIN32
 #include <process.h>
 #endif
@@ -35,6 +37,14 @@ struct sClParamsSSAO
 	cl_int quality;
 	cl_float fov;
 	cl_float intensity;
+};
+
+struct sClParamsDOF
+{
+	cl_int width;
+	cl_int height;
+	cl_float focus;
+	cl_float radius;
 };
 
 
@@ -89,6 +99,11 @@ CclSupport::CclSupport(void)
 	kernelSSAO = NULL;
 	queueSSAO = NULL;
 	SSAOprepared = false;
+
+	programDOF = NULL;
+	kernelDOF = NULL;
+	queueDOF = NULL;
+	DOFprepared = false;
 }
 
 bool CclSupport::checkErr(cl_int err, const char * name)
@@ -119,34 +134,9 @@ bool CclSupport::checkErr(cl_int err, const char * name)
 		return true;
 }
 
-void CclSupport::Init(void)
+void CclSupport::InitDevice(void)
 {
-	cl_int err;
-
-	ready = false;
-
-	char progressText[1000];
-	sprintf(progressText, "OpenCL - initialization");
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
-	while (gtk_events_pending())
-		gtk_main_iteration();
-
-#ifdef WIN32
-	const std::wstring opencldll( L"OpenCL.dll" );
-	err = clewInit(opencldll.c_str());
-	std::cout << clewErrorString(err) << std::endl;
-#endif
-
-	if(!customFormulas)
-	{
-		customFormulas = new CCustomFormulas(data_directory);
-	}
-
-	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
-	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
-	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
-	memoryLimitByUser = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem))) * 1024 * 1024;
+	cl_int err = 0;
 
 	cl::Platform::get(&platformList);
 	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
@@ -226,6 +216,37 @@ void CclSupport::Init(void)
 	gtk_label_set_text(GTK_LABEL(Interface.label_OpenClComputingUnits), text);
 
 	clDir = std::string(sharedDir) + "cl/";
+}
+
+void CclSupport::InitFractal(void)
+{
+	cl_int err;
+	char text[1000];
+
+	ready = false;
+
+	char progressText[1000];
+	sprintf(progressText, "OpenCL - initialization");
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+
+#ifdef WIN32
+	const std::wstring opencldll( L"OpenCL.dll" );
+	err = clewInit(opencldll.c_str());
+	std::cout << clewErrorString(err) << std::endl;
+#endif
+
+	if(!customFormulas)
+	{
+		customFormulas = new CCustomFormulas(data_directory);
+	}
+
+	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
+	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
+	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+	memoryLimitByUser = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem))) * 1024 * 1024;
 
 	std::string strFormula = "mandelbulb";
 
@@ -365,7 +386,7 @@ void CclSupport::Init(void)
 	std::string buildParams;
 	buildParams = "-w -cl-single-precision-constant -cl-denorms-are-zero ";
 
-	if(lastParams.DOFEnabled) buildParams += "-D_DOFEnabled ";
+	if(lastParams.DOFEnabled && lastParams.DOFmethod == 1) buildParams += "-D_DOFEnabled ";
 	if(lastParams.slowAmbientOcclusionEnabled) buildParams += "-D_SlowAOEnabled ";
 	if(lastParams.fakeLightsEnabled) buildParams += "-D_orbitTrapsEnabled ";
 	if(lastParams.auxLightNumber > 0) buildParams += "-D_AuxLightsEnabled ";
@@ -446,8 +467,6 @@ void CclSupport::Init(void)
 	if(!checkErr(err, "CommandQueue::CommandQueue()"))return;
 	printf("OpenCL command queue prepared\n");
 
-	SSAOPrepare();
-
 	sprintf(progressText, "OpenCL - ready");
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
@@ -478,6 +497,7 @@ void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumF
 	if(inConstants->fractal.primitives.invertedSphereEnable != lastFractal.primitives.invertedSphereEnable) recompileRequest = true;
 	if(inConstants->fractal.primitives.waterEnable != lastFractal.primitives.waterEnable) recompileRequest = true;
 	if(inConstants->params.texturedBackground != lastParams.texturedBackground) recompileRequest = true;
+	if(inConstants->params.DOFmethod != lastParams.DOFmethod) recompileRequest = true;
 
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 	if(engineNumber != lastEngineNumber) recompileRequest = true;
@@ -492,7 +512,10 @@ void CclSupport::Recompile(void)
 {
 	Disable();
 	Enable();
-	Init();
+	InitDevice();
+	InitFractal();
+	SSAOPrepare();
+	DOFPrepare();
 	recompileRequest = false;
 }
 
@@ -509,7 +532,6 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 	{
 		stepSize = workGroupSize;
 		int workGroupSizeMultiplier = 1;
-
 		double startTime = real_clock();
 		double lastTime = startTime;
 		double lastTimeProcessing = startTime;
@@ -522,7 +544,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 		if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
 
 		int nDof = 1;
-		if (lastParams.DOFEnabled) nDof = 256;
+		if (lastParams.DOFEnabled && lastParams.DOFmethod == 1) nDof = 256;
 
 		size_t sizeOfPixel = sizeof(sClPixel) + sizeof(sClReflect) * 10; //10 because max nuber of reflections is 10
 		size_t jobSizeLimit;
@@ -631,7 +653,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 					int x = a % width;
 					int y = a / width;
 
-					if (lastParams.DOFEnabled)
+					if (lastParams.DOFEnabled && lastParams.DOFmethod == 1)
 					{
 						sRGBfloat oldPixel = image->GetPixelImage(x, y);
 						sRGBfloat newPixel;
@@ -652,7 +674,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 
 				char progressText[1000];
 				double percent;
-				if (lastParams.DOFEnabled)
+				if (lastParams.DOFEnabled && lastParams.DOFmethod == 1)
 				{
 					percent = (double) (dofLoop - 1.0) / nDof + (double) (pixelIndex + stepSize) / (width * height) / nDof;
 				}
@@ -751,6 +773,13 @@ void CclSupport::Disable(void)
 	if(queueSSAO) delete queueSSAO;
 	queueSSAO = NULL;
 	SSAOprepared = false;
+	if(programDOF) delete programDOF;
+	programDOF = NULL;
+	if(kernelDOF) delete kernelDOF;
+	kernelDOF = NULL;
+	if(queueDOF) delete queueDOF;
+	queueDOF = NULL;
+	DOFprepared = false;
 	enabled = false;
 	ready = false;
 }
@@ -822,6 +851,43 @@ void CclSupport::SSAOPrepare(void)
 	}
 }
 
+void CclSupport::DOFPrepare(void)
+{
+	if(!DOFprepared)
+	{
+		cl_int err;
+		std::string strFileDOF = clDir + "cl_DOF.cl";
+		std::ifstream fileDOF(strFileDOF.c_str());
+		if(!checkErr(fileDOF.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFileDOF).c_str())) return;
+		std::string progDOF(std::istreambuf_iterator<char>(fileDOF), (std::istreambuf_iterator<char>()));
+		cl::Program::Sources sources;
+		sources.push_back(std::make_pair(progDOF.c_str(), progDOF.length()));
+
+		programDOF = new cl::Program(*context, sources, &err);
+		if(!checkErr(err, "ProgramDOF()")) return;
+
+		std::string buildParams = "-w -cl-single-precision-constant -cl-denorms-are-zero ";
+		err = programDOF->build(devices, buildParams.c_str());
+
+		std::stringstream errorMessageStream;
+		errorMessageStream << "OpenCL Build log:\t" << programDOF->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[deviceIndex]) << std::endl;
+		std::string buildLogText;
+		buildLogText = errorMessageStream.str();
+		std::cout << buildLogText;
+
+		if(!checkErr(err, "ProgramDOF::build()")) return;
+		printf("OpenCL DOF program built done\n");
+
+		kernelDOF = new cl::Kernel(*programDOF, "DOF", &err);
+		if(!checkErr(err, "Kernel::Kernel()")) return;
+		printf("OpenCL DOF kernel opened\n");
+
+		queueDOF = new cl::CommandQueue(*context, devices[deviceIndex], 0, &err);
+		if(!checkErr(err, "CommandQueueDOF::CommandQueue()"))return;
+		printf("OpenCL DOF command queue prepared\n");
+	}
+}
+
 void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 {
 	cl_int err;
@@ -870,11 +936,11 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *colorBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_uchar3)*size, colorBuffer, &err);
+	cl::Buffer *colorBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(cl_uchar3)*size, colorBuffer, &err);
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *opacityBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort)*size, opacityBuffer, &err);
+	cl::Buffer *opacityBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort)*size, opacityBuffer, &err);
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
@@ -884,6 +950,10 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 
 	err = queueSSAO->enqueueWriteBuffer(*imageBufferCl, CL_TRUE, 0, sizeof(cl_ushort3)*size, imageBuffer);
 	sprintf(errorText, "ComamndQueueSSAO(imageBuffer)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueSSAO->enqueueWriteBuffer(*opacityBufferCl, CL_TRUE, 0, sizeof(cl_ushort)*size, opacityBuffer);
+	sprintf(errorText, "ComamndQueueSSAO(opacityBuffer)");
 	if (!checkErr(err, errorText)) return;
 
 	sClParamsSSAO paramsSSAO;
@@ -899,13 +969,64 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	err = kernelSSAO->setArg(3, *opacityBufferCl);
 	err = kernelSSAO->setArg(4, paramsSSAO);
 
-	err = queueSSAO->enqueueNDRangeKernel(*kernelSSAO, cl::NullRange, cl::NDRange(size), cl::NDRange(workGroupSize));
-	sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
-	if (!checkErr(err, errorText)) return;
+	stepSize = workGroupSize;
+	int workGroupSizeMultiplier = 1;
+	double startTime = real_clock();
+	double lastTime = real_clock();
+	double lastTimeProcessing = startTime;
+	double lastProcessingTime = 1.0;
 
-	err = queueSSAO->finish();
-	if (!checkErr(err, "ComamndQueueSSAO::finish() - Kernel")) return;
+	for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
+	{
+		double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+		if (processingCycleTime < 0.02) processingCycleTime = 0.02;
 
+		double factor = processingCycleTime / lastProcessingTime;
+		if (factor > 2.0) factor = 2.0;
+		workGroupSizeMultiplier *= factor;
+
+		//printf("job size limit: %ld\n", jobSizeLimit);
+		int pixelsLeft = width * height - pixelIndex;
+		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
+		if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
+		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+		if (workGroupSizeMultiplier > width * height / workGroupSize / 8) workGroupSizeMultiplier = width * height / workGroupSize / 8;
+		stepSize = workGroupSize * workGroupSizeMultiplier;
+		if (stepSize > pixelsLeft) stepSize = pixelsLeft;
+
+		err = queueSSAO->enqueueNDRangeKernel(*kernelSSAO, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+		sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
+		if (!checkErr(err, errorText)) return;
+
+		err = queueSSAO->finish();
+		if (!checkErr(err, "ComamndQueueSSAO::finish() - Kernel")) return;
+
+		double time = real_clock() - startTime;
+		char progressText[1000];
+		double percent;
+		percent = (double) (pixelIndex + stepSize) / (width * height);
+
+		double time_to_go = (1.0 - percent) * time / percent;
+		int togo_time_s = (int) time_to_go % 60;
+		int togo_time_min = (int) (time_to_go / 60) % 60;
+		int togo_time_h = time_to_go / 3600;
+		int time_s = (int) time % 60;
+		int time_min = (int) (time / 60) % 60;
+		int time_h = time / 3600;
+		sprintf(progressText, "SSAO OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h, time_min,
+				time_s);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+
+		if (programClosed) break;
+
+		while (gtk_events_pending())
+			gtk_main_iteration();
+
+		lastProcessingTime = time - lastTimeProcessing;
+		lastTimeProcessing = time;
+
+	}
 	err = queueSSAO->enqueueReadBuffer(*imageBufferCl, CL_TRUE, 0, sizeof(cl_ushort3)*size, imageBuffer);
 	if (!checkErr(err, "ComamndQueueSSAO::enqueueReadBuffer()")) return;
 	err = queueSSAO->finish();
@@ -933,6 +1054,275 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	delete imageBufferCl;
 	delete colorBufferCl;
 	delete opacityBufferCl;
+}
+
+void CclSupport::DOFRender(cImage *image, GtkWidget *outputDarea)
+{
+	cl_int err;
+	char errorText[1000];
+
+	cl_ushort4 *in_image = new cl_ushort4[width * height];
+	cl_ushort4 *out_image = new cl_ushort4[width * height];
+	size_t imageSize = sizeof(cl_ushort4) * width * height;
+
+	sSortZ<cl_float> *temp_sort = new sSortZ<cl_float> [width * height];
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			int ptr = x + y * width;
+			sRGB16 pixel16 = image->GetPixelImage16(x, y);
+			in_image[ptr].s0 = pixel16.R;
+			in_image[ptr].s1 = pixel16.G;
+			in_image[ptr].s2 = pixel16.B;
+			in_image[ptr].s3 = image->GetPixelAlpha(x, y);
+			temp_sort[ptr].z = image->GetPixelZBuffer(x, y);
+			temp_sort[ptr].i = ptr;
+		}
+	}
+	memcpy(out_image, in_image, imageSize);
+
+	if (!noGUI && image->IsPreview())
+	{
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Sorting zBuffer");
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
+		while (gtk_events_pending())
+			gtk_main_iteration();
+	}
+
+	//------------ CPU part --------------
+
+	QuickSortZBuffer(temp_sort, 1, height * width - 1);
+
+	if (!noGUI && image->IsPreview())
+	{
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect. Randomizing zBuffer");
+		while (gtk_events_pending())
+			gtk_main_iteration();
+	}
+
+	//Randomize Z-buffer
+	int imgSize = height * width;
+	double neutral = lastParams.DOFFocus;
+	double deep = lastParams.DOFRadius;
+	for (int i = imgSize - 1; i >= 0; i--)
+	{
+		sSortZ<cl_float> temp;
+		temp = temp_sort[i];
+		double z1 = temp.z;
+		double size1 = (z1 - neutral) / z1 * deep;
+
+		int randomStep = i;
+
+		bool done = false;
+		int ii;
+		do
+		{
+			ii = i - Random(randomStep);
+			if (ii <= 0) ii = 0;
+			sSortZ<cl_float> temp2 = temp_sort[ii];
+			double z2 = temp2.z;
+			double size2 = (z2 - neutral) / z2 * deep;
+
+			if (size1 == 0 && size2 == 0) done = true;
+
+			if (size1 * size2 > 0)
+			{
+				double sizeCompare;
+				if (size1 > 0)
+				{
+					sizeCompare = size2 / size1;
+				}
+				else
+				{
+					sizeCompare = size1 / size2;
+				}
+
+				if (sizeCompare > 0.7)
+				{
+					done = true;
+				}
+				else
+				{
+					done = false;
+				}
+			}
+			else
+			{
+				done = false;
+			}
+			randomStep = randomStep * 0.7 - 1;
+
+			if (randomStep <= 0) done = true;
+		} while (!done);
+		temp_sort[i] = temp_sort[ii];
+		temp_sort[ii] = temp;
+	}
+
+	//------------------ GPU part ------------------
+
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect with OpenCL");
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
+	while (gtk_events_pending())
+		gtk_main_iteration();
+
+	//cl::Image2D *in_imageBufferCl = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_UNORM_INT16), width, height,
+	//		width * sizeof(cl_ushort4), in_image, &err);
+	//if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
+
+	//cl::Image2D *out_imageBufferCl = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_UNORM_INT16), width, height,
+	//		width * sizeof(cl_ushort4), out_image, &err);
+	//if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
+
+	cl::Buffer *in_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, imageSize, in_image, &err);
+	sprintf(errorText, "in_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, in_image, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	cl::Buffer *out_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, out_image, &err);
+	sprintf(errorText, "out_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, out_image, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sSortZ<cl_float> ) * width * height, temp_sort, &err);
+	sprintf(errorText, "zBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(sSortZ<cl_float>)*width*height, temp_sort, &err)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueDOF->enqueueWriteBuffer(*in_imageBufferCl, CL_TRUE, 0, imageSize, in_image);
+	sprintf(errorText, "ComamndQueueDOF(in_imageBufferCl)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueDOF->enqueueWriteBuffer(*out_imageBufferCl, CL_TRUE, 0, imageSize, out_image);
+	sprintf(errorText, "ComamndQueueDOF(out_imageBufferCl)");
+	if (!checkErr(err, errorText)) return;
+
+	err = queueDOF->enqueueWriteBuffer(*zBufferCl, CL_TRUE, 0, sizeof(sSortZ<cl_float> ) * width * height, temp_sort);
+	sprintf(errorText, "ComamndQueueDOF(in_imageBufferCl)");
+	if (!checkErr(err, errorText)) return;
+
+	sClParamsDOF paramsDOF;
+	paramsDOF.width = width;
+	paramsDOF.height = height;
+	paramsDOF.focus = lastParams.DOFFocus;
+	paramsDOF.radius = lastParams.DOFRadius * width / 1000.0;
+
+	err = kernelDOF->setArg(0, *in_imageBufferCl);
+	err = kernelDOF->setArg(1, *out_imageBufferCl);
+	err = kernelDOF->setArg(2, *zBufferCl);
+	err = kernelDOF->setArg(3, paramsDOF);
+
+	stepSize = workGroupSize;
+	int workGroupSizeMultiplier = 1;
+	double startTime = real_clock();
+	double lastTime = real_clock();
+	double lastTimeProcessing = startTime;
+	double lastProcessingTime = 1.0;
+
+	for (int pixelIndex = 0; pixelIndex < width * height; pixelIndex += stepSize)
+	{
+		double processingCycleTime = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLProcessingCycleTime)));
+		if (processingCycleTime < 0.02) processingCycleTime = 0.02;
+
+		double factor = processingCycleTime / lastProcessingTime;
+		if (factor > 2.0) factor = 2.0;
+		workGroupSizeMultiplier *= factor;
+
+		//printf("job size limit: %ld\n", jobSizeLimit);
+		int pixelsLeft = width * height - pixelIndex;
+		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
+		if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
+		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
+		if (workGroupSizeMultiplier > width * height / workGroupSize / 8) workGroupSizeMultiplier = width * height / workGroupSize / 8;
+		stepSize = workGroupSize * workGroupSizeMultiplier;
+		if (stepSize > pixelsLeft) stepSize = pixelsLeft;
+
+		err = queueDOF->enqueueNDRangeKernel(*kernelDOF, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+		sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
+		if (!checkErr(err, errorText)) return;
+
+		err = queueDOF->finish();
+		if (!checkErr(err, "ComamndQueueSSAO::finish() - Kernel")) return;
+
+		double time = real_clock() - startTime;
+		char progressText[1000];
+		double percent;
+		percent = (double) (pixelIndex + stepSize) / (width * height);
+
+		double time_to_go = (1.0 - percent) * time / percent;
+		int togo_time_s = (int) time_to_go % 60;
+		int togo_time_min = (int) (time_to_go / 60) % 60;
+		int togo_time_h = time_to_go / 3600;
+		int time_s = (int) time % 60;
+		int time_min = (int) (time / 60) % 60;
+		int time_h = time / 3600;
+		sprintf(progressText, "DOF OpenCL - rendering. Done %.1f%%, to go %dh%dm%ds, elapsed %dh%dm%ds", percent * 100.0, togo_time_h, togo_time_min, togo_time_s, time_h, time_min,
+				time_s);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), progressText);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), percent);
+
+		if (programClosed) break;
+
+		if (real_clock() - lastTime > 60.0)
+		{
+			if (image->IsPreview())
+			{
+				err = queueDOF->enqueueReadBuffer(*out_imageBufferCl, CL_TRUE, 0, imageSize, out_image);
+				sRGB16 *image16 = image->GetImage16Ptr();
+				size_t size = width * height;
+				for (size_t i = 0; i < size; i++)
+				{
+					sRGB16 pixel;
+					cl_ushort3 pixelCl = out_image[i];
+					pixel.R = pixelCl.s0;
+					pixel.G = pixelCl.s1;
+					pixel.B = pixelCl.s2;
+					image16[i] = pixel;
+				}
+				image->ConvertTo8bit();
+				image->UpdatePreview();
+				image->RedrawInWidget(outputDarea);
+				while (gtk_events_pending())
+					gtk_main_iteration();
+			}
+			lastTime = real_clock();
+		}
+
+		while (gtk_events_pending())
+			gtk_main_iteration();
+
+		lastProcessingTime = time - lastTimeProcessing;
+		lastTimeProcessing = time;
+	}
+
+	err = queueDOF->enqueueReadBuffer(*out_imageBufferCl, CL_TRUE, 0, imageSize, out_image);
+
+	//cl::size_t<3> origin;
+	//cl::size_t<3> region;
+	//origin[0] = 0, origin[1] = 0; origin[1] = 0;
+	//region[0] = width, region[1] = height, origin[2] = 1;
+	//err = queueDOF->enqueueReadImage(*out_imageBufferCl, true, origin, region, width * sizeof(cl_ushort4), 0, out_image);
+	//if (!checkErr(err, "ComamndQueueSSAO::enqueueReadBuffer()")) return;
+	//err = queueDOF->finish();
+
+	sRGB16 *image16 = image->GetImage16Ptr();
+	size_t size = width * height;
+	for (size_t i = 0; i < size; i++)
+	{
+		sRGB16 pixel;
+		cl_ushort3 pixelCl = out_image[i];
+		pixel.R = pixelCl.s0;
+		pixel.G = pixelCl.s1;
+		pixel.B = pixelCl.s2;
+		image16[i] = pixel;
+	}
+
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(Interface.progressBar), "Rendering Depth Of Field effect done");
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 1.0);
+
+	delete[] in_image;
+	delete[] out_image;
+	delete[] temp_sort;
+	delete in_imageBufferCl;
+	delete out_imageBufferCl;
+	delete zBufferCl;
 }
 
 //------------------------------------ custom formulas -----------------------------

@@ -63,7 +63,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral)
 
 	sRGB16 *temp_image = new sRGB16[width * height];
 	unsigned short *temp_alpha = new unsigned short[width * height];
-	sSortZ *temp_sort = new sSortZ[width * height];
+	sSortZ<float> *temp_sort = new sSortZ<float>[width * height];
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
@@ -96,7 +96,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral)
 	int imgSize = height*width;
 	for(int i=imgSize-1; i>=0; i--)
 	{
-		sSortZ temp;
+		sSortZ<float> temp;
 		temp = temp_sort[i];
 		double z1 = temp.z;
 		double size1 = (z1 - neutral) / z1 * deep;
@@ -109,7 +109,7 @@ void PostRendering_DOF(cImage *image, double deep, double neutral)
 		{
 			ii = i - Random(randomStep);
 			if (ii <= 0) ii = 0;
-			sSortZ temp2 = temp_sort[ii];
+			sSortZ<float> temp2 = temp_sort[ii];
 			double z2 = temp2.z;
 			double size2 = (z2 - neutral) / z2 * deep;
 

@@ -9,8 +9,6 @@
 //
 //*********************************************************
 
-__constant sampler_t samplerSSAO = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_REPEAT | CLK_FILTER_LINEAR;
-
 typedef struct
 {
 	int width;

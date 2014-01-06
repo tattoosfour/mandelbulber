@@ -61,7 +61,8 @@ class CclSupport
 public:
 	CclSupport();
 	bool checkErr(cl_int err, const char * name);
-	void Init(void);
+	void InitDevice(void);
+	void InitFractal(void);
 	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
@@ -82,6 +83,8 @@ public:
 
 	void SSAOPrepare(void);
 	void SSAORender(cImage *image, GtkWidget *outputDarea);
+	void DOFPrepare(void);
+	void DOFRender(cImage *image, GtkWidget *outputDarea);
 
 private:
 	bool enabled;
@@ -111,7 +114,12 @@ private:
 	cl::Kernel *kernelSSAO;
 	cl::CommandQueue *queueSSAO;
 
+	cl::Program *programDOF;
+	cl::Kernel *kernelDOF;
+	cl::CommandQueue *queueDOF;
+
 	bool SSAOprepared;
+	bool DOFprepared;
 
 	std::string clDir;
 
