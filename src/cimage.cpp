@@ -392,6 +392,7 @@ void cImage::Squares(int y, int pFactor)
 		float zBufferTemp = zBuffer[x + y * width];
 		sRGB8 colourTemp = colourBuffer[x + y * width];
 		unsigned short alphaTemp = alphaBuffer[x + y * width];
+		unsigned short opacityTemp = opacityBuffer[x + y * width];
 
 		for (int yy = 0; yy < pFactor; yy++)
 		{
@@ -402,6 +403,7 @@ void cImage::Squares(int y, int pFactor)
 				zBuffer[x + xx + (y + yy) * width] = zBufferTemp;
 				colourBuffer[x + xx + (y + yy) * width] = colourTemp;
 				alphaBuffer[x + xx + (y + yy) * width] = alphaTemp;
+				opacityBuffer[x + xx + (y + yy) * width] = opacityTemp;
 			}
 		}
 	}

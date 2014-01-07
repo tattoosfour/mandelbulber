@@ -370,6 +370,7 @@ void *MainThread(void *ptr)
 					{
 
 						if (progressive < progressiveStart && xScr % (progressive * 2) == 0 && yScr % (progressive * 2) == 0) continue;
+						image->progressiveFactor = progressive;
 
 						//------------- finding fractal surface ---------------------------
 
@@ -965,6 +966,11 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 									image->CompileImage();
 									WriteLog("Image compiled");
 
+									if (param.SSAOEnabled && !netRender->IsClient() && !netRender->IsServer())
+									{
+										PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality/(sqrt(progressive+2)), param.perspectiveType, param.quiet);
+									}
+
 									image->ConvertTo8bit();
 									WriteLog("Image converted to 8-bit");
 									image->UpdatePreview();
@@ -1075,7 +1081,7 @@ void Render(sParamRender param, cImage *image, GtkWidget *outputDarea)
 
 		image->CompileImage();
 		WriteLog("Image compiled");
-		if (param.SSAOEnabled && !programClosed && !netRender->IsClient())
+		if (param.SSAOEnabled && !netRender->IsClient())
 		{
 			PostRendering_SSAO(image, param.doubles.persp, param.SSAOQuality, param.perspectiveType, param.quiet);
 			WriteLog("SSAO rendered");
