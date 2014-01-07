@@ -384,19 +384,24 @@ void ThreadSSAO(void *ptr)
 
 			}
 
-			sRGB16 pixel = image->GetPixelImage16(x, y);
 			sRGB8 colour = image->GetPixelColor(x, y);
+			sRGB16 pixel = image->GetPixelImage16(x, y);
 			double R = pixel.R + 65535.0 * colour.R / 256.0 * total_ambient * intensity * (1.0 - opacity);
 			double G = pixel.G + 65535.0 * colour.G / 256.0 * total_ambient * intensity * (1.0 - opacity);
 			double B = pixel.B + 65535.0 * colour.B / 256.0 * total_ambient * intensity * (1.0 - opacity);
 			if (R > 65535) R = 65535;
 			if (G > 65535) G = 65535;
 			if (B > 65535) B = 65535;
-			pixel.R = R;
-			pixel.G = G;
-			pixel.B = B;
-
-			image->PutPixelImage16(x, y, pixel);
+			for(int sqY =0; sqY<progressive; sqY++)
+			{
+				for(int sqX =0; sqX<progressive; sqX++)
+				{
+					pixel.R = R;
+					pixel.G = G;
+					pixel.B = B;
+					image->PutPixelImage16(x + sqX, y + sqY, pixel);
+				}
+			}
 		}
 
 		double percentDone = (double) y / height * 100.0;
@@ -436,7 +441,7 @@ void PostRendering_SSAO(cImage *image, double persp, int quality, enumPerspectiv
 
 	int progressive = image->progressiveFactor;
 
-	progressive = 1;
+	//progressive = 1;
 
 	for (int i = 0; i < NR_THREADS; i++)
 	{

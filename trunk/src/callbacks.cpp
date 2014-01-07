@@ -40,6 +40,9 @@ bool refreshInNextLoop = false;
 
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 {
+	g_signal_handlers_block_by_func(widget, (GCallback*)motion_notify_event, NULL);
+	while (gtk_events_pending())
+		gtk_main_iteration();
 	x_mouse = event->x;
 	y_mouse = event->y;
 
@@ -194,7 +197,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 		}
 		mainImage.RedrawInWidget(renderWindow.drawingArea);
 	}
-
+	g_signal_handlers_unblock_by_func(widget, (GCallback*)motion_notify_event, NULL);
 	return TRUE;
 }
 
