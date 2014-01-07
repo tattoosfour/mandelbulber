@@ -403,6 +403,7 @@ void *MainThread(void *ptr)
 								viewVector.z = z3 / r * sin(r * fov);
 								viewVector.y = cos(r * fov);
 							}
+							viewVector.Normalize();
 						}
 						else if(perspectiveType == equirectangular)
 						{
@@ -412,6 +413,7 @@ void *MainThread(void *ptr)
 							viewVector.x = sin(fov * x3) * cos(fov * z3);
 							viewVector.z = sin(fov * z3);
 							viewVector.y = cos(fov * x3) * cos(fov * z3);
+							viewVector.Normalize();
 						}
 						else //3-point perspective
 						{
@@ -419,7 +421,7 @@ void *MainThread(void *ptr)
 							viewVector.y = 1.0;
 							viewVector.z = z2 * fov;
 						}
-						viewVector.Normalize();
+
 						viewVector = mRot.RotateVector(viewVector);
 
 						//Ray marching

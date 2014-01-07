@@ -322,6 +322,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 					viewVector.z = z2 / r * sin(r * params.doubles.persp);
 					viewVector.y = cos(r * params.doubles.persp);
 				}
+				viewVector.Normalize();
 			}
 			else if (perspectiveType == equirectangular)
 			{
@@ -330,6 +331,7 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				viewVector.x = sin(params.doubles.persp * x2) * cos(params.doubles.persp * z2);
 				viewVector.z = sin(params.doubles.persp * z2);
 				viewVector.y = cos(params.doubles.persp * x2) * cos(params.doubles.persp * z2);
+				viewVector.Normalize();
 			}
 			else
 			{
@@ -340,7 +342,6 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 				viewVector.z = z2 * params.doubles.persp;
 			}
 
-			viewVector.Normalize();
 			CVector3 viewVectorNotRotated = viewVector;
 			viewVector = mRot.RotateVector(viewVector);
 
