@@ -1462,6 +1462,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 
 		}
 		zBuff = reflectBuff[0 + local_offset].depth;
+		if(reflectBuff[0 + local_offset].found) alphaChannel = 1.0f;
 
 		float3 finallColour = resultShader;
 		

@@ -650,6 +650,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 					sRGBfloat pixel = { pixelCl.R, pixelCl.G, pixelCl.B };
 					sRGB8 color = {pixelCl.colR, pixelCl.colG, pixelCl.colB};
 					unsigned short opacity = pixelCl.opacity;
+					unsigned short alpha = pixelCl.alpha;
 					int x = a % width;
 					int y = a / width;
 
@@ -662,6 +663,9 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 						newPixel.B = oldPixel.B * (1.0 - 1.0 / dofLoop) + pixel.B * (1.0 / dofLoop);
 						image->PutPixelImage(x, y, newPixel);
 						image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
+						unsigned short oldAlpha = image->GetPixelAlpha(x, y);
+						unsigned short newAlpha = (double)oldAlpha * (1.0 - 1.0 / dofLoop) + alpha * (1.0 / dofLoop);
+						image->PutPixelAlpha(x, y, newAlpha);
 					}
 					else
 					{
@@ -669,6 +673,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 						image->PutPixelZBuffer(x, y, rgbbuff[i].zBuffer);
 						image->PutPixelColour(x, y, color);
 						image->PutPixelOpacity(x, y, opacity);
+						image->PutPixelAlpha(x, y, alpha);
 					}
 				}
 
