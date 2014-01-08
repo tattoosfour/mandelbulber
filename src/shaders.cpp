@@ -349,7 +349,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 			output.R = fogDensity * input.param->effectColours.fogColor.R / 65536.0 + (1.0 - fogDensity) * output.R;
 			output.G = fogDensity * input.param->effectColours.fogColor.G / 65536.0 + (1.0 - fogDensity) * output.G;
 			output.B = fogDensity * input.param->effectColours.fogColor.B / 65536.0 + (1.0 - fogDensity) * output.B;
-			totalOpacity += fogDensity + (1.0 - fogDensity) * totalOpacity;
+			totalOpacity = fogDensity + (1.0 - fogDensity) * totalOpacity;
 			output.alpha = fogDensity + (1.0 - fogDensity) * output.alpha;
 		}
 

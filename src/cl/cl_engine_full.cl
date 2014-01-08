@@ -1051,8 +1051,8 @@ float3 VolumetricShader(__constant sClInConstants *consts, sClShaderInputData *i
 			float fogDensity = step / consts->params.fogVisibility;
 			if(fogDensity > 1.0f) fogDensity = 1.0f;
 			output = fogDensity * consts->params.fogColour + (1.0f - fogDensity) * output;
-			totalOpacity += fogDensity + (1.0f - fogDensity) * totalOpacity;
-			alpha += fogDensity + (1.0f - fogDensity) * alpha;
+			totalOpacity = fogDensity + (1.0f - fogDensity) * totalOpacity;
+			alpha = fogDensity + (1.0f - fogDensity) * alpha;
 		}
 		
 		
