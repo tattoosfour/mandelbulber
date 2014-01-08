@@ -300,7 +300,7 @@ float3 RayMarching(__constant sClInConstants *consts, sClCalcParams *calcParam, 
 	
 	if (found && binaryEnable)
 	{
-		float step = distThresh * 0.5f;
+		step *= 0.5f;
 		for (int i = 0; i < 10; i++)
 		{
 			if (dist < distThresh && dist > distThresh * search_limit)

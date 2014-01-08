@@ -144,8 +144,10 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 
 	if (found && binaryEnable)
 	{
-		double step = distThresh * 0.5;
-		for (int i = 0; i < 10; i++)
+		//scan -= step;
+		//double step = distThresh * 0.5;
+		step *= 0.5;
+		for (int i = 0; i < 20; i++)
 		{
 			DE_counter++;
 			if (dist < distThresh && dist > distThresh * search_limit)
@@ -165,12 +167,22 @@ CVector3 RayMarching(sParamRender *param, sFractal *calcParam, CVector3 start, C
 					point = start + direction * scan;
 				}
 			}
+			if (calcParam->constantDEThreshold)
+			{
+				distThresh = param->doubles.quality;
+			}
+			else
+			{
+				distThresh = scan * param->doubles.resolution * param->doubles.persp / param->doubles.quality + distThreshInit;
+			}
 			bool max_iter = false;
 			dist = CalculateDistance(point, *calcParam, &max_iter);
 			//printf("Distance binary = %g\n", dist/distThresh);
 			step *= 0.5;
 		}
 	}
+
+
 
 	DE_counter += counter;
 	Pixel_counter++;
