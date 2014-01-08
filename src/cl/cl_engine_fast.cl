@@ -254,6 +254,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	distThresh = 1e-6f;
 
 	formulaOut outF;
+	float step = 0.0f;
 	//ray-marching
 	for(count = 0; count < MAX_RAYMARCHING && scan < 50.0f; count++)
 	{
@@ -269,7 +270,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			break;
 		}
 
-		float step = (distance - 0.5f*distThresh) * consts->params.DEfactor;
+		step = (distance - 0.5f*distThresh) * consts->params.DEfactor;
 		scan += step;
 	}
 
@@ -277,7 +278,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	//binary searching
 	if(found)
 	{
-		float step = distThresh;
+		step *= 0.5f;
 		for(int i=0; i<5; i++)
 		{
 			if(distance < distThresh && distance > distThresh * 0.95f)
@@ -302,7 +303,7 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 	}
 
 	float zBuff = scan;
-	if(!found) zBuff = 1e5f;
+	if(!found) zBuff = 1e4f;
 	
 	float3 colour = 0.0f;
 	float3 surfaceColour = 1.0f;
