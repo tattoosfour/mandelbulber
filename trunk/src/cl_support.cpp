@@ -449,13 +449,13 @@ void CclSupport::InitFractal(void)
 
 	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 	reflectBuffer = new sClReflect[reflectBufferSize];
-	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_HOST_NO_ACCESS, reflectBufferSize, NULL, &err);
 	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err)")) return;
 
-	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
+	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
 	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err)")) return;
 
-	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
+	inCLBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err);
 	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sClInBuff), inBuffer1, &err)")) return;
 
 	outCL = new cl::Buffer(*context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, buffSize,rgbbuff,&err);
@@ -602,7 +602,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 				reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 				//printf("reflectBuffer size = %d\n", reflectBufferSize);
 				reflectBuffer = new sClReflect[10 * stepSize];
-				auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
+				auxReflectBuffer = new cl::Buffer(*context, CL_MEM_HOST_NO_ACCESS, reflectBufferSize, NULL, &err);
 				sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err), reflectBufferSize = %ld", reflectBufferSize);
 				if (!checkErr(err, errorText)) return;
 
@@ -937,15 +937,15 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 
 		opacityBuffer[i] = imageOpacity[i];
 	}
-	cl::Buffer *imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err);
+	cl::Buffer *imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err);
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *colorBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(cl_uchar3)*size, colorBuffer, &err);
+	cl::Buffer *colorBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_uchar3)*size, colorBuffer, &err);
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *opacityBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort)*size, opacityBuffer, &err);
+	cl::Buffer *opacityBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_ushort)*size, opacityBuffer, &err);
 	sprintf(errorText, "imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(cl_ushort3)*size, imageBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
@@ -1179,15 +1179,15 @@ void CclSupport::DOFRender(cImage *image, GtkWidget *outputDarea)
 	//		width * sizeof(cl_ushort4), out_image, &err);
 	//if(!checkErr(err, "cl::Image2D(...backgroundImage...)")) return;
 
-	cl::Buffer *in_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, imageSize, in_image, &err);
+	cl::Buffer *in_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, imageSize, in_image, &err);
 	sprintf(errorText, "in_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, in_image, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *out_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, out_image, &err);
+	cl::Buffer *out_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, imageSize, out_image, &err);
 	sprintf(errorText, "out_imageBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, imageSize, out_image, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(sSortZ<cl_float> ) * width * height, temp_sort, &err);
+	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sSortZ<cl_float> ) * width * height, temp_sort, &err);
 	sprintf(errorText, "zBufferCl = new cl::Buffer(*context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(sSortZ<cl_float>)*width*height, temp_sort, &err)");
 	if (!checkErr(err, errorText)) return;
 
