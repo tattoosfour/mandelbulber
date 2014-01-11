@@ -577,6 +577,13 @@ void DrawPalette(sRGB *palette)
 			gdk_color.green = color.G * 256;
 			gdk_color.blue = color.B * 256;
 			gdk_color.pixel = 0;
+			if(((int)(i + paletteOffset *10) % (int)colWidth) == colWidth / 2)
+			{
+				gdk_color.red = gdk_color.red > 32768 ? gdk_color.red - 5000 : gdk_color.red + 5000;
+				gdk_color.green = gdk_color.green > 32768 ? gdk_color.green - 5000 : gdk_color.green + 5000;
+				gdk_color.blue = gdk_color.blue > 32768 ? gdk_color.blue - 5000 : gdk_color.blue + 5000;
+				gdk_color.pixel = 0;
+			}
 			gdk_gc_set_rgb_fg_color(GC, &gdk_color);
 			gdk_draw_line(dareaPalette->window, GC, i, 0, i, 30);
 		}

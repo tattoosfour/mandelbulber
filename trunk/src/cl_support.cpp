@@ -907,11 +907,16 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 
 	float *zBuffer = image->GetZBufferPtr();
 	size_t zBufferSize = image->GetZBufferSize();
+	size_t size = width * height;
+
+	size_t usedMemForSSAO = (sizeof(cl_ushort3)*size + sizeof(cl_uchar3)*size + sizeof(cl_ushort)*size + zBufferSize) / 1024 / 1024;
+	printf("GPU memory foe SSAO effect: %ld MB\n\n", usedMemForSSAO);
+
 	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err);
 	sprintf(errorText, "zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
 
-	size_t size = width * height;
+
 	cl_ushort3 *imageBuffer = new cl_ushort3[size];
 	cl_uchar3 *colorBuffer = new cl_uchar3[size];
 	cl_ushort *opacityBuffer = new cl_ushort[size];
@@ -960,6 +965,8 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	err = queueSSAO->enqueueWriteBuffer(*opacityBufferCl, CL_TRUE, 0, sizeof(cl_ushort)*size, opacityBuffer);
 	sprintf(errorText, "ComamndQueueSSAO(opacityBuffer)");
 	if (!checkErr(err, errorText)) return;
+
+	size_t usedMem = (sizeof(cl_ushort3)*size + sizeof(cl_uchar3)*size + sizeof(cl_ushort)*size) / 1024 / 1024;
 
 	sClParamsSSAO paramsSSAO;
 	paramsSSAO.width = width;
@@ -1170,6 +1177,9 @@ void CclSupport::DOFRender(cImage *image, GtkWidget *outputDarea)
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
 	while (gtk_events_pending())
 		gtk_main_iteration();
+
+	size_t usedMemForDOF = (imageSize + imageSize + sizeof(sSortZ<cl_float>) * width * height) / 1024 / 1024;
+	printf("GPU memory foe DOF effect: %ld MB\n", usedMemForDOF);
 
 	//cl::Image2D *in_imageBufferCl = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_UNORM_INT16), width, height,
 	//		width * sizeof(cl_ushort4), in_image, &err);

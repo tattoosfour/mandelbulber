@@ -1602,7 +1602,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.frIFSDefaults = gtk_frame_new("Vector presets");
 	Interface.frKeyframeAnimation = gtk_frame_new("Keyframe animation");
 	Interface.frKeyframeAnimation2 = gtk_frame_new("Key-frames");
-	Interface.frPalette = gtk_frame_new("Colour palette");
+	Interface.frPalette = gtk_frame_new("Colour palette (click on colour palette to edit)");
 	Interface.frImageSaving = gtk_frame_new("Image saving");
 	Interface.frHybrid = gtk_frame_new("Hybrid formula");
 	Interface.frStereo = gtk_frame_new("Stereoscopic rendering");
@@ -2292,6 +2292,9 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLNewFormula, PressedOpenCLNewFormula);
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLDeleteFormula, PressedOpenCLDeleteFormula);
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLRecompile, PressedRecompile);
+
+	gtk_signal_connect(GTK_OBJECT(dareaPalette), "button_press_event", GTK_SIGNAL_FUNC(pressed_button_on_palette), NULL);
+	gtk_widget_set_events(GTK_WIDGET(dareaPalette), GDK_BUTTON_PRESS_MASK);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
 

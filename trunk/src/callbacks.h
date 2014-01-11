@@ -22,6 +22,7 @@ gboolean CallerTimerLoop(void);
 gboolean CallerTimerLoopWindowRefresh(GtkWidget *widget);
 gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
 gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event);
+gboolean pressed_button_on_palette(GtkWidget *widget, GdkEventButton *event);
 gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data);
 gboolean WindowReconfigured(GtkWindow *window, GdkEvent *event, gpointer data);
 gboolean on_darea_expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
