@@ -543,6 +543,45 @@ gboolean pressed_button_on_image(GtkWidget *widget, GdkEventButton *event)
 	return true;
 }
 
+gboolean pressed_button_on_palette(GtkWidget *widget, GdkEventButton *event)
+{
+	int x = event->x;
+	int y = event->y;
+	double colWidth = 10;
+	double paletteOffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentPaletteOffset));
+	int index = (int) ((x + colWidth/2) / colWidth + paletteOffset);
+	if(index < 0) index = 0;
+	if(index < 256)
+	{
+		char text[100];
+		sprintf(text, "Please edit color #%d", index);
+		GtkWidget *colorDialog = gtk_color_selection_dialog_new(text);
+		GtkColorSelection *colorSel = GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colorDialog)));
+
+		sRGB color16 = Interface_data.palette[index];
+		GdkColor color;
+		color.red = color16.R*256;
+		color.green = color16.G*256;
+		color.blue = color16.B*256;
+		gtk_color_selection_set_current_color(colorSel, &color);
+
+		gint result;
+	  result = gtk_dialog_run(GTK_DIALOG(colorDialog));
+		if (result == GTK_RESPONSE_OK)
+		{
+			gtk_color_selection_get_current_color(colorSel, &color);
+			color16.R = color.red/256;
+			color16.G = color.green/256;
+			color16.B = color.blue/256;
+			Interface_data.palette[index] = color16;
+
+			DrawPalette(Interface_data.palette);
+		}
+		gtk_widget_destroy(colorDialog);
+	}
+	return TRUE;
+}
+
 //----------- close program
 gboolean StopRenderingAndQuit(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
