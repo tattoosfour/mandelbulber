@@ -1478,22 +1478,42 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 	bool SSAOEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkSSAOEnabled));
 	double persp = atof(gtk_entry_get_text(GTK_ENTRY(Interface.edit_persp)));
 	enumPerspectiveType perspectiveType = (enumPerspectiveType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboPerspectiveType));
-
-
 	double DOFFocus = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFFocus));
 	double DOFRadius = gtk_adjustment_get_value(GTK_ADJUSTMENT(Interface.adjustmentDOFRadius));
 	bool DOFEnabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkDOFEnabled));
+
 	if (!isRendering)
 	{
 		mainImage.CompileImage();
-		if (SSAOEnabled)
+		if (clSupport->IsReady())
 		{
-			PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
+			clSupport->SetSize(mainImage.GetWidth(), mainImage.GetHeight());
+			sClInBuff *inCLBuff = clSupport->GetInBuffer1();
+			sClInConstants *inCLConstants = clSupport->GetInConstantBuffer1();
+			sParamRender param;
+			ReadInterface(&param);
+			Params2Cl(&param, inCLBuff, inCLConstants);
+			clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
+			if(SSAOEnabled)
+			{
+				clSupport->SSAORender(&mainImage, renderWindow.drawingArea);
+			}
+			if (DOFEnabled)
+			{
+				clSupport->DOFRender(&mainImage, renderWindow.drawingArea);
+			}
 		}
-		if (DOFEnabled)
+		else
 		{
-			double DOF_focus = pow(10, DOFFocus / 10.0 - 16.0);
-			PostRendering_DOF(&mainImage, DOFRadius * mainImage.GetWidth() / 1000.0, DOF_focus);
+			if (SSAOEnabled)
+			{
+				PostRendering_SSAO(&mainImage, persp, SSAOQuality, perspectiveType, false);
+			}
+			if (DOFEnabled)
+			{
+				double DOF_focus = pow(10, DOFFocus / 10.0 - 16.0);
+				PostRendering_DOF(&mainImage, DOFRadius * mainImage.GetWidth() / 1000.0, DOF_focus);
+			}
 		}
 		mainImage.ConvertTo8bit();
 		mainImage.UpdatePreview();
