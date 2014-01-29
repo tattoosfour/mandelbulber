@@ -966,8 +966,6 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	sprintf(errorText, "ComamndQueueSSAO(opacityBuffer)");
 	if (!checkErr(err, errorText)) return;
 
-	size_t usedMem = (sizeof(cl_ushort3)*size + sizeof(cl_uchar3)*size + sizeof(cl_ushort)*size) / 1024 / 1024;
-
 	sClParamsSSAO paramsSSAO;
 	paramsSSAO.width = width;
 	paramsSSAO.height = height;
@@ -984,7 +982,6 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	stepSize = workGroupSize;
 	int workGroupSizeMultiplier = 1;
 	double startTime = real_clock();
-	double lastTime = real_clock();
 	double lastTimeProcessing = startTime;
 	double lastProcessingTime = 1.0;
 
