@@ -1172,7 +1172,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					distance = z.Length();
 					if (distance > 1e15)
 					{
-						distance = (L - log(log(r) / log(N)) / log(p))/100.0;
+						distance = (L - log(log(r) / log((double)N)) / log(p))/100.0;
 						break;
 					}
 				}
