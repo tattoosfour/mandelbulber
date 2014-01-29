@@ -316,7 +316,7 @@ bool CNetRender::WaitForClient(char *statusOut)
 		std::cout << stat;
 
 		//checking client version
-		int clientVersion;
+		int clientVersion = 0;
 		sendDataToClient(NULL, 0, (char*)"ver", clientIndex-1, 0);
 		char command[4];
 		size_t recvd_bytes = receiveDataFromClient(command, clientIndex-1, 0);
