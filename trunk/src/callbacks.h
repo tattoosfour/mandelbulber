@@ -123,6 +123,7 @@ void PressedOpenCLEditFormulaInit(GtkWidget *widget, gpointer data);
 void PressedOpenCLNewFormula(GtkWidget *widget, gpointer data);
 void PressedOpenCLDeleteFormula(GtkWidget *widget, gpointer data);
 void PressedRecompile(GtkWidget *widget, gpointer data);
+void PressedPath2Keyframes(GtkWidget *widget, gpointer data);
 
 double ScanFractal(sParamRender *params, CVector3 direction);
 double ScanSizeOfFractal(sParamRender *params);

@@ -3273,3 +3273,92 @@ void PressedRecompile(GtkWidget *widget, gpointer data)
 	}
 #endif
 }
+
+void PressedPath2Keyframes(GtkWidget *widget, gpointer data)
+{
+	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window_interface), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
+			"Are you sure to convert flight path to keyframes?\nThis will overwrite existing keyframes!");
+
+	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+	if(result == GTK_RESPONSE_YES)
+	{
+		sParamRender fractParam;
+		ReadInterface(&fractParam);
+
+		FILE *pFile_coordinates = NULL;
+		pFile_coordinates = fopen(Interface_data.file_path, "r");
+
+		int framesPerKey = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_animationFramesPerKey)));
+
+		if (pFile_coordinates)
+		{
+			int n;
+			int index = 0;
+			string filenameKeyframe;
+			double alphaCorrection = 0.0;
+			double betaCorrection = 0.0;
+			double gammaCorrection = 0.0;
+
+			double alfa_old = 0.0;
+			double beta_old = 0.0;
+			double gamma_old = 0.0;
+
+			do
+			{
+				n = fscanf(pFile_coordinates, "%lf %lf %lf %lf %lf %lf", &fractParam.doubles.vp.x, &fractParam.doubles.vp.y, &fractParam.doubles.vp.z, &fractParam.doubles.alpha,
+						&fractParam.doubles.beta, &fractParam.doubles.gamma);
+				fractParam.doubles.zoom = 1e-15;
+
+				if ((alfa_old - fractParam.doubles.alpha) > M_PI) //angle jump over +180° to negative value
+				{
+					alphaCorrection += 2.0 * M_PI;
+				}
+				if ((fractParam.doubles.alpha - alfa_old) > M_PI) //angle jump over -180° to positive value
+				{
+					alphaCorrection -= 2.0 * M_PI;
+				}
+				if ((beta_old - fractParam.doubles.beta) > M_PI)
+				{
+					betaCorrection += 2.0 * M_PI;
+				}
+				if ((fractParam.doubles.beta - beta_old) > M_PI)
+				{
+					betaCorrection -= 2.0 * M_PI;
+				}
+				if ((gamma_old - fractParam.doubles.gamma) > M_PI)
+				{
+					gammaCorrection += 2.0 * M_PI;
+				}
+				if ((fractParam.doubles.gamma - gamma_old) > M_PI)
+				{
+					gammaCorrection -= 2 * M_PI;
+				}
+
+				alfa_old = fractParam.doubles.alpha;
+				beta_old = fractParam.doubles.beta;
+				gamma_old = fractParam.doubles.gamma;
+
+				fractParam.doubles.alpha += alphaCorrection;
+				fractParam.doubles.beta += betaCorrection;
+				fractParam.doubles.gamma += gammaCorrection;
+
+				if(index % framesPerKey == 0)
+				{
+					int keyframeIndex = index / framesPerKey;
+					filenameKeyframe = IndexFilename(Interface_data.file_keyframes, "fract", keyframeIndex);
+					SaveSettings(filenameKeyframe.c_str(), fractParam, true);
+				}
+
+				if (n <= 0)
+				{
+					fclose(pFile_coordinates);
+					break;
+				}
+
+				index++;
+			} while (n > 0);
+			printf("Created %d keyframes\n", index / framesPerKey);
+		}
+	}
+	gtk_widget_destroy(dialog);
+}

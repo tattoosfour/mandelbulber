@@ -434,6 +434,7 @@ struct sInterface
 	GtkWidget *buOpenCLEditFormula;
 	GtkWidget *buOpenCLEditFormulaInit;
 	GtkWidget *buOpenCLRecompile;
+	GtkWidget *buConvertPathToKeyframes;
 
 	GtkWidget *edit_va;
 	GtkWidget *edit_vb;

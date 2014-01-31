@@ -1734,6 +1734,7 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buOpenCLEditFormulaInit = gtk_button_new_with_label("Edit formula Init");
 	Interface.buOpenCLDeleteFormula = gtk_button_new_with_label("Delete");
 	Interface.buOpenCLRecompile = gtk_button_new_with_label("Recompile");
+	Interface.buConvertPathToKeyframes = gtk_button_new_with_label("Convert flight path to keyframes");
 
 	//edit
 	Interface.edit_va = gtk_entry_new();
@@ -2292,6 +2293,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLNewFormula, PressedOpenCLNewFormula);
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLDeleteFormula, PressedOpenCLDeleteFormula);
 	CONNECT_SIGNAL_CLICKED(Interface.buOpenCLRecompile, PressedRecompile);
+	CONNECT_SIGNAL_CLICKED(Interface.buConvertPathToKeyframes, PressedPath2Keyframes);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "button_press_event", GTK_SIGNAL_FUNC(pressed_button_on_palette), NULL);
 	gtk_widget_set_events(GTK_WIDGET(dareaPalette), GDK_BUTTON_PRESS_MASK);
@@ -2707,10 +2709,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation), Interface.boxKeyframeAnimation);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons, false, false, 1);
-	//gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons), Interface.buAnimationRecordKey, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons), Interface.buAnimationRenderFromKeys, false, false, 1);
-
-	//gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons2), Interface.buConvertPathToKeyframes, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationEdits, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("100", "Frames per key:", 5, Interface.edit_animationFramesPerKey), false, false, 1);

@@ -2226,7 +2226,7 @@ void MainRender(void)
 			if (distance > 5.0) distance = 5.0;
 
 			//auto-calculate of zoom value
-			fractParam.doubles.zoom = distance / 1000;
+			fractParam.doubles.zoom = 1e-15;
 
 			//path record mode
 			if (fractParam.recordMode && foundLastFrame)
@@ -2270,7 +2270,7 @@ void MainRender(void)
 				if (n <= 0)
 				{
 					foundLastFrame = true;
-					fclose(pFile_coordinates);
+					break;
 				}
 				WriteLog("Coordinates loaded");
 			}
