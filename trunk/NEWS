@@ -1,5 +1,25 @@
 Version history
 
+v1.21
+- Added color palette editor
+- Added function to convert flight path into keyframes
+- improved water algorithm - less visible pattern
+- added setting for water animation speed
+- in flight path recording function added switching between using gamma rotation or not (use "Rotate without using gamma angle")
+- in flight path recording function added switching between constant flight speed and based on estimated distance (use "Absolute distance mode")
+- added arrows in HUD for flight path recording
+- Added low quality SSAO effect during progressive rendering (better looking fast preview)
+- optimized binary searching algorithm in RayMarching() function
+- OpenCL - added kernel for Screen Space Ambient Occlusion (SSAO) effect
+- OpenCL - added kernel for Depth Of Field (DOF) effect. There is possible to switch between Monte-Carlo DOF and post-effect DOF
+- OpenCL - improved quality of "fake lights" based on orbit traps
+- OpenCL - implemented textured background
+- OpenCL - added alpha channel in "Full" kernel (possible to save image as PNG-16 + Alpha)
+- fixed bug: flight path rendering didn't worked properly when rendering was continued from the middle
+- fixed bug: eliminated memory leaks in OpenCL rendering functions
+- fixed bug: corrected calculation of viewVector and z value for 3-point perspective
+- fixed bug: sometimes 3D cursor was jerky. Added temporary disabling for event handler during rendering of cursor
+
 v1.20
 - OpenCL - added NoDE rendering engine
 - OpenCL - added "limits" feature to rendering engine
@@ -9,6 +29,7 @@ v1.20
 - OpenCL - added setting for delta for deltaDE algorythm
 - added HUD for flight path recording
 - simplified code and corrected for "limits" and "interior mode"
+- fixed bug: NetRender didn't worked under Windows 7 and Windows Vista. Now connection is limited to IPv4 and works properly.
 - fixed problem with visibility of 3D cursor during flight path recording
 - fixed resource leaks
 

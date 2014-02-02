@@ -514,8 +514,11 @@ void CclSupport::Recompile(void)
 	Enable();
 	InitDevice();
 	InitFractal();
-	SSAOPrepare();
-	DOFPrepare();
+	if(ready)
+	{
+		SSAOPrepare();
+		DOFPrepare();
+	}
 	recompileRequest = false;
 }
 
