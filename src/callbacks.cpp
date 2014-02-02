@@ -2889,8 +2889,11 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 		clSupport->SetSize(atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth))), atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight))));
 		clSupport->InitDevice();
 		clSupport->InitFractal();
-		clSupport->SSAOPrepare();
-		clSupport->DOFPrepare();
+		if(clSupport->IsReady())
+		{
+			clSupport->SSAOPrepare();
+			clSupport->DOFPrepare();
+		}
 		clSupport->Enable();
 	}
 	else

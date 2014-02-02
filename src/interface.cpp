@@ -2609,7 +2609,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16, true, true, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16Alpha, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveAllImageLayers, true, true, 1);
+	//gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveAllImageLayers, true, true, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
