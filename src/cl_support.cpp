@@ -138,6 +138,12 @@ void CclSupport::InitDevice(void)
 {
 	cl_int err = 0;
 
+#ifdef WIN32
+	const std::wstring opencldll( L"OpenCL.dll" );
+	err = clewInit(opencldll.c_str());
+	std::cout << clewErrorString(err) << std::endl;
+#endif
+
 	cl::Platform::get(&platformList);
 	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
 	std::cout << "OpenCL Platform number is: " << platformList.size() << std::endl;
@@ -231,12 +237,6 @@ void CclSupport::InitFractal(void)
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(Interface.progressBar), 0.0);
 	while (gtk_events_pending())
 		gtk_main_iteration();
-
-#ifdef WIN32
-	const std::wstring opencldll( L"OpenCL.dll" );
-	err = clewInit(opencldll.c_str());
-	std::cout << clewErrorString(err) << std::endl;
-#endif
 
 	if(!customFormulas)
 	{
@@ -449,7 +449,7 @@ void CclSupport::InitFractal(void)
 
 	reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 	reflectBuffer = new sClReflect[reflectBufferSize];
-	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_HOST_NO_ACCESS, reflectBufferSize, NULL, &err);
+	auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 	if(!checkErr(err, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err)")) return;
 
 	inCLConstBuffer1 = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sClInConstants), constantsBuffer1, &err);
@@ -605,7 +605,7 @@ void CclSupport::Render(cImage *image, GtkWidget *outputDarea)
 				reflectBufferSize = sizeof(sClReflect) * 10 * stepSize;
 				//printf("reflectBuffer size = %d\n", reflectBufferSize);
 				reflectBuffer = new sClReflect[10 * stepSize];
-				auxReflectBuffer = new cl::Buffer(*context, CL_MEM_HOST_NO_ACCESS, reflectBufferSize, NULL, &err);
+				auxReflectBuffer = new cl::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err);
 				sprintf(errorText, "Buffer::Buffer(*context, CL_MEM_READ_WRITE, reflectBufferSize, NULL, &err), reflectBufferSize = %ld", reflectBufferSize);
 				if (!checkErr(err, errorText)) return;
 
