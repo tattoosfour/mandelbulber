@@ -1448,6 +1448,7 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 		{
 			if(clSupport->IsReady())
 			{
+#ifdef CLSUPPORT
 				clSupport->SetSize(mainImage.GetWidth(), mainImage.GetHeight());
 				sClInBuff *inCLBuff = clSupport->GetInBuffer1();
 				sClInConstants *inCLConstants = clSupport->GetInConstantBuffer1();
@@ -1456,6 +1457,7 @@ void PressedSSAOUpdate(GtkWidget *widget, gpointer data)
 				Params2Cl(&param, inCLBuff, inCLConstants);
 				clSupport->SetParams(inCLBuff, inCLConstants, param.fractal.formula);
 				clSupport->SSAORender(&mainImage, renderWindow.drawingArea);
+#endif
 			}
 			else
 			{
@@ -1487,6 +1489,7 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 		mainImage.CompileImage();
 		if (clSupport->IsReady())
 		{
+#ifdef CLSUPPORT
 			clSupport->SetSize(mainImage.GetWidth(), mainImage.GetHeight());
 			sClInBuff *inCLBuff = clSupport->GetInBuffer1();
 			sClInConstants *inCLConstants = clSupport->GetInConstantBuffer1();
@@ -1502,6 +1505,7 @@ void PressedDOFUpdate(GtkWidget *widget, gpointer data)
 			{
 				clSupport->DOFRender(&mainImage, renderWindow.drawingArea);
 			}
+#endif
 		}
 		else
 		{
@@ -2884,6 +2888,7 @@ void PressedMeasureActivation(GtkWidget *widget, gpointer data)
 
 void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 {
+#ifdef CLSUPPORT
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClEnable)))
 	{
 		clSupport->SetSize(atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageWidth))), atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_imageHeight))));
@@ -2900,6 +2905,7 @@ void ChangedOpenClEnabled(GtkWidget *widget, gpointer data)
 	{
 		clSupport->Disable();
 	}
+#endif
 }
 
 void ChangedOpenClCustomEnable(GtkWidget *widget, gpointer data)
