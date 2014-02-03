@@ -42,7 +42,7 @@ kernel void SSAO(__global ushort4 *image, __global float *zBuffer, __global ucha
 		scr2 *= z * p.fov;
 
 		float ambient = 0.0f;
-		for(float angle = 0; angle < quality; angle++)
+		for(float angle = 0.0f; angle < quality; angle+=1.0f)
 		{
 			float2 dir = (float2)	{ cos(angle), sin(angle)};
 			float maxDiff = -1e10;
