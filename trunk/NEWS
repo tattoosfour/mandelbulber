@@ -1,5 +1,9 @@
 Version history
 
+v1.21-1
+- fixed bug: OpenCL - SSAO kernel coudn't be compiled on nVidia
+- fixed bug: OpenCL - there was error -54 during rendering of SSAO and DOF (caused by not matched localWorkSize with GlobalWorkSize)
+
 v1.21
 - Added color palette editor
 - Added function to convert flight path into keyframes
