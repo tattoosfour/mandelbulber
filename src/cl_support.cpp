@@ -913,12 +913,11 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 	size_t size = width * height;
 
 	size_t usedMemForSSAO = (sizeof(cl_ushort3)*size + sizeof(cl_uchar3)*size + sizeof(cl_ushort)*size + zBufferSize) / 1024 / 1024;
-	printf("GPU memory foe SSAO effect: %ld MB\n\n", usedMemForSSAO);
+	printf("GPU memory for SSAO effect: %ld MB\n\n", usedMemForSSAO);
 
 	cl::Buffer *zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err);
 	sprintf(errorText, "zBufferCl = new cl::Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, zBufferSize, zBuffer, &err)");
 	if (!checkErr(err, errorText)) return;
-
 
 	cl_ushort3 *imageBuffer = new cl_ushort3[size];
 	cl_uchar3 *colorBuffer = new cl_uchar3[size];
@@ -1001,12 +1000,27 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 		int pixelsLeft = width * height - pixelIndex;
 		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
 		if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
-		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 		if (workGroupSizeMultiplier > width * height / workGroupSize / 8) workGroupSizeMultiplier = width * height / workGroupSize / 8;
+		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 		stepSize = workGroupSize * workGroupSizeMultiplier;
-		if (stepSize > pixelsLeft) stepSize = pixelsLeft;
 
-		err = queueSSAO->enqueueNDRangeKernel(*kernelSSAO, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+		//calculation of stepSize to be multiplied workGroupSize
+		size_t limitedWorkgroupSize = workGroupSize;
+		if (stepSize > pixelsLeft)
+		{
+			int mul = pixelsLeft / workGroupSize;
+			if (mul > 0)
+			{
+				stepSize = mul * workGroupSize;
+			}
+			else
+			{
+				//in this case will be limited workGroupSize
+				stepSize = pixelsLeft;
+				limitedWorkgroupSize = pixelsLeft;
+			}
+		}
+		err = queueSSAO->enqueueNDRangeKernel(*kernelSSAO, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(limitedWorkgroupSize));
 		sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
 		if (!checkErr(err, errorText)) return;
 
@@ -1037,7 +1051,6 @@ void CclSupport::SSAORender(cImage *image, GtkWidget *outputDarea)
 
 		lastProcessingTime = time - lastTimeProcessing;
 		lastTimeProcessing = time;
-
 	}
 	err = queueSSAO->enqueueReadBuffer(*imageBufferCl, CL_TRUE, 0, sizeof(cl_ushort3)*size, imageBuffer);
 	if (!checkErr(err, "ComamndQueueSSAO::enqueueReadBuffer()")) return;
@@ -1179,7 +1192,7 @@ void CclSupport::DOFRender(cImage *image, GtkWidget *outputDarea)
 		gtk_main_iteration();
 
 	size_t usedMemForDOF = (imageSize + imageSize + sizeof(sSortZ<cl_float>) * width * height) / 1024 / 1024;
-	printf("GPU memory foe DOF effect: %ld MB\n", usedMemForDOF);
+	printf("GPU memory for DOF effect: %ld MB\n", usedMemForDOF);
 
 	//cl::Image2D *in_imageBufferCl = new cl::Image2D(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, cl::ImageFormat(CL_RGBA, CL_UNORM_INT16), width, height,
 	//		width * sizeof(cl_ushort4), in_image, &err);
@@ -1244,12 +1257,28 @@ void CclSupport::DOFRender(cImage *image, GtkWidget *outputDarea)
 		int pixelsLeft = width * height - pixelIndex;
 		int maxWorkGroupSizeMultiplier = pixelsLeft / workGroupSize;
 		if (workGroupSizeMultiplier > maxWorkGroupSizeMultiplier) workGroupSizeMultiplier = maxWorkGroupSizeMultiplier;
-		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 		if (workGroupSizeMultiplier > width * height / workGroupSize / 8) workGroupSizeMultiplier = width * height / workGroupSize / 8;
+		if (workGroupSizeMultiplier < numberOfComputeUnits) workGroupSizeMultiplier = numberOfComputeUnits;
 		stepSize = workGroupSize * workGroupSizeMultiplier;
-		if (stepSize > pixelsLeft) stepSize = pixelsLeft;
 
-		err = queueDOF->enqueueNDRangeKernel(*kernelDOF, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(workGroupSize));
+		//calculation of stepSize to be multiplied workGroupSize
+		size_t limitedWorkgroupSize = workGroupSize;
+		if (stepSize > pixelsLeft)
+		{
+			int mul = pixelsLeft / workGroupSize;
+			if (mul > 0)
+			{
+				stepSize = mul * workGroupSize;
+			}
+			else
+			{
+				//in this case will be limited workGroupSize
+				stepSize = pixelsLeft;
+				limitedWorkgroupSize = pixelsLeft;
+			}
+		}
+
+		err = queueDOF->enqueueNDRangeKernel(*kernelDOF, cl::NDRange(pixelIndex), cl::NDRange(stepSize), cl::NDRange(limitedWorkgroupSize));
 		sprintf(errorText, "ComamndQueueSSAO::nqueueNDRangeKernel(size)");
 		if (!checkErr(err, errorText)) return;
 
