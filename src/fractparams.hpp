@@ -9,11 +9,14 @@
  /
  ********************************************************/
 
-#ifndef FRACTPARAMS_H_
-#define FRACTPARAMS_H_
+#ifndef FRACTPARAMS_HPP_
+#define FRACTPARAMS_HPP_
 
 #include "fractal.h"
 #include "texture.hpp"
+#include "parameters.hpp"
+
+void InitParams(parameters::container *par);
 
 struct sParamRenderD
 {
@@ -145,4 +148,4 @@ struct sParamRender
 	double settingsVersion;
 };
 
-#endif /* FRACTPARAMS_H_ */
+#endif /* FRACTPARAMS_HPP_ */

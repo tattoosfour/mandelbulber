@@ -14,7 +14,7 @@
 
 #include <vector>
 #include "common_math.h"
-#include "fractparams.h"
+#include "fractparams.hpp"
 #include <stddef.h>
 #include <string>
 

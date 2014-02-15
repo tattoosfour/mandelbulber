@@ -13,7 +13,7 @@
 #define IMAGE_H_
 
 #include "cimage.hpp"
-#include "fractparams.h"
+#include "fractparams.hpp"
 
 struct sSSAOparams
 {

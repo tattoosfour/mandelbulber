@@ -14,7 +14,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include "fractparams.h"
+#include "fractparams.hpp"
 #include "cl_support.hpp"
 #include "callbacks.h"
 #include "shaders.h"

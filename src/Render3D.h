@@ -15,7 +15,7 @@
 #include "algebra.hpp"
 #include "image.h"
 #include "texture.hpp"
-#include "fractparams.h"
+#include "fractparams.hpp"
 #include "cl_support.hpp"
 
 struct sParam
