@@ -37,6 +37,7 @@
 #include "undo.hpp"
 #include "callbacks.h"
 #include "netrender.hpp"
+#include "parameters.hpp"
 
 using namespace std;
 
@@ -1511,6 +1512,9 @@ int main(int argc, char *argv[])
 
 	printf("Log file: %s\n", logfileName.c_str());
 	WriteLog("Log file created");
+
+	parameters::container par;
+	InitParams(&par);
 
 	//initialising GTK+
 	bool result = ReadComandlineParams(argc, argv);
