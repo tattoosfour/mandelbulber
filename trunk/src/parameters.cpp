@@ -54,6 +54,7 @@ template void container::addParam<std::string>(std::string name, std::string def
 template void container::addParam<CVector3>(std::string name, CVector3 defaultVal, bool morphable);
 template void container::addParam<sRGB>(std::string name, sRGB defaultVal, bool morphable);
 template void container::addParam<bool>(std::string name, bool defaultVal, bool morphable);
+template void container::addParam<sRGB*>(std::string name, sRGB *defaultVal, bool morphable);
 
 //defining of params with limits
 template<class T>
@@ -226,6 +227,13 @@ varType container::Assigner(sMultiVal &multi, bool val)
 	return typeBool;
 }
 
+varType container::Assigner(sMultiVal &multi, sRGB val[256])
+{
+	clearMultiVal(multi);
+	multi.sVal = MakePaletteString(val);
+	return typeBool;
+}
+
 varType container::Getter(sMultiVal multi, double &val)
 {
 	val = multi.dVal[0];
@@ -356,6 +364,9 @@ void container::DebugPrintf(std::string name)
 			case typeBool:
 				printf("variable type 'bool'\n");
 				break;
+			case typeColorPalette:
+				printf("variable type 'colorPalette'\n");
+				break;
 		}
 	}
 	else
@@ -383,4 +394,20 @@ void container::clearMultiVal(sMultiVal &multiVal)
 	multiVal.dVal[2] = 0.0;
 	multiVal.dVal[3] = 0.0;
 	multiVal.sVal.clear();
+}
+
+std::string container::MakePaletteString(sRGB palette[256])
+{
+	int length;
+	int pointer = 0;
+	char *paletteString = new char[257 * 7];
+	for (int i = 0; i < 256; i++)
+	{
+		int colour = palette[i].R * 65536 + palette[i].G * 256 + palette[i].B;
+		colour = colour & 0x00FFFFFF;
+		length = sprintf(&paletteString[pointer], "%x ", colour);
+		pointer += length;
+	}
+	std::string out(paletteString);
+	return out;
 }

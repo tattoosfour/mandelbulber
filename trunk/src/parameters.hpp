@@ -21,7 +21,7 @@ namespace parameters
 {
 enum varType
 {
-	typeInt, typeDouble, typeString, typeVector3, typeRgb, typeBool
+	typeInt, typeDouble, typeString, typeVector3, typeRgb, typeBool, typeColorPalette
 };
 
 struct sMultiVal
@@ -63,14 +63,17 @@ private:
 	varType Assigner(sMultiVal &multi, CVector3 val);
 	varType Assigner(sMultiVal &multi, sRGB val);
 	varType Assigner(sMultiVal &multi, bool val);
+	varType Assigner(sMultiVal &multi, sRGB val[256]);
 	varType Getter(sMultiVal multi, double &val);
 	varType Getter(sMultiVal multi, int &val);
 	varType Getter(sMultiVal multi, std::string &val);
 	varType Getter(sMultiVal multi, CVector3 &val);
 	varType Getter(sMultiVal multi, sRGB &val);
 	varType Getter(sMultiVal multi, bool &val);
+	varType Getter(sMultiVal multi, sRGB val[256]);
 	std::string nameWithIndex(std::string *str, int index);
 	void clearMultiVal(sMultiVal &multiVal);
+	std::string MakePaletteString(sRGB palette[256]);
 
 	std::map<std::string, sRecord> myMap;
 };
