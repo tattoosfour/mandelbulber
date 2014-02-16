@@ -9,6 +9,7 @@
  /
  ********************************************************/
 #include "fractparams.hpp"
+#include "interface.h"
 
 void InitParams(parameters::container *par)
 {
@@ -16,21 +17,21 @@ void InitParams(parameters::container *par)
 	par->addParam("image_width", 800, 32, 1000000, false);
 	par->addParam("image_height", 600, 32, 1000000, false);
 	par->addParam("tiles", 1, 1, 64, false);
+	par->addParam("tile_no", 0, false);
 
 	//animation
 	par->addParam("start_frame", 0, 0, 99999, false);
 	par->addParam("end_frame", 1000, 0, 99999, false);
 	par->addParam("frames_per_keyframe", 100, 1, 99999, false);
+	par->addParam("frame_no", 0, 0, 99999, false);
 
+	//camera
 	par->addParam("view_point", CVector3(0.0, 0.0, 0.0), true);
 	par->addParam("angle_alpha", -20.0, true);
 	par->addParam("angle_beta", 30.0, true);
 	par->addParam("angle_gamma", 0.0, true);
 	par->addParam("zoom", 2.5, 0.0, 1e15, true);
 	par->addParam("perspective", 0.5, 0.0, 100.0, true);
-	par->addParam("limit_min", CVector3(-10.0, -10.0, -10.0), true);
-	par->addParam("limit_max", CVector3(10.0, 10.0, 10.0), true);
-	par->addParam("limits_enabled", false, true);
 	par->addParam("fish_eye", false, true);
 	par->addParam("fish_eye_180cut", false, true);
 	par->addParam("stereo_eye_distance", 1.0, true);
@@ -50,6 +51,14 @@ void InitParams(parameters::container *par)
 	par->addParam("analityc_DE_mode", true, false);
 	par->addParam("DE_factor", 1.0, 0.0, 1e15, true);
 	par->addParam("slow_shading", false, true);
+	par->addParam("view_distance_max", 50.0, 0.0, 1e15, true);
+	par->addParam("view_distance_min", 1e-15, 1e-15, 1e15, true);
+	par->addParam("limit_min", CVector3(-10.0, -10.0, -10.0), true);
+	par->addParam("limit_max", CVector3(10.0, 10.0, 10.0), true);
+	par->addParam("limits_enabled", false, true);
+	par->addParam("interior_mode", false, true);
+	par->addParam("linear_DE_mode", false, true);
+	par->addParam("constant_DE_threshold", false, true);
 
 	//foldings
 	par->addParam("tglad_folding_mode", false, true);
@@ -58,25 +67,32 @@ void InitParams(parameters::container *par)
 	par->addParam("spherical_folding_mode", false, true);
 	par->addParam("spherical_folding_fixed", 1.0, true);
 	par->addParam("spherical_folding_min", 0.5, true);
-	par->addParam("IFS_folding_mode", false, true);
+	par->addParam("c_add", -1.3, true);
 
 	//image effects
 	par->addParam("brightness", 1.0, 0.0, 1e15, true);
 	par->addParam("contrast", 1.0, 0.0, 1e15, true);
 	par->addParam("gamma", 1.0, 0.0, 1e15, true);
 	par->addParam("hdr", false, true);
-	par->addParam("ambient", 0.0, true);
-	par->addParam("reflect", 0.0, true);
-	par->addParam("shadows_intensity", 0.7, true);
+	par->addParam("ambient", 0.0, 0.0, 1e15, true);
+	par->addParam("reflect", 0.0, 0.0, 1e15, true);
+	par->addParam("shadows_intensity", 0.7, 0.0, 1e15, true);
 	par->addParam("shadows_cone_angle", 1.0, 0.0, 180.0, true);
-	par->addParam("ambient_occlusion", 1.0, true);
+	par->addParam("ambient_occlusion", 1.0, 0.0, 1e15, true);
 	par->addParam("ambient_occlusion_quality", 4, 1, 10, true);
 	par->addParam("ambient_occlusion_fast_tune", 1.0, true);
 	par->addParam("ambient_occlusion_enabled", false, true);
 	par->addParam("fast_ambient_occlusion_mode", false, true);
-	par->addParam("shading", 1.0, true);
-	par->addParam("specular", 1.0, true);
-	par->addParam("glow_intensity", 0.0, true);
+	par->addParam("shading", 1.0, 0.0, 1e15, true);
+	par->addParam("specular", 1.0, 0.0, 1e15, true);
+	par->addParam("glow_intensity", 0.0, 0.0, 1e15, true);
+	par->addParam("textured_background", false, true);
+	par->addParam("background_as_fuldome", false, false);
+	par->addParam("shadows_enabled", true, true);
+	par->addParam("penetrating_lights", true, true);
+	par->addParam("raytraced_reflections", true, true);
+	par->addParam("reflections_max", 5, 0, 10, false);
+
 	par->addParam("glow_color", 1, (sRGB){40984, 44713, 49490}, true);
 	par->addParam("glow_color", 2, (sRGB){57192, 60888, 62408}, true);
 	par->addParam("background_color", 1, (sRGB){0, 38306, 65535}, true);
@@ -85,9 +101,15 @@ void InitParams(parameters::container *par)
 	par->addParam("fog_color", 1, (sRGB){20000, 20000, 20000}, true);
 	par->addParam("fog_color", 2, (sRGB){0, 30000, 65535}, true);
 	par->addParam("fog_color", 3, (sRGB){65535, 65535, 65535}, true);
-	par->addParam("textured_background", false, true);
-	par->addParam("background_as_fuldome", false, false);
-	par->addParam("shadows_enabled", true, true);
+
+	par->addParam("volumetric_fog_density", 0.0, 0.0, 1e15, true);
+	par->addParam("volumetric_fog_colour_1_distance", 1.0, true);
+	par->addParam("volumetric_fog_colour_2_distance", 2.0, true);
+	par->addParam("volumetric_fog_distance_factor", 1.0, true);
+
+	par->addParam("iteration_fog_enable", false, true);
+	par->addParam("iteration_fog_opacity", 1000.0, 0.0, 1e15, true);
+	par->addParam("iteration_fog_opacity_trim", 4.0, 0.0, 1000.0, true);
 
 	//coloring
 	par->addParam("fractal_color", true, true);
@@ -138,6 +160,21 @@ void InitParams(parameters::container *par)
 	par->addParam("aux_light_predefined_colour", 3, (sRGB){64884, 64928, 48848}, true);
 	par->addParam("aux_light_predefined_colour", 4, (sRGB){52704, 62492, 45654}, true);
 
+	for(int i=0; i<5; i++)
+	{
+		par->addParam("volumetric_light_intensity", i, 100.0, true);
+		par->addParam("volumetric_light_enabled", i, false, true);
+	}
+
+	//fake lights
+	par->addParam("fake_lights_enabled", false, true);
+	par->addParam("fake_lights_intensity", 1.0, true);
+	par->addParam("fake_lights_visibility", 1.0, true);
+	par->addParam("fake_lights_visibility_size", 5.0, true);
+	par->addParam("fake_lights_orbit_trap", CVector3(2.0, 0.0, 0.0), true);
+	par->addParam("fake_lights_min_iter", 1, 0, 250, true);
+	par->addParam("fake_lights_max_iter", 2, 0, 250, true);
+
 	//IFS formula
 	par->addParam("IFS_scale", 2.0, true);
 	par->addParam("IFS_rot_alpha", 0.0, true);
@@ -173,6 +210,108 @@ void InitParams(parameters::container *par)
 	}
 	par->addParam("hybrid_cyclic", false, true);
 
+	//Mandelbox
+	par->addParam("mandelbox_scale", 2.0, true);
+	par->addParam("mandelbox_folding_limit", 1.0, true);
+	par->addParam("mandelbox_folding_value", 2.0, true);
+	par->addParam("mandelbox_folding_min_radius", 0.5, true);
+	par->addParam("mandelbox_folding_fixed_radius", 1.0, true);
+	par->addParam("mandelbox_sharpness", 3.0, true);
+	par->addParam("mandelbox_offset", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_main", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_x_neg", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_x_pos", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_y_neg", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_y_pos", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_z_neg", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_rotation_z_pos", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("mandelbox_color", CVector3(0.03, 0.05, 0.07), true);
+	par->addParam("mandelbox_color_R", 0.0, true);
+	par->addParam("mandelbox_color_Sp1", 0.2, true);
+	par->addParam("mandelbox_color_Sp2", 0.2, true);
+	par->addParam("mandelbox_rotation_enabled", false, true);
+	par->addParam("mandelbox_fold_mode", true, true);
+	par->addParam("mandelbox_solid", 1.0, true);
+	par->addParam("mandelbox_melt", 0.0, true);
+
+	par->addParam("mandelbox_vary_scale_vary", 0.1, true);
+	par->addParam("mandelbox_vary_fold", 1.0, true);
+	par->addParam("mandelbox_vary_minr", 0.5, true);
+	par->addParam("mandelbox_vary_rpower", 1.0, true);
+	par->addParam("mandelbox_vary_wadd", 0.0, true);
+
+	//FoldingIntPow
+	par->addParam("FoldingIntPow_folding_factor", 2.0, true);
+	par->addParam("FoldingIntPow_z_factor", 5.0, true);
+
+	//primitives
+	par->addParam("primitive_only_plane", false, false);
+
+	par->addParam("primitive_plane_enabled", false, false);
+	par->addParam("primitive_plane_centre", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("primitive_plane_normal", CVector3(0.0, 0.0, -1.0), true);
+	par->addParam("primitive_plane_colour", (sRGB){20000, 20000, 20000}, true);
+	par->addParam("primitive_plane_reflect", 0.0, 0.0, 1e15, true);
+
+	par->addParam("primitive_box_enabled", false, true);
+	par->addParam("primitive_box_centre", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("primitive_box_size", CVector3(2.0, 2.0, 2.0), true);
+	par->addParam("primitive_box_colour", (sRGB){20000, 20000, 20000}, true);
+	par->addParam("primitive_box_reflect", 0.0, 0.0, 1e15, true);
+
+	par->addParam("primitive_invertedBox_enabled", false, true);
+	par->addParam("primitive_invertedBox_centre", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("primitive_invertedBox_size", CVector3(10.0, 10.0, 10.0), true);
+	par->addParam("primitive_invertedBox_colour", (sRGB){20000, 20000, 20000}, true);
+	par->addParam("primitive_invertedBox_reflect", 0.0, 0.0, 1e15, true);
+
+	par->addParam("primitive_sphere_enabled", false, true);
+	par->addParam("primitive_sphere_centre", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("primitive_sphere_radius", 1.5, true);
+	par->addParam("primitive_sphere_colour", (sRGB){20000, 20000, 20000}, true);
+	par->addParam("primitive_sphere_reflect", 0.0, 0.0, 1e15, true);
+
+	par->addParam("primitive_invertedSphere_enabled", false, true);
+	par->addParam("primitive_invertedSphere_centre", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("primitive_invertedSphere_radius", 5.0, true);
+	par->addParam("primitive_invertedSphere_colour", (sRGB){20000, 20000, 20000}, true);
+	par->addParam("primitive_invertedSphere_reflect", 0.0, 0.0, 1e15, true);
+
+	par->addParam("primitive_water_enabled", false, true);
+	par->addParam("primitive_water_level", 0.0, true);
+	par->addParam("primitive_water_amplitude", 0.02, true);
+	par->addParam("primitive_water_length", 0.2, true);
+	par->addParam("primitive_water_iterations", 5, 1, 250, true);
+	par->addParam("primitive_water_rotation", 0.0, true);
+	par->addParam("primitive_water_anim_speed", 0.1, true);
+	par->addParam("primitive_water_colour", (sRGB){0, 5000, 10000}, true);
+	par->addParam("primitive_water_reflect", 0.7, 0.0, 1e15, true);
+
+	//OpenCL Support
+#ifdef CLSUPPORT
+	par->addParam("ocl_custom_DE_mode", false, false);
+	par->addParam("ocl_custom_formula_name", std::string("example"), false);
+	for (int i = 0; i < 15; ++i)
+	{
+		par->addParam("ocl_custom_par", i, 0.0, true);
+	}
+	par->addParam("ocl_delta_DE_step", 1e-5, 1e-10, 1e10, true);
+	par->addParam("ocl_DOF_method", 0, false);
+#endif
+
+	//files
+	par->addParam("file_destination", std::string("images/image"), false);
+	par->addParam("file_background", (std::string(sharedDir)+"textures/background.jpg"), false);
+	par->addParam("file_envmap", (std::string(sharedDir)+"textures/envmap.jpg"), false);
+	par->addParam("file_lightmap", (std::string(sharedDir)+"textures/lightmap.jpg"), false);
+	par->addParam("file_animation_path", std::string("paths/path.txt"), false);
+	par->addParam("file_keyframes", std::string("keyframes/keyframe"), false);
+
+	//color palette
+	sRGB palette[256];
+	srand(par->Get<int>("coloring_random_seed"));
+	NewPalette(palette, 1.0);
+	par->addParam("palette", palette, false);
 }
 
 
