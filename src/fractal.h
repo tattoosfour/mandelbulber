@@ -22,6 +22,8 @@ const int IFS_VECTOR_COUNT = 9;
 const int HYBRID_COUNT = 5;
 const int MANDELBOX_FOLDS = 2;
 
+namespace fractal
+{
 enum enumFractalFormula
 {
 	none = 0,
@@ -71,33 +73,19 @@ enum enumCalculationMode
 
 enum enumGeneralizedFoldBoxType
 {
-	foldTet = 0,
-	foldCube = 1,
-	foldOct = 2,
-	foldDodeca = 3,
-	foldOctCube = 4,
-	foldIcosa = 5,
-	foldBox6 = 6,
-	foldBox5 = 7
+	foldTet = 0, foldCube = 1, foldOct = 2, foldDodeca = 3, foldOctCube = 4, foldIcosa = 5, foldBox6 = 6, foldBox5 = 7
 };
 
 enum enumObjectType
 {
-	objFractal = 0,
-	objPlane = 1,
-	objWater = 2,
-	objSphere = 3,
-	objSphereInv = 4,
-	objBox = 5,
-	objBoxInv = 6
+	objFractal = 0, objPlane = 1, objWater = 2, objSphere = 3, objSphereInv = 4, objBox = 5, objBoxInv = 6
 };
 
 enum enumOCLDEMode
 {
-	calculated = 0,
-	deltaDE = 1,
-	noDE = 2
+	calculated = 0, deltaDE = 1, noDE = 2
 };
+}
 
 struct sFractalIFSD
 {
@@ -117,7 +105,7 @@ struct sFractalIFSD
 
 struct sFractalGeneralizedFoldBox
 {
-	enum enumGeneralizedFoldBoxType type;
+	fractal::enumGeneralizedFoldBoxType type;
 	CVector3 Nv_tet[4];
 	CVector3 Nv_cube[6];
 	CVector3 Nv_oct[8];
@@ -268,15 +256,15 @@ struct sFractal
 	bool useCustomOCLFormula;
 	bool normalCalculationMode;
 
-	enumFractalFormula formula;
+	fractal::enumFractalFormula formula;
 
 	int hybridIters[HYBRID_COUNT];
-	enumFractalFormula hybridFormula[HYBRID_COUNT];
+	fractal::enumFractalFormula hybridFormula[HYBRID_COUNT];
 
-	std::vector<enumFractalFormula> formulaSequence;
+	std::vector<fractal::enumFractalFormula> formulaSequence;
 	std::vector<double> hybridPowerSequence;
 	char customOCLFormulaName[100];
-	enumOCLDEMode customOCLFormulaDEMode;
+	fractal::enumOCLDEMode customOCLFormulaDEMode;
 
 	sFractalIFS IFS;
 	sFractalMandelbox mandelbox;
@@ -286,7 +274,7 @@ struct sFractal
 	int frameNo;
 
 	int itersOut;
-	enumObjectType objectOut;
+	fractal::enumObjectType objectOut;
 
 	int fakeLightsMinIter;
 	int fakeLightsMaxIter;

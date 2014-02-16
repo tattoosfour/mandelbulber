@@ -142,7 +142,7 @@ struct sParamRender
 	cTexture *backgroundTexture;
 	cTexture *envmapTexture;
 	cTexture *lightmapTexture;
-	std::vector<enumFractalFormula> formulaSequence;
+	std::vector<fractal::enumFractalFormula> formulaSequence;
 	std::vector<double> hybridPowerSequence;
 
 	double settingsVersion;

@@ -87,7 +87,7 @@ template void container::addParam<sRGB>(std::string name, sRGB defaultVal, sRGB 
 template<class T>
 void container::addParam(std::string name, int index, T defaultVal, bool morphable)
 {
-	if (index > 0)
+	if (index >= 0)
 	{
 		record newRecord;
 		sMultiVal multi;
@@ -122,7 +122,7 @@ template void container::addParam<bool>(std::string name, int index, bool defaul
 template<class T>
 void container::addParam(std::string name, int index, T defaultVal, T minVal, T maxVal, bool morphable)
 {
-	if (index > 0)
+	if (index >= 0)
 	{
 		record newRecord;
 		sMultiVal multi;

@@ -166,85 +166,85 @@ double atofData(const gchar *text)
 	return retval;
 }
 
-enumFractalFormula FormulaNumberGUI2Data(int formula)
+fractal::enumFractalFormula FormulaNumberGUI2Data(int formula)
 {
-	enumFractalFormula formula2 = trig_optim;
-	if (formula == 0) formula2 = none;
-	if (formula == 1) formula2 = trig_optim;
-	if (formula == 2) formula2 = fast_trig;
-	if (formula == 3) formula2 = minus_fast_trig;
-	if (formula == 4) formula2 = xenodreambuie;
-	if (formula == 5) formula2 = hypercomplex;
-	if (formula == 6) formula2 = quaternion;
-	if (formula == 7) formula2 = menger_sponge;
-	if (formula == 8) formula2 = tglad;
-	if (formula == 9) formula2 = kaleidoscopic;
-	if (formula == 10) formula2 = mandelbulb2;
-	if (formula == 11) formula2 = mandelbulb3;
-	if (formula == 12) formula2 = mandelbulb4;
-	if (formula == 13) formula2 = foldingIntPow2;
-	if (formula == 14) formula2 = smoothMandelbox;
-	if (formula == 15) formula2 = mandelboxVaryScale4D;
-	if (formula == 16) formula2 = aexion;
-	if (formula == 17) formula2 = benesi;
-	if (formula == 18) formula2 = bristorbrot;
-	if (formula == 19) formula2 = generalizedFoldBox;
-	if (formula == 20) formula2 = invertX;
-	if (formula == 21) formula2 = invertY;
-	if (formula == 22) formula2 = invertZ;
-	if (formula == 23) formula2 = invertR;
-	if (formula == 24) formula2 = sphericalFold;
-	if (formula == 25) formula2 = powXYZ;
-	if (formula == 26) formula2 = scaleX;
-	if (formula == 27) formula2 = scaleY;
-	if (formula == 28) formula2 = scaleZ;
-	if (formula == 29) formula2 = offsetX;
-	if (formula == 30) formula2 = offsetY;
-	if (formula == 31) formula2 = offsetZ;
-	if (formula == 32) formula2 = angleMultiplyX;
-	if (formula == 33) formula2 = angleMultiplyY;
-	if (formula == 34) formula2 = angleMultiplyZ;
+	fractal::enumFractalFormula formula2 = fractal::trig_optim;
+	if (formula == 0) formula2 = fractal::none;
+	if (formula == 1) formula2 = fractal::trig_optim;
+	if (formula == 2) formula2 = fractal::fast_trig;
+	if (formula == 3) formula2 = fractal::minus_fast_trig;
+	if (formula == 4) formula2 = fractal::xenodreambuie;
+	if (formula == 5) formula2 = fractal::hypercomplex;
+	if (formula == 6) formula2 = fractal::quaternion;
+	if (formula == 7) formula2 = fractal::menger_sponge;
+	if (formula == 8) formula2 = fractal::tglad;
+	if (formula == 9) formula2 = fractal::kaleidoscopic;
+	if (formula == 10) formula2 = fractal::mandelbulb2;
+	if (formula == 11) formula2 = fractal::mandelbulb3;
+	if (formula == 12) formula2 = fractal::mandelbulb4;
+	if (formula == 13) formula2 = fractal::foldingIntPow2;
+	if (formula == 14) formula2 = fractal::smoothMandelbox;
+	if (formula == 15) formula2 = fractal::mandelboxVaryScale4D;
+	if (formula == 16) formula2 = fractal::aexion;
+	if (formula == 17) formula2 = fractal::benesi;
+	if (formula == 18) formula2 = fractal::bristorbrot;
+	if (formula == 19) formula2 = fractal::generalizedFoldBox;
+	if (formula == 20) formula2 = fractal::invertX;
+	if (formula == 21) formula2 = fractal::invertY;
+	if (formula == 22) formula2 = fractal::invertZ;
+	if (formula == 23) formula2 = fractal::invertR;
+	if (formula == 24) formula2 = fractal::sphericalFold;
+	if (formula == 25) formula2 = fractal::powXYZ;
+	if (formula == 26) formula2 = fractal::scaleX;
+	if (formula == 27) formula2 = fractal::scaleY;
+	if (formula == 28) formula2 = fractal::scaleZ;
+	if (formula == 29) formula2 = fractal::offsetX;
+	if (formula == 30) formula2 = fractal::offsetY;
+	if (formula == 31) formula2 = fractal::offsetZ;
+	if (formula == 32) formula2 = fractal::angleMultiplyX;
+	if (formula == 33) formula2 = fractal::angleMultiplyY;
+	if (formula == 34) formula2 = fractal::angleMultiplyZ;
 	return formula2;
 }
 
-int FormulaNumberData2GUI(enumFractalFormula formula)
+int FormulaNumberData2GUI(fractal::enumFractalFormula formula)
 {
 	int formula2 = 0;
-	if (formula == none) formula2 = 0;
-	if (formula == trig_optim) formula2 = 1;
-	if (formula == fast_trig) formula2 = 2;
-	if (formula == minus_fast_trig) formula2 = 3;
-	if (formula == xenodreambuie) formula2 = 4;
-	if (formula == hypercomplex) formula2 = 5;
-	if (formula == quaternion) formula2 = 6;
-	if (formula == menger_sponge) formula2 = 7;
-	if (formula == tglad) formula2 = 8;
-	if (formula == kaleidoscopic) formula2 = 9;
-	if (formula == mandelbulb2) formula2 = 10;
-	if (formula == mandelbulb3) formula2 = 11;
-	if (formula == mandelbulb4) formula2 = 12;
-	if (formula == foldingIntPow2) formula2 = 13;
-	if (formula == smoothMandelbox) formula2 = 14;
-	if (formula == mandelboxVaryScale4D) formula2 = 15;
-	if (formula == aexion) formula2 = 16;
-	if (formula == benesi) formula2 = 17;
-	if (formula == bristorbrot) formula2 = 18;
-	if (formula == generalizedFoldBox) formula2 = 19;
-	if (formula == invertX) formula2 = 20;
-	if (formula == invertY) formula2 = 21;
-	if (formula == invertZ) formula2 = 22;
-	if (formula == invertR) formula2 = 23;
-	if (formula == sphericalFold) formula2 = 24;
-	if (formula == powXYZ) formula2 = 25;
-	if (formula == scaleX) formula2 = 26;
-	if (formula == scaleY) formula2 = 27;
-	if (formula == scaleZ) formula2 = 28;
-	if (formula == offsetX) formula2 = 29;
-	if (formula == offsetY) formula2 = 30;
-	if (formula == offsetZ) formula2 = 31;
-	if (formula == angleMultiplyX) formula2 = 32;
-	if (formula == angleMultiplyY) formula2 = 33;
-	if (formula == angleMultiplyZ) formula2 = 34;
+	if (formula == fractal::none) formula2 = 0;
+	if (formula == fractal::trig_optim) formula2 = 1;
+	if (formula == fractal::fast_trig) formula2 = 2;
+	if (formula == fractal::minus_fast_trig) formula2 = 3;
+	if (formula == fractal::xenodreambuie) formula2 = 4;
+	if (formula == fractal::hypercomplex) formula2 = 5;
+	if (formula == fractal::quaternion) formula2 = 6;
+	if (formula == fractal::menger_sponge) formula2 = 7;
+	if (formula == fractal::tglad) formula2 = 8;
+	if (formula == fractal::kaleidoscopic) formula2 = 9;
+	if (formula == fractal::mandelbulb2) formula2 = 10;
+	if (formula == fractal::mandelbulb3) formula2 = 11;
+	if (formula == fractal::mandelbulb4) formula2 = 12;
+	if (formula == fractal::foldingIntPow2) formula2 = 13;
+	if (formula == fractal::smoothMandelbox) formula2 = 14;
+	if (formula == fractal::mandelboxVaryScale4D) formula2 = 15;
+	if (formula == fractal::aexion) formula2 = 16;
+	if (formula == fractal::benesi) formula2 = 17;
+	if (formula == fractal::bristorbrot) formula2 = 18;
+	if (formula == fractal::generalizedFoldBox) formula2 = 19;
+	if (formula == fractal::invertX) formula2 = 20;
+	if (formula == fractal::invertY) formula2 = 21;
+	if (formula == fractal::invertZ) formula2 = 22;
+	if (formula == fractal::invertR) formula2 = 23;
+	if (formula == fractal::sphericalFold) formula2 = 24;
+	if (formula == fractal::powXYZ) formula2 = 25;
+	if (formula == fractal::scaleX) formula2 = 26;
+	if (formula == fractal::scaleY) formula2 = 27;
+	if (formula == fractal::scaleZ) formula2 = 28;
+	if (formula == fractal::offsetX) formula2 = 29;
+	if (formula == fractal::offsetY) formula2 = 30;
+	if (formula == fractal::offsetZ) formula2 = 31;
+	if (formula == fractal::angleMultiplyX) formula2 = 32;
+	if (formula == fractal::angleMultiplyY) formula2 = 33;
+	if (formula == fractal::angleMultiplyZ) formula2 = 34;
 	return formula2;
 }
 
@@ -516,7 +516,7 @@ void ReadInterface(sParamRender *params)
 		params->fractal.primitives.waterIterations = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_primitiveWaterIterations)));
 		params->fractal.primitives.waterEnable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkPrimitiveWaterEnabled));
 
-		params->fractal.genFoldBox.type = (enumGeneralizedFoldBoxType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType));
+		params->fractal.genFoldBox.type = (fractal::enumGeneralizedFoldBoxType)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType));
 
 		params->OpenCLEngine = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
 		params->OpenCLPixelsPerJob = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLPixelsPerJob)));
@@ -538,7 +538,7 @@ void ReadInterface(sParamRender *params)
 
 #ifdef CLSUPPORT
 		params->fractal.useCustomOCLFormula = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable));
-		params->fractal.customOCLFormulaDEMode = (enumOCLDEMode)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode));
+		params->fractal.customOCLFormulaDEMode = (fractal::enumOCLDEMode)gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode));
 		if(clSupport->customFormulas)
 		{
 			std::string actualName, actualFormula, actualIni;
@@ -595,30 +595,30 @@ void ReadInterface(sParamRender *params)
 		params->primitiveWaterColour = GdkColor2sRGB(color);
 
 		int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
-		if (formula == 0) params->fractal.formula = trig_optim;
-		if (formula == 1) params->fractal.formula = trig_DE;
-		if (formula == 2) params->fractal.formula = fast_trig;
-		if (formula == 3) params->fractal.formula = minus_fast_trig;
-		if (formula == 4) params->fractal.formula = xenodreambuie;
-		if (formula == 5) params->fractal.formula = hypercomplex;
-		if (formula == 6) params->fractal.formula = quaternion;
-		if (formula == 7) params->fractal.formula = menger_sponge;
-		if (formula == 8) params->fractal.formula = tglad;
-		if (formula == 9) params->fractal.formula = kaleidoscopic;
-		if (formula == 10) params->fractal.formula = mandelbulb2;
-		if (formula == 11) params->fractal.formula = mandelbulb3;
-		if (formula == 12) params->fractal.formula = mandelbulb4;
-		if (formula == 13) params->fractal.formula = foldingIntPow2;
-		if (formula == 14) params->fractal.formula = smoothMandelbox;
-		if (formula == 15) params->fractal.formula = mandelboxVaryScale4D;
-		if (formula == 16) params->fractal.formula = aexion;
-		if (formula == 17) params->fractal.formula = benesi;
-		if (formula == 18) params->fractal.formula = bristorbrot;
-		if (formula == 19) params->fractal.formula = hybrid;
-		if (formula == 20) params->fractal.formula = generalizedFoldBox;
+		if (formula == 0) params->fractal.formula = fractal::trig_optim;
+		if (formula == 1) params->fractal.formula = fractal::trig_DE;
+		if (formula == 2) params->fractal.formula = fractal::fast_trig;
+		if (formula == 3) params->fractal.formula = fractal::minus_fast_trig;
+		if (formula == 4) params->fractal.formula = fractal::xenodreambuie;
+		if (formula == 5) params->fractal.formula = fractal::hypercomplex;
+		if (formula == 6) params->fractal.formula = fractal::quaternion;
+		if (formula == 7) params->fractal.formula = fractal::menger_sponge;
+		if (formula == 8) params->fractal.formula = fractal::tglad;
+		if (formula == 9) params->fractal.formula = fractal::kaleidoscopic;
+		if (formula == 10) params->fractal.formula = fractal::mandelbulb2;
+		if (formula == 11) params->fractal.formula = fractal::mandelbulb3;
+		if (formula == 12) params->fractal.formula = fractal::mandelbulb4;
+		if (formula == 13) params->fractal.formula = fractal::foldingIntPow2;
+		if (formula == 14) params->fractal.formula = fractal::smoothMandelbox;
+		if (formula == 15) params->fractal.formula = fractal::mandelboxVaryScale4D;
+		if (formula == 16) params->fractal.formula = fractal::aexion;
+		if (formula == 17) params->fractal.formula = fractal::benesi;
+		if (formula == 18) params->fractal.formula = fractal::bristorbrot;
+		if (formula == 19) params->fractal.formula = fractal::hybrid;
+		if (formula == 20) params->fractal.formula = fractal::generalizedFoldBox;
 
 #ifdef CLSUPPORT
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable))) params->fractal.formula = ocl_custom;
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable))) params->fractal.formula = fractal::ocl_custom;
 #endif
 
 		CheckPrameters(params);
@@ -687,9 +687,9 @@ void ReadInterface(sParamRender *params)
 		params->fractal.frameNo = 0;
 	}
 
-	if (params->fractal.formula == trig_DE || params->fractal.formula == trig_optim || params->fractal.formula == menger_sponge || params->fractal.formula == kaleidoscopic
-			|| params->fractal.formula == tglad || params->fractal.formula == smoothMandelbox || params->fractal.formula == mandelboxVaryScale4D
-			|| params->fractal.formula == generalizedFoldBox) params->fractal.analitycDE = true;
+	if (params->fractal.formula == fractal::trig_DE || params->fractal.formula == fractal::trig_optim || params->fractal.formula == fractal::menger_sponge || params->fractal.formula == fractal::kaleidoscopic
+			|| params->fractal.formula == fractal::tglad || params->fractal.formula == fractal::smoothMandelbox || params->fractal.formula == fractal::mandelboxVaryScale4D
+			|| params->fractal.formula == fractal::generalizedFoldBox) params->fractal.analitycDE = true;
 	else params->fractal.analitycDE = false;
 
 	params->doubles.resolution = 1.0 / params->image_width / params->noOfTiles;
@@ -1063,7 +1063,7 @@ void WriteInterface(sParamRender *params)
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), params->fractal.customOCLFormulaDEMode);
 	params->fractal.useCustomOCLFormula = false;
-	if(params->fractal.formula == ocl_custom) params->fractal.useCustomOCLFormula = true;
+	if(params->fractal.formula == fractal::ocl_custom) params->fractal.useCustomOCLFormula = true;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkOpenClCustomEnable), params->fractal.useCustomOCLFormula);
 
 	if (params->fractal.useCustomOCLFormula)
@@ -1101,27 +1101,27 @@ void WriteInterface(sParamRender *params)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), params->fractal.genFoldBox.type);
 
 	int formula = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboFractType));
-	if (params->fractal.formula == trig_optim) formula = 0;
-	if (params->fractal.formula == trig_DE) formula = 1;
-	if (params->fractal.formula == fast_trig) formula = 2;
-	if (params->fractal.formula == minus_fast_trig) formula = 3;
-	if (params->fractal.formula == xenodreambuie) formula = 4;
-	if (params->fractal.formula == hypercomplex) formula = 5;
-	if (params->fractal.formula == quaternion) formula = 6;
-	if (params->fractal.formula == menger_sponge) formula = 7;
-	if (params->fractal.formula == tglad) formula = 8;
-	if (params->fractal.formula == kaleidoscopic) formula = 9;
-	if (params->fractal.formula == mandelbulb2) formula = 10;
-	if (params->fractal.formula == mandelbulb3) formula = 11;
-	if (params->fractal.formula == mandelbulb4) formula = 12;
-	if (params->fractal.formula == foldingIntPow2) formula = 13;
-	if (params->fractal.formula == smoothMandelbox) formula = 14;
-	if (params->fractal.formula == mandelboxVaryScale4D) formula = 15;
-	if (params->fractal.formula == aexion) formula = 16;
-	if (params->fractal.formula == benesi) formula = 17;
-	if (params->fractal.formula == bristorbrot) formula = 18;
-	if (params->fractal.formula == hybrid) formula = 19;
-	if (params->fractal.formula == generalizedFoldBox) formula = 20;
+	if (params->fractal.formula == fractal::trig_optim) formula = 0;
+	if (params->fractal.formula == fractal::trig_DE) formula = 1;
+	if (params->fractal.formula == fractal::fast_trig) formula = 2;
+	if (params->fractal.formula == fractal::minus_fast_trig) formula = 3;
+	if (params->fractal.formula == fractal::xenodreambuie) formula = 4;
+	if (params->fractal.formula == fractal::hypercomplex) formula = 5;
+	if (params->fractal.formula == fractal::quaternion) formula = 6;
+	if (params->fractal.formula == fractal::menger_sponge) formula = 7;
+	if (params->fractal.formula == fractal::tglad) formula = 8;
+	if (params->fractal.formula == fractal::kaleidoscopic) formula = 9;
+	if (params->fractal.formula == fractal::mandelbulb2) formula = 10;
+	if (params->fractal.formula == fractal::mandelbulb3) formula = 11;
+	if (params->fractal.formula == fractal::mandelbulb4) formula = 12;
+	if (params->fractal.formula == fractal::foldingIntPow2) formula = 13;
+	if (params->fractal.formula == fractal::smoothMandelbox) formula = 14;
+	if (params->fractal.formula == fractal::mandelboxVaryScale4D) formula = 15;
+	if (params->fractal.formula == fractal::aexion) formula = 16;
+	if (params->fractal.formula == fractal::benesi) formula = 17;
+	if (params->fractal.formula == fractal::bristorbrot) formula = 18;
+	if (params->fractal.formula == fractal::hybrid) formula = 19;
+	if (params->fractal.formula == fractal::generalizedFoldBox) formula = 20;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
