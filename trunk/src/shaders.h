@@ -48,7 +48,7 @@ struct sShaderInputData
 	double depth;
 	sStep *stepBuff;
 	int stepCount;
-	enumObjectType objectType;
+	fractal::enumObjectType objectType;
 };
 
 extern sLight *Lights;

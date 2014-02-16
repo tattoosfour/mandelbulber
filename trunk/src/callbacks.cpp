@@ -1272,7 +1272,7 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 {
 	sParamRender params;
 	ReadInterface(&params);
-	enumFractalFormula formula = params.fractal.formula;
+	fractal::enumFractalFormula formula = params.fractal.formula;
 
 	/*
 	if (formula == trig_DE || formula == trig_optim)
@@ -1286,15 +1286,15 @@ void ChangedComboFormula(GtkWidget *widget, gpointer data)
 	}
 	*/
 
-	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == tglad || formula == smoothMandelbox || formula == mandelboxVaryScale4D || formula == generalizedFoldBox || formula == hybrid);
-	gtk_widget_set_sensitive(Interface.tab_box_IFS, formula == kaleidoscopic || params.fractal.IFS.foldingMode || formula == hybrid);
-	gtk_widget_set_sensitive(Interface.edit_power, formula == trig_DE || formula == trig_optim || formula == xenodreambuie || formula == mandelbulb4);
-	gtk_widget_set_sensitive(Interface.edit_cadd, formula == aexion || formula == hybrid);
-	gtk_widget_set_sensitive(Interface.tab_box_hybrid, formula == hybrid);
-	gtk_widget_set_sensitive(Interface.edit_mandelboxSharpness, formula == smoothMandelbox);
-	gtk_widget_set_sensitive(Interface.comboGeneralizedFoldBoxType, formula == generalizedFoldBox);
-	gtk_widget_set_sensitive(Interface.edit_mandelboxSolid, formula == generalizedFoldBox);
-	gtk_widget_set_sensitive(Interface.edit_mandelboxMelt, formula == generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.tab_box_mandelbox, formula == fractal::tglad || formula == fractal::smoothMandelbox || formula == fractal::mandelboxVaryScale4D || formula == fractal::generalizedFoldBox || formula == fractal::hybrid);
+	gtk_widget_set_sensitive(Interface.tab_box_IFS, formula == fractal::kaleidoscopic || params.fractal.IFS.foldingMode || formula == fractal::hybrid);
+	gtk_widget_set_sensitive(Interface.edit_power, formula == fractal::trig_DE || formula == fractal::trig_optim || formula == fractal::xenodreambuie || formula == fractal::mandelbulb4);
+	gtk_widget_set_sensitive(Interface.edit_cadd, formula == fractal::aexion || formula == fractal::hybrid);
+	gtk_widget_set_sensitive(Interface.tab_box_hybrid, formula == fractal::hybrid);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxSharpness, formula == fractal::smoothMandelbox);
+	gtk_widget_set_sensitive(Interface.comboGeneralizedFoldBoxType, formula == fractal::generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxSolid, formula == fractal::generalizedFoldBox);
+	gtk_widget_set_sensitive(Interface.edit_mandelboxMelt, formula == fractal::generalizedFoldBox);
 	gtk_widget_set_sensitive(Interface.comboFractType, true);
 }
 
@@ -1673,7 +1673,7 @@ void CreateFormulaSequence(sFractal &fractal)
 	{
 		for (int hybrid_n = 0; hybrid_n < HYBRID_COUNT - 1; ++hybrid_n)
 		{
-			if (fractal.hybridFormula[hybrid_n] == none) continue;
+			if (fractal.hybridFormula[hybrid_n] == fractal::none) continue;
 			for (int i = 0; i < fractal.hybridIters[hybrid_n]; ++i)
 			{
 				if (number < fractal.doubles.N)
@@ -1688,7 +1688,7 @@ void CreateFormulaSequence(sFractal &fractal)
 		int temp_end = (int)fractal.doubles.N;
 		if (fractal.hybridCyclic) temp_end = fractal.hybridIters[HYBRID_COUNT - 1];
 
-		if (fractal.hybridFormula[HYBRID_COUNT - 1] != none) for (int i = 0; i < temp_end; i++)
+		if (fractal.hybridFormula[HYBRID_COUNT - 1] != fractal::none) for (int i = 0; i < temp_end; i++)
 		{
 			if (number < (int)fractal.doubles.N)
 			{
