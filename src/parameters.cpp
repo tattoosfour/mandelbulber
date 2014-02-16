@@ -28,8 +28,36 @@ container::~container()
 	myMap.clear();
 }
 
-template <class T>
-void container::addParam(std::string name, T defaultVal)
+//defining of params without limits
+template<class T>
+void container::addParam(std::string name, T defaultVal, bool morphable)
+{
+	record newRecord;
+	sMultiVal multi;
+	newRecord.type = Assigner(multi, defaultVal);
+	newRecord.actualVal = multi;
+	newRecord.defaultVal = multi;
+	newRecord.morphable = morphable;
+	newRecord.limitsDefined = false;
+
+	std::pair<std::map<std::string, record>::iterator, bool> ret;
+	ret = myMap.insert(std::pair<std::string, record>(name, newRecord));
+
+	if (ret.second == false)
+	{
+		std::cerr << "addParam(): element '" << name << "' already existed" << std::endl;
+	}
+}
+template void container::addParam<double>(std::string name, double defaultVal, bool morphable);
+template void container::addParam<int>(std::string name, int defaultVal, bool morphable);
+template void container::addParam<std::string>(std::string name, std::string defaultVal, bool morphable);
+template void container::addParam<CVector3>(std::string name, CVector3 defaultVal, bool morphable);
+template void container::addParam<sRGB>(std::string name, sRGB defaultVal, bool morphable);
+template void container::addParam<bool>(std::string name, bool defaultVal, bool morphable);
+
+//defining of params with limits
+template<class T>
+void container::addParam(std::string name, T defaultVal, T minVal, T maxVal, bool morphable)
 {
 	record newRecord;
 	sMultiVal multi;
@@ -37,21 +65,94 @@ void container::addParam(std::string name, T defaultVal)
 	newRecord.actualVal = multi;
 	newRecord.defaultVal = multi;
 
-	std::pair<std::map<std::string,record>::iterator,bool> ret;
-	ret = myMap.insert(std::pair<std::string,record>(name,newRecord));
+	Assigner(newRecord.minVal, minVal);
+	Assigner(newRecord.maxVal, maxVal);
+	newRecord.morphable = morphable;
+	newRecord.limitsDefined = true;
 
-  if (ret.second==false) {
-    std::cerr << "addParam(): element '" << name << "' already existed" << std::endl;
-  }
+	std::pair<std::map<std::string, record>::iterator, bool> ret;
+	ret = myMap.insert(std::pair<std::string, record>(name, newRecord));
+
+	if (ret.second == false)
+	{
+		std::cerr << "addParam(): element '" << name << "' already existed" << std::endl;
+	}
 }
+template void container::addParam<double>(std::string name, double defaultVal, double minVal, double maxVal, bool morphable);
+template void container::addParam<int>(std::string name, int defaultVal, int minVal, int maxVal, bool morphable);
+template void container::addParam<CVector3>(std::string name, CVector3 defaultVal, CVector3 minVal, CVector3 maxVal, bool morphable);
+template void container::addParam<sRGB>(std::string name, sRGB defaultVal, sRGB minVal, sRGB maxVal, bool morphable);
 
-// force template instantiation
-template void container::addParam<double>(std::string name, double defaultVal);
-template void container::addParam<int>(std::string name, int defaultVal);
-template void container::addParam<std::string>(std::string name, std::string defaultVal);
-template void container::addParam<CVector3>(std::string name, CVector3 defaultVal);
-template void container::addParam<sRGB>(std::string name, sRGB defaultVal);
-template void container::addParam<bool>(std::string name, bool defaultVal);
+//defining of params without limits and with index
+template<class T>
+void container::addParam(std::string name, int index, T defaultVal, bool morphable)
+{
+	if (index > 0)
+	{
+		record newRecord;
+		sMultiVal multi;
+		newRecord.type = Assigner(multi, defaultVal);
+		newRecord.actualVal = multi;
+		newRecord.defaultVal = multi;
+		newRecord.morphable = morphable;
+		newRecord.limitsDefined = false;
+
+		std::string indexName = nameWithIndex(&name, index);
+		std::pair<std::map<std::string, record>::iterator, bool> ret;
+		ret = myMap.insert(std::pair<std::string, record>(indexName, newRecord));
+
+		if (ret.second == false)
+		{
+			std::cerr << "addParam(): element '" << indexName << "' already existed" << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "addParam(): element '" << name << "' has negative index (" << index << ")" << std::endl;
+	}
+}
+template void container::addParam<double>(std::string name, int index, double defaultVal, bool morphable);
+template void container::addParam<int>(std::string name, int index, int defaultVal, bool morphable);
+template void container::addParam<std::string>(std::string name, int index, std::string defaultVal, bool morphable);
+template void container::addParam<CVector3>(std::string name, int index, CVector3 defaultVal, bool morphable);
+template void container::addParam<sRGB>(std::string name, int index, sRGB defaultVal, bool morphable);
+template void container::addParam<bool>(std::string name, int index, bool defaultVal, bool morphable);
+
+//defining of params with limits and index
+template<class T>
+void container::addParam(std::string name, int index, T defaultVal, T minVal, T maxVal, bool morphable)
+{
+	if (index > 0)
+	{
+		record newRecord;
+		sMultiVal multi;
+		newRecord.type = Assigner(multi, defaultVal);
+		newRecord.actualVal = multi;
+		newRecord.defaultVal = multi;
+
+		Assigner(newRecord.minVal, minVal);
+		Assigner(newRecord.maxVal, maxVal);
+		newRecord.morphable = morphable;
+		newRecord.limitsDefined = true;
+
+		std::string indexName = nameWithIndex(&name, index);
+		std::pair<std::map<std::string, record>::iterator, bool> ret;
+		ret = myMap.insert(std::pair<std::string, record>(indexName, newRecord));
+
+		if (ret.second == false)
+		{
+			std::cerr << "addParam(): element '" << indexName << "' already existed" << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "addParam(): element '" << name << "' has negative index (" << index << ")" << std::endl;
+	}
+}
+template void container::addParam<double>(std::string name, int index, double defaultVal, double minVal, double maxVal, bool morphable);
+template void container::addParam<int>(std::string name, int index, int defaultVal, int minVal, int maxVal, bool morphable);
+template void container::addParam<CVector3>(std::string name, int index, CVector3 defaultVal, CVector3 minVal, CVector3 maxVal, bool morphable);
+template void container::addParam<sRGB>(std::string name, int index, sRGB defaultVal, sRGB minVal, sRGB maxVal, bool morphable);
 
 varType container::Assigner(sMultiVal &multi, double val)
 {
@@ -61,7 +162,7 @@ varType container::Assigner(sMultiVal &multi, double val)
 	char sbuff[100];
 	snprintf(sbuff, 100, "%.16lg", val);
 	multi.sVal = std::string(sbuff);
-	multi.cVal = (sRGB) {0, 0, 0};
+	multi.cVal = (sRGB ) { 0, 0, 0 };
 	multi.bVal = val;
 	return typeDouble;
 }
@@ -128,7 +229,7 @@ varType container::Assigner(sMultiVal &multi, bool val)
 	char sbuff[100];
 	snprintf(sbuff, 100, "%d", val);
 	multi.sVal = std::string(sbuff);
-	multi.cVal = (sRGB) {0, 0, 0};
+	multi.cVal = (sRGB ) { 0, 0, 0 };
 	multi.bVal = val;
 	return typeBool;
 }
@@ -169,16 +270,16 @@ varType container::Getter(sMultiVal multi, bool &val)
 	return typeBool;
 }
 
-template <class T>
+template<class T>
 void container::Set(std::string name, T val)
 {
 	std::map<std::string, record>::iterator it;
 	it = myMap.find(name);
-	if(it != myMap.end())
+	if (it != myMap.end())
 	{
 		sMultiVal multi;
 		varType type = Assigner(multi, val);
-		if(it->second.type == type)
+		if (it->second.type == type)
 		{
 			it->second.actualVal = multi;
 		}
@@ -201,19 +302,19 @@ template void container::Set<CVector3>(std::string name, CVector3 val);
 template void container::Set<sRGB>(std::string name, sRGB val);
 template void container::Set<bool>(std::string name, bool val);
 
-template <class T>
+template<class T>
 T container::Get(std::string name)
 {
 	std::map<std::string, record>::iterator it;
 	it = myMap.find(name);
 	T val;
-	if(it != myMap.end())
+	if (it != myMap.end())
 	{
 		record rec = it->second;
 		sMultiVal multi = rec.actualVal;
 		varType type = Getter(multi, val);
 #ifdef _PARAM_DEBUG
-		if(it->second.type != type)
+		if (it->second.type != type)
 		{
 			std::cerr << "Get(): element '" << name << "' gave value of not default type" << std::endl;
 		}
@@ -241,7 +342,7 @@ void container::DebugPrintf(std::string name)
 	printf("vector3 = %.16lg; %.16lg; %.16lg\n", rec.actualVal.vVal.x, rec.actualVal.vVal.y, rec.actualVal.vVal.z);
 	printf("string = %s\n", rec.actualVal.sVal.c_str());
 	printf("color = %x %x %x\n", rec.actualVal.cVal.R, rec.actualVal.cVal.G, rec.actualVal.cVal.B);
-	switch(rec.type)
+	switch (rec.type)
 	{
 		case typeInt:
 			printf("variable type 'int'\n");
@@ -262,4 +363,12 @@ void container::DebugPrintf(std::string name)
 			printf("variable type 'bool'\n");
 			break;
 	}
+}
+
+std::string container::nameWithIndex(std::string *str, int index)
+{
+	char name[256];
+	sprintf(name, "%s_%d", str->c_str(), index);
+	std::string out(name);
+	return out;
 }

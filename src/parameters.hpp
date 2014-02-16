@@ -39,6 +39,10 @@ struct record
 	varType type;
 	sMultiVal actualVal;
 	sMultiVal defaultVal;
+	sMultiVal minVal;
+	sMultiVal maxVal;
+	bool morphable;
+	bool limitsDefined;
 };
 
 class container
@@ -46,7 +50,10 @@ class container
 public:
 	container();
 	~container();
-	template <class T> void addParam(std::string name, T defaultVal);
+	template <class T> void addParam(std::string name, T defaultVal, bool morphable);
+	template <class T> void addParam(std::string name, T defaultVal, T minVal, T maxVal, bool morphable);
+	template <class T> void addParam(std::string name, int index, T defaultVal, bool morphable);
+	template <class T> void addParam(std::string name, int index, T defaultVal, T minVal, T maxVal, bool morphable);
 	template <class T> void Set(std::string name, T val);
 	template <class T> T Get(std::string name);
 
@@ -65,6 +72,7 @@ private:
 	varType Getter(sMultiVal multi, CVector3 &val);
 	varType Getter(sMultiVal multi, sRGB &val);
 	varType Getter(sMultiVal multi, bool &val);
+	std::string nameWithIndex(std::string *str, int index);
 
 	std::map<std::string, record> myMap;
 };
