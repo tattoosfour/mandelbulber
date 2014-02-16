@@ -26,15 +26,12 @@ enum varType
 
 struct sMultiVal
 {
-	double dVal;
-	int iVal;
-	CVector3 vVal;
+	double dVal[4];
+	int iVal[4];
 	std::string sVal;
-	sRGB cVal;
-	bool bVal;
 };
 
-struct record
+struct sRecord
 {
 	varType type;
 	sMultiVal actualVal;
@@ -73,8 +70,9 @@ private:
 	varType Getter(sMultiVal multi, sRGB &val);
 	varType Getter(sMultiVal multi, bool &val);
 	std::string nameWithIndex(std::string *str, int index);
+	void clearMultiVal(sMultiVal &multiVal);
 
-	std::map<std::string, record> myMap;
+	std::map<std::string, sRecord> myMap;
 };
 
 }

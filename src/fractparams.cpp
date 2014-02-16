@@ -31,6 +31,10 @@ void InitParams(parameters::container *par)
 	par->addParam("limit_min", CVector3(-10.0, -10.0, -10.0), true);
 	par->addParam("limit_max", CVector3(10.0, 10.0, 10.0), true);
 	par->addParam("limits_enabled", false, true);
+	par->addParam("fish_eye", false, true);
+	par->addParam("fish_eye_180cut", false, true);
+	par->addParam("stereo_eye_distance", 1.0, true);
+	par->addParam("stereo_enabled", false, true);
 
 	//general fractal and engine
 	par->addParam("formula", (int)fractal::trig_optim, false);
@@ -158,10 +162,17 @@ void InitParams(parameters::container *par)
 	}
 
 	//Hybrid formula
-	for(int i = 0; i < HYBRID_COUNT; i++)
+	for(int i = 1; i <= HYBRID_COUNT; i++)
 	{
-		par->addParam("hybrid_formula", i, (int)fractal::none, true);
+		if(i != HYBRID_COUNT)
+			par->addParam("hybrid_formula", i, (int)fractal::none, false);
+		else
+			par->addParam("hybrid_formula", i, (int)fractal::fast_trig, false);
+		par->addParam("hybrid_iterations", i, 1, true);
+		par->addParam("hybrid_power", i, 2.0, true);
 	}
+	par->addParam("hybrid_cyclic", false, true);
+
 }
 
 
