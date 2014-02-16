@@ -206,8 +206,6 @@ void SaveSettings(const char *filename, const sParamRender& params, bool compare
 	fprintfInt(fileSettings, "fog_colour_3_R", params.fogColour3.R, 65535, compare);
 	fprintfInt(fileSettings, "fog_colour_3_G", params.fogColour3.G, 65535, compare);
 	fprintfInt(fileSettings, "fog_colour_3_B", params.fogColour3.B, 65535, compare);
-	fprintfInt(fileSettings, "background_color_1_G", params.background_color1.G, 38306, compare);
-	fprintfInt(fileSettings, "background_color_1_B", params.background_color1.B, 65535, compare);
 	fprintfInt(fileSettings, "textured_background", params.texturedBackground, false, compare);
 	fprintfInt(fileSettings, "background_as_fuldome", params.background_as_fulldome, false, compare);
 	fprintfInt(fileSettings, "shadows_enabled", params.shadow, true, compare);
