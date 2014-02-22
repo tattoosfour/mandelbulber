@@ -65,6 +65,9 @@ bool newLineRendered = false;
 
 cImage mainImage(800, 600);
 
+parameters::container gPar;
+parameters::container appPar;
+
 double real_clock(void)
 {
 #ifdef WIN32 /* WINDOWS */
@@ -1498,7 +1501,7 @@ int main(int argc, char *argv[])
   strcpy(sharedDir, (string(pathCWD)+"\\").c_str());
 #else               /*other unix - try sysconf*/
 	sharedDir = new char[1000];
-	strcpy(sharedDir, (string(SHARED_DIR)+"/").c_str());
+	strcpy(sharedDir, (std::string(SHARED_DIR)+"/").c_str());
 #endif  /* WINDOWS */
 
 	//logfile
@@ -1513,8 +1516,9 @@ int main(int argc, char *argv[])
 	printf("Log file: %s\n", logfileName.c_str());
 	WriteLog("Log file created");
 
-	parameters::container par;
-	InitParams(&par);
+	//initialization of parameter container
+	InitParams(&gPar);
+	WriteLog("All parameters defined");
 
 	//initialising GTK+
 	bool result = ReadComandlineParams(argc, argv);
@@ -1563,6 +1567,7 @@ int main(int argc, char *argv[])
 	timeline.reset(new cTimeline);
 
 	//initialising g_thread
+	/*
 	if (!g_thread_supported())
 	{
 		g_thread_init(NULL);
@@ -1575,6 +1580,7 @@ int main(int argc, char *argv[])
 		//return 1;
 	}
 	WriteLog("g_thread initialised");
+	*/
 
 	//OpenCL
 

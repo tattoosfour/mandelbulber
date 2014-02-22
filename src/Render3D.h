@@ -72,6 +72,8 @@ extern int NR_THREADS;
 extern bool noGUI;
 
 extern cImage mainImage;
+extern parameters::container gPar;
+extern parameters::container appPar;
 
 double real_clock(void);
 void MainRender(void);

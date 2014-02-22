@@ -22,6 +22,10 @@
 
 sMainWindow renderWindow;
 sInterface Interface;
+std::map<std::string, GtkWidget*> mapInterfaceEdit;
+std::map<std::string, GtkWidget*> mapAppParamsEdit;
+std::map<std::string, sGtkEditVector3> mapInterfaceEditVector;
+std::map<std::string, sGtkEditVector3> mapAppParamsEditVector;
 sInterface_data Interface_data;
 sNoGUIdata noGUIdata;
 GtkWidget *window_histogram, *window_interface;
@@ -729,6 +733,17 @@ void ReadInterface(sParamRender *params)
 	CreateFormulaSequence(params->fractal);
 }
 
+std::string gtk_entry_get_vector3(sGtkEditVector3 entry3)
+{
+	std::string out;
+	out += gtk_entry_get_text(GTK_ENTRY(entry3.x));
+	out += " ";
+	out += gtk_entry_get_text(GTK_ENTRY(entry3.y));
+	out	+= " ";
+	out += gtk_entry_get_text(GTK_ENTRY(entry3.z));
+	return out;
+}
+
 void ReadInterfaceAppSettings(sAppSettings *appParams)
 {
 #ifdef CLSUPPORT
@@ -1211,6 +1226,68 @@ void AddComboTextsFractalFormula(GtkComboBox *combo)
 	gtk_combo_box_append_text(combo, "axis Z angle multiply by p");
 }
 
+GtkWidget* CreateEditWithMap(std::string name, std::map<std::string, GtkWidget*> *map)
+{
+	GtkWidget *widget = gtk_entry_new();
+	std::pair<std::map<std::string, GtkWidget*>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, GtkWidget*>(name, widget));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateEditWithMap(): element '" << name << "' already existed" << std::endl;
+	}
+	return widget;
+}
+
+GtkWidget* CreateEditWithMapIndexed(std::string name, int index, std::map<std::string, GtkWidget*> *map)
+{
+	char cname[256];
+	sprintf(cname, "%s_%d", name.c_str(), index);
+	std::string name2(cname);
+	GtkWidget *widget = gtk_entry_new();
+	std::pair<std::map<std::string, GtkWidget*>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, GtkWidget*>(name2, widget));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateEditWithMap(): element '" << name2 << "' already existed" << std::endl;
+	}
+	return widget;
+}
+
+sGtkEditVector3 CreateEditVector3WithMap(std::string name, std::map<std::string, sGtkEditVector3> *map)
+{
+	sGtkEditVector3 widget3;
+	widget3.x = gtk_entry_new();
+	widget3.y = gtk_entry_new();
+	widget3.z = gtk_entry_new();
+
+	std::pair<std::map<std::string, sGtkEditVector3>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, sGtkEditVector3>(name, widget3));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateEditVector3WithMap(): element '" << name << "' already existed" << std::endl;
+	}
+	return widget3;
+}
+
+sGtkEditVector3 CreateEditVector3WithMapIndexed(std::string name, int index, std::map<std::string, sGtkEditVector3> *map)
+{
+	char cname[256];
+	sprintf(cname, "%s_%d", name.c_str(), index);
+	std::string name2(cname);
+	sGtkEditVector3 widget3;
+	widget3.x = gtk_entry_new();
+	widget3.y = gtk_entry_new();
+	widget3.z = gtk_entry_new();
+
+	std::pair<std::map<std::string, sGtkEditVector3>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, sGtkEditVector3>(name2, widget3));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateEditVector3WithMap(): element '" << name2 << "' already existed" << std::endl;
+	}
+	return widget3;
+}
+
 void CreateInterface(sParamRender *default_settings)
 {
 	//------------- glowne okno renderowania
@@ -1634,6 +1711,12 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.hSeparator1 = gtk_hseparator_new();
 	Interface.vSeparator1 = gtk_vseparator_new();
 
+
+	//edits
+	Interface.edit_measure.x = gtk_entry_new();
+	Interface.edit_measure.y = gtk_entry_new();
+	Interface.edit_measure.z = gtk_entry_new();
+
 	//buttons
 	Interface.buRender = gtk_button_new_with_label("RENDER");
 	Interface.buStop = gtk_button_new_with_label("STOP");
@@ -1735,233 +1818,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buOpenCLDeleteFormula = gtk_button_new_with_label("Delete");
 	Interface.buOpenCLRecompile = gtk_button_new_with_label("Recompile");
 	Interface.buConvertPathToKeyframes = gtk_button_new_with_label("Convert flight path to keyframes");
-
-	//edit
-	Interface.edit_va = gtk_entry_new();
-	Interface.edit_vb = gtk_entry_new();
-	Interface.edit_vc = gtk_entry_new();
-	Interface.edit_julia_a = gtk_entry_new();
-	Interface.edit_julia_b = gtk_entry_new();
-	Interface.edit_julia_c = gtk_entry_new();
-	Interface.edit_amin = gtk_entry_new();
-	Interface.edit_amax = gtk_entry_new();
-	Interface.edit_bmin = gtk_entry_new();
-	Interface.edit_bmax = gtk_entry_new();
-	Interface.edit_cmin = gtk_entry_new();
-	Interface.edit_cmax = gtk_entry_new();
-	Interface.edit_alfa = gtk_entry_new();
-	Interface.edit_beta = gtk_entry_new();
-	Interface.edit_gammaAngle = gtk_entry_new();
-	Interface.edit_zoom = gtk_entry_new();
-	Interface.edit_persp = gtk_entry_new();
-	Interface.edit_maxN = gtk_entry_new();
-	Interface.edit_minN = gtk_entry_new();
-	Interface.edit_power = gtk_entry_new();
-	Interface.edit_FoldingIntPowFoldingFactor = gtk_entry_new();
-	Interface.edit_FoldingIntPowZFactor = gtk_entry_new();
-	Interface.edit_DE_thresh = gtk_entry_new();
-	Interface.edit_DE_stepFactor = gtk_entry_new();
-	Interface.edit_roughness = gtk_entry_new();
-	Interface.edit_imageWidth = gtk_entry_new();
-	Interface.edit_imageHeight = gtk_entry_new();
-	Interface.edit_ambient = gtk_entry_new();
-	Interface.edit_ambient_occlusion = gtk_entry_new();
-	Interface.edit_brightness = gtk_entry_new();
-	Interface.edit_gamma = gtk_entry_new();
-	Interface.edit_glow = gtk_entry_new();
-	Interface.edit_reflect = gtk_entry_new();
-	Interface.edit_shading = gtk_entry_new();
-	Interface.edit_shadows = gtk_entry_new();
-	Interface.edit_specular = gtk_entry_new();
-	Interface.edit_AmbientOcclusionQuality = gtk_entry_new();
-	Interface.edit_step_forward = gtk_entry_new();
-	Interface.edit_step_rotation = gtk_entry_new();
-	Interface.edit_mouse_click_distance = gtk_entry_new();
-	Interface.edit_animationDESpeed = gtk_entry_new();
-	Interface.edit_color_seed = gtk_entry_new();
-	Interface.edit_color_speed = gtk_entry_new();
-	Interface.edit_colour_saturation = gtk_entry_new();
-	Interface.edit_tglad_folding_1 = gtk_entry_new();
-	Interface.edit_tglad_folding_2 = gtk_entry_new();
-	Interface.edit_spherical_folding_1 = gtk_entry_new();
-	Interface.edit_spherical_folding_2 = gtk_entry_new();
-	Interface.edit_mainLightIntensity = gtk_entry_new();
-	Interface.edit_auxLightIntensity = gtk_entry_new();
-	Interface.edit_auxLightNumber = gtk_entry_new();
-	Interface.edit_auxLightMaxDist = gtk_entry_new();
-	Interface.edit_auxLightRandomSeed = gtk_entry_new();
-	Interface.edit_auxLightDistributionRadius = gtk_entry_new();
-	Interface.edit_auxLightPre1x = gtk_entry_new();
-	Interface.edit_auxLightPre1y = gtk_entry_new();
-	Interface.edit_auxLightPre1z = gtk_entry_new();
-	Interface.edit_auxLightPre1intensity = gtk_entry_new();
-	Interface.edit_auxLightPre2x = gtk_entry_new();
-	Interface.edit_auxLightPre2y = gtk_entry_new();
-	Interface.edit_auxLightPre2z = gtk_entry_new();
-	Interface.edit_auxLightPre2intensity = gtk_entry_new();
-	Interface.edit_auxLightPre3x = gtk_entry_new();
-	Interface.edit_auxLightPre3y = gtk_entry_new();
-	Interface.edit_auxLightPre3z = gtk_entry_new();
-	Interface.edit_auxLightPre3intensity = gtk_entry_new();
-	Interface.edit_auxLightPre4x = gtk_entry_new();
-	Interface.edit_auxLightPre4y = gtk_entry_new();
-	Interface.edit_auxLightPre4z = gtk_entry_new();
-	Interface.edit_auxLightPre4intensity = gtk_entry_new();
-	Interface.edit_mainLightAlfa = gtk_entry_new();
-	Interface.edit_mainLightBeta = gtk_entry_new();
-	Interface.edit_auxLightVisibility = gtk_entry_new();
-	Interface.edit_auxLightPlacementDistance = gtk_entry_new();
-	Interface.edit_auxLightRandomCentreX = gtk_entry_new();
-	Interface.edit_auxLightRandomCentreY = gtk_entry_new();
-	Interface.edit_auxLightRandomCentreZ = gtk_entry_new();
-	Interface.edit_IFSScale = gtk_entry_new();
-	Interface.edit_IFSAlfa = gtk_entry_new();
-	Interface.edit_IFSBeta = gtk_entry_new();
-	Interface.edit_IFSGamma = gtk_entry_new();
-	Interface.edit_IFSOffsetX = gtk_entry_new();
-	Interface.edit_IFSOffsetY = gtk_entry_new();
-	Interface.edit_IFSOffsetZ = gtk_entry_new();
-	Interface.edit_IFSEdgeX = gtk_entry_new();
-	Interface.edit_IFSEdgeY = gtk_entry_new();
-	Interface.edit_IFSEdgeZ = gtk_entry_new();
-	Interface.edit_animationFramesPerKey = gtk_entry_new();
-	Interface.edit_animationStartFrame = gtk_entry_new();
-	Interface.edit_animationEndFrame = gtk_entry_new();
-	Interface.edit_contrast = gtk_entry_new();
-
-	for (int i = 0; i < HYBRID_COUNT; ++i) {
-		Interface.edit_hybridIter[i] = gtk_entry_new();
-		Interface.edit_hybridPower[i] = gtk_entry_new();
-	}
-
-	Interface.edit_NavigatorAbsoluteDistance = gtk_entry_new();
-	Interface.edit_stereoDistance = gtk_entry_new();
-	Interface.edit_mandelboxScale = gtk_entry_new();
-	Interface.edit_mandelboxFoldingLimit = gtk_entry_new();
-	Interface.edit_mandelboxFoldingValue = gtk_entry_new();
-	Interface.edit_mandelboxSpFoldingFixedRadius = gtk_entry_new();
-	Interface.edit_mandelboxSpFoldingMinRadius = gtk_entry_new();
-	Interface.edit_mandelboxSharpness = gtk_entry_new();
-	Interface.edit_mandelboxOffsetX= gtk_entry_new();
-	Interface.edit_mandelboxOffsetY= gtk_entry_new();
-	Interface.edit_mandelboxOffsetZ= gtk_entry_new();
-	Interface.edit_mandelboxSolid = gtk_entry_new();
-	Interface.edit_mandelboxMelt = gtk_entry_new();
-
-	for (int component = 0; component < 3; ++component)
-		Interface.edit_mandelboxRotationMain[component] = gtk_entry_new();
-
-	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
-		for (int axis = 0; axis < 3; ++axis)
-			for (int component = 0; component < 3; ++component) {
-				Interface.edit_mandelboxRotation[fold][axis][component] = gtk_entry_new();
-				gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_mandelboxRotation[fold][axis][component]), 5);
-			}
-
-	Interface.edit_mandelboxColorFactorR = gtk_entry_new();
-	Interface.edit_mandelboxColorFactorSp1 = gtk_entry_new();
-	Interface.edit_mandelboxColorFactorSp2 = gtk_entry_new();
-	Interface.edit_mandelboxColorFactorX = gtk_entry_new();
-	Interface.edit_mandelboxColorFactorY = gtk_entry_new();
-	Interface.edit_mandelboxColorFactorZ = gtk_entry_new();
-	Interface.edit_viewMinDistance = gtk_entry_new();
-	Interface.edit_viewMaxDistance = gtk_entry_new();
-	Interface.edit_FractalConstantFactor = gtk_entry_new();
-
-	Interface.edit_volumetricLightMainIntensity = gtk_entry_new();
-	Interface.edit_volumetricLightAux1Intensity = gtk_entry_new();
-	Interface.edit_volumetricLightAux2Intensity = gtk_entry_new();
-	Interface.edit_volumetricLightAux3Intensity = gtk_entry_new();
-	Interface.edit_volumetricLightAux4Intensity = gtk_entry_new();
-
-	Interface.edit_reflectionsMax = gtk_entry_new();
-
-	Interface.edit_mandelboxVaryFold = gtk_entry_new();
-	Interface.edit_mandelboxVaryMinR = gtk_entry_new();
-	Interface.edit_mandelboxVaryRPower = gtk_entry_new();
-	Interface.edit_mandelboxVaryScale = gtk_entry_new();
-	Interface.edit_mandelboxVaryWAdd = gtk_entry_new();
-
-	Interface.edit_cadd = gtk_entry_new();
-
-	Interface.edit_volumetricFogDensity = gtk_entry_new();
-	Interface.edit_volumetricFogColorDistance = gtk_entry_new();
-	Interface.edit_volumetricFogColorDistance2 = gtk_entry_new();
-	Interface.edit_volumetricFogDistanceFact = gtk_entry_new();
-
-	Interface.edit_fastAoTune = gtk_entry_new();
-
-	Interface.edit_primitivePlaneCentreX = gtk_entry_new();
-	Interface.edit_primitivePlaneCentreY = gtk_entry_new();
-	Interface.edit_primitivePlaneCentreZ = gtk_entry_new();
-	Interface.edit_primitivePlaneNormalX = gtk_entry_new();
-	Interface.edit_primitivePlaneNormalY = gtk_entry_new();
-	Interface.edit_primitivePlaneNormalZ = gtk_entry_new();
-	Interface.edit_primitivePlaneReflect = gtk_entry_new();
-	Interface.edit_primitiveBoxCentreX = gtk_entry_new();
-	Interface.edit_primitiveBoxCentreY = gtk_entry_new();
-	Interface.edit_primitiveBoxCentreZ = gtk_entry_new();
-	Interface.edit_primitiveBoxSizeX = gtk_entry_new();
-	Interface.edit_primitiveBoxSizeY = gtk_entry_new();
-	Interface.edit_primitiveBoxSizeZ = gtk_entry_new();
-	Interface.edit_primitiveBoxReflect = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxCentreX = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxCentreY = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxCentreZ = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxSizeX = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxSizeY = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxSizeZ = gtk_entry_new();
-	Interface.edit_primitiveInvertedBoxReflect = gtk_entry_new();
-	Interface.edit_primitiveSphereCentreX = gtk_entry_new();
-	Interface.edit_primitiveSphereCentreY = gtk_entry_new();
-	Interface.edit_primitiveSphereCentreZ = gtk_entry_new();
-	Interface.edit_primitiveSphereRadius = gtk_entry_new();
-	Interface.edit_primitiveSphereReflect = gtk_entry_new();
-	Interface.edit_primitiveInvertedSphereCentreX = gtk_entry_new();
-	Interface.edit_primitiveInvertedSphereCentreY = gtk_entry_new();
-	Interface.edit_primitiveInvertedSphereCentreZ = gtk_entry_new();
-	Interface.edit_primitiveInvertedSphereRadius = gtk_entry_new();
-	Interface.edit_primitiveInvertedSphereReflect = gtk_entry_new();
-	Interface.edit_primitiveWaterHeight = gtk_entry_new();
-	Interface.edit_primitiveWaterAmplitude = gtk_entry_new();
-	Interface.edit_primitiveWaterLength = gtk_entry_new();
-	Interface.edit_primitiveWaterRotation = gtk_entry_new();
-	Interface.edit_primitiveWaterIterations = gtk_entry_new();
-	Interface.edit_primitiveWaterReflect = gtk_entry_new();
-	Interface.edit_primitiveWaterAnimSpeed = gtk_entry_new();
-
-	Interface.edit_measureX = gtk_entry_new();
-	Interface.edit_measureY = gtk_entry_new();
-	Interface.edit_measureZ = gtk_entry_new();
-
-	Interface.edit_tiles = gtk_entry_new();
-
-	Interface.edit_iterFogOpacity = gtk_entry_new();
-	Interface.edit_iterFogOpacityTrim = gtk_entry_new();
-
-	Interface.edit_OpenCLPixelsPerJob = gtk_entry_new();
-	Interface.edit_OpenCLProcessingCycleTime = gtk_entry_new();
-	Interface.edit_OpenCLMaxMem = gtk_entry_new();
-	Interface.edit_OpenCLTextEditor = gtk_entry_new();
-	Interface.edit_OpenCLDeltaDEStep = gtk_entry_new();
-
-	Interface.edit_netRenderClientName = gtk_entry_new();
-	Interface.edit_netRenderClientPort = gtk_entry_new();
-	Interface.edit_netRenderServerPort = gtk_entry_new();
-
-	Interface.edit_fakeLightsOrbitTrapX = gtk_entry_new();
-	Interface.edit_fakeLightsOrbitTrapY = gtk_entry_new();
-	Interface.edit_fakeLightsOrbitTrapZ = gtk_entry_new();
-	Interface.edit_fakeLightsMinIter = gtk_entry_new();
-	Interface.edit_fakeLightsMaxIter = gtk_entry_new();
-	Interface.edit_fakeLightsIntensity = gtk_entry_new();
-	Interface.edit_fakeLightsVisibility = gtk_entry_new();
-	Interface.edit_fakeLightsVisibilitySize = gtk_entry_new();
-
-	Interface.edit_shadowConeAngle = gtk_entry_new();
-
-	for(int i=0; i<15; i++)
-		Interface.edit_customParameters[i] = gtk_entry_new();
 
 	//combo
 	//		fract type
@@ -2210,6 +2066,957 @@ void CreateInterface(sParamRender *default_settings)
 	dareaPalette = gtk_drawing_area_new();
 	gtk_widget_set_size_request(dareaPalette, 640, 30);
 
+
+
+	//----------------------- main box -----------------------
+
+	//	box buttons
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.boxButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buRender, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buStop, true, true, 1);
+
+	//	frame view point
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frCoordinates, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frCoordinates), Interface.boxView);
+
+	//		box coordinates
+	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxCoordinates, false, false, 1);
+	sGtkEditVector3 edit_v = CreateEditVector3WithMap("view_point", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "x:", 20, edit_v.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "y:", 20, edit_v.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "z:", 20, edit_v.z), false, false, 1);
+
+	//		box angle
+	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxAngle, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "alpha (yaw):", 15, CreateEditWithMap("angle_alpha", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "beta (pitch):", 15, CreateEditWithMap("angle_beta", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "gamma (roll):", 15, CreateEditWithMap("angle_gamma", &mapInterfaceEdit)), false, false, 1);
+
+	//		box zoom
+	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxZoom, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("2,5", "Close up (zoom):", 20, CreateEditWithMap("zoom", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("0,5", "perspective (FOV):", 5, CreateEditWithMap("perspective", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateWidgetWithLabel("Perspective projection:", Interface.comboPerspectiveType), false, false, 1);
+
+	//buttons arrows
+	gtk_container_add(GTK_CONTAINER(Interface.buUp), Interface.pixmap_up);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buUp, 1, 2, 0, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.buDown), Interface.pixmap_down);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buDown, 1, 2, 2, 3);
+	gtk_container_add(GTK_CONTAINER(Interface.buLeft), Interface.pixmap_left);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buLeft, 0, 1, 1, 2);
+	gtk_container_add(GTK_CONTAINER(Interface.buRight), Interface.pixmap_right);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRight, 2, 3, 1, 2);
+	gtk_container_add(GTK_CONTAINER(Interface.buRotateLeft), Interface.pixmap_rotate_left);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateLeft, 0, 1, 2, 3);
+	gtk_container_add(GTK_CONTAINER(Interface.buRotateRight), Interface.pixmap_rotate_right);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateRight, 2, 3, 2, 3);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.fr3Dnavigator, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.fr3Dnavigator), Interface.boxArrows);
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxArrows2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows2), Interface.tableArrows, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows2), Interface.checkStraightRotation, false, false, 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStraightRotation), false);
+
+	//navigation
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxNavigation, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.buInitNavigator, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationButtons), Interface.buForward, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationButtons), Interface.buBackward, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(0.5), "Step for camera moving multiplied by DE:", 5, CreateEditWithMap("camera_movenent_step_de", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.checkNavigatorAbsoluteDistance, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(0.1), "Absolute movement distance:", 10, CreateEditWithMap("camera_movenent_step_absolute", &mapInterfaceEdit)), false, false,
+			1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(10.0), "Rotation step in degrees", 5, CreateEditWithMap("camera_rotation_step", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(3.0), "Mouse click close-up ratio", 5, CreateEditWithMap("camera_mouse_click_step", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationZooming, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkZoomClickEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkNavigatorGoToSurface, false, false, 1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable), true);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.label_NavigatorEstimatedDistance, false, false, 1);
+
+	//buttons arrows 2
+	gtk_container_add(GTK_CONTAINER(Interface.buMoveUp), Interface.pixmap_move_up);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveUp, 1, 2, 0, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.buMoveDown), Interface.pixmap_move_down);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveDown, 1, 2, 2, 3);
+	gtk_container_add(GTK_CONTAINER(Interface.buMoveLeft), Interface.pixmap_move_left);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveLeft, 0, 1, 1, 2);
+	gtk_container_add(GTK_CONTAINER(Interface.buMoveRight), Interface.pixmap_move_right);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveRight, 2, 3, 1, 2);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxArrows3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxArrows3), Interface.tableArrows2, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frMeasure, true, true, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMeasure), Interface.boxMeasure);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.boxMeasure1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), Interface.buMeasureActivation, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "X:", 20, Interface.edit_measure.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Y:", 20, Interface.edit_measure.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Z:", 20, Interface.edit_measure.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.label_measureDistance, false, false, 1);
+
+	//	frame fractal
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFormula, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFormula), Interface.boxFractalFormula);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), CreateWidgetWithLabel("Fractal formula type:", Interface.comboFractType), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxJulia, false, false, 1);
+	sGtkEditVector3 edit_julia = CreateEditVector3WithMap("julia_c", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia x:", 20, edit_julia.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia y:", 20, edit_julia.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia z:", 20, edit_julia.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), Interface.checkJulia, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxFractalPower, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("8,0", "power:", 5, CreateEditWithMap("power", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("1,0", "Fractal constant factor:", 5, CreateEditWithMap("fractal_constant_factor", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("0,0", "c add:", 5, CreateEditWithMap("c_add", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFoldingIntPow, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFoldingIntPow), Interface.boxFractalFoldingIntPow);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("2,0", "Cubic folding factor:", 5, CreateEditWithMap("foldingIntPow_folding_factor", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("10,0", "Z factor:", 5, CreateEditWithMap("foldingIntPow_z_factor", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFolding, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalFolding), Interface.boxFractalFolding);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxTgladFolding, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), Interface.checkTgladMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("1,0", "Folding limit:", 5, CreateEditWithMap("folding_limit", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("2,0", "Folding value:", 5, CreateEditWithMap("folding_value", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxSphericalFolding, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), Interface.checkSphericalFoldingMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("1,0", "Fixed radius:", 5, CreateEditWithMap("spherical_folding_fixed", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("0,5", "Min. radius:", 5, CreateEditWithMap("spherical_folding_min", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.checkIFSFoldingMode, false, false, 1);
+
+	//primitives
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frPrimitives, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitives), Interface.boxPrimitives);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitives), Interface.tabsPrimitives, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitivePlane), Interface.frPrimitivePlane, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitivePlane), Interface.boxPrimitivePlane);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane1, false, false, 1);
+	sGtkEditVector3 edit_primitivePlaneCentre = CreateEditVector3WithMap("primitive_plane_centre", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Centre x:", 10, edit_primitivePlaneCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 10, edit_primitivePlaneCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "z:", 10, edit_primitivePlaneCentre.z), false, false, 1);
+	sGtkEditVector3 edit_primitivePlaneNormal = CreateEditVector3WithMap("primitive_plane_normal", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Normal x:", 5, edit_primitivePlaneNormal.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 5, edit_primitivePlaneNormal.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("-1,0", "z:", 5, edit_primitivePlaneNormal.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.buColorPrimitivePlane, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_plane_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitivePlaneEnabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitiveOnlyPlane, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveWater), Interface.frPrimitiveWater, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveWater), Interface.boxPrimitiveWater);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.0", "Level:", 10, CreateEditWithMap("primitive_water_level", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.1", "Wave amplitude:", 10, CreateEditWithMap("primitive_water_amplitude", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("1.0", "Wave length:", 10, CreateEditWithMap("primitive_water_length", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0", "Rotation:", 10, CreateEditWithMap("primitive_water_rotation", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 3, CreateEditWithMap("primitive_water_iterations", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.buColorPrimitiveWater, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,7", "Reflect:", 5, CreateEditWithMap("primitive_water_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,1", "Waves anim speed:", 5, CreateEditWithMap("primitive_water_anim_speed", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.checkPrimitiveWaterEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBox), Interface.frPrimitiveBox, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveBox), Interface.boxPrimitiveBox);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox1, false, false, 1);
+	sGtkEditVector3 edit_primitiveBoxCentre = CreateEditVector3WithMap("primitive_box_centre", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "Centre x:", 10, edit_primitiveBoxCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "y:", 10, edit_primitiveBoxCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "z:", 10, edit_primitiveBoxCentre.z), false, false, 1);
+	sGtkEditVector3 edit_primitiveBoxSize = CreateEditVector3WithMap("primitive_box_size", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "Size x:", 10, edit_primitiveBoxSize.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "y:", 10, edit_primitiveBoxSize.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "z:", 10, edit_primitiveBoxSize.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.buColorPrimitiveBox, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_box_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.checkPrimitiveBoxEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBoxInv), Interface.frPrimitiveInvertedBox, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox1, false, false, 1);
+	sGtkEditVector3 edit_primitiveInvertedBoxCentre = CreateEditVector3WithMap("primitive_invertedBox_centre", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "Centre x:", 10, edit_primitiveInvertedBoxCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "y:", 10, edit_primitiveInvertedBoxCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "z:", 10, edit_primitiveInvertedBoxCentre.z), false, false, 1);
+	sGtkEditVector3 edit_primitiveInvertedBoxSize = CreateEditVector3WithMap("primitive_invertedBox_size", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "Size x:", 10, edit_primitiveInvertedBoxSize.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "y:", 10, edit_primitiveInvertedBoxSize.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "z:", 10, edit_primitiveInvertedBoxSize.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.buColorPrimitiveInvertedBox, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_invertedBox_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.checkPrimitiveInvertedBoxEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphere), Interface.frPrimitiveSphere, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveSphere), Interface.boxPrimitiveSphere);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere1, false, false, 1);
+	sGtkEditVector3 edit_primitiveSphereCentre = CreateEditVector3WithMap("primitive_sphere_centre", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "Centre x:", 10, edit_primitiveSphereCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "y:", 10, edit_primitiveSphereCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "z:", 10, edit_primitiveSphereCentre.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("2.0", "z:", 10, CreateEditWithMap("primitive_sphere_radius", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.buColorPrimitiveSphere, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_sphere_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.checkPrimitiveSphereEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphereInv), Interface.frPrimitiveInvertedSphere, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere1, false, false, 1);
+	sGtkEditVector3 edit_primitiveInvertedSphereCentre = CreateEditVector3WithMap("primitive_invertedSphere_centre", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "Centre x:", 10, edit_primitiveInvertedSphereCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "y:", 10, edit_primitiveInvertedSphereCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "z:", 10, edit_primitiveInvertedSphereCentre.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("2.0", "z:", 10, CreateEditWithMap("primitive_invertedSphere_radius", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.buColorPrimitiveInvertedSphere, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_invertedSphere_reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.checkPrimitiveInvertedSphereEnabled, false, false, 1);
+
+	//tab --- engine
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frFractalRayMarching, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFractalRayMarching), Interface.boxFractalRayMarching);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxQuality, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Max. iterations:", 5, CreateEditWithMap("N", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Min. iterations:", 5, CreateEditWithMap("minN", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.label_DE_threshold, false, false, 1);
+	GtkWidget *edit_DE_thresh = CreateEditWithMap("DE_thresh", &mapInterfaceEdit);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), edit_DE_thresh, false, false, 1);
+	gtk_entry_set_text(GTK_ENTRY(edit_DE_thresh), "1,0");
+	gtk_entry_set_width_chars(GTK_ENTRY(edit_DE_thresh), 5);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, CreateEditWithMap("DE_factor", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStep, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStepHQ, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Smoothness:", 5, CreateEditWithMap("smoothness", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkInteriorMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDELinearMode, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkConstantDEThreshold, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkSlowShading, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxViewDistance, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, CreateEditWithMap("view_distance_min", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("20", "Maximum render distance:", 10, CreateEditWithMap("view_distance_max", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frLimits, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLimits), Interface.boxLimits);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.tableLimits, false, false, 1);
+	sGtkEditVector3 edit_limit_min = CreateEditVector3WithMap("limit_min", &mapInterfaceEditVector);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "x min:", 20, edit_limit_min.x), 0, 1, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "y min:", 20, edit_limit_min.y), 1, 2, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "z min:", 20, edit_limit_min.z), 2, 3, 0, 1);
+	sGtkEditVector3 edit_limit_max = CreateEditVector3WithMap("limit_max", &mapInterfaceEditVector);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "x max:", 20, edit_limit_max.x), 0, 1, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "y max:", 20, edit_limit_max.y), 1, 2, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "z max:", 20, edit_limit_max.z), 2, 3, 1, 2);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.checkLimits, false, false, 1);
+
+	//frame netRender
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frNetRender, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frNetRender), Interface.tabsNetRender);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_server), Interface.boxNetRenderServerV, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.boxNetRenderServerH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerScan, false, false, 1);
+	gtk_widget_set_sensitive(Interface.checkNetRenderServerScan, false);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), CreateEdit("5555", "   network port:", 20,  CreateEditWithMap("net_render_server_port", &mapAppParamsEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.label_serverStatus, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_client), Interface.boxNetRenderClientV, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.boxNetRenderClientH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), Interface.checkNetRenderClientEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("11.0.0.4", "   IP or domain of server:", 20, CreateEditWithMap("net_render_client_IP", &mapAppParamsEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("5555", "port:", 10, CreateEditWithMap("net_render_client_port", &mapAppParamsEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.label_clientStatus, false, false, 1);
+
+	//frame image
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImage, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frImage), Interface.boxImage);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxImage), Interface.boxImageRes, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "Image width:", 5, CreateEditWithMap("image_width", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "Image height:", 5, CreateEditWithMap("image_height", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", Interface.comboImageProportion), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateEdit("1", "Tiles (rows and columns):", 5, CreateEditWithMap("tiles", &mapInterfaceEdit)), false, false, 1);
+
+	//frame image adjustments
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImageAdjustments, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frImageAdjustments), Interface.boxImageAdjustmentsV);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsV), Interface.boxImageAdjustmentsH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "brightness:", 5, CreateEditWithMap("brightness", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "contrast:", 5, CreateEditWithMap("contrast", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "gamma:", 5, CreateEditWithMap("gamma", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.checkHDR, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.buApplyImageAdjustments, false, false, 1);
+
+	//frame Stereoscopic
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frStereo, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frStereo), Interface.boxStereoscopic);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxStereoscopic), Interface.boxStereoParams, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxStereoParams), CreateEdit("0,1", "Distance between eyes:", 20, CreateEditWithMap("stereo_eye_distance", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxStereoParams), Interface.checkStereoEnabled, false, false, 1);
+
+	//frame Image saving
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImageSaving, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frImageSaving), Interface.boxImageSaving);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxSaveImage, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveImage, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16Alpha, true, true, 1);
+	//gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveAllImageLayers, true, true, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), Interface.checkAutoSaveImage, false, false, 1);
+
+	//frame effects
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frShadersSurface, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frShadersSurface), Interface.boxShadersSurfaceV);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("0,5", "shading:", 5, CreateEditWithMap("shading", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "direct light:", 5, CreateEditWithMap("shadows_intensity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "specularity:", 5, CreateEditWithMap("specular", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("0,0", "ambient:", 5, CreateEditWithMap("ambient", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("10,0", "Soft shadow cone angle:", 5, CreateEditWithMap("shadows_cone_angle", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("2,0", "ambient occlusion:", 5, CreateEditWithMap("ambient_occlusion", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("4", "AO quality:", 5, CreateEditWithMap("ambient_occlusion_quality", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("1,0", "Fast AO tune:", 5, CreateEditWithMap("ambient_occlusion_fast_tune", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("0,0", "reflection:", 5, CreateEditWithMap("reflect", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("5", "reflections depth:", 5, CreateEditWithMap("reflections_max", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkShadow, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkAmbientOcclusion, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkFastAmbientOcclusion, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkRaytracedReflections, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frShadersVolumetric, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frShadersVolumetric), Interface.boxShadersVolumetricV);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("1,0", "glow:", 5, CreateEditWithMap("glow_intensity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("100", "iter. fog opacity", 6, CreateEditWithMap("iteration_fog_opacity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("3", "fog opacity trim (iterations)", 6, CreateEditWithMap("iteration_fog_opacity_trim", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog density:", 5, CreateEditWithMap("volumetric_fog_density", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog colour 1 distance:", 5, CreateEditWithMap("volumetric_fog_colour_1_distance", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog colour 2 distance:", 5, CreateEditWithMap("volumetric_fog_colour_2_distance", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog distance factor:", 5, CreateEditWithMap("volumetric_fog_distance_factor", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), Interface.buAutoFog, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkBitmapBackground, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkBitmapBackgroundFulldome, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkIterFogEnable, false, false, 1);
+
+
+	//frame fake lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frFakeLights, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frFakeLights), Interface.boxFakeLightsV);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("2", "Min iter.:", 5, CreateEditWithMap("fake_lights_min_iter", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("4", "Max iter.:", 5, CreateEditWithMap("fake_lights_max_iter", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Intensity:", 10, CreateEditWithMap("fake_lights_intensity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Visibility:", 10, CreateEditWithMap("fake_lights_visibility", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Size:", 10, CreateEditWithMap("fake_lights_visibility_size", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), Interface.checkFakeLightsEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH2, false, false, 1);
+	sGtkEditVector3 edit_fakeLightsOrbitTrap = CreateEditVector3WithMap("fake_lights_orbit_trap", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Orbit trap X:", 5, edit_fakeLightsOrbitTrap.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Y:", 5, edit_fakeLightsOrbitTrap.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Z:", 5, edit_fakeLightsOrbitTrap.z), false, false, 1);
+
+	//frame fog
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frPostFog, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPostFog), Interface.boxPostFog);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.checkFogEnabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", Interface.buColorFog), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.label_sliderFog, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.sliderFogDepth, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider2, false, false, 1);
+
+	//frame animation
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frAnimation, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frAnimation), Interface.boxAnimation);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.boxAnimationButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationRecordTrack, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationContinueRecord, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationRenderTrack, true, true, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.boxAnimationEdits, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits), CreateEdit(DoubleToString(0.01), "Flight speed (DE multiplier):", 5, CreateEditWithMap("flight_speed", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationFrame, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationDistance, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationSpeed, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frKeyframeAnimation, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation), Interface.boxKeyframeAnimation);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons), Interface.buAnimationRenderFromKeys, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons2), Interface.buConvertPathToKeyframes, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationEdits, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("100", "Frames per key:", 5, CreateEditWithMap("frames_per_keyframe", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.label_keyframeInfo, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frAnimationFrames, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frAnimationFrames), Interface.boxAnimationEdits2);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("0", "Start frame:", 5, CreateEditWithMap("start_frame", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("1000", "End frame:", 5, CreateEditWithMap("end_frame", &mapInterfaceEdit)), false, false, 1);
+
+	//---- tab pot effects
+
+	//frame palette
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPalette, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPalette), Interface.boxPalette);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), Interface.boxEffectsColoring, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.checkColoring, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.vSeparator1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("123456", "Random seed:", 6, CreateEditWithMap("coloring_random_seed", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Saturation:", 6, CreateEditWithMap("coloring_saturation", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Colour speed:", 6, CreateEditWithMap("coloring_speed", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buRandomPalette, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buGetPaletteFromImage, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), dareaPalette, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), Interface.boxPaletteOffset, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.label_paletteOffset, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.sliderPaletteOffset, true, true, 1);
+
+	//frame colors
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frColors, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frColors), Interface.boxColors);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow 1:", Interface.buColorGlow1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorGlow2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background 1:", Interface.buColorBackgroud1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorBackgroud2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorBackgroud3), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Fog 1:", Interface.buColorFog1), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorFog2), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorFog3), false, false, 1);
+
+	//frame SSAO
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPostSSAO, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPostSSAO), Interface.boxPostSSAO);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostSSAO), Interface.boxSSAOButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOButtons), Interface.checkSSAOEnabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOButtons), Interface.buUpdateSSAO, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostSSAO), Interface.boxSSAOSlider, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOSlider), Interface.label_SSAO_quality, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOSlider), Interface.sliderSSAOQuality, true, true, 1);
+
+	//frame DOF
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPostDOF, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPostDOF), Interface.boxPostDOF);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.checkDOFEnabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.buUpdateDOF, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.label_sliderDOF, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFSlider1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.label_DOF_focus, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.sliderDOFFocus, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFSlider2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider2), Interface.label_DOF_radius, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider2), Interface.sliderDOFRadius, true, true, 1);
+
+	//gtk_box_pack_start(GTK_BOX(Interface.tab_box_posteffects), Interface.buBuddhabrot, true, true, 1);
+
+	//---- tab Lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frMainLight, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMainLight), Interface.boxMainLight);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMainLight), Interface.boxMainLightPosition, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("-45", "Horizontal angle relative to camera:", 6, CreateEditWithMap("main_light_alpha", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("45", "Vertical angle relative to camera:", 6, CreateEditWithMap("main_light_beta", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateWidgetWithLabel("Colour:", Interface.buColorMainLight), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsCommon, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLightsCommon), Interface.boxLightCommon);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), Interface.buDistributeLights, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit("0", "Number of aux. lights:", 6, CreateEditWithMap("aux_light_number", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit(DoubleToString(0.01), "Manual placement distance:", 6, CreateEditWithMap("light_manual_placement_dist", &mapAppParamsEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightBallance, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLightBallance), Interface.boxLightBallance);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBallance), Interface.boxLightBrightness, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Main light intensity:", 6, CreateEditWithMap("main_light_intensity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Auxiliary lights intensity:", 6, CreateEditWithMap("aux_light_intensity", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Lights visibility:", 6, CreateEditWithMap("aux_light_visibility", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), Interface.checkPenetratingLights, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsParameters, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLightsParameters), Interface.boxLightsParameters);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("1234", "Random seed:", 6, CreateEditWithMap("aux_light_random_seed", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("0,1", "Maximum distance from fractal", 12, CreateEditWithMap("aux_light_max_dist", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("3.0", "Distribution radius of lights:", 6, CreateEditWithMap("aux_light_distribution_radius", &mapInterfaceEdit)), false, false, 1);
+	sGtkEditVector3 edit_auxLightRandomCentre = CreateEditVector3WithMap("aux_light_random_center", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Centre of distribution X:", 12, edit_auxLightRandomCentre.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Y:", 12, edit_auxLightRandomCentre.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Z:", 12, edit_auxLightRandomCentre.z), false, false, 1);
+
+	//frame: predefined lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frPredefinedLights, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frPredefinedLights), Interface.boxPredefinedLights);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.label_auxLightPre1, false, false, 1);
+	sGtkEditVector3 edit_auxLightPre1 = CreateEditVector3WithMap("aux_light_predefined_position_1", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("3,0", "x:", 12, edit_auxLightPre1.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "y:", 12, edit_auxLightPre1.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "z:", 12, edit_auxLightPre1.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_1", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.buColorAuxLightPre1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.checkAuxLightPre1Enabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.label_auxLightPre2, false, false, 1);
+	sGtkEditVector3 edit_auxLightPre2 = CreateEditVector3WithMap("aux_light_predefined_position_2", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("-3,0", "x:", 12, edit_auxLightPre2.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("-3,0", "y:", 12, edit_auxLightPre2.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("0,0", "z:", 12, edit_auxLightPre2.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_2", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.buColorAuxLightPre2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.checkAuxLightPre2Enabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.label_auxLightPre3, false, false, 1);
+	sGtkEditVector3 edit_auxLightPre3 = CreateEditVector3WithMap("aux_light_predefined_position_3", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("1,0", "x:", 12, edit_auxLightPre3.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("3,0", "y:", 12, edit_auxLightPre3.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("-1,0", "z:", 12, edit_auxLightPre3.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_3", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.buColorAuxLightPre3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.checkAuxLightPre3Enabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre4, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.label_auxLightPre4, false, false, 1);
+	sGtkEditVector3 edit_auxLightPre4 = CreateEditVector3WithMap("aux_light_predefined_position_4", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "x:", 12, edit_auxLightPre4.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-1,0", "y:", 12, edit_auxLightPre4.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-3,0", "z:", 12, edit_auxLightPre4.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_4", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.buColorAuxLightPre4, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.checkAuxLightPre4Enabled, false, false, 1);
+
+	//frame: volumetric lights
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frVolumetricLight, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frVolumetricLight), Interface.boxVolumetricLight);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightGeneral, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightMain, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), CreateEdit("1,0", "Intensity for main light:", 12, CreateEditWithMap("volumetric_light_intensity_0", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), Interface.checkVolumetricLightMainEnabled, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightAux, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #1:", 12, CreateEditWithMap("volumetric_light_intensity_1", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux1Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #2:", 12, CreateEditWithMap("volumetric_light_intensity_2", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux2Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #3:", 12, CreateEditWithMap("volumetric_light_intensity_3", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux3Enabled, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #4:", 12, CreateEditWithMap("volumetric_light_intensity_4", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux4Enabled, false, false, 1);
+
+	//tab IFS
+	//frame: main IFS
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSMain, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frIFSMain), Interface.boxIFSMain);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("2,0", "scale:", 6, CreateEditWithMap("IFS_scale", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation alpha:", 6, CreateEditWithMap("IFS_rot_alpha", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation beta:", 6, CreateEditWithMap("IFS_rot_beta", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation gamma:", 6, CreateEditWithMap("IFS_rot_gamma", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit2, false, false, 1);
+	sGtkEditVector3 edit_IFSOffset = CreateEditVector3WithMap("IFS_offset", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("1", "offset x:", 6, edit_IFSOffset.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("0", "offset y:", 6, edit_IFSOffset.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("0", "offset z:", 6, edit_IFSOffset.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsX, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsY, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsZ, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSMengerSponge, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSEdge, false, false, 1);
+	sGtkEditVector3 edit_IFSEdge = CreateEditVector3WithMap("IFS_edge", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge x:", 6, edit_IFSEdge.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge y:", 6, edit_IFSEdge.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge z:", 6, edit_IFSEdge.z), false, false, 1);
+
+	//frame: IFS params
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSParams, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frIFSParams), Interface.boxIFSParams);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSParams), Interface.tableIFSParams, false, false, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSx, 0, 1, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSy, 1, 2, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSz, 2, 3, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSalfa, 3, 4, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSbeta, 4, 5, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSgamma, 5, 6, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSdistance, 6, 7, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSintensity, 7, 8, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSenabled, 8, 9, 0, 1);
+
+	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
+	{
+		Interface.IFSParams[i].checkIFSenabled = gtk_check_button_new();
+		sGtkEditVector3 edit_IFS_direction = CreateEditVector3WithMapIndexed("IFS_direction", i, &mapInterfaceEditVector);
+		GtkWidget *editIFSalpha = CreateEditWithMapIndexed("IFS_alpha", i, &mapInterfaceEdit);
+		GtkWidget *editIFSbeta = CreateEditWithMapIndexed("IFS_beta", i, &mapInterfaceEdit);
+		GtkWidget *editIFSgamma = CreateEditWithMapIndexed("IFS_gamma", i, &mapInterfaceEdit);
+		GtkWidget *editIFSdistance = CreateEditWithMapIndexed("IFS_distance", i, &mapInterfaceEdit);
+		GtkWidget *editIFSintensity = CreateEditWithMapIndexed("IFS_intensity", i, &mapInterfaceEdit);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_IFS_direction.x), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_IFS_direction.y), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_IFS_direction.z), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(editIFSalpha), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(editIFSbeta), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(editIFSgamma), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(editIFSdistance), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(editIFSintensity), 6);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), edit_IFS_direction.x, 0, 1, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), edit_IFS_direction.y, 1, 2, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), edit_IFS_direction.z, 2, 3, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), editIFSalpha, 3, 4, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), editIFSbeta, 4, 5, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), editIFSgamma, 5, 6, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), editIFSdistance, 6, 7, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), editIFSintensity, 7, 8, i + 1, i + 2);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].checkIFSenabled, 8, 9, i + 1, i + 2);
+	}
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.boxIFSButtons, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeOffset, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeVectors, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSReset, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSDefaults, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frIFSDefaults), Interface.boxIFSDefaults);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultDodeca, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultIcosa, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultOcta, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultMengerSponge, false, false, 1);
+
+	//tab hybrid formula
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_hybrid), Interface.frHybrid, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frHybrid), Interface.boxHybrid);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.tableHybridParams, false, false, 1);
+
+	for (int i = 0; i < HYBRID_COUNT; ++i)
+	{
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.label_HybridFormula[i], 0, 1, i, i + 1);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.comboHybridFormula[i], 1, 2, i, i + 1);
+		GtkWidget *edit_hybridIter = CreateEditWithMapIndexed("hybrid_iterations", i + 1, &mapInterfaceEdit);
+		GtkWidget *edit_hybridPower = CreateEditWithMapIndexed("hybrid_power", i + 1, &mapInterfaceEdit);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("3", "  iterations:", 6, edit_hybridIter), 2, 3, i, i + 1);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("2", "power / scale / p:", 6, edit_hybridPower), 3, 4, i, i + 1);
+	}
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.checkHybridCyclic, false, false, 1);
+
+	//tab Mandelbox
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxMainParams, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxMainParams), Interface.boxMandelboxMainParams);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("2", "Scale", 6, CreateEditWithMap("mandelbox_scale", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("3,0", "Sharpness", 6, CreateEditWithMap("mandelbox_sharpness", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("1,0", "Solid", 6, CreateEditWithMap("mandelbox_solid", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("0,0", "Melt", 6, CreateEditWithMap("mandelbox_melt", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Folding limit", 6, CreateEditWithMap("mandelbox_folding_limit", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("2", "Folding value", 6, CreateEditWithMap("mandelbox_folding_value", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Fixed radius", 6, CreateEditWithMap("mandelbox_folding_fixed_radius", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, CreateEditWithMap("mandelbox_folding_min_radius", &mapInterfaceEdit)), false, false, 1);
+
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxOffset, false, false, 1);
+	sGtkEditVector3 edit_mandelboxOffset = CreateEditVector3WithMap("mandelbox_offset", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Spherical folding offset X", 6, edit_mandelboxOffset.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Y", 6, edit_mandelboxOffset.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Z", 6, edit_mandelboxOffset.z), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateWidgetWithLabel("GeneralizedFoldBox type", Interface.comboGeneralizedFoldBoxType), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.boxMandelboxRotationMain, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.checkMandelboxRotationsEnable, false, false, 1);
+
+	sGtkEditVector3 edit_mandelboxRotationMain = CreateEditVector3WithMap("mandelbox_rotation_main", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "Main rotation: alpha", 6, edit_mandelboxRotationMain.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "beta", 6, edit_mandelboxRotationMain.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "gamma", 6, edit_mandelboxRotationMain.z), false, false, 1);
+
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Negative plane"), 1, 4, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Positive plane"), 4, 7, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alpha"), 1, 2, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 2, 3, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 3, 4, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 4, 5, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 5, 6, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 6, 7, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("X Axis"), 0, 1, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Y Axis"), 0, 1, 3, 4);
+	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Z Axis"), 0, 1, 4, 5);
+
+	for (int axis = 0; axis < 3; ++axis)
+	{
+		sGtkEditVector3 edit_mandelbox_rotation_neg = CreateEditVector3WithMapIndexed("mandelbox_rotation_neg", axis + 1, &mapInterfaceEditVector);
+		sGtkEditVector3 edit_mandelbox_rotation_pos = CreateEditVector3WithMapIndexed("mandelbox_rotation_pos", axis + 1, &mapInterfaceEditVector);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_neg.x), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_neg.y), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_neg.z), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_pos.x), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_pos.y), 6);
+		gtk_entry_set_width_chars(GTK_ENTRY(edit_mandelbox_rotation_pos.z), 6);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_neg.x, 1, 2, axis + 2, axis + 3);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_neg.y, 2, 3, axis + 2, axis + 3);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_neg.z, 3, 4, axis + 2, axis + 3);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_pos.x, 4, 5, axis + 2, axis + 3);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_pos.y, 5, 6, axis + 2, axis + 3);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), edit_mandelbox_rotation_pos.z, 6, 7, axis + 2, axis + 3);
+	}
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.tableMandelboxRotations, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxVary, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxVary), Interface.boxMandelboxVary);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,1", "Vary scale", 6, CreateEditWithMap("mandelbox_vary_scale_vary", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "Fold", 6, CreateEditWithMap("mandelbox_vary_fold", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,5", "min R", 6, CreateEditWithMap("mandelbox_vary_minr", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "R power", 6, CreateEditWithMap("mandelbox_vary_rpower", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0", "w add", 6, CreateEditWithMap("mandelbox_vary_wadd", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxColoring, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxColoring), Interface.boxMandelboxColoring);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor1), CreateEdit("0", "Resultant absolute value component", 6, CreateEditWithMap("mandelbox_color_R", &mapInterfaceEdit)), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor2, false, false, 1);
+	sGtkEditVector3 edit_mandelboxColorFactor = CreateEditVector3WithMap("mandelbox_color", &mapInterfaceEditVector);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,1", "X plane component", 6, edit_mandelboxColorFactor.x), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,2", "Y plane component", 6, edit_mandelboxColorFactor.y), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,3", "Z plane component", 6, edit_mandelboxColorFactor.z), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, CreateEditWithMap("mandelbox_color_Sp1", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, CreateEditWithMap("mandelbox_color_Sp2", &mapInterfaceEdit)), false, false, 1);
+
+	//tab OpenCL
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.tabsOpenCL, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClSettings, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.comboOpenCLEngine, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClInformation, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClPlatformBy, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxClock, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMemorySize, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClComputingUnits, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxWorkgroup, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClWorkgroupSize, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClStatus, false, false, 1);
+
+#ifdef CLSUPPORT
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClEngineSettings, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", Interface.comboOpenCLGPUCPU), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Platform index:", Interface.comboOpenCLPlatformIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device index:", Interface.comboOpenCLDeviceIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateEdit("256", "Max GPU mem to use [MB]:", 6, CreateEditWithMap("openCL_memory_limit", &mapAppParamsEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH2), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, CreateEditWithMap("openCL_cycle_time", &mapAppParamsEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH3, false, false, 1);
+#ifdef WIN32
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("notepad.exe", "Text editor:", 40, CreateEditWithMap("openCL_text_editor", &mapAppParamsEdit)), false, false, 1);
+#else	
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("/usr/bin/kate", "Text editor:", 40, CreateEditWithMap("openCL_text_editor", &mapAppParamsEdit)), false, false, 1);
+#endif
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH4, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4), CreateEdit("1e-5", "Delta for DeltaDE distance estimation:", 6, CreateEditWithMap("ocl_delta_DE_step", &mapInterfaceEdit)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4),  CreateWidgetWithLabel("DOF effect method:", Interface.comboOpenCLDOFMode), false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH11, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.comboOpenCLCustomFormulas, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLNewFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormulaInit, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), CreateWidgetWithLabel("Distance estimation method:", Interface.comboOpenCLDEMode), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH13, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH13), Interface.checkOpenClCustomEnable, false, false, 1);
+
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomParams, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomParams), Interface.boxOpenClCustomV2);
+	for(int i=0; i<15; i++)
+	{
+		char text[100];
+		int row = i / 3;
+		int column = i % 3;
+		sprintf(text, "consts->fractal.custom[%2d]:", i);
+		GtkWidget *edit_customParameters = CreateEditWithMapIndexed("ocl_custom_par", i, &mapInterfaceEdit);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableOpenCLCustom), CreateEdit("0", text, 6, edit_customParameters), column, column+1, row, row+1);
+	}
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV2), Interface.tableOpenCLCustom, false, false, 1);
+#endif //CLSUPPORT
+
+	//tab About...
+	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
+
+	//tabs
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.tabs, false, false, 1);
+
+	//setup files button
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.buFiles, false, false, 1);
+
+	//Load / Save settings
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frLoadSave, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frLoadSave), Interface.boxLoadSave);
+
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadSettings, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buSaveSettings, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadExample, true, true, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buCopyToClipboard, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buGetFromClipboard, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buUndo, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buRedo, false, false, 1);
+
+	//Keyframe aniation
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frKeyframeAnimation2, false, false, 1);
+	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation2), Interface.boxBottomKeyframeAnimation);
+	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buTimeline, true, true, 1);
+
+	//progressbar
+	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.progressBar, false, false, 1);
+
+	//tabs
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_view, Interface.tab_label_view);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_engine, Interface.tab_label_engine);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_fractal, Interface.tab_label_fractal);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_IFS, Interface.tab_label_IFS);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_hybrid, Interface.tab_label_hybrid);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_mandelbox, Interface.tab_label_mandelbox);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders, Interface.tab_label_shaders);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders2, Interface.tab_label_shaders2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
+#ifdef CLSUPPORT
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_openCL, Interface.tab_label_openCL);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclEngine, Interface.tab_label_openclEngine);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclCustom, Interface.tab_label_openclCustom);
+#endif
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveWater, Interface.tab_label_primitiveWater);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBox, Interface.tab_label_primitiveBox);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBoxInv, Interface.tab_label_primitiveBoxInv);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphere, Interface.tab_label_primitiveSphere);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphereInv, Interface.tab_label_primitiveSphereInv);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_server, Interface.tab_label_server);
+	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_client, Interface.tab_label_client);
+
+	//main window pack
+	gtk_container_add(GTK_CONTAINER(window_interface), Interface.boxMain);
+
+	//CreateTooltips();
+
+	gtk_widget_show_all(window_interface);
+
+	//set default sensivity settings
+	//ChangedComboFormula(NULL, NULL);
+	//ChangedTgladFoldingMode(NULL, NULL);
+	//ChangedJulia(NULL, NULL);
+	//ChangedSphericalFoldingMode(NULL, NULL);
+	//ChangedLimits(NULL, NULL);
+	//ChangedMandelboxRotations(NULL, NULL);
+	//ChangedAmbientOcclusion(NULL, NULL);
+	//ChangedFastAmbientOcclusion(NULL, NULL);
+	//ChangedIterFogEnable(NULL, NULL);
+
+	//Writing default settings
+	//WriteInterface(default_settings);
+	interfaceCreated = true;
+	renderRequest = false;
+
+	//load app settings
+	sAppSettings appParams;
+#ifdef CLSUPPORT
+	if(LoadAppSettings("mandelbulber_ocl_settings", appParams))
+#else
+	if(LoadAppSettings("mandelbulber_settings", appParams))
+#endif
+	{
+		//WriteInterfaceAppSettings(&appParams);
+	}
+	else
+	{
+		printf("Will be used default settings\n");
+	}
+
+  g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
+  g_timeout_add (100,(GSourceFunc)CallerTimerLoopWindowRefresh,NULL);
+
+  clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+
 	//connected signals
 	CONNECT_SIGNAL_CLICKED(Interface.buRender, StartRendering);
 	CONNECT_SIGNAL_CLICKED(Interface.buStop, StopRendering);
@@ -2274,7 +3081,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
 	CONNECT_SIGNAL_CLICKED(Interface.checkConstantDEThreshold, ChangedConstantDEThreshold);
 	CONNECT_SIGNAL(Interface.comboImageProportion, ChangedImageProportion, "changed");
-	CONNECT_SIGNAL(Interface.edit_imageHeight, ChangedImageProportion, "activate");
+	CONNECT_SIGNAL(mapInterfaceEdit["image_height"], ChangedImageProportion, "activate");
 	CONNECT_SIGNAL_CLICKED(Interface.buCopyToClipboard, PressedCopyToClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buLoadExample, PressedLoadExample);
@@ -2299,918 +3106,6 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_widget_set_events(GTK_WIDGET(dareaPalette), GDK_BUTTON_PRESS_MASK);
 
 	gtk_signal_connect(GTK_OBJECT(dareaPalette), "expose-event", GTK_SIGNAL_FUNC(on_dareaPalette_expose), NULL);
-
-	//----------------------- main box -----------------------
-
-	//	box buttons
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.boxButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buRender, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxButtons), Interface.buStop, true, true, 1);
-
-	//	frame view point
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frCoordinates, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frCoordinates), Interface.boxView);
-
-	//		box coordinates
-	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxCoordinates, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "x:", 20, Interface.edit_va), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "y:", 20, Interface.edit_vb), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxCoordinates), CreateEdit("0,0", "z:", 20, Interface.edit_vc), false, false, 1);
-
-	//		box angle
-	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxAngle, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "alpha (yaw):", 15, Interface.edit_alfa), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "beta (pitch):", 15, Interface.edit_beta), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAngle), CreateEdit("0,0", "gamma (roll):", 15, Interface.edit_gammaAngle), false, false, 1);
-
-	//		box zoom
-	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxZoom, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("2,5", "Close up (zoom):", 20, Interface.edit_zoom), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("0,5", "perspective (FOV):", 5, Interface.edit_persp), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateWidgetWithLabel("Perspective projection:", Interface.comboPerspectiveType), false, false, 1);
-
-	//buttons arrows
-	gtk_container_add(GTK_CONTAINER(Interface.buUp), Interface.pixmap_up);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buUp, 1, 2, 0, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.buDown), Interface.pixmap_down);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buDown, 1, 2, 2, 3);
-	gtk_container_add(GTK_CONTAINER(Interface.buLeft), Interface.pixmap_left);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buLeft, 0, 1, 1, 2);
-	gtk_container_add(GTK_CONTAINER(Interface.buRight), Interface.pixmap_right);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRight, 2, 3, 1, 2);
-	gtk_container_add(GTK_CONTAINER(Interface.buRotateLeft), Interface.pixmap_rotate_left);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateLeft, 0, 1, 2, 3);
-	gtk_container_add(GTK_CONTAINER(Interface.buRotateRight), Interface.pixmap_rotate_right);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows), Interface.buRotateRight, 2, 3, 2, 3);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.fr3Dnavigator, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.fr3Dnavigator), Interface.boxArrows);
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxArrows2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows2), Interface.tableArrows, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows2), Interface.checkStraightRotation, false, false, 1);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkStraightRotation), false);
-
-	//navigation
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxNavigation, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.buInitNavigator, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationButtons), Interface.buForward, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationButtons), Interface.buBackward, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(0.5), "Step for camera moving multiplied by DE:", 5, Interface.edit_step_forward), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.checkNavigatorAbsoluteDistance, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(0.1), "Absolute movement distance:", 10, Interface.edit_NavigatorAbsoluteDistance), false, false,
-			1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(10.0), "Rotation step in degrees", 5, Interface.edit_step_rotation), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), CreateEdit(DoubleToString(3.0), "Mouse click close-up ratio", 5, Interface.edit_mouse_click_distance), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.boxNavigationZooming, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkZoomClickEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigationZooming), Interface.checkNavigatorGoToSurface, false, false, 1);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Interface.checkZoomClickEnable), true);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNavigation), Interface.label_NavigatorEstimatedDistance, false, false, 1);
-
-	//buttons arrows 2
-	gtk_container_add(GTK_CONTAINER(Interface.buMoveUp), Interface.pixmap_move_up);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveUp, 1, 2, 0, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.buMoveDown), Interface.pixmap_move_down);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveDown, 1, 2, 2, 3);
-	gtk_container_add(GTK_CONTAINER(Interface.buMoveLeft), Interface.pixmap_move_left);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveLeft, 0, 1, 1, 2);
-	gtk_container_add(GTK_CONTAINER(Interface.buMoveRight), Interface.pixmap_move_right);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableArrows2), Interface.buMoveRight, 2, 3, 1, 2);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows), Interface.boxArrows3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxArrows3), Interface.tableArrows2, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_view), Interface.frMeasure, true, true, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMeasure), Interface.boxMeasure);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.boxMeasure1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), Interface.buMeasureActivation, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "X:", 20, Interface.edit_measureX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Y:", 20, Interface.edit_measureY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure1), CreateEdit("0", "Z:", 20, Interface.edit_measureZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMeasure), Interface.label_measureDistance, false, false, 1);
-
-	//	frame fractal
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFormula, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frFractalFormula), Interface.boxFractalFormula);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), CreateWidgetWithLabel("Fractal formula type:", Interface.comboFractType), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxJulia, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia x:", 20, Interface.edit_julia_a), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia y:", 20, Interface.edit_julia_b), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), CreateEdit("0,0", "Julia z:", 20, Interface.edit_julia_c), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxJulia), Interface.checkJulia, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxFractalPower, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("8,0", "power:", 5, Interface.edit_power), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("1,0", "Fractal constant factor:", 5, Interface.edit_FractalConstantFactor), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalPower), CreateEdit("0,0", "c add:", 5, Interface.edit_cadd), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFoldingIntPow, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frFractalFoldingIntPow), Interface.boxFractalFoldingIntPow);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("2,0", "Cubic folding factor:", 5, Interface.edit_FoldingIntPowFoldingFactor), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFoldingIntPow), CreateEdit("10,0", "Z factor:", 5, Interface.edit_FoldingIntPowZFactor), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFolding, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frFractalFolding), Interface.boxFractalFolding);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxTgladFolding, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), Interface.checkTgladMode, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("1,0", "Folding limit:", 5, Interface.edit_tglad_folding_1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxTgladFolding), CreateEdit("2,0", "Folding value:", 5, Interface.edit_tglad_folding_2), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.boxSphericalFolding, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), Interface.checkSphericalFoldingMode, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("1,0", "Fixed radius:", 5, Interface.edit_spherical_folding_1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSphericalFolding), CreateEdit("0,5", "Min. radius:", 5, Interface.edit_spherical_folding_2), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFolding), Interface.checkIFSFoldingMode, false, false, 1);
-
-	//primitives
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frPrimitives, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitives), Interface.boxPrimitives);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitives), Interface.tabsPrimitives, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitivePlane), Interface.frPrimitivePlane, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitivePlane), Interface.boxPrimitivePlane);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitivePlaneCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 10, Interface.edit_primitivePlaneCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "z:", 10, Interface.edit_primitivePlaneCentreZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "Normal x:", 5, Interface.edit_primitivePlaneNormalX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 5, Interface.edit_primitivePlaneNormalY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("-1,0", "z:", 5, Interface.edit_primitivePlaneNormalZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.buColorPrimitivePlane, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateEdit("0,0", "Reflect:", 5, Interface.edit_primitivePlaneReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitivePlaneEnabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.checkPrimitiveOnlyPlane, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveWater), Interface.frPrimitiveWater, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveWater), Interface.boxPrimitiveWater);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.0", "Level:", 10, Interface.edit_primitiveWaterHeight), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0.1", "Wave amplitude:", 10, Interface.edit_primitiveWaterAmplitude), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("1.0", "Wave length:", 10, Interface.edit_primitiveWaterLength), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0", "Rotation:", 10, Interface.edit_primitiveWaterRotation), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 3, Interface.edit_primitiveWaterIterations), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.buColorPrimitiveWater, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,7", "Reflect:", 5, Interface.edit_primitiveWaterReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,1", "Waves anim speed:", 5, Interface.edit_primitiveWaterAnimSpeed), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.checkPrimitiveWaterEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBox), Interface.frPrimitiveBox, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveBox), Interface.boxPrimitiveBox);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveBoxCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveBoxCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveBoxCentreZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "Size x:", 10, Interface.edit_primitiveBoxSizeX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "y:", 10, Interface.edit_primitiveBoxSizeY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "z:", 10, Interface.edit_primitiveBoxSizeZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.buColorPrimitiveBox, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), CreateEdit("0,0", "Reflect:", 5, Interface.edit_primitiveBoxReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.checkPrimitiveBoxEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveBoxInv), Interface.frPrimitiveInvertedBox, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveInvertedBoxCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveInvertedBoxCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveInvertedBoxCentreZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "Size x:", 10, Interface.edit_primitiveInvertedBoxSizeX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "y:", 10, Interface.edit_primitiveInvertedBoxSizeY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "z:", 10, Interface.edit_primitiveInvertedBoxSizeZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.buColorPrimitiveInvertedBox, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), CreateEdit("0,0", "Reflect:", 5, Interface.edit_primitiveInvertedBoxReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.checkPrimitiveInvertedBoxEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphere), Interface.frPrimitiveSphere, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveSphere), Interface.boxPrimitiveSphere);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveSphereCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveSphereCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveSphereCentreZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("2.0", "z:", 10, Interface.edit_primitiveSphereRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.buColorPrimitiveSphere, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), CreateEdit("0,0", "Reflect:", 5, Interface.edit_primitiveSphereReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.checkPrimitiveSphereEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_primitiveSphereInv), Interface.frPrimitiveInvertedSphere, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "Centre x:", 10, Interface.edit_primitiveInvertedSphereCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "y:", 10, Interface.edit_primitiveInvertedSphereCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "z:", 10, Interface.edit_primitiveInvertedSphereCentreZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("2.0", "z:", 10, Interface.edit_primitiveInvertedSphereRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.buColorPrimitiveInvertedSphere, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), CreateEdit("0,0", "Reflect:", 5, Interface.edit_primitiveInvertedSphereReflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.checkPrimitiveInvertedSphereEnabled, false, false, 1);
-
-	//tab --- engine
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frFractalRayMarching, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frFractalRayMarching), Interface.boxFractalRayMarching);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxQuality, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("250", "Max. iterations:", 5, Interface.edit_maxN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1", "Min. iterations:", 5, Interface.edit_minN), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.label_DE_threshold, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.edit_DE_thresh, false, false, 1);
-	gtk_entry_set_text(GTK_ENTRY(Interface.edit_DE_thresh), "1,0");
-	gtk_entry_set_width_chars(GTK_ENTRY(Interface.edit_DE_thresh), 5);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "DE step factor:", 5, Interface.edit_DE_stepFactor), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStep, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), Interface.buAutoDEStepHQ, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxQuality), CreateEdit("1,0", "Smoothness:", 5, Interface.edit_roughness), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxFractalSwitches, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkIterThresh, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkInteriorMode, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkDELinearMode, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkConstantDEThreshold, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalSwitches), Interface.checkSlowShading, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalRayMarching), Interface.boxViewDistance, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("1e-15", "Minimum render distance:", 10, Interface.edit_viewMinDistance), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxViewDistance), CreateEdit("20", "Maximum render distance:", 10, Interface.edit_viewMaxDistance), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frLimits, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frLimits), Interface.boxLimits);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.tableLimits, false, false, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "x min:", 20, Interface.edit_amin), 0, 1, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "y min:", 20, Interface.edit_bmin), 1, 2, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("-0,5", "z min:", 20, Interface.edit_cmin), 2, 3, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "x max:", 20, Interface.edit_amax), 0, 1, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "y max:", 20, Interface.edit_bmax), 1, 2, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableLimits), CreateEdit("0,5", "z max:", 20, Interface.edit_cmax), 2, 3, 1, 2);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLimits), Interface.checkLimits, false, false, 1);
-
-	//frame netRender
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_engine), Interface.frNetRender, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frNetRender), Interface.tabsNetRender);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_server), Interface.boxNetRenderServerV, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.boxNetRenderServerH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), Interface.checkNetRenderServerScan, false, false, 1);
-	gtk_widget_set_sensitive(Interface.checkNetRenderServerScan, false);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerH1), CreateEdit("5555", "   network port:", 20, Interface.edit_netRenderServerPort), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderServerV), Interface.label_serverStatus, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_client), Interface.boxNetRenderClientV, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.boxNetRenderClientH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), Interface.checkNetRenderClientEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("11.0.0.4", "   IP or domain of server:", 20, Interface.edit_netRenderClientName), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientH1), CreateEdit("5555", "port:", 10, Interface.edit_netRenderClientPort), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxNetRenderClientV), Interface.label_clientStatus, false, false, 1);
-
-	//frame image
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImage, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frImage), Interface.boxImage);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxImage), Interface.boxImageRes, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "Image width:", 5, Interface.edit_imageWidth), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "Image height:", 5, Interface.edit_imageHeight), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", Interface.comboImageProportion), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateEdit("1", "Tiles (rows and columns):", 5, Interface.edit_tiles), false, false, 1);
-
-	//frame image adjustments
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImageAdjustments, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frImageAdjustments), Interface.boxImageAdjustmentsV);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsV), Interface.boxImageAdjustmentsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "brightness:", 5, Interface.edit_brightness), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "contrast:", 5, Interface.edit_contrast), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), CreateEdit("1,0", "gamma:", 5, Interface.edit_gamma), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.checkHDR, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAdjustmentsH1), Interface.buApplyImageAdjustments, false, false, 1);
-
-	//frame Stereoscopic
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frStereo, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frStereo), Interface.boxStereoscopic);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxStereoscopic), Interface.boxStereoParams, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxStereoParams), CreateEdit("0,1", "Distance between eyes:", 20, Interface.edit_stereoDistance), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxStereoParams), Interface.checkStereoEnabled, false, false, 1);
-
-	//frame Image saving
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_image), Interface.frImageSaving, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frImageSaving), Interface.boxImageSaving);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxSaveImage, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveImage, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSavePNG16Alpha, true, true, 1);
-	//gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveAllImageLayers, true, true, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), Interface.checkAutoSaveImage, false, false, 1);
-
-	//frame effects
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frShadersSurface, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frShadersSurface), Interface.boxShadersSurfaceV);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("0,5", "shading:", 5, Interface.edit_shading), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "direct light:", 5, Interface.edit_shadows), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("1,0", "specularity:", 5, Interface.edit_specular), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("0,0", "ambient:", 5, Interface.edit_ambient), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH1), CreateEdit("10,0", "Soft shadow cone angle:", 5, Interface.edit_shadowConeAngle), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("2,0", "ambient occlusion:", 5, Interface.edit_ambient_occlusion), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("4", "AO quality:", 5, Interface.edit_AmbientOcclusionQuality), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("1,0", "Fast AO tune:", 5, Interface.edit_fastAoTune), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("0,0", "reflection:", 5, Interface.edit_reflect), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH2), CreateEdit("5", "reflections depth:", 5, Interface.edit_reflectionsMax), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceV), Interface.boxShadersSurfaceH3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkShadow, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkAmbientOcclusion, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkFastAmbientOcclusion, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersSurfaceH3), Interface.checkRaytracedReflections, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frShadersVolumetric, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frShadersVolumetric), Interface.boxShadersVolumetricV);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("1,0", "glow:", 5, Interface.edit_glow), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("100", "iter. fog opacity", 6, Interface.edit_iterFogOpacity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH1), CreateEdit("3", "fog opacity trim (iterations)", 6, Interface.edit_iterFogOpacityTrim), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog density:", 5, Interface.edit_volumetricFogDensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog colour 1 distance:", 5, Interface.edit_volumetricFogColorDistance), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog colour 2 distance:", 5, Interface.edit_volumetricFogColorDistance2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), CreateEdit("1,0", "Fog distance factor:", 5, Interface.edit_volumetricFogDistanceFact), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH2), Interface.buAutoFog, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricV), Interface.boxShadersVolumetricH3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkBitmapBackground, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkBitmapBackgroundFulldome, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxShadersVolumetricH3), Interface.checkIterFogEnable, false, false, 1);
-
-
-	//frame fake lights
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frFakeLights, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frFakeLights), Interface.boxFakeLightsV);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("2", "Min iter.:", 5, Interface.edit_fakeLightsMinIter), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("4", "Max iter.:", 5, Interface.edit_fakeLightsMaxIter), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Intensity:", 10, Interface.edit_fakeLightsIntensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Visibility:", 10, Interface.edit_fakeLightsVisibility), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), CreateEdit("1,0", "Size:", 10, Interface.edit_fakeLightsVisibilitySize), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH1), Interface.checkFakeLightsEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsV), Interface.boxFakeLightsH2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Orbit trap X:", 5, Interface.edit_fakeLightsOrbitTrapX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Y:", 5, Interface.edit_fakeLightsOrbitTrapY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFakeLightsH2), CreateEdit("0,0", "Z:", 5, Interface.edit_fakeLightsOrbitTrapZ), false, false, 1);
-
-	//frame fog
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders), Interface.frPostFog, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPostFog), Interface.boxPostFog);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.checkFogEnabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", Interface.buColorFog), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.label_sliderFog, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.sliderFogDepth, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider2, false, false, 1);
-
-	//frame animation
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frAnimation, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frAnimation), Interface.boxAnimation);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.boxAnimationButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationRecordTrack, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationContinueRecord, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationButtons), Interface.buAnimationRenderTrack, true, true, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.boxAnimationEdits, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits), CreateEdit(DoubleToString(0.01), "Flight speed (DE multiplier):", 5, Interface.edit_animationDESpeed), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationFrame, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationDistance, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimation), Interface.label_animationSpeed, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frKeyframeAnimation, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation), Interface.boxKeyframeAnimation);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons), Interface.buAnimationRenderFromKeys, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationButtons2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationButtons2), Interface.buConvertPathToKeyframes, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.boxKeyframeAnimationEdits, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimationEdits), CreateEdit("100", "Frames per key:", 5, Interface.edit_animationFramesPerKey), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxKeyframeAnimation), Interface.label_keyframeInfo, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_animation), Interface.frAnimationFrames, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frAnimationFrames), Interface.boxAnimationEdits2);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("0", "Start frame:", 5, Interface.edit_animationStartFrame), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxAnimationEdits2), CreateEdit("1000", "End frame:", 5, Interface.edit_animationEndFrame), false, false, 1);
-
-	//---- tab pot effects
-
-	//frame palette
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPalette, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPalette), Interface.boxPalette);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), Interface.boxEffectsColoring, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.checkColoring, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.vSeparator1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("123456", "Random seed:", 6, Interface.edit_color_seed), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Saturation:", 6, Interface.edit_colour_saturation), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), CreateEdit("1,0", "Colour speed:", 6, Interface.edit_color_speed), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buRandomPalette, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxEffectsColoring), Interface.buGetPaletteFromImage, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), dareaPalette, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPalette), Interface.boxPaletteOffset, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.label_paletteOffset, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPaletteOffset), Interface.sliderPaletteOffset, true, true, 1);
-
-	//frame colors
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frColors, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frColors), Interface.boxColors);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow 1:", Interface.buColorGlow1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorGlow2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background 1:", Interface.buColorBackgroud1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorBackgroud2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorBackgroud3), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Fog 1:", Interface.buColorFog1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorFog2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorFog3), false, false, 1);
-
-	//frame SSAO
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPostSSAO, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPostSSAO), Interface.boxPostSSAO);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostSSAO), Interface.boxSSAOButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOButtons), Interface.checkSSAOEnabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOButtons), Interface.buUpdateSSAO, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostSSAO), Interface.boxSSAOSlider, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOSlider), Interface.label_SSAO_quality, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxSSAOSlider), Interface.sliderSSAOQuality, true, true, 1);
-
-	//frame DOF
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPostDOF, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPostDOF), Interface.boxPostDOF);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.checkDOFEnabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.buUpdateDOF, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFButtons), Interface.label_sliderDOF, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFSlider1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.label_DOF_focus, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider1), Interface.sliderDOFFocus, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPostDOF), Interface.boxDOFSlider2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider2), Interface.label_DOF_radius, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxDOFSlider2), Interface.sliderDOFRadius, true, true, 1);
-
-	//gtk_box_pack_start(GTK_BOX(Interface.tab_box_posteffects), Interface.buBuddhabrot, true, true, 1);
-
-	//---- tab Lights
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frMainLight, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMainLight), Interface.boxMainLight);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMainLight), Interface.boxMainLightPosition, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("-45", "Horizontal angle relative to camera:", 6, Interface.edit_mainLightAlfa), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("45", "Vertical angle relative to camera:", 6, Interface.edit_mainLightBeta), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateWidgetWithLabel("Colour:", Interface.buColorMainLight), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsCommon, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frLightsCommon), Interface.boxLightCommon);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), Interface.buDistributeLights, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit("0", "Number of aux. lights:", 6, Interface.edit_auxLightNumber), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightCommon), CreateEdit(DoubleToString(0.01), "Manual placement distance:", 6, Interface.edit_auxLightPlacementDistance), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightBallance, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frLightBallance), Interface.boxLightBallance);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightBallance), Interface.boxLightBrightness, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Main light intensity:", 6, Interface.edit_mainLightIntensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Auxiliary lights intensity:", 6, Interface.edit_auxLightIntensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), CreateEdit("1,0", "Lights visibility:", 6, Interface.edit_auxLightVisibility), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightBrightness), Interface.checkPenetratingLights, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsParameters, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frLightsParameters), Interface.boxLightsParameters);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("1234", "Random seed:", 6, Interface.edit_auxLightRandomSeed), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution), CreateEdit("0,1", "Maximum distance from fractal", 12, Interface.edit_auxLightMaxDist), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightsParameters), Interface.boxLightDistribution2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("3.0", "Distribution radius of lights:", 6, Interface.edit_auxLightDistributionRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Centre of distribution X:", 12, Interface.edit_auxLightRandomCentreX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Y:", 12, Interface.edit_auxLightRandomCentreY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightDistribution2), CreateEdit("0", "Z:", 12, Interface.edit_auxLightRandomCentreZ), false, false, 1);
-
-	//frame: predefined lights
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frPredefinedLights, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frPredefinedLights), Interface.boxPredefinedLights);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.label_auxLightPre1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("3,0", "x:", 12, Interface.edit_auxLightPre1x), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "y:", 12, Interface.edit_auxLightPre1y), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "z:", 12, Interface.edit_auxLightPre1z), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("1,0", "intensity:", 12, Interface.edit_auxLightPre1intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.buColorAuxLightPre1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.checkAuxLightPre1Enabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.label_auxLightPre2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("-3,0", "x:", 12, Interface.edit_auxLightPre2x), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("-3,0", "y:", 12, Interface.edit_auxLightPre2y), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("0,0", "z:", 12, Interface.edit_auxLightPre2z), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("1,0", "intensity:", 12, Interface.edit_auxLightPre2intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.buColorAuxLightPre2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.checkAuxLightPre2Enabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.label_auxLightPre3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("1,0", "x:", 12, Interface.edit_auxLightPre3x), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("3,0", "y:", 12, Interface.edit_auxLightPre3y), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("-1,0", "z:", 12, Interface.edit_auxLightPre3z), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("1,0", "intensity:", 12, Interface.edit_auxLightPre3intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.buColorAuxLightPre3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.checkAuxLightPre3Enabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre4, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.label_auxLightPre4, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "x:", 12, Interface.edit_auxLightPre4x), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-1,0", "y:", 12, Interface.edit_auxLightPre4y), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-3,0", "z:", 12, Interface.edit_auxLightPre4z), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "intensity:", 12, Interface.edit_auxLightPre4intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.buColorAuxLightPre4, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.checkAuxLightPre4Enabled, false, false, 1);
-
-	//frame: volumetric lights
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frVolumetricLight, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frVolumetricLight), Interface.boxVolumetricLight);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightGeneral, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightMain, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), CreateEdit("1,0", "Intensity for main light:", 12, Interface.edit_volumetricLightMainIntensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightMain), Interface.checkVolumetricLightMainEnabled, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLight), Interface.boxVolumetricLightAux, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #1:", 12, Interface.edit_volumetricLightAux1Intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux1Enabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #2:", 12, Interface.edit_volumetricLightAux2Intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux2Enabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #3:", 12, Interface.edit_volumetricLightAux3Intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux3Enabled, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), CreateEdit("1,0", "L #4:", 12, Interface.edit_volumetricLightAux4Intensity), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxVolumetricLightAux), Interface.checkVolumetricLightAux4Enabled, false, false, 1);
-
-	//tab IFS
-	//frame: main IFS
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSMain, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frIFSMain), Interface.boxIFSMain);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("2,0", "scale:", 6, Interface.edit_IFSScale), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation alpha:", 6, Interface.edit_IFSAlfa), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation beta:", 6, Interface.edit_IFSBeta), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit), CreateEdit("0", "rotation gamma:", 6, Interface.edit_IFSGamma), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSMainEdit2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("1", "offset x:", 6, Interface.edit_IFSOffsetX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("0", "offset y:", 6, Interface.edit_IFSOffsetY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), CreateEdit("0", "offset z:", 6, Interface.edit_IFSOffsetZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsX, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsY, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSAbsZ, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMainEdit2), Interface.checkIFSMengerSponge, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSMain), Interface.boxIFSEdge, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge x:", 6, Interface.edit_IFSEdgeX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge y:", 6, Interface.edit_IFSEdgeY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSEdge), CreateEdit("0", "Edge z:", 6, Interface.edit_IFSEdgeZ), false, false, 1);
-
-	//frame: IFS params
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSParams, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frIFSParams), Interface.boxIFSParams);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSParams), Interface.tableIFSParams, false, false, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSx, 0, 1, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSy, 1, 2, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSz, 2, 3, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSalfa, 3, 4, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSbeta, 4, 5, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSgamma, 5, 6, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSdistance, 6, 7, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSintensity, 7, 8, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.label_IFSenabled, 8, 9, 0, 1);
-
-	for (int i = 0; i < IFS_VECTOR_COUNT; i++)
-	{
-		Interface.IFSParams[i].editIFSx = gtk_entry_new();
-		Interface.IFSParams[i].editIFSy = gtk_entry_new();
-		Interface.IFSParams[i].editIFSz = gtk_entry_new();
-		Interface.IFSParams[i].editIFSalfa = gtk_entry_new();
-		Interface.IFSParams[i].editIFSbeta = gtk_entry_new();
-		Interface.IFSParams[i].editIFSgamma = gtk_entry_new();
-		Interface.IFSParams[i].editIFSdistance = gtk_entry_new();
-		Interface.IFSParams[i].editIFSintensity = gtk_entry_new();
-		Interface.IFSParams[i].checkIFSenabled = gtk_check_button_new();
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSx), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSy), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSz), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSalfa), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSbeta), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSgamma), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSdistance), 6);
-		gtk_entry_set_width_chars(GTK_ENTRY(Interface.IFSParams[i].editIFSintensity), 6);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSx, 0, 1, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSy, 1, 2, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSz, 2, 3, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSalfa, 3, 4, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSbeta, 4, 5, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSgamma, 5, 6, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSdistance, 6, 7, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].editIFSintensity, 7, 8, i + 1, i + 2);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableIFSParams), Interface.IFSParams[i].checkIFSenabled, 8, 9, i + 1, i + 2);
-	}
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.boxIFSButtons, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeOffset, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSNormalizeVectors, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSButtons), Interface.buIFSReset, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_IFS), Interface.frIFSDefaults, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frIFSDefaults), Interface.boxIFSDefaults);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultDodeca, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultIcosa, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultOcta, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxIFSDefaults), Interface.buIFSDefaultMengerSponge, false, false, 1);
-
-	//tab hybrid formula
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_hybrid), Interface.frHybrid, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frHybrid), Interface.boxHybrid);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.tableHybridParams, false, false, 1);
-
-	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.label_HybridFormula[i], 0, 1, i, i + 1);
-	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.comboHybridFormula[i], 1, 2, i, i + 1);
-
-	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("3", "  iterations:", 6, Interface.edit_hybridIter[i]), 2, 3, i, i + 1);
-	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("2", "power / scale / p:", 6, Interface.edit_hybridPower[i]), 3, 4, i, i + 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxHybrid), Interface.checkHybridCyclic, false, false, 1);
-
-	//tab Mandelbox
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxMainParams, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxMainParams), Interface.boxMandelboxMainParams);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("2", "Scale", 6, Interface.edit_mandelboxScale), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("3,0", "Sharpness", 6, Interface.edit_mandelboxSharpness), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("1,0", "Solid", 6, Interface.edit_mandelboxSolid), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams1), CreateEdit("0,0", "Melt", 6, Interface.edit_mandelboxMelt), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxMainParams2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Folding limit", 6, Interface.edit_mandelboxFoldingLimit), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("2", "Folding value", 6, Interface.edit_mandelboxFoldingValue), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("1", "Fixed radius", 6, Interface.edit_mandelboxSpFoldingFixedRadius), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams2), CreateEdit("0,5", "Min radius", 6, Interface.edit_mandelboxSpFoldingMinRadius), false, false, 1);
-
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxMainParams), Interface.boxMandelboxOffset, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Spherical folding offset X", 6, Interface.edit_mandelboxOffsetX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Y", 6, Interface.edit_mandelboxOffsetY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Z", 6, Interface.edit_mandelboxOffsetZ), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateWidgetWithLabel("GeneralizedFoldBox type", Interface.comboGeneralizedFoldBoxType), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.boxMandelboxRotationMain, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.checkMandelboxRotationsEnable, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "Main rotation: alpha", 6, Interface.edit_mandelboxRotationMain[0]), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "beta", 6, Interface.edit_mandelboxRotationMain[1]), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotationMain), CreateEdit("0", "gamma", 6, Interface.edit_mandelboxRotationMain[2]), false, false, 1);
-
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Negative plane"), 1, 4, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Positive plane"), 4, 7, 0, 1);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alpha"), 1, 2, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 2, 3, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 3, 4, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Alfa"), 4, 5, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Beta"), 5, 6, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Gamma"), 6, 7, 1, 2);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("X Axis"), 0, 1, 2, 3);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Y Axis"), 0, 1, 3, 4);
-	gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations), gtk_label_new("Z Axis"), 0, 1, 4, 5);
-
-	for (int fold = 0; fold < MANDELBOX_FOLDS; ++fold)
-		for (int axis = 0; axis < 3; ++axis)
-			for (int component = 0; component < 3; ++component)
-				gtk_table_attach_defaults(GTK_TABLE(Interface.tableMandelboxRotations),
-						Interface.edit_mandelboxRotation[fold][axis][component], component + fold * 3 + 1, component + fold * 3 + 2, axis + 2, axis + 3);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxRotations), Interface.tableMandelboxRotations, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxVary, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxVary), Interface.boxMandelboxVary);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,1", "Vary scale", 6, Interface.edit_mandelboxVaryScale), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "Fold", 6, Interface.edit_mandelboxVaryFold), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0,5", "min R", 6, Interface.edit_mandelboxVaryMinR), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("1", "R power", 6, Interface.edit_mandelboxVaryRPower), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxVary), CreateEdit("0", "w add", 6, Interface.edit_mandelboxVaryWAdd), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxColoring, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxColoring), Interface.boxMandelboxColoring);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor1), CreateEdit("0", "Resultant absolute value component", 6, Interface.edit_mandelboxColorFactorR), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,1", "X plane component", 6, Interface.edit_mandelboxColorFactorX), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,2", "Y plane component", 6, Interface.edit_mandelboxColorFactorY), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor2), CreateEdit("0,3", "Z plane component", 6, Interface.edit_mandelboxColorFactorZ), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColoring), Interface.boxMandelboxColor3, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("5,0", "Min radius component", 6, Interface.edit_mandelboxColorFactorSp1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxColor3), CreateEdit("1,0", "Fixed radius component", 6, Interface.edit_mandelboxColorFactorSp2), false, false, 1);
-
-	//tab OpenCL
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openCL), Interface.tabsOpenCL, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClSettings, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.comboOpenCLEngine, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClInformation, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClPlatformBy, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxClock, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMemorySize, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClComputingUnits, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClMaxWorkgroup, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClWorkgroupSize, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClInformation), Interface.label_OpenClStatus, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClEngineSettings, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", Interface.comboOpenCLGPUCPU), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Platform index:", Interface.comboOpenCLPlatformIndex), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device index:", Interface.comboOpenCLDeviceIndex), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateEdit("256", "Max GPU mem to use [MB]:", 6, Interface.edit_OpenCLMaxMem), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH2), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, Interface.edit_OpenCLProcessingCycleTime), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH3, false, false, 1);
-#ifdef WIN32
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("notepad.exe", "Text editor:", 40, Interface.edit_OpenCLTextEditor), false, false, 1);
-#else	
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH3), CreateEdit("/usr/bin/kate", "Text editor:", 40, Interface.edit_OpenCLTextEditor), false, false, 1);
-#endif
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH4, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4), CreateEdit("1e-5", "Delta for DeltaDE distance estimation:", 6, Interface.edit_OpenCLDeltaDEStep), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4),  CreateWidgetWithLabel("DOF effect method:", Interface.comboOpenCLDOFMode), false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH11, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.comboOpenCLCustomFormulas, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLNewFormula, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormula, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormulaInit, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), CreateWidgetWithLabel("Distance estimation method:", Interface.comboOpenCLDEMode), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH13, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH13), Interface.checkOpenClCustomEnable, false, false, 1);
-
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomParams, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomParams), Interface.boxOpenClCustomV2);
-	for(int i=0; i<15; i++)
-	{
-		char text[100];
-		int row = i / 3;
-		int column = i % 3;
-		sprintf(text, "consts->fractal.custom[%2d]:", i);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableOpenCLCustom), CreateEdit("0", text, 6, Interface.edit_customParameters[i]), column, column+1, row, row+1);
-	}
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV2), Interface.tableOpenCLCustom, false, false, 1);
-
-	//tab About...
-	gtk_box_pack_start(GTK_BOX(Interface.tab_box_about), Interface.label_about, false, false, 1);
-
-	//tabs
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.tabs, false, false, 1);
-
-	//setup files button
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.buFiles, false, false, 1);
-
-	//Load / Save settings
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frLoadSave, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frLoadSave), Interface.boxLoadSave);
-
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadSettings, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buSaveSettings, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buLoadExample, true, true, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buCopyToClipboard, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buGetFromClipboard, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buUndo, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLoadSave), Interface.buRedo, false, false, 1);
-
-	//Keyframe aniation
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.frKeyframeAnimation2, false, false, 1);
-	gtk_container_add(GTK_CONTAINER(Interface.frKeyframeAnimation2), Interface.boxBottomKeyframeAnimation);
-	gtk_box_pack_start(GTK_BOX(Interface.boxBottomKeyframeAnimation), Interface.buTimeline, true, true, 1);
-
-	//progressbar
-	gtk_box_pack_start(GTK_BOX(Interface.boxMain), Interface.progressBar, false, false, 1);
-
-	//tabs
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_view, Interface.tab_label_view);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_engine, Interface.tab_label_engine);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_image, Interface.tab_label_image);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_fractal, Interface.tab_label_fractal);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_IFS, Interface.tab_label_IFS);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_hybrid, Interface.tab_label_hybrid);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_mandelbox, Interface.tab_label_mandelbox);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders, Interface.tab_label_shaders);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_shaders2, Interface.tab_label_shaders2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_lights, Interface.tab_label_lights);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_animation, Interface.tab_label_animation);
-#ifdef CLSUPPORT
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_openCL, Interface.tab_label_openCL);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclEngine, Interface.tab_label_openclEngine);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsOpenCL), Interface.tab_box_openclCustom, Interface.tab_label_openclCustom);
-#endif
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabs), Interface.tab_box_about, Interface.tab_label_about);
-
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitivePlane, Interface.tab_label_primitivePlane);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveWater, Interface.tab_label_primitiveWater);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBox, Interface.tab_label_primitiveBox);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveBoxInv, Interface.tab_label_primitiveBoxInv);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphere, Interface.tab_label_primitiveSphere);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsPrimitives), Interface.tab_box_primitiveSphereInv, Interface.tab_label_primitiveSphereInv);
-
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_server, Interface.tab_label_server);
-	gtk_notebook_append_page(GTK_NOTEBOOK(Interface.tabsNetRender), Interface.tab_box_client, Interface.tab_label_client);
-
-	//main window pack
-	gtk_container_add(GTK_CONTAINER(window_interface), Interface.boxMain);
-
-	CreateTooltips();
-
-	gtk_widget_show_all(window_interface);
-
-	//set default sensivity settings
-	ChangedComboFormula(NULL, NULL);
-	ChangedTgladFoldingMode(NULL, NULL);
-	ChangedJulia(NULL, NULL);
-	ChangedSphericalFoldingMode(NULL, NULL);
-	ChangedLimits(NULL, NULL);
-	ChangedMandelboxRotations(NULL, NULL);
-	ChangedAmbientOcclusion(NULL, NULL);
-	ChangedFastAmbientOcclusion(NULL, NULL);
-	ChangedIterFogEnable(NULL, NULL);
-
-	//Writing default settings
-	WriteInterface(default_settings);
-	interfaceCreated = true;
-	renderRequest = false;
-
-	//load app settings
-	sAppSettings appParams;
-#ifdef CLSUPPORT
-	if(LoadAppSettings("mandelbulber_ocl_settings", appParams))
-#else
-	if(LoadAppSettings("mandelbulber_settings", appParams))
-#endif
-	{
-		WriteInterfaceAppSettings(&appParams);
-	}
-	else
-	{
-		printf("Will be used default settings\n");
-	}
-
-  g_timeout_add (100,(GSourceFunc)CallerTimerLoop,NULL);
-  g_timeout_add (100,(GSourceFunc)CallerTimerLoopWindowRefresh,NULL);
-
-  clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
 	gdk_threads_enter();
 	gtk_main();
