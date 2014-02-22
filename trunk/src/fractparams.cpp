@@ -24,6 +24,7 @@ void InitParams(parameters::container *par)
 	par->addParam("end_frame", 1000, 0, 99999, false);
 	par->addParam("frames_per_keyframe", 100, 1, 99999, false);
 	par->addParam("frame_no", 0, 0, 99999, false);
+	par->addParam("flight_speed", 0.1, 1e-15, 1e15, false);
 
 	//camera
 	par->addParam("view_point", CVector3(0.0, 0.0, 0.0), true);
@@ -32,20 +33,24 @@ void InitParams(parameters::container *par)
 	par->addParam("angle_gamma", 0.0, true);
 	par->addParam("zoom", 2.5, 0.0, 1e15, true);
 	par->addParam("perspective", 0.5, 0.0, 100.0, true);
-	par->addParam("fish_eye", false, true);
-	par->addParam("fish_eye_180cut", false, true);
+	par->addParam("perspective_type", 0, false);
+	par->addParam("fish_eye_180cut", false, false);
 	par->addParam("stereo_eye_distance", 1.0, true);
-	par->addParam("stereo_enabled", false, true);
+	par->addParam("stereo_enabled", false, false);
+	par->addParam("camera_movenent_step_de", 0.5, 1e-15, 1e5, false);
+	par->addParam("camera_movenent_step_absolute", 0.5, 1e-15, 1e15, false);
+	par->addParam("camera_rotation_step", 0.5, 1e-15, 360.0, false);
+	par->addParam("camera_mouse_click_step", 0.5, 1e-15, 1e5, false);
 
 	//general fractal and engine
 	par->addParam("formula", (int)fractal::trig_optim, false);
 	par->addParam("power", 9.0, true);
 	par->addParam("julia_mode", false, true);
-	par->addParam("julia", CVector3(0.0, 0.0, 0.0), true);
+	par->addParam("julia_c", CVector3(0.0, 0.0, 0.0), true);
 	par->addParam("N", 250, 0, 65536, true);
 	par->addParam("minN", 1, 0, 65536, true);
 	par->addParam("fractal_constant_factor", 1.0, true);
-	par->addParam("quality", 1.0, true);
+	par->addParam("DE_thresh", 1.0, true); //old name was 'quality'
 	par->addParam("smoothness", 1.0, true);
 	par->addParam("iteration_threshold_mode", false, true);
 	par->addParam("analityc_DE_mode", true, false);
@@ -130,7 +135,7 @@ void InitParams(parameters::container *par)
 
 	//main light
 	par->addParam("main_light_intensity", 1.0, true);
-	par->addParam("main_light_alfa", -45.0, true);
+	par->addParam("main_light_alpha", -45.0, true);
 	par->addParam("main_light_beta", 45.0, true);
 	par->addParam("main_light_colour", (sRGB){65535, 65535, 65535}, true);
 
@@ -219,12 +224,11 @@ void InitParams(parameters::container *par)
 	par->addParam("mandelbox_sharpness", 3.0, true);
 	par->addParam("mandelbox_offset", CVector3(0.0, 0.0, 0.0), true);
 	par->addParam("mandelbox_rotation_main", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_x_neg", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_x_pos", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_y_neg", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_y_pos", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_z_neg", CVector3(0.0, 0.0, 0.0), true);
-	par->addParam("mandelbox_rotation_z_pos", CVector3(0.0, 0.0, 0.0), true);
+	for(int i = 1; i<=3; i++)
+	{
+		par->addParam("mandelbox_rotation_neg", i, CVector3(0.0, 0.0, 0.0), true);
+		par->addParam("mandelbox_rotation_pos", i, CVector3(0.0, 0.0, 0.0), true);
+	}
 	par->addParam("mandelbox_color", CVector3(0.03, 0.05, 0.07), true);
 	par->addParam("mandelbox_color_R", 0.0, true);
 	par->addParam("mandelbox_color_Sp1", 0.2, true);
@@ -241,8 +245,8 @@ void InitParams(parameters::container *par)
 	par->addParam("mandelbox_vary_wadd", 0.0, true);
 
 	//FoldingIntPow
-	par->addParam("FoldingIntPow_folding_factor", 2.0, true);
-	par->addParam("FoldingIntPow_z_factor", 5.0, true);
+	par->addParam("foldingIntPow_folding_factor", 2.0, true);
+	par->addParam("foldingIntPow_z_factor", 5.0, true);
 
 	//primitives
 	par->addParam("primitive_only_plane", false, false);
@@ -314,4 +318,27 @@ void InitParams(parameters::container *par)
 	par->addParam("palette", palette, false);
 }
 
+void InitAppParams(parameters::container *par)
+{
+	par->addParam("net_render_client_port", std::string("5555"), true);
+	par->addParam("net_render_client_IP", std::string("10.0.0.4"), true);
+	par->addParam("net_render_server_port", std::string("5555"), true);
+	par->addParam("light_manual_placement_dist", 0.1, 1e-15, 1e15, true);
 
+#ifdef CLSUPPORT
+	par->addParam("openCL_use_CPU", false, true);
+	par->addParam("openCL_platform_index", 0, true);
+	par->addParam("openCL_device_index", 0, true);
+	par->addParam("openCL_engine", 0, true);
+	par->addParam("openCL_cycle_time", 1.0, 0.02, 60.0, true);
+	par->addParam("openCL_memory_limit", 256, true);
+#ifdef WIN32
+	par->addParam("CreateEditWithMap("openCL_cycle_time", &mapAppParamsEdit)", std::string("notepad.exe"), true);
+#else
+	par->addParam("openCL_text_editor", std::string("/usr/bin/kate"), true);
+#endif
+	par->addParam("openCL_use_CPU", false, true);
+	par->addParam("openCL_use_CPU", false, true);
+
+#endif
+}
