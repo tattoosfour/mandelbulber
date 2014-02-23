@@ -36,8 +36,8 @@ extern int y_mouse;
 extern double last_z_mouse;
 extern double smooth_last_z_mouse;
 
-extern std::map<std::string, GtkWidget*> mapInterfaceEdit;
-extern std::map<std::string, GtkWidget*> mapAppParamsEdit;
+extern std::map<std::string, GtkWidget*> mapInterface;
+extern std::map<std::string, GtkWidget*> mapAppParams;
 
 enum enumImageFormat
 {
@@ -370,6 +370,7 @@ struct sInterface
 	GtkWidget *hSeparator4;
 	GtkWidget *vSeparator1;
 
+	//to keep
 	sGtkEditVector3 edit_measure;
 
 	GtkWidget *edit_va;
@@ -711,6 +712,7 @@ struct sInterface
 
 	GtkWidget *progressBar;
 
+
 	GtkWidget *checkAmbientOcclusion;
 	GtkWidget *checkFastAmbientOcclusion;
 	GtkWidget *checkShadow;
@@ -760,15 +762,19 @@ struct sInterface
 	GtkWidget *checkPrimitiveSphereEnabled;
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
-	GtkWidget *checkOpenClEnable;
+
 	GtkWidget *checkOpenClCustomEnable;
 	GtkWidget *checkIterFogEnable;
-	GtkWidget *checkNetRenderServerEnable;
-	GtkWidget *checkNetRenderServerScan;
-	GtkWidget *checkNetRenderClientEnable;
+
 	GtkWidget *checkPrimitiveOnlyPlane;
 	GtkWidget *checkFakeLightsEnabled;
 	GtkWidget *checkHDR;
+
+	//to keep
+	GtkWidget *checkNetRenderServerEnable;
+	GtkWidget *checkNetRenderServerScan;
+	GtkWidget *checkNetRenderClientEnable;
+	GtkWidget *checkOpenClEnable;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
@@ -974,6 +980,11 @@ GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
 void ReadInterfaceAppSettings(sAppSettings *appParams);
 void WriteInterfaceAppSettings(sAppSettings *appParams);
+void ReadInterfaceNew(parameters::container *par);
+void WriteInterfaceNew(parameters::container *par);
+std::string gtk_entry_get_vector3(sGtkEditVector3 entry3);
+void gtk_entry_set_vector3(sGtkEditVector3 entry3, std::string text);
+
 #ifdef CLSUPPORT
 void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *clConstantsBuff);
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
@@ -983,6 +994,8 @@ std::string gtk_entry_get_vector3(sGtkEditVector3 entry3);
 GtkWidget* CreateEditWithMap(std::string name, std::map<std::string, GtkWidget*> *map);
 sGtkEditVector3 CreateEditVector3WithMap(std::string name, std::map<std::string, sGtkEditVector3> *map);
 sGtkEditVector3 CreateEditVector3WithMapIndexed(std::string name, int index, std::map<std::string, sGtkEditVector3> *map);
+GtkWidget* CreateCheckBoxWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map);
+GtkWidget* CreateCheckBoxWithMapIndexed(std::string name, int index, std::string label, std::map<std::string, GtkWidget*> *map);
 
 #endif
 #endif /* INTERFACE_H_ */

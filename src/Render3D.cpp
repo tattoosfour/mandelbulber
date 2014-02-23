@@ -1735,6 +1735,10 @@ int main(int argc, char *argv[])
 				//creating GTK+ GUI
 				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
+				WriteInterfaceNew(&gPar);
+				gdk_threads_enter();
+				gtk_main();
+				gdk_threads_leave();
 			}
 			else
 			{

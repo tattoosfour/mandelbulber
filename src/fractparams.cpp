@@ -37,10 +37,6 @@ void InitParams(parameters::container *par)
 	par->addParam("fish_eye_180cut", false, false);
 	par->addParam("stereo_eye_distance", 1.0, true);
 	par->addParam("stereo_enabled", false, false);
-	par->addParam("camera_movenent_step_de", 0.5, 1e-15, 1e5, false);
-	par->addParam("camera_movenent_step_absolute", 0.5, 1e-15, 1e15, false);
-	par->addParam("camera_rotation_step", 0.5, 1e-15, 360.0, false);
-	par->addParam("camera_mouse_click_step", 0.5, 1e-15, 1e5, false);
 
 	//general fractal and engine
 	par->addParam("formula", (int)fractal::trig_optim, false);
@@ -73,6 +69,7 @@ void InitParams(parameters::container *par)
 	par->addParam("spherical_folding_fixed", 1.0, true);
 	par->addParam("spherical_folding_min", 0.5, true);
 	par->addParam("c_add", -1.3, true);
+	par->addParam("IFS_folding_mode", false, true);
 
 	//image effects
 	par->addParam("brightness", 1.0, 0.0, 1e15, true);
@@ -95,7 +92,7 @@ void InitParams(parameters::container *par)
 	par->addParam("background_as_fuldome", false, false);
 	par->addParam("shadows_enabled", true, true);
 	par->addParam("penetrating_lights", true, true);
-	par->addParam("raytraced_reflections", true, true);
+	par->addParam("raytraced_reflections", false, true);
 	par->addParam("reflections_max", 5, 0, 10, false);
 
 	par->addParam("glow_color", 1, (sRGB){40984, 44713, 49490}, true);
@@ -301,6 +298,7 @@ void InitParams(parameters::container *par)
 	}
 	par->addParam("ocl_delta_DE_step", 1e-5, 1e-10, 1e10, true);
 	par->addParam("ocl_DOF_method", 0, false);
+	par->addParam("ocl_use_custom_formula", 0, false);
 #endif
 
 	//files
@@ -324,6 +322,14 @@ void InitAppParams(parameters::container *par)
 	par->addParam("net_render_client_IP", std::string("10.0.0.4"), true);
 	par->addParam("net_render_server_port", std::string("5555"), true);
 	par->addParam("light_manual_placement_dist", 0.1, 1e-15, 1e15, true);
+	par->addParam("camera_movenent_step_de", 0.5, 1e-15, 1e5, false);
+	par->addParam("camera_movenent_step_absolute", 0.5, 1e-15, 1e15, false);
+	par->addParam("camera_rotation_step", 0.5, 1e-15, 360.0, false);
+	par->addParam("camera_mouse_click_step", 0.5, 1e-15, 1e5, false);
+	par->addParam("camera_straight_rotation", false, false);
+	par->addParam("camera_absolute_distance_mode", false, false);
+	par->addParam("camera_go_to_surface_mode", false, false);
+	par->addParam("auto_save_images", false, false);
 
 #ifdef CLSUPPORT
 	par->addParam("openCL_use_CPU", false, true);
@@ -337,8 +343,6 @@ void InitAppParams(parameters::container *par)
 #else
 	par->addParam("openCL_text_editor", std::string("/usr/bin/kate"), true);
 #endif
-	par->addParam("openCL_use_CPU", false, true);
-	par->addParam("openCL_use_CPU", false, true);
 
 #endif
 }
