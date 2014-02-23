@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define _PARAM_DEBUG
+//#define _PARAM_DEBUG
 
 using namespace parameters;
 
@@ -286,7 +286,8 @@ void container::Set(std::string name, T val)
 #ifdef _PARAM_DEBUG
 		else
 		{
-			std::cerr << "Set(): element '" << name << "' got value of wrong type" << std::endl;
+			std::cerr << "Set(): element '" << name << "' got value of not default type" << std::endl;
+			DebugPrintf(name);
 		}
 #endif
 	}
@@ -317,6 +318,7 @@ T container::Get(std::string name)
 		if (it->second.type != type)
 		{
 			std::cerr << "Get(): element '" << name << "' gave value of not default type" << std::endl;
+			DebugPrintf(name);
 		}
 #endif
 	}
