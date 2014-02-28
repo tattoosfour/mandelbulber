@@ -270,6 +270,7 @@ varType container::Getter(sMultiVal multi, bool &val)
 	return typeBool;
 }
 
+//set parameter value by name
 template<class T>
 void container::Set(std::string name, T val)
 {
@@ -303,6 +304,49 @@ template void container::Set<CVector3>(std::string name, CVector3 val);
 template void container::Set<sRGB>(std::string name, sRGB val);
 template void container::Set<bool>(std::string name, bool val);
 
+//set parameter value by name and index
+template<class T>
+void container::Set(std::string name, int index, T val)
+{
+	if (index >= 0)
+	{
+		std::string indexName = nameWithIndex(&name, index);
+		std::map<std::string, sRecord>::iterator it;
+		it = myMap.find(indexName);
+		if (it != myMap.end())
+		{
+			sMultiVal multi;
+			varType type = Assigner(multi, val);
+			if (it->second.type == type)
+			{
+				it->second.actualVal = multi;
+			}
+#ifdef _PARAM_DEBUG
+			else
+			{
+				std::cerr << "Set(): element '" << name << "' got value of not default type" << std::endl;
+				DebugPrintf(name);
+			}
+#endif
+		}
+		else
+		{
+			std::cerr << "Set(): element '" << indexName << "' doesn't exists" << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "Set(): element '" << name << "' has negative index (" << index << ")" << std::endl;
+	}
+}
+template void container::Set<double>(std::string name, int index,double val);
+template void container::Set<int>(std::string name, int index,int val);
+template void container::Set<std::string>(std::string name, int index,std::string val);
+template void container::Set<CVector3>(std::string name, int index,CVector3 val);
+template void container::Set<sRGB>(std::string name, int index,sRGB val);
+template void container::Set<bool>(std::string name, int index,bool val);
+
+//get parameter value by name
 template<class T>
 T container::Get(std::string name)
 {
@@ -334,6 +378,47 @@ template std::string container::Get<std::string>(std::string name);
 template CVector3 container::Get<CVector3>(std::string name);
 template sRGB container::Get<sRGB>(std::string name);
 template bool container::Get<bool>(std::string name);
+
+//get parameter value by name and index
+template<class T>
+T container::Get(std::string name, int index)
+{
+	T val;
+	if (index >= 0)
+	{
+		std::string indexName = nameWithIndex(&name, index);
+		std::map<std::string, sRecord>::iterator it;
+		it = myMap.find(indexName);
+		if (it != myMap.end())
+		{
+			sRecord rec = it->second;
+			sMultiVal multi = rec.actualVal;
+			varType type = Getter(multi, val);
+#ifdef _PARAM_DEBUG
+			if (it->second.type != type)
+			{
+				std::cerr << "Get(): element '" << indexName << "' gave value of not default type" << std::endl;
+				DebugPrintf(indexName);
+			}
+#endif
+		}
+		else
+		{
+			std::cerr << "Get(): element '" << indexName << "' doesn't exists" << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "Get(): element '" << name << "' has negative index (" << index << ")" << std::endl;
+	}
+	return val;
+}
+template double container::Get<double>(std::string name, int index);
+template int container::Get<int>(std::string name, int index);
+template std::string container::Get<std::string>(std::string name, int index);
+template CVector3 container::Get<CVector3>(std::string name, int index);
+template sRGB container::Get<sRGB>(std::string name, int index);
+template bool container::Get<bool>(std::string name, int index);
 
 void container::DebugPrintf(std::string name)
 {

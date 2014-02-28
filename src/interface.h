@@ -695,6 +695,7 @@ struct sInterface
 	GtkWidget *label_sliderFog;
 	GtkWidget *label_sliderDOF;
 
+
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
 	GtkWidget *comboHybridFormula[HYBRID_COUNT];
@@ -709,6 +710,7 @@ struct sInterface
 	GtkWidget *comboOpenCLCustomFormulas;
 	GtkWidget *comboOpenCLDEMode;
 	GtkWidget *comboOpenCLDOFMode;
+
 
 	GtkWidget *progressBar;
 
@@ -970,8 +972,10 @@ void CreateTooltips(void);
 bool ReadComandlineParams(int argc, char *argv[]);
 double atofData(const gchar* text);
 void AddComboTextsFractalFormula(GtkComboBox *combo);
-fractal::enumFractalFormula FormulaNumberGUI2Data(int formula);
-int FormulaNumberData2GUI(fractal::enumFractalFormula formula);
+fractal::enumFractalFormula HybridFormulaNumberGUI2Data(int formula);
+int HybridFormulaNumberData2GUI(fractal::enumFractalFormula formula);
+fractal::enumFractalFormula MainFormulaNumberGUI2Data(int formula);
+int MainFormulaNumberData2GUI(fractal::enumFractalFormula formula);
 void Params2InterfaceData(sParamRender *source);
 void InterfaceData2Params(sParamRender *dest);
 void CheckPrameters(sParamRender *params);
@@ -991,11 +995,14 @@ matrix33 RotMatrix2matrix33(CRotationMatrix rot);
 cl_float4 CVector2float3(CVector3 vect);
 cl_float4 sRGB2float3(sRGB colour, double factor);
 std::string gtk_entry_get_vector3(sGtkEditVector3 entry3);
+
 GtkWidget* CreateEditWithMap(std::string name, std::map<std::string, GtkWidget*> *map);
 sGtkEditVector3 CreateEditVector3WithMap(std::string name, std::map<std::string, sGtkEditVector3> *map);
 sGtkEditVector3 CreateEditVector3WithMapIndexed(std::string name, int index, std::map<std::string, sGtkEditVector3> *map);
 GtkWidget* CreateCheckBoxWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map);
 GtkWidget* CreateCheckBoxWithMapIndexed(std::string name, int index, std::string label, std::map<std::string, GtkWidget*> *map);
+void AddComboBoxToMap(std::string name, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
+void AddComboBoxToMapIndexed(std::string name, int index, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
 
 #endif
 #endif /* INTERFACE_H_ */

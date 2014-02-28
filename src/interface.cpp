@@ -170,7 +170,7 @@ double atofData(const gchar *text)
 	return retval;
 }
 
-fractal::enumFractalFormula FormulaNumberGUI2Data(int formula)
+fractal::enumFractalFormula HybridFormulaNumberGUI2Data(int formula)
 {
 	fractal::enumFractalFormula formula2 = fractal::trig_optim;
 	if (formula == 0) formula2 = fractal::none;
@@ -211,7 +211,34 @@ fractal::enumFractalFormula FormulaNumberGUI2Data(int formula)
 	return formula2;
 }
 
-int FormulaNumberData2GUI(fractal::enumFractalFormula formula)
+fractal::enumFractalFormula MainFormulaNumberGUI2Data(int formula)
+{
+	fractal::enumFractalFormula formula2 = fractal::trig_optim;
+	if (formula == 0) formula2 = fractal::trig_optim;
+	if (formula == 1) formula2 = fractal::trig_DE;
+	if (formula == 2) formula2 = fractal::fast_trig;
+	if (formula == 3) formula2 = fractal::minus_fast_trig;
+	if (formula == 4) formula2 = fractal::xenodreambuie;
+	if (formula == 5) formula2 = fractal::hypercomplex;
+	if (formula == 6) formula2 = fractal::quaternion;
+	if (formula == 7) formula2 = fractal::menger_sponge;
+	if (formula == 8) formula2 = fractal::tglad;
+	if (formula == 9) formula2 = fractal::kaleidoscopic;
+	if (formula == 10) formula2 = fractal::mandelbulb2;
+	if (formula == 11) formula2 = fractal::mandelbulb3;
+	if (formula == 12) formula2 = fractal::mandelbulb4;
+	if (formula == 13) formula2 = fractal::foldingIntPow2;
+	if (formula == 14) formula2 = fractal::smoothMandelbox;
+	if (formula == 15) formula2 = fractal::mandelboxVaryScale4D;
+	if (formula == 16) formula2 = fractal::aexion;
+	if (formula == 17) formula2 = fractal::benesi;
+	if (formula == 18) formula2 = fractal::bristorbrot;
+	if (formula == 19) formula2 = fractal::hybrid;
+	if (formula == 20) formula2 = fractal::generalizedFoldBox;
+	return formula2;
+}
+
+int HybridFormulaNumberData2GUI(fractal::enumFractalFormula formula)
 {
 	int formula2 = 0;
 	if (formula == fractal::none) formula2 = 0;
@@ -249,6 +276,33 @@ int FormulaNumberData2GUI(fractal::enumFractalFormula formula)
 	if (formula == fractal::angleMultiplyX) formula2 = 32;
 	if (formula == fractal::angleMultiplyY) formula2 = 33;
 	if (formula == fractal::angleMultiplyZ) formula2 = 34;
+	return formula2;
+}
+
+int MainFormulaNumberData2GUI(fractal::enumFractalFormula formula)
+{
+	int formula2 = 0;
+	if (formula == fractal::trig_optim) formula2 = 0;
+	if (formula == fractal::trig_DE) formula2 = 1;
+	if (formula == fractal::fast_trig) formula2 = 2;
+	if (formula == fractal::minus_fast_trig) formula2 = 3;
+	if (formula == fractal::xenodreambuie) formula2 = 4;
+	if (formula == fractal::hypercomplex) formula2 = 5;
+	if (formula == fractal::quaternion) formula2 = 6;
+	if (formula == fractal::menger_sponge) formula2 = 7;
+	if (formula == fractal::tglad) formula2 = 8;
+	if (formula == fractal::kaleidoscopic) formula2 = 9;
+	if (formula == fractal::mandelbulb2) formula2 = 10;
+	if (formula == fractal::mandelbulb3) formula2 = 11;
+	if (formula == fractal::mandelbulb4) formula2 = 12;
+	if (formula == fractal::foldingIntPow2) formula2 = 13;
+	if (formula == fractal::smoothMandelbox) formula2 = 14;
+	if (formula == fractal::mandelboxVaryScale4D) formula2 = 15;
+	if (formula == fractal::aexion) formula2 = 16;
+	if (formula == fractal::benesi) formula2 = 17;
+	if (formula == fractal::bristorbrot) formula2 = 18;
+	if (formula == fractal::hybrid) formula2 = 19;
+	if (formula == fractal::generalizedFoldBox) formula2 = 20;
 	return formula2;
 }
 
@@ -628,7 +682,7 @@ void ReadInterface(sParamRender *params)
 		CheckPrameters(params);
 
 		for (int i = 0; i < HYBRID_COUNT; ++i)
-			params->fractal.hybridFormula[i] = FormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
+			params->fractal.hybridFormula[i] = HybridFormulaNumberGUI2Data(gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i])));
 
 		double imageScale = 0;
 		int scale = gtk_combo_box_get_active(GTK_COMBO_BOX(renderWindow.comboImageScale));
@@ -778,7 +832,10 @@ void ReadInterfaceNew(parameters::container *par)
 			{
 				par->Set(name, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
 			}
-
+			else if(GTK_IS_COMBO_BOX(widget))
+			{
+				par->Set(name, gtk_combo_box_get_active(GTK_COMBO_BOX(widget)));
+			}
 		}
 	}
 	{
@@ -790,23 +847,41 @@ void ReadInterfaceNew(parameters::container *par)
 			par->Set(name, gtk_entry_get_vector3(widget3));
 		}
 	}
+
+	int formulaCombo = par->Get<int>("formula_combo");
+	fractal::enumFractalFormula formulaNo = MainFormulaNumberGUI2Data(formulaCombo);
+	par->Set("formula", (int)formulaNo);
+
+	for (int i = 1; i <= HYBRID_COUNT; ++i)
+		par->Set("hybrid_formula", i, (int)HybridFormulaNumberGUI2Data(par->Get<int>("hybrid_formula_combo", i)));
 }
 
 void WriteInterfaceNew(parameters::container *par)
 {
+	fractal::enumFractalFormula formulaNo = (fractal::enumFractalFormula) par->Get<int>("formula");
+	int formulaCombo = MainFormulaNumberData2GUI(formulaNo);
+	par->Set("formula_combo", formulaCombo);
+
+	for (int i = 1; i <= HYBRID_COUNT; ++i)
+		par->Set("hybrid_formula_combo", i, HybridFormulaNumberData2GUI((fractal::enumFractalFormula) par->Get<int>("hybrid_formula", i)));
+
 	{
 		std::map<std::string, GtkWidget*>::iterator it;
 		for (it = mapInterface.begin(); it != mapInterface.end(); ++it)
 		{
 			std::string name = it->first;
 			GtkWidget *widget = it->second;
-			if(GTK_IS_ENTRY(widget))
+			if (GTK_IS_ENTRY(widget))
 			{
 				gtk_entry_set_text(GTK_ENTRY(widget), par->Get<std::string>(name).c_str());
 			}
-			else if(GTK_IS_TOGGLE_BUTTON(widget))
+			else if (GTK_IS_TOGGLE_BUTTON(widget))
 			{
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), par->Get<bool>(name));
+			}
+			else if (GTK_IS_COMBO_BOX(widget))
+			{
+				gtk_combo_box_set_active(GTK_COMBO_BOX(widget), par->Get<int>(name));
 			}
 		}
 	}
@@ -1218,7 +1293,7 @@ void WriteInterface(sParamRender *params)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), formula);
 
 	for (int i = 0; i < HYBRID_COUNT; ++i)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i]), FormulaNumberData2GUI(params->fractal.hybridFormula[i]));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboHybridFormula[i]), HybridFormulaNumberData2GUI(params->fractal.hybridFormula[i]));
 
 	GdkColor color;
 	color = sRGB2GdkColor(params->effectColours.glow_color1);
@@ -1356,6 +1431,29 @@ GtkWidget* CreateEditWithMapIndexed(std::string name, int index, std::map<std::s
 		std::cerr << "CreateEditWithMap(): element '" << name2 << "' already existed" << std::endl;
 	}
 	return widget;
+}
+
+void AddComboBoxToMap(std::string name, GtkWidget* combo, std::map<std::string, GtkWidget*> *map)
+{
+	std::pair<std::map<std::string, GtkWidget*>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, GtkWidget*>(name, combo));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateCheckBoxWithMap(): element '" << name << "' already existed" << std::endl;
+	}
+}
+
+void AddComboBoxToMapIndexed(std::string name, int index, GtkWidget* combo, std::map<std::string, GtkWidget*> *map)
+{
+	char cname[256];
+	sprintf(cname, "%s_%d", name.c_str(), index);
+	std::string name2(cname);
+	std::pair<std::map<std::string, GtkWidget*>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, GtkWidget*>(name2, combo));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateCheckBoxWithMap(): element '" << name2 << "' already existed" << std::endl;
+	}
 }
 
 sGtkEditVector3 CreateEditVector3WithMap(std::string name, std::map<std::string, sGtkEditVector3> *map)
@@ -1926,112 +2024,119 @@ void CreateInterface(sParamRender *default_settings)
 
 	//combo
 	//		fract type
-	Interface.comboFractType = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbulb");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbulb - Daniel White's");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Polynomic power 2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Polynomic power 2 - minus z");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Xenodreambuie's formula");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hypercomplex");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Quaternion");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Menger sponge");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Tglad's formula (Mandelbox)");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Kaleidoscopic IFS");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Modified Mandelbulb 3");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "FoldingIntPower2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Smooth Mandelbox");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Mandelbox vary scale 4D");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Aexion");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Benesi");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Bristorbrot");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Hybrid");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboFractType), "Generalized Mandelbox Fold");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboFractType), 1);
+	GtkWidget *comboFractType = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Mandelbulb");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Mandelbulb - Daniel White's");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Polynomic power 2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Polynomic power 2 - minus z");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Xenodreambuie's formula");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Hypercomplex");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Quaternion");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Menger sponge");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Tglad's formula (Mandelbox)");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Kaleidoscopic IFS");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Modified Mandelbulb 1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Modified Mandelbulb 2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Modified Mandelbulb 3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "FoldingIntPower2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Smooth Mandelbox");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Mandelbox vary scale 4D");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Aexion");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Benesi");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Bristorbrot");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Hybrid");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboFractType), "Generalized Mandelbox Fold");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboFractType), 1);
+	AddComboBoxToMap("formula_combo", comboFractType, &mapInterface);
 
 	//image format
-	Interface.comboImageFormat = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "JPEG");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "PNG 8-bit");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "PNG 16-bit");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageFormat), "PNG 16-bit with alpha channel");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboImageFormat), 0);
+	GtkWidget *comboImageFormat = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageFormat), "JPEG");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageFormat), "PNG 8-bit");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageFormat), "PNG 16-bit");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageFormat), "PNG 16-bit with alpha channel");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboImageFormat), 0);
+	AddComboBoxToMap("save_image_format", comboImageFormat, &mapAppParams);
 
-	for (int i = 0; i < HYBRID_COUNT; ++i) {
-		Interface.comboHybridFormula[i] = gtk_combo_box_new_text();
-		AddComboTextsFractalFormula(GTK_COMBO_BOX(Interface.comboHybridFormula[i]));
-	}
+	GtkWidget *comboPerspectiveType = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboPerspectiveType), "Three-point perspective");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboPerspectiveType), "Fish eye");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboPerspectiveType), "Equirectangular projection");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboPerspectiveType), "Fish eye 180 degree cut");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboPerspectiveType), 0);
+	AddComboBoxToMap("perspective_type", comboPerspectiveType, &mapInterface);
 
-	Interface.comboPerspectiveType = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Three-point perspective");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Fish eye");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Equirectangular projection");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboPerspectiveType), "Fish eye 180 degree cut");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboPerspectiveType), 0);
+	GtkWidget *comboImageProportion = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "Free");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "1:1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "5:4");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "4:3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "16:10");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboImageProportion), "16:9");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboImageProportion), 0);
+	AddComboBoxToMap("image_proportion", comboImageProportion, &mapInterface);
 
-	Interface.comboImageProportion = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "Free");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "1:1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "5:4");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "4:3");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "16:10");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboImageProportion), "16:9");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboImageProportion), 0);
+	GtkWidget *comboGeneralizedFoldBoxType = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Tetrahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Cube");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Octahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Dodecahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Octahedron/Cube");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Icosahedron");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Box 6");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), "Box 5");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboGeneralizedFoldBoxType), 0);
+	AddComboBoxToMap("mandelbox_fold_mode", comboGeneralizedFoldBoxType, &mapInterface);
 
-	Interface.comboGeneralizedFoldBoxType = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Tetrahedron");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Cube");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Octahedron");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Dodecahedron");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Octahedron/Cube");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Icosahedron");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Box 6");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), "Box 5");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboGeneralizedFoldBoxType), 0);
+#ifdef CLSUPPORT
+	GtkWidget *comboOpenCLEngine = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLEngine), "Fast: no effects");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLEngine), "Normal: shadows, glow, fast AO");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLEngine), "Full: all shaders");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLEngine), "No DE");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLEngine), 0);
+	AddComboBoxToMap("openCL_engine", comboOpenCLEngine, &mapAppParams);
 
-	Interface.comboOpenCLEngine = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Fast: no effects");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Normal: shadows, glow, fast AO");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "Full: all shaders");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLEngine), "No DE");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine), 0);
+	GtkWidget *comboOpenCLDeviceIndex = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDeviceIndex), "0");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDeviceIndex), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDeviceIndex), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDeviceIndex), "3");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLDeviceIndex), 0);
+	AddComboBoxToMap("openCL_device_index", comboOpenCLDeviceIndex, &mapAppParams);
 
-	Interface.comboOpenCLDeviceIndex = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "0");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), "3");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex), 0);
+	GtkWidget *comboOpenCLPlatformIndex = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLPlatformIndex), "0");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLPlatformIndex), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLPlatformIndex), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLPlatformIndex), "3");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLPlatformIndex), 0);
+	AddComboBoxToMap("openCL_platform_index", comboOpenCLPlatformIndex, &mapAppParams);
 
-	Interface.comboOpenCLPlatformIndex = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "0");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), "3");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex), 0);
+	GtkWidget *comboOpenCLGPUCPU = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLGPUCPU), "GPU");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLGPUCPU), "CPU");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLGPUCPU), 0);
+	AddComboBoxToMap("openCL_use_CPU", comboOpenCLGPUCPU, &mapAppParams);
 
-	Interface.comboOpenCLGPUCPU = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), "GPU");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), "CPU");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU), 0);
+	GtkWidget *comboOpenCLCustomFormulas = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLCustomFormulas), "Enable OpenCL to get list");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLCustomFormulas), 0);
+	AddComboBoxToMap("ocl_custom_formula_name", comboOpenCLCustomFormulas, &mapInterface);
 
-	Interface.comboOpenCLCustomFormulas = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), "Enable OpenCL to get list");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLCustomFormulas), 0);
+	GtkWidget *comboOpenCLDEMode = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDEMode), "Calculated DE in formula");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDEMode), "Delta DE");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLDEMode), 0);
+	AddComboBoxToMap("ocl_custom_DE_mode", comboOpenCLDEMode, &mapInterface);
 
-	Interface.comboOpenCLDEMode = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "Calculated DE in formula");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "Delta DE");
-	//gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), "no DE");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), 0);
+	GtkWidget *comboOpenCLDOFMode = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDOFMode), "Post effect");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(comboOpenCLDOFMode), "Monte Carlo");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(comboOpenCLDEMode), 0);
+	AddComboBoxToMap("ocl_DOF_method", comboOpenCLDOFMode, &mapInterface);
 
-	Interface.comboOpenCLDOFMode = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode), "Post effect");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(Interface.comboOpenCLDOFMode), "Monte Carlo");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(Interface.comboOpenCLDEMode), 0);
-
-
+#endif
 	//progress bar
 	Interface.progressBar = gtk_progress_bar_new();
 
@@ -2148,8 +2253,8 @@ void CreateInterface(sParamRender *default_settings)
 	//		box zoom
 	gtk_box_pack_start(GTK_BOX(Interface.boxView), Interface.boxZoom, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("2,5", "Close up (zoom):", 20, CreateEditWithMap("zoom", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("0,5", "perspective (FOV):", 5, CreateEditWithMap("perspective", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateWidgetWithLabel("Perspective projection:", Interface.comboPerspectiveType), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateEdit("0,5", "perspective (FOV):", 5, CreateEditWithMap("fov", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxZoom), CreateWidgetWithLabel("Perspective projection:", comboPerspectiveType), false, false, 1);
 
 	//buttons arrows
 	gtk_container_add(GTK_CONTAINER(Interface.buUp), Interface.pixmap_up);
@@ -2214,7 +2319,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_fractal), Interface.frFractalFormula, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frFractalFormula), Interface.boxFractalFormula);
 
-	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), CreateWidgetWithLabel("Fractal formula type:", Interface.comboFractType), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), CreateWidgetWithLabel("Fractal formula type:", comboFractType), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxFractalFormula), Interface.boxJulia, false, false, 1);
 	sGtkEditVector3 edit_julia = CreateEditVector3WithMap("julia_c", &mapInterfaceEditVector);
@@ -2411,7 +2516,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxImage), Interface.boxImageRes, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("800", "Image width:", 5, CreateEditWithMap("image_width", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes), CreateEdit("600", "Image height:", 5, CreateEditWithMap("image_height", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", Interface.comboImageProportion), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateWidgetWithLabel("Image proportion:", comboImageProportion), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageRes),  CreateEdit("1", "Tiles (rows and columns):", 5, CreateEditWithMap("tiles", &mapInterface)), false, false, 1);
 
 	//frame image adjustments
@@ -2444,7 +2549,7 @@ void CreateInterface(sParamRender *default_settings)
 	//gtk_box_pack_start(GTK_BOX(Interface.boxSaveImage), Interface.buSaveAllImageLayers, true, true, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageSaving), Interface.boxImageAutoSave, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", Interface.comboImageFormat), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateWidgetWithLabel("Auto-save / animation image format:", comboImageFormat), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxImageAutoSave), CreateCheckBoxWithMap("auto_save_images", "Auto-save", &mapAppParams), false, false, 1);
 
 	//frame effects
@@ -2802,7 +2907,10 @@ void CreateInterface(sParamRender *default_settings)
 	for (int i = 0; i < HYBRID_COUNT; ++i)
 	{
 		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.label_HybridFormula[i], 0, 1, i, i + 1);
-		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), Interface.comboHybridFormula[i], 1, 2, i, i + 1);
+		GtkWidget *comboHybridFormula = gtk_combo_box_new_text();
+		AddComboTextsFractalFormula(GTK_COMBO_BOX(comboHybridFormula));
+		AddComboBoxToMapIndexed("hybrid_formula_combo", i + 1, comboHybridFormula, &mapInterface);
+		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), comboHybridFormula, 1, 2, i, i + 1);
 		GtkWidget *edit_hybridIter = CreateEditWithMapIndexed("hybrid_iterations", i + 1, &mapInterface);
 		GtkWidget *edit_hybridPower = CreateEditWithMapIndexed("hybrid_power", i + 1, &mapInterface);
 		gtk_table_attach_defaults(GTK_TABLE(Interface.tableHybridParams), CreateEdit("3", "  iterations:", 6, edit_hybridIter), 2, 3, i, i + 1);
@@ -2832,7 +2940,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Spherical folding offset X", 6, edit_mandelboxOffset.x), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Y", 6, edit_mandelboxOffset.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateEdit("1", "Z", 6, edit_mandelboxOffset.z), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateWidgetWithLabel("GeneralizedFoldBox type", Interface.comboGeneralizedFoldBoxType), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMandelboxOffset), CreateWidgetWithLabel("GeneralizedFoldBox type", comboGeneralizedFoldBoxType), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_mandelbox), Interface.frMandelboxRotations, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frMandelboxRotations), Interface.boxMandelboxRotations);
@@ -2906,7 +3014,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClSettings), Interface.boxOpenClSettings);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSettings), Interface.boxOpenClSwitches1, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.checkOpenClEnable, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), Interface.comboOpenCLEngine, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClSwitches1), comboOpenCLEngine, false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClInformation, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClInformation), Interface.boxOpenClInformation);
@@ -2922,9 +3030,9 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclEngine), Interface.frOpenClEngineSettings, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClEngineSettings), Interface.boxOpenClEngineSettingsV);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH1, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", Interface.comboOpenCLGPUCPU), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Platform index:", Interface.comboOpenCLPlatformIndex), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device index:", Interface.comboOpenCLDeviceIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device type:", comboOpenCLGPUCPU), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Platform index:", comboOpenCLPlatformIndex), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateWidgetWithLabel("Device index:", comboOpenCLDeviceIndex), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH1),  CreateEdit("256", "Max GPU mem to use [MB]:", 6, CreateEditWithMap("openCL_memory_limit", &mapAppParams)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH2, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH2), CreateEdit("1", "Processing cycle time [s] (higher gives better performace)", 6, CreateEditWithMap("openCL_cycle_time", &mapAppParams)), false, false, 1);
@@ -2936,19 +3044,19 @@ void CreateInterface(sParamRender *default_settings)
 #endif
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsV), Interface.boxOpenClEngineSettingsH4, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4), CreateEdit("1e-5", "Delta for DeltaDE distance estimation:", 6, CreateEditWithMap("ocl_delta_DE_step", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4),  CreateWidgetWithLabel("DOF effect method:", Interface.comboOpenCLDOFMode), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClEngineSettingsH4),  CreateWidgetWithLabel("DOF effect method:", comboOpenCLDOFMode), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_openclCustom), Interface.frOpenClCustomSelection, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frOpenClCustomSelection), Interface.boxOpenClCustomV1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH11, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.comboOpenCLCustomFormulas, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), comboOpenCLCustomFormulas, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLNewFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLEditFormulaInit, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLDeleteFormula, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH11), Interface.buOpenCLRecompile, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH12, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), CreateWidgetWithLabel("Distance estimation method:", Interface.comboOpenCLDEMode), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH12), CreateWidgetWithLabel("Distance estimation method:", comboOpenCLDEMode), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomV1), Interface.boxOpenClCustomH13, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxOpenClCustomH13), CreateCheckBoxWithMap("ocl_use_custom_formula", "Use custom formula", &mapInterface), false, false, 1);
 
@@ -3115,7 +3223,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buIFSReset, PressedIFSReset);
 
 	CONNECT_SIGNAL(renderWindow.comboImageScale, ChangedComboScale, "changed");
-	CONNECT_SIGNAL(Interface.comboFractType, ChangedComboFormula, "changed");
+	CONNECT_SIGNAL(comboFractType, ChangedComboFormula, "changed");
 	CONNECT_SIGNAL_CLICKED(mapInterface["tglad_folding_mode"], ChangedTgladFoldingMode);
 	CONNECT_SIGNAL_CLICKED(mapInterface["julia_mode"], ChangedJulia);
 	CONNECT_SIGNAL_CLICKED(mapInterface["spherical_folding_mode"], ChangedSphericalFoldingMode);
@@ -3127,7 +3235,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStep, PressedAutoDEStep);
 	CONNECT_SIGNAL_CLICKED(Interface.buAutoDEStepHQ, PressedAutoDEStepHQ);
 	CONNECT_SIGNAL_CLICKED(mapInterface["iteration_threshold_mode"], ChangedConstantDEThreshold);
-	CONNECT_SIGNAL(Interface.comboImageProportion, ChangedImageProportion, "changed");
+	CONNECT_SIGNAL(comboImageProportion, ChangedImageProportion, "changed");
 	CONNECT_SIGNAL(mapInterface["image_height"], ChangedImageProportion, "activate");
 	CONNECT_SIGNAL_CLICKED(Interface.buCopyToClipboard, PressedCopyToClipboard);
 	CONNECT_SIGNAL_CLICKED(Interface.buGetFromClipboard, PressedPasteFromClipboard);
@@ -3136,7 +3244,7 @@ void CreateInterface(sParamRender *default_settings)
 	CONNECT_SIGNAL_CLICKED(Interface.buMeasureActivation, PressedMeasureActivation);
 	CONNECT_SIGNAL_CLICKED(Interface.checkOpenClEnable, ChangedOpenClEnabled);
 	CONNECT_SIGNAL_CLICKED(mapInterface["ocl_use_custom_formula"], ChangedOpenClCustomEnable);
-	CONNECT_SIGNAL(Interface.comboOpenCLCustomFormulas, ChangedComboOpenCLCustomFormulas, "changed");
+	CONNECT_SIGNAL(comboOpenCLCustomFormulas, ChangedComboOpenCLCustomFormulas, "changed");
 	CONNECT_SIGNAL_CLICKED(mapInterface["iteration_fog_enable"], ChangedIterFogEnable);
 	CONNECT_SIGNAL_CLICKED(Interface.buSaveAllImageLayers, PressedSaveAllImageLayers);
 	CONNECT_SIGNAL_CLICKED(Interface.checkNetRenderServerEnable, PressedServerEnable);
