@@ -377,9 +377,9 @@ float3 MainShadow(__constant sClInConstants *consts, sClShaderInputData *input)
 float3 MainSpecular(sClShaderInputData *input)
 {
 	float3 specular;
-	float3 half = input->lightVect - input->viewVector;
-	half = normalize(half);
-	float shade2 = dot(input->normal,half);
+	float3 halfVector = input->lightVect - input->viewVector;
+	halfVector = normalize(halfVector);
+	float shade2 = dot(input->normal,halfVector);
 	if (shade2 < 0.0f) shade2 = 0.0f;
 	shade2 = pow(shade2, 30.0f) * 1.0f;
 	if (shade2 > 15.0f) shade2 = 15.0f;
@@ -542,9 +542,9 @@ float3 LightShading(__constant sClInConstants *consts, sClShaderInputData *input
 	if (shade > 500.0f) shade = 500.0f;
 
 	//specular
-	float3 half = lightVector - input->viewVector;
-	half = normalize(half);
-	float shade2 = dot(input->normal, half);
+	float3 halfVector = lightVector - input->viewVector;
+	halfVector = normalize(halfVector);
+	float shade2 = dot(input->normal, halfVector);
 	if (shade2 < 0.0f) shade2 = 0.0f;
 	shade2 = pow(shade2, 30.0f) * 1.0f;
 	shade2 *= intensity * consts->params.specularIntensity;
@@ -638,9 +638,9 @@ float3 FakeLights(__constant sClInConstants *consts, sClShaderInputData *input, 
 	if(fakeLight2 < 0.0f) fakeLight2 = 0.0f;
 	fakeLights = fakeLight2;
 
-	float3 half = fakeLightNormal - input->viewVector;
-	half = normalize(half);
-	float fakeSpecular = dot(input->normal, half);
+	float3 halfVector = fakeLightNormal - input->viewVector;
+	halfVector = normalize(halfVector);
+	float fakeSpecular = dot(input->normal, halfVector);
 	if (fakeSpecular < 0.0f) fakeSpecular = 0.0f;
 	fakeSpecular = pow(fakeSpecular, 30.0f) * fakeLight;
 	if (fakeSpecular > 15.0f) fakeSpecular = 15.0f;
