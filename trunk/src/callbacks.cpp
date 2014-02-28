@@ -1271,7 +1271,7 @@ void ChangedComboScale(GtkWidget *widget, gpointer data)
 void ChangedComboFormula(GtkWidget *widget, gpointer data)
 {
 	sParamRender params;
-	ReadInterface(&params);
+	//ReadInterface(&params);
 	fractal::enumFractalFormula formula = params.fractal.formula;
 
 	/*

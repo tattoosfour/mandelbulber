@@ -18,6 +18,7 @@ void InitParams(parameters::container *par)
 	par->addParam("image_height", 600, 32, 1000000, false);
 	par->addParam("tiles", 1, 1, 64, false);
 	par->addParam("tile_no", 0, false);
+	par->addParam("image_proportion", 0, false);
 
 	//animation
 	par->addParam("start_frame", 0, 0, 99999, false);
@@ -32,7 +33,7 @@ void InitParams(parameters::container *par)
 	par->addParam("angle_beta", 30.0, true);
 	par->addParam("angle_gamma", 0.0, true);
 	par->addParam("zoom", 2.5, 0.0, 1e15, true);
-	par->addParam("perspective", 0.5, 0.0, 100.0, true);
+	par->addParam("fov", 0.5, 0.0, 100.0, true);
 	par->addParam("perspective_type", 0, false);
 	par->addParam("fish_eye_180cut", false, false);
 	par->addParam("stereo_eye_distance", 1.0, true);
@@ -40,6 +41,7 @@ void InitParams(parameters::container *par)
 
 	//general fractal and engine
 	par->addParam("formula", (int)fractal::trig_optim, false);
+	par->addParam("formula_combo", MainFormulaNumberData2GUI(fractal::trig_optim), false);
 	par->addParam("power", 9.0, true);
 	par->addParam("julia_mode", false, true);
 	par->addParam("julia_c", CVector3(0.0, 0.0, 0.0), true);
@@ -201,12 +203,18 @@ void InitParams(parameters::container *par)
 	}
 
 	//Hybrid formula
-	for(int i = 1; i <= HYBRID_COUNT; i++)
+	for (int i = 1; i <= HYBRID_COUNT; i++)
 	{
-		if(i != HYBRID_COUNT)
-			par->addParam("hybrid_formula", i, (int)fractal::none, false);
+		if (i != HYBRID_COUNT)
+		{
+			par->addParam("hybrid_formula", i, (int) fractal::none, false);
+			par->addParam("hybrid_formula_combo", i, (int) fractal::none, false);
+		}
 		else
-			par->addParam("hybrid_formula", i, (int)fractal::fast_trig, false);
+		{
+			par->addParam("hybrid_formula", i, (int) fractal::fast_trig, false);
+			par->addParam("hybrid_formula_combo", i, HybridFormulaNumberData2GUI(fractal::fast_trig), false);
+		}
 		par->addParam("hybrid_iterations", i, 1, true);
 		par->addParam("hybrid_power", i, 2.0, true);
 	}
@@ -330,6 +338,7 @@ void InitAppParams(parameters::container *par)
 	par->addParam("camera_absolute_distance_mode", false, false);
 	par->addParam("camera_go_to_surface_mode", false, false);
 	par->addParam("auto_save_images", false, false);
+	par->addParam("save_image_format", 0, false);
 
 #ifdef CLSUPPORT
 	par->addParam("openCL_use_CPU", false, true);

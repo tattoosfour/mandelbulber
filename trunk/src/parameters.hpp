@@ -52,7 +52,9 @@ public:
 	template <class T> void addParam(std::string name, int index, T defaultVal, bool morphable);
 	template <class T> void addParam(std::string name, int index, T defaultVal, T minVal, T maxVal, bool morphable);
 	template <class T> void Set(std::string name, T val);
+	template <class T> void Set(std::string name, int index, T val);
 	template <class T> T Get(std::string name);
+	template <class T> T Get(std::string name, int index);
 
 	void DebugPrintf(std::string name);
 
