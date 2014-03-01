@@ -42,6 +42,7 @@ void InitParams(parameters::container *par)
 	//general fractal and engine
 	par->addParam("formula", (int)fractal::trig_optim, false);
 	par->addParam("formula_combo", MainFormulaNumberData2GUI(fractal::trig_optim), false);
+	par->SetToSave("formula_combo", false);
 	par->addParam("power", 9.0, true);
 	par->addParam("julia_mode", false, true);
 	par->addParam("julia_c", CVector3(0.0, 0.0, 0.0), true);
@@ -209,11 +210,13 @@ void InitParams(parameters::container *par)
 		{
 			par->addParam("hybrid_formula", i, (int) fractal::none, false);
 			par->addParam("hybrid_formula_combo", i, (int) fractal::none, false);
+			par->SetToSave("hybrid_formula_combo", i, false);
 		}
 		else
 		{
 			par->addParam("hybrid_formula", i, (int) fractal::fast_trig, false);
 			par->addParam("hybrid_formula_combo", i, HybridFormulaNumberData2GUI(fractal::fast_trig), false);
+			par->SetToSave("hybrid_formula_combo", i, false);
 		}
 		par->addParam("hybrid_iterations", i, 1, true);
 		par->addParam("hybrid_power", i, 2.0, true);

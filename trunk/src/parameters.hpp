@@ -40,6 +40,7 @@ struct sRecord
 	sMultiVal maxVal;
 	bool morphable;
 	bool limitsDefined;
+	bool toSave;
 };
 
 class container
@@ -51,10 +52,15 @@ public:
 	template <class T> void addParam(std::string name, T defaultVal, T minVal, T maxVal, bool morphable);
 	template <class T> void addParam(std::string name, int index, T defaultVal, bool morphable);
 	template <class T> void addParam(std::string name, int index, T defaultVal, T minVal, T maxVal, bool morphable);
+
 	template <class T> void Set(std::string name, T val);
 	template <class T> void Set(std::string name, int index, T val);
+
 	template <class T> T Get(std::string name);
 	template <class T> T Get(std::string name, int index);
+
+	void SetToSave(std::string, bool toSave);
+	void SetToSave(std::string, int index, bool toSave);
 
 	void DebugPrintf(std::string name);
 

@@ -578,14 +578,7 @@ struct sInterface
 
 	GtkWidget *buRender;
 	GtkWidget *buStop;
-	GtkWidget *buColorGlow1;
-	GtkWidget *buColorGlow2;
-	GtkWidget *buColorBackgroud1;
-	GtkWidget *buColorBackgroud2;
-	GtkWidget *buColorBackgroud3;
-	GtkWidget *buColorFog1;
-	GtkWidget *buColorFog2;
-	GtkWidget *buColorFog3;
+
 	GtkWidget *buApplyImageAdjustments;
 	GtkWidget *buSaveImage;
 	GtkWidget *buSavePNG;
@@ -610,15 +603,10 @@ struct sInterface
 	GtkWidget *buAnimationRecordTrack;
 	GtkWidget *buAnimationContinueRecord;
 	GtkWidget *buAnimationRenderTrack;
-	GtkWidget *buColorFog;
-	GtkWidget *buColorSSAO;
+
 	GtkWidget *buUpdateSSAO;
 	GtkWidget *buUpdateDOF;
-	GtkWidget *buColorAuxLightPre1;
-	GtkWidget *buColorAuxLightPre2;
-	GtkWidget *buColorAuxLightPre3;
-	GtkWidget *buColorAuxLightPre4;
-	GtkWidget *buColorMainLight;
+
 	GtkWidget *buDistributeLights;
 	GtkWidget *buIFSNormalizeOffset;
 	GtkWidget *buIFSNormalizeVectors;
@@ -640,12 +628,7 @@ struct sInterface
 	GtkWidget *buCopyToClipboard;
 	GtkWidget *buGetFromClipboard;
 	GtkWidget *buLoadExample;
-	GtkWidget *buColorPrimitivePlane;
-	GtkWidget *buColorPrimitiveBox;
-	GtkWidget *buColorPrimitiveInvertedBox;
-	GtkWidget *buColorPrimitiveSphere;
-	GtkWidget *buColorPrimitiveInvertedSphere;
-	GtkWidget *buColorPrimitiveWater;
+
 	GtkWidget *buAutoFog;
 	GtkWidget *buMeasureActivation;
 	GtkWidget *buSaveAllImageLayers;
@@ -655,6 +638,30 @@ struct sInterface
 	GtkWidget *buOpenCLEditFormulaInit;
 	GtkWidget *buOpenCLRecompile;
 	GtkWidget *buConvertPathToKeyframes;
+
+	//to remove later
+	GtkWidget *buColorGlow1;
+	GtkWidget *buColorGlow2;
+	GtkWidget *buColorBackgroud1;
+	GtkWidget *buColorBackgroud2;
+	GtkWidget *buColorBackgroud3;
+	GtkWidget *buColorFog1;
+	GtkWidget *buColorFog2;
+	GtkWidget *buColorFog3;
+	GtkWidget *buColorPrimitivePlane;
+	GtkWidget *buColorPrimitiveBox;
+	GtkWidget *buColorPrimitiveInvertedBox;
+	GtkWidget *buColorPrimitiveSphere;
+	GtkWidget *buColorPrimitiveInvertedSphere;
+	GtkWidget *buColorPrimitiveWater;
+	GtkWidget *buColorAuxLightPre1;
+	GtkWidget *buColorAuxLightPre2;
+	GtkWidget *buColorAuxLightPre3;
+	GtkWidget *buColorAuxLightPre4;
+	GtkWidget *buColorMainLight;
+	GtkWidget *buColorFog;
+	GtkWidget *buColorSSAO;
+
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -1003,6 +1010,7 @@ GtkWidget* CreateCheckBoxWithMap(std::string name, std::string label, std::map<s
 GtkWidget* CreateCheckBoxWithMapIndexed(std::string name, int index, std::string label, std::map<std::string, GtkWidget*> *map);
 void AddComboBoxToMap(std::string name, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
 void AddComboBoxToMapIndexed(std::string name, int index, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
+GtkWidget* CreateColorButtonWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map);
 
 #endif
 #endif /* INTERFACE_H_ */
