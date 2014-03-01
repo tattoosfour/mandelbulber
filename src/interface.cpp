@@ -836,6 +836,16 @@ void ReadInterfaceNew(parameters::container *par)
 			{
 				par->Set(name, gtk_combo_box_get_active(GTK_COMBO_BOX(widget)));
 			}
+			else if(GTK_IS_COLOR_BUTTON(widget))
+			{
+				GdkColor color;
+				gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
+				par->Set(name, GdkColor2sRGB(color));
+			}
+			else
+			{
+				std::cerr << "ReadInterfaceNew(): this type of widget is not proper here. Name: '" << name << "'" << std::endl;
+			}
 		}
 	}
 	{
@@ -882,6 +892,15 @@ void WriteInterfaceNew(parameters::container *par)
 			else if (GTK_IS_COMBO_BOX(widget))
 			{
 				gtk_combo_box_set_active(GTK_COMBO_BOX(widget), par->Get<int>(name));
+			}
+			else if(GTK_IS_COLOR_BUTTON(widget))
+			{
+				GdkColor color = sRGB2GdkColor(par->Get<sRGB>(name));
+				gtk_color_button_set_color(GTK_COLOR_BUTTON(widget), &color);
+			}
+			else
+			{
+				std::cerr << "WriteInterfaceNew(): this type of widget is not proper here. Name: '" << name << "'" << std::endl;
 			}
 		}
 	}
@@ -1413,7 +1432,7 @@ GtkWidget* CreateCheckBoxWithMapIndexed(std::string name, int index, std::string
 	ret = map->insert(pair<std::string, GtkWidget*>(name2, widget));
 	if (ret.second == false)
 	{
-		std::cerr << "CreateCheckBoxWithMap(): element '" << name2 << "' already existed" << std::endl;
+		std::cerr << "CreateCheckBoxWithMapIndexed(): element '" << name2 << "' already existed" << std::endl;
 	}
 	return widget;
 }
@@ -1428,7 +1447,7 @@ GtkWidget* CreateEditWithMapIndexed(std::string name, int index, std::map<std::s
 	ret = map->insert(pair<std::string, GtkWidget*>(name2, widget));
 	if (ret.second == false)
 	{
-		std::cerr << "CreateEditWithMap(): element '" << name2 << "' already existed" << std::endl;
+		std::cerr << "CreateEditWithMapIndexed(): element '" << name2 << "' already existed" << std::endl;
 	}
 	return widget;
 }
@@ -1439,7 +1458,7 @@ void AddComboBoxToMap(std::string name, GtkWidget* combo, std::map<std::string, 
 	ret = map->insert(pair<std::string, GtkWidget*>(name, combo));
 	if (ret.second == false)
 	{
-		std::cerr << "CreateCheckBoxWithMap(): element '" << name << "' already existed" << std::endl;
+		std::cerr << "AddComboBoxToMap(): element '" << name << "' already existed" << std::endl;
 	}
 }
 
@@ -1452,7 +1471,7 @@ void AddComboBoxToMapIndexed(std::string name, int index, GtkWidget* combo, std:
 	ret = map->insert(pair<std::string, GtkWidget*>(name2, combo));
 	if (ret.second == false)
 	{
-		std::cerr << "CreateCheckBoxWithMap(): element '" << name2 << "' already existed" << std::endl;
+		std::cerr << "AddComboBoxToMapIndexed(): element '" << name2 << "' already existed" << std::endl;
 	}
 }
 
@@ -1486,9 +1505,23 @@ sGtkEditVector3 CreateEditVector3WithMapIndexed(std::string name, int index, std
 	ret = map->insert(pair<std::string, sGtkEditVector3>(name2, widget3));
 	if (ret.second == false)
 	{
-		std::cerr << "CreateEditVector3WithMap(): element '" << name2 << "' already existed" << std::endl;
+		std::cerr << "CreateEditVector3WithMapIndexed(): element '" << name2 << "' already existed" << std::endl;
 	}
 	return widget3;
+}
+
+GtkWidget* CreateColorButtonWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map)
+{
+	GtkWidget *widget = gtk_color_button_new();
+	gtk_color_button_set_title(GTK_COLOR_BUTTON(widget), label.c_str());
+
+	std::pair<std::map<std::string, GtkWidget*>::iterator, bool> ret;
+	ret = map->insert(pair<std::string, GtkWidget*>(name, widget));
+	if (ret.second == false)
+	{
+		std::cerr << "CreateColorButtonWithMap(): element '" << name << "' already existed" << std::endl;
+	}
+	return widget;
 }
 
 void CreateInterface(sParamRender *default_settings)
@@ -1929,16 +1962,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buSavePNG16 = gtk_button_new_with_label("Save PNG 16-bit");
 	Interface.buSavePNG16Alpha = gtk_button_new_with_label("Save PNG 16-bit + Alpha");
 	Interface.buFiles = gtk_button_new_with_label("Select file paths (output images, textures)");
-	Interface.buColorGlow1 = gtk_color_button_new();
-	Interface.buColorGlow2 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow1), "Glow colour 1");
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorGlow2), "Glow colour 2");
-	Interface.buColorBackgroud1 = gtk_color_button_new();
-	Interface.buColorBackgroud2 = gtk_color_button_new();
-	Interface.buColorBackgroud3 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud1), "Background colour 1");
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background colour 2");
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorBackgroud2), "Background colour 3");
 	Interface.buLoadSettings = gtk_button_new_with_label("Load Settings");
 	Interface.buSaveSettings = gtk_button_new_with_label("Save Settings");
 	Interface.buUp = gtk_button_new();
@@ -1957,22 +1980,8 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buAnimationRecordTrack = gtk_button_new_with_label("Record path");
 	Interface.buAnimationContinueRecord = gtk_button_new_with_label("Continue recording");
 	Interface.buAnimationRenderTrack = gtk_button_new_with_label("Render animation");
-	Interface.buColorFog = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog), "Fog colour");
-	Interface.buColorSSAO = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorSSAO), "Screen space ambient occlusion color");
 	Interface.buUpdateSSAO = gtk_button_new_with_label("Update image");
 	Interface.buUpdateDOF = gtk_button_new_with_label("Update DOF");
-	Interface.buColorAuxLightPre1 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre1), "Colour of Auxiliary light #1");
-	Interface.buColorAuxLightPre2 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre2), "Colour of Auxiliary light #2");
-	Interface.buColorAuxLightPre3 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre3), "Colour of Auxiliary light #3");
-	Interface.buColorAuxLightPre4 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorAuxLightPre4), "Colour of Auxiliary light #4");
-	Interface.buColorMainLight = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorMainLight), "Main light source colour");
 	Interface.buDistributeLights = gtk_button_new_with_label("Distribute / update lights");
 	Interface.buIFSNormalizeOffset = gtk_button_new_with_label("Normalize offset vector");
 	Interface.buIFSNormalizeVectors = gtk_button_new_with_label("Normalize symmetry vectors");
@@ -1994,24 +2003,6 @@ void CreateInterface(sParamRender *default_settings)
 	Interface.buCopyToClipboard = gtk_button_new_with_label("Copy to clipboard");
 	Interface.buGetFromClipboard = gtk_button_new_with_label("Paste from clipboard");
 	Interface.buLoadExample = gtk_button_new_with_label("Load example");
-	Interface.buColorFog1 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog1), "Fog colour 1");
-	Interface.buColorFog2 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog2), "Fog colour 2");
-	Interface.buColorFog3 = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorFog3), "Fog colour 3");
-	Interface.buColorPrimitivePlane = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitivePlane), "Plane colour");
-	Interface.buColorPrimitiveBox = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveBox), "Box colour");
-	Interface.buColorPrimitiveInvertedBox = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveInvertedBox), "Inverted box colour");
-	Interface.buColorPrimitiveSphere = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveSphere), "Sphere colour");
-	Interface.buColorPrimitiveInvertedSphere = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveInvertedSphere), "Inverted sphere colour");
-	Interface.buColorPrimitiveWater = gtk_color_button_new();
-	gtk_color_button_set_title(GTK_COLOR_BUTTON(Interface.buColorPrimitiveWater), "Water colour");
 	Interface.buAutoFog = gtk_button_new_with_label("Auto fog");
 	Interface.buMeasureActivation = gtk_button_new_with_label("Activate measurement");
 	Interface.buSaveAllImageLayers = gtk_button_new_with_label("Save all layers");
@@ -2371,7 +2362,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("0.0", "y:", 5, edit_primitivePlaneNormal.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane1), CreateEdit("-1,0", "z:", 5, edit_primitivePlaneNormal.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane), Interface.boxPrimitivePlane2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), Interface.buColorPrimitivePlane, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateColorButtonWithMap("primitive_plane_colour", "Plane colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_plane_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateCheckBoxWithMap("primitive_plane_enabled", "Enabled", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitivePlane2), CreateCheckBoxWithMap("primitive_only_plane", "Only plane (2D mode)", &mapInterface), false, false, 1);
@@ -2385,7 +2376,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("0", "Rotation:", 10, CreateEditWithMap("primitive_water_rotation", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater1), CreateEdit("5", "Iterations:", 3, CreateEditWithMap("primitive_water_iterations", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater), Interface.boxPrimitiveWater2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), Interface.buColorPrimitiveWater, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateColorButtonWithMap("primitive_water_colour", "Water colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,7", "Reflect:", 5, CreateEditWithMap("primitive_water_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateEdit("0,1", "Waves anim speed:", 5, CreateEditWithMap("primitive_water_anim_speed", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveWater2), CreateCheckBoxWithMap("primitive_water_enabled", "Enabled", &mapInterface), false, false, 1);
@@ -2402,7 +2393,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "y:", 10, edit_primitiveBoxSize.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox1), CreateEdit("1.0", "z:", 10, edit_primitiveBoxSize.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox), Interface.boxPrimitiveBox2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), Interface.buColorPrimitiveBox, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), CreateColorButtonWithMap("primitive_box_colour", "Box colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_box_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveBox2), CreateCheckBoxWithMap("primitive_box_enabled", "Enabled", &mapInterface), false, false, 1);
 
@@ -2418,7 +2409,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "y:", 10, edit_primitiveInvertedBoxSize.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox1), CreateEdit("10.0", "z:", 10, edit_primitiveInvertedBoxSize.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox), Interface.boxPrimitiveInvertedBox2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), Interface.buColorPrimitiveInvertedBox, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), CreateColorButtonWithMap("primitive_invertedBox_colour", "Inverted box colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_invertedBox_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedBox2), CreateCheckBoxWithMap("primitive_invertedBox_enabled", "Enabled", &mapInterface), false, false, 1);
 
@@ -2431,7 +2422,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("0.0", "z:", 10, edit_primitiveSphereCentre.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere1), CreateEdit("2.0", "z:", 10, CreateEditWithMap("primitive_sphere_radius", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere), Interface.boxPrimitiveSphere2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), Interface.buColorPrimitiveSphere, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), CreateColorButtonWithMap("primitive_sphere_colour", "Sphere colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_sphere_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveSphere2), CreateCheckBoxWithMap("primitive_sphere_enabled", "Enabled", &mapInterface), false, false, 1);
 
@@ -2444,7 +2435,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("0.0", "z:", 10, edit_primitiveInvertedSphereCentre.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere1), CreateEdit("2.0", "z:", 10, CreateEditWithMap("primitive_invertedSphere_radius", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere), Interface.boxPrimitiveInvertedSphere2, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), Interface.buColorPrimitiveInvertedSphere, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), CreateColorButtonWithMap("primitive_invertedSphere_colour", "Inverted sphere colour", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), CreateEdit("0,0", "Reflect:", 5, CreateEditWithMap("primitive_invertedSphere_reflect", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPrimitiveInvertedSphere2), CreateCheckBoxWithMap("primitive_invertedSphere_enabled", "Enabled", &mapInterface), false, false, 1);
 
@@ -2619,7 +2610,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frPostFog), Interface.boxPostFog);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogButtons, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateCheckBoxWithMap("post_fog_enabled", "Enable fog         ", &mapInterface), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", Interface.buColorFog), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), CreateWidgetWithLabel("Fog colour:", CreateColorButtonWithMap("post_fog_color", "Fog colour", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogButtons), Interface.label_sliderFog, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxPostFog), Interface.boxFogSlider, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxFogSlider), Interface.label_fog_visibility, false, false, 1);
@@ -2684,14 +2675,14 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_container_add(GTK_CONTAINER(Interface.frColors), Interface.boxColors);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxColors), Interface.boxGlowColor, false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow 1:", Interface.buColorGlow1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorGlow2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background 1:", Interface.buColorBackgroud1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorBackgroud2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorBackgroud3), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Fog 1:", Interface.buColorFog1), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", Interface.buColorFog2), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", Interface.buColorFog3), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Glow 1:", CreateColorButtonWithMap("glow_color_1", "Glow colour 1", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", CreateColorButtonWithMap("glow_color_2", "Glow colour 2", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Background 1:", CreateColorButtonWithMap("background_color_1", "Background colour 1", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", CreateColorButtonWithMap("background_color_2", "Background colour 2", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", CreateColorButtonWithMap("background_color_3", "Background colour 3", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("Fog 1:", CreateColorButtonWithMap("fog_color_1", "Fog colour 1", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("2:", CreateColorButtonWithMap("fog_color_2", "Fog colour 2", &mapInterface)), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxGlowColor), CreateWidgetWithLabel("3:", CreateColorButtonWithMap("fog_color_3", "Fog colour 3", &mapInterface)), false, false, 1);
 
 	//frame SSAO
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_shaders2), Interface.frPostSSAO, false, false, 1);
@@ -2725,7 +2716,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxMainLight), Interface.boxMainLightPosition, false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("-45", "Horizontal angle relative to camera:", 6, CreateEditWithMap("main_light_alpha", &mapInterface)), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateEdit("45", "Vertical angle relative to camera:", 6, CreateEditWithMap("main_light_beta", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateWidgetWithLabel("Colour:", Interface.buColorMainLight), false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxMainLightPosition), CreateWidgetWithLabel("Colour:", CreateColorButtonWithMap("main_light_colour", "Main light source colour", &mapInterface)), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.tab_box_lights), Interface.frLightsCommon, false, false, 1);
 	gtk_container_add(GTK_CONTAINER(Interface.frLightsCommon), Interface.boxLightCommon);
@@ -2764,7 +2755,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "y:", 12, edit_auxLightPre1.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("-3,0", "z:", 12, edit_auxLightPre1.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_1", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), Interface.buColorAuxLightPre1, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateColorButtonWithMap("aux_light_predefined_colour_1", "Colour of Auxiliary light #1", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre1), CreateCheckBoxWithMap("aux_light_predefined_enabled_1", "Enable", &mapInterface), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre2, false, false, 1);
@@ -2774,7 +2765,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("-3,0", "y:", 12, edit_auxLightPre2.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("0,0", "z:", 12, edit_auxLightPre2.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_2", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), Interface.buColorAuxLightPre2, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateColorButtonWithMap("aux_light_predefined_colour_2", "Colour of Auxiliary light #2", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre2), CreateCheckBoxWithMap("aux_light_predefined_enabled_2", "Enable", &mapInterface), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre3, false, false, 1);
@@ -2784,7 +2775,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("3,0", "y:", 12, edit_auxLightPre3.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("-1,0", "z:", 12, edit_auxLightPre3.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_3", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), Interface.buColorAuxLightPre3, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateColorButtonWithMap("aux_light_predefined_colour_3", "Colour of Auxiliary light #3", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre3), CreateCheckBoxWithMap("aux_light_predefined_enabled_3", "Enable", &mapInterface), false, false, 1);
 
 	gtk_box_pack_start(GTK_BOX(Interface.boxPredefinedLights), Interface.boxLightPre4, false, false, 1);
@@ -2794,7 +2785,7 @@ void CreateInterface(sParamRender *default_settings)
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-1,0", "y:", 12, edit_auxLightPre4.y), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("-3,0", "z:", 12, edit_auxLightPre4.z), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateEdit("1,0", "intensity:", 12, CreateEditWithMap("aux_light_predefined_intensity_4", &mapInterface)), false, false, 1);
-	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), Interface.buColorAuxLightPre4, false, false, 1);
+	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateColorButtonWithMap("aux_light_predefined_colour_4", "Colour of Auxiliary light #4", &mapInterface), false, false, 1);
 	gtk_box_pack_start(GTK_BOX(Interface.boxLightPre4), CreateCheckBoxWithMap("aux_light_predefined_enabled_4", "Enable", &mapInterface), false, false, 1);
 
 	//frame: volumetric lights

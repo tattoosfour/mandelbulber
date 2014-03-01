@@ -39,6 +39,7 @@ void container::addParam(std::string name, T defaultVal, bool morphable)
 	newRecord.defaultVal = multi;
 	newRecord.morphable = morphable;
 	newRecord.limitsDefined = false;
+	newRecord.toSave = true;
 
 	std::pair<std::map<std::string, sRecord>::iterator, bool> ret;
 	ret = myMap.insert(std::pair<std::string, sRecord>(name, newRecord));
@@ -70,6 +71,7 @@ void container::addParam(std::string name, T defaultVal, T minVal, T maxVal, boo
 	Assigner(newRecord.maxVal, maxVal);
 	newRecord.morphable = morphable;
 	newRecord.limitsDefined = true;
+	newRecord.toSave = true;
 
 	std::pair<std::map<std::string, sRecord>::iterator, bool> ret;
 	ret = myMap.insert(std::pair<std::string, sRecord>(name, newRecord));
@@ -97,6 +99,7 @@ void container::addParam(std::string name, int index, T defaultVal, bool morphab
 		newRecord.defaultVal = multi;
 		newRecord.morphable = morphable;
 		newRecord.limitsDefined = false;
+		newRecord.toSave = true;
 
 		std::string indexName = nameWithIndex(&name, index);
 		std::pair<std::map<std::string, sRecord>::iterator, bool> ret;
@@ -135,6 +138,7 @@ void container::addParam(std::string name, int index, T defaultVal, T minVal, T 
 		Assigner(newRecord.maxVal, maxVal);
 		newRecord.morphable = morphable;
 		newRecord.limitsDefined = true;
+		newRecord.toSave = true;
 
 		std::string indexName = nameWithIndex(&name, index);
 		std::pair<std::map<std::string, sRecord>::iterator, bool> ret;
@@ -498,3 +502,41 @@ std::string container::MakePaletteString(sRGB palette[256])
 	std::string out(paletteString);
 	return out;
 }
+
+void container::SetToSave(std::string name, bool toSave)
+{
+	std::map<std::string, sRecord>::iterator it;
+	it = myMap.find(name);
+	if (it != myMap.end())
+	{
+		it->second.toSave = toSave;
+	}
+	else
+	{
+		std::cerr << "SetToSave(): element '" << name << "' doesn't exists" << std::endl;
+	}
+}
+
+void container::SetToSave(std::string name, int index, bool toSave)
+{
+	if (index >= 0)
+	{
+		std::string indexName = nameWithIndex(&name, index);
+		std::map<std::string, sRecord>::iterator it;
+		it = myMap.find(indexName);
+		if (it != myMap.end())
+		{
+			it->second.toSave = toSave;
+		}
+		else
+		{
+			std::cerr << "SetToSave(): element '" << indexName << "' doesn't exists" << std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "SetToSave(): element '" << name << "' has negative index (" << index << ")" << std::endl;
+	}
+}
+
+
