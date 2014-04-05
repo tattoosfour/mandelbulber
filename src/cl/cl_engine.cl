@@ -365,9 +365,9 @@ kernel void fractal3D(__global sClPixel *out, __global sClInBuff *inBuff, __cons
 			//float shadow = 1.0f;
 			//shadow = 0.0;
 			
-			float3 halfVector = lightVector - viewVector;
-			halfVector = fast_normalize(halfVector);
-			float specular = dot(normal, halfVector);
+			float3 half = lightVector - viewVector;
+			half = fast_normalize(half);
+			float specular = dot(normal, half);
 			if (specular < 0.0f) specular = 0.0f;
 			specular = pown(specular, 30.0f);
 			if (specular > 15.0f) specular = 15.0f;

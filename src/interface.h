@@ -14,7 +14,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include "fractparams.hpp"
+#include "fractparams.h"
 #include "cl_support.hpp"
 #include "callbacks.h"
 #include "shaders.h"
@@ -36,9 +36,6 @@ extern int y_mouse;
 extern double last_z_mouse;
 extern double smooth_last_z_mouse;
 
-extern std::map<std::string, GtkWidget*> mapInterface;
-extern std::map<std::string, GtkWidget*> mapAppParams;
-
 enum enumImageFormat
 {
 	imgFormatJPG = 0,
@@ -46,16 +43,6 @@ enum enumImageFormat
 	imgFormatPNG16 = 2,
 	imgFormatPNG16Alpha = 3
 };
-
-struct sGtkEditVector3
-{
-	GtkWidget *x;
-	GtkWidget *y;
-	GtkWidget *z;
-};
-
-extern std::map<std::string, sGtkEditVector3> mapInterfaceEditVector;
-extern std::map<std::string, sGtkEditVector3> mapAppParamsEditVector;
 
 struct sMainWindow
 {
@@ -79,10 +66,9 @@ struct sMainWindow
 
 struct sInterfaceIFS
 {
-	sGtkEditVector3 editIFSdirection;
-	GtkWidget *editIFSx; //temporary
-	GtkWidget *editIFSy; //temporary
-	GtkWidget *editIFSz; //temporary
+	GtkWidget *editIFSx;
+	GtkWidget *editIFSy;
+	GtkWidget *editIFSz;
 	GtkWidget *editIFSalfa;
 	GtkWidget *editIFSbeta;
 	GtkWidget *editIFSgamma;
@@ -370,215 +356,16 @@ struct sInterface
 	GtkWidget *hSeparator4;
 	GtkWidget *vSeparator1;
 
-	//to keep
-	sGtkEditVector3 edit_measure;
-
-	GtkWidget *edit_va;
-		GtkWidget *edit_vb;
-		GtkWidget *edit_vc;
-		GtkWidget *edit_julia_a;
-		GtkWidget *edit_julia_b;
-		GtkWidget *edit_julia_c;
-		GtkWidget *edit_amin;
-		GtkWidget *edit_amax;
-		GtkWidget *edit_bmin;
-		GtkWidget *edit_bmax;
-		GtkWidget *edit_cmin;
-		GtkWidget *edit_cmax;
-		GtkWidget *edit_alfa;
-		GtkWidget *edit_beta;
-		GtkWidget *edit_gammaAngle;
-		GtkWidget *edit_zoom;
-		GtkWidget *edit_persp;
-		GtkWidget *edit_maxDepth;
-		GtkWidget *edit_maxN;
-		GtkWidget *edit_minN;
-		GtkWidget *edit_power;
-		GtkWidget *edit_DE_thresh;
-		GtkWidget *edit_DE_stepFactor;
-		GtkWidget *edit_imageWidth;
-		GtkWidget *edit_imageHeight;
-		GtkWidget *edit_shading;
-		GtkWidget *edit_shadows;
-		GtkWidget *edit_glow;
-		GtkWidget *edit_ambient_occlusion;
-		GtkWidget *edit_ambient;
-		GtkWidget *edit_brightness;
-		GtkWidget *edit_gamma;
-		GtkWidget *edit_contrast;
-		GtkWidget *edit_specular;
-		GtkWidget *edit_reflect;
-		GtkWidget *edit_AmbientOcclusionQuality;
-		GtkWidget *edit_fileOutput;
-		GtkWidget *edit_fileEnvMap;
-		GtkWidget *edit_fileAmbient;
-		GtkWidget *edit_fileBackground;
-		GtkWidget *edit_fileKeyframes;
-		GtkWidget *edit_step_forward;
-		GtkWidget *edit_step_rotation;
-		GtkWidget *edit_mouse_click_distance;
-		GtkWidget *edit_animationDESpeed;
-		GtkWidget *edit_color_seed;
-		GtkWidget *edit_colour_saturation;
-		GtkWidget *edit_tglad_folding_1;
-		GtkWidget *edit_tglad_folding_2;
-		GtkWidget *edit_spherical_folding_1;
-		GtkWidget *edit_spherical_folding_2;
-		GtkWidget *edit_color_speed;
-		GtkWidget *edit_mainLightIntensity;
-		GtkWidget *edit_auxLightIntensity;
-		GtkWidget *edit_auxLightRandomSeed;
-		GtkWidget *edit_auxLightNumber;
-		GtkWidget *edit_auxLightMaxDist;
-		GtkWidget *edit_auxLightDistributionRadius;
-		GtkWidget *edit_auxLightPre1x;
-		GtkWidget *edit_auxLightPre1y;
-		GtkWidget *edit_auxLightPre1z;
-		GtkWidget *edit_auxLightPre1intensity;
-		GtkWidget *edit_auxLightPre2x;
-		GtkWidget *edit_auxLightPre2y;
-		GtkWidget *edit_auxLightPre2z;
-		GtkWidget *edit_auxLightPre2intensity;
-		GtkWidget *edit_auxLightPre3x;
-		GtkWidget *edit_auxLightPre3y;
-		GtkWidget *edit_auxLightPre3z;
-		GtkWidget *edit_auxLightPre3intensity;
-		GtkWidget *edit_auxLightPre4x;
-		GtkWidget *edit_auxLightPre4y;
-		GtkWidget *edit_auxLightPre4z;
-		GtkWidget *edit_auxLightPre4intensity;
-		GtkWidget *edit_auxLightVisibility;
-		GtkWidget *edit_auxLightPlacementDistance;
-		GtkWidget *edit_auxLightRandomCentreX;
-		GtkWidget *edit_auxLightRandomCentreY;
-		GtkWidget *edit_auxLightRandomCentreZ;
-		GtkWidget *edit_mainLightAlfa;
-		GtkWidget *edit_mainLightBeta;
-		GtkWidget *edit_IFSAlfa;
-		GtkWidget *edit_IFSBeta;
-		GtkWidget *edit_IFSGamma;
-		GtkWidget *edit_IFSScale;
-		GtkWidget *edit_IFSOffsetX;
-		GtkWidget *edit_IFSOffsetY;
-		GtkWidget *edit_IFSOffsetZ;
-		GtkWidget *edit_IFSEdgeX;
-		GtkWidget *edit_IFSEdgeY;
-		GtkWidget *edit_IFSEdgeZ;
-		GtkWidget *edit_animationFramesPerKey;
-		GtkWidget *edit_animationStartFrame;
-		GtkWidget *edit_animationEndFrame;
-		GtkWidget *edit_hybridIter[HYBRID_COUNT];
-		GtkWidget *edit_hybridPower[HYBRID_COUNT];
-		GtkWidget *edit_NavigatorAbsoluteDistance;
-		GtkWidget *edit_stereoDistance;
-		GtkWidget *edit_mandelboxScale;
-		GtkWidget *edit_mandelboxFoldingLimit;
-		GtkWidget *edit_mandelboxFoldingValue;
-		GtkWidget *edit_mandelboxSpFoldingFixedRadius;
-		GtkWidget *edit_mandelboxSpFoldingMinRadius;
-		GtkWidget *edit_mandelboxRotation[MANDELBOX_FOLDS][3][3];
-		GtkWidget *edit_mandelboxRotationMain[3];
-		GtkWidget *edit_mandelboxColorFactorX;
-		GtkWidget *edit_mandelboxColorFactorY;
-		GtkWidget *edit_mandelboxColorFactorZ;
-		GtkWidget *edit_mandelboxColorFactorR;
-		GtkWidget *edit_mandelboxColorFactorSp1;
-		GtkWidget *edit_mandelboxColorFactorSp2;
-		GtkWidget *edit_mandelboxSharpness;
-		GtkWidget *edit_mandelboxOffsetX;
-		GtkWidget *edit_mandelboxOffsetY;
-		GtkWidget *edit_mandelboxOffsetZ;
-		GtkWidget *edit_mandelboxSolid;
-		GtkWidget *edit_mandelboxMelt;
-		GtkWidget *edit_viewMinDistance;
-		GtkWidget *edit_viewMaxDistance;
-		GtkWidget *edit_FractalConstantFactor;
-		GtkWidget *edit_FoldingIntPowZFactor;
-		GtkWidget *edit_FoldingIntPowFoldingFactor;
-		GtkWidget *edit_roughness;
-		GtkWidget *edit_volumetricLightMainIntensity;
-		GtkWidget *edit_volumetricLightAux1Intensity;
-		GtkWidget *edit_volumetricLightAux2Intensity;
-		GtkWidget *edit_volumetricLightAux3Intensity;
-		GtkWidget *edit_volumetricLightAux4Intensity;
-		GtkWidget *edit_reflectionsMax;
-		GtkWidget *edit_mandelboxVaryScale;
-		GtkWidget *edit_mandelboxVaryRPower;
-		GtkWidget *edit_mandelboxVaryFold;
-		GtkWidget *edit_mandelboxVaryMinR;
-		GtkWidget *edit_mandelboxVaryWAdd;
-		GtkWidget *edit_cadd;
-		GtkWidget *edit_volumetricFogDensity;
-		GtkWidget *edit_volumetricFogColorDistance;
-		GtkWidget *edit_volumetricFogColorDistance2;
-		GtkWidget *edit_volumetricFogDistanceFact;
-		GtkWidget *edit_fastAoTune;
-		GtkWidget *edit_primitivePlaneCentreX;
-		GtkWidget *edit_primitivePlaneCentreY;
-		GtkWidget *edit_primitivePlaneCentreZ;
-		GtkWidget *edit_primitivePlaneNormalX;
-		GtkWidget *edit_primitivePlaneNormalY;
-		GtkWidget *edit_primitivePlaneNormalZ;
-		GtkWidget *edit_primitivePlaneReflect;
-		GtkWidget *edit_primitiveBoxCentreX;
-		GtkWidget *edit_primitiveBoxCentreY;
-		GtkWidget *edit_primitiveBoxCentreZ;
-		GtkWidget *edit_primitiveBoxSizeX;
-		GtkWidget *edit_primitiveBoxSizeY;
-		GtkWidget *edit_primitiveBoxSizeZ;
-		GtkWidget *edit_primitiveBoxReflect;
-		GtkWidget *edit_primitiveInvertedBoxCentreX;
-		GtkWidget *edit_primitiveInvertedBoxCentreY;
-		GtkWidget *edit_primitiveInvertedBoxCentreZ;
-		GtkWidget *edit_primitiveInvertedBoxSizeX;
-		GtkWidget *edit_primitiveInvertedBoxSizeY;
-		GtkWidget *edit_primitiveInvertedBoxSizeZ;
-		GtkWidget *edit_primitiveInvertedBoxReflect;
-		GtkWidget *edit_primitiveSphereCentreX;
-		GtkWidget *edit_primitiveSphereCentreY;
-		GtkWidget *edit_primitiveSphereCentreZ;
-		GtkWidget *edit_primitiveSphereRadius;
-		GtkWidget *edit_primitiveSphereReflect;
-		GtkWidget *edit_primitiveInvertedSphereCentreX;
-		GtkWidget *edit_primitiveInvertedSphereCentreY;
-		GtkWidget *edit_primitiveInvertedSphereCentreZ;
-		GtkWidget *edit_primitiveInvertedSphereRadius;
-		GtkWidget *edit_primitiveInvertedSphereReflect;
-		GtkWidget *edit_primitiveWaterHeight;
-		GtkWidget *edit_primitiveWaterAmplitude;
-		GtkWidget *edit_primitiveWaterLength;
-		GtkWidget *edit_primitiveWaterRotation;
-		GtkWidget *edit_primitiveWaterIterations;
-		GtkWidget *edit_primitiveWaterReflect;
-		GtkWidget *edit_measureX;
-		GtkWidget *edit_measureY;
-		GtkWidget *edit_measureZ;
-		GtkWidget *edit_tiles;
-		GtkWidget *edit_OpenCLPixelsPerJob;
-		GtkWidget *edit_OpenCLProcessingCycleTime;
-		GtkWidget *edit_OpenCLMaxMem;
-		GtkWidget *edit_OpenCLTextEditor;
-		GtkWidget *edit_OpenCLDeltaDEStep;
-		GtkWidget *edit_iterFogOpacityTrim;
-		GtkWidget *edit_iterFogOpacity;
-		GtkWidget *edit_netRenderServerPort;
-		GtkWidget *edit_netRenderClientPort;
-		GtkWidget *edit_netRenderClientName;
-		GtkWidget *edit_fakeLightsOrbitTrapX;
-		GtkWidget *edit_fakeLightsOrbitTrapY;
-		GtkWidget *edit_fakeLightsOrbitTrapZ;
-		GtkWidget *edit_fakeLightsIntensity;
-		GtkWidget *edit_fakeLightsVisibility;
-		GtkWidget *edit_fakeLightsVisibilitySize;
-		GtkWidget *edit_fakeLightsMinIter;
-		GtkWidget *edit_fakeLightsMaxIter;
-		GtkWidget *edit_shadowConeAngle;
-		GtkWidget *edit_customParameters[15];
-		GtkWidget *edit_primitiveWaterAnimSpeed;
-
 	GtkWidget *buRender;
 	GtkWidget *buStop;
-
+	GtkWidget *buColorGlow1;
+	GtkWidget *buColorGlow2;
+	GtkWidget *buColorBackgroud1;
+	GtkWidget *buColorBackgroud2;
+	GtkWidget *buColorBackgroud3;
+	GtkWidget *buColorFog1;
+	GtkWidget *buColorFog2;
+	GtkWidget *buColorFog3;
 	GtkWidget *buApplyImageAdjustments;
 	GtkWidget *buSaveImage;
 	GtkWidget *buSavePNG;
@@ -603,10 +390,15 @@ struct sInterface
 	GtkWidget *buAnimationRecordTrack;
 	GtkWidget *buAnimationContinueRecord;
 	GtkWidget *buAnimationRenderTrack;
-
+	GtkWidget *buColorFog;
+	GtkWidget *buColorSSAO;
 	GtkWidget *buUpdateSSAO;
 	GtkWidget *buUpdateDOF;
-
+	GtkWidget *buColorAuxLightPre1;
+	GtkWidget *buColorAuxLightPre2;
+	GtkWidget *buColorAuxLightPre3;
+	GtkWidget *buColorAuxLightPre4;
+	GtkWidget *buColorMainLight;
 	GtkWidget *buDistributeLights;
 	GtkWidget *buIFSNormalizeOffset;
 	GtkWidget *buIFSNormalizeVectors;
@@ -628,7 +420,12 @@ struct sInterface
 	GtkWidget *buCopyToClipboard;
 	GtkWidget *buGetFromClipboard;
 	GtkWidget *buLoadExample;
-
+	GtkWidget *buColorPrimitivePlane;
+	GtkWidget *buColorPrimitiveBox;
+	GtkWidget *buColorPrimitiveInvertedBox;
+	GtkWidget *buColorPrimitiveSphere;
+	GtkWidget *buColorPrimitiveInvertedSphere;
+	GtkWidget *buColorPrimitiveWater;
 	GtkWidget *buAutoFog;
 	GtkWidget *buMeasureActivation;
 	GtkWidget *buSaveAllImageLayers;
@@ -639,29 +436,208 @@ struct sInterface
 	GtkWidget *buOpenCLRecompile;
 	GtkWidget *buConvertPathToKeyframes;
 
-	//to remove later
-	GtkWidget *buColorGlow1;
-	GtkWidget *buColorGlow2;
-	GtkWidget *buColorBackgroud1;
-	GtkWidget *buColorBackgroud2;
-	GtkWidget *buColorBackgroud3;
-	GtkWidget *buColorFog1;
-	GtkWidget *buColorFog2;
-	GtkWidget *buColorFog3;
-	GtkWidget *buColorPrimitivePlane;
-	GtkWidget *buColorPrimitiveBox;
-	GtkWidget *buColorPrimitiveInvertedBox;
-	GtkWidget *buColorPrimitiveSphere;
-	GtkWidget *buColorPrimitiveInvertedSphere;
-	GtkWidget *buColorPrimitiveWater;
-	GtkWidget *buColorAuxLightPre1;
-	GtkWidget *buColorAuxLightPre2;
-	GtkWidget *buColorAuxLightPre3;
-	GtkWidget *buColorAuxLightPre4;
-	GtkWidget *buColorMainLight;
-	GtkWidget *buColorFog;
-	GtkWidget *buColorSSAO;
-
+	GtkWidget *edit_va;
+	GtkWidget *edit_vb;
+	GtkWidget *edit_vc;
+	GtkWidget *edit_julia_a;
+	GtkWidget *edit_julia_b;
+	GtkWidget *edit_julia_c;
+	GtkWidget *edit_amin;
+	GtkWidget *edit_amax;
+	GtkWidget *edit_bmin;
+	GtkWidget *edit_bmax;
+	GtkWidget *edit_cmin;
+	GtkWidget *edit_cmax;
+	GtkWidget *edit_alfa;
+	GtkWidget *edit_beta;
+	GtkWidget *edit_gammaAngle;
+	GtkWidget *edit_zoom;
+	GtkWidget *edit_persp;
+	GtkWidget *edit_maxDepth;
+	GtkWidget *edit_maxN;
+	GtkWidget *edit_minN;
+	GtkWidget *edit_power;
+	GtkWidget *edit_DE_thresh;
+	GtkWidget *edit_DE_stepFactor;
+	GtkWidget *edit_imageWidth;
+	GtkWidget *edit_imageHeight;
+	GtkWidget *edit_shading;
+	GtkWidget *edit_shadows;
+	GtkWidget *edit_glow;
+	GtkWidget *edit_ambient_occlusion;
+	GtkWidget *edit_ambient;
+	GtkWidget *edit_brightness;
+	GtkWidget *edit_gamma;
+	GtkWidget *edit_contrast;
+	GtkWidget *edit_specular;
+	GtkWidget *edit_reflect;
+	GtkWidget *edit_AmbientOcclusionQuality;
+	GtkWidget *edit_fileOutput;
+	GtkWidget *edit_fileEnvMap;
+	GtkWidget *edit_fileAmbient;
+	GtkWidget *edit_fileBackground;
+	GtkWidget *edit_fileKeyframes;
+	GtkWidget *edit_step_forward;
+	GtkWidget *edit_step_rotation;
+	GtkWidget *edit_mouse_click_distance;
+	GtkWidget *edit_animationDESpeed;
+	GtkWidget *edit_color_seed;
+	GtkWidget *edit_colour_saturation;
+	GtkWidget *edit_tglad_folding_1;
+	GtkWidget *edit_tglad_folding_2;
+	GtkWidget *edit_spherical_folding_1;
+	GtkWidget *edit_spherical_folding_2;
+	GtkWidget *edit_color_speed;
+	GtkWidget *edit_mainLightIntensity;
+	GtkWidget *edit_auxLightIntensity;
+	GtkWidget *edit_auxLightRandomSeed;
+	GtkWidget *edit_auxLightNumber;
+	GtkWidget *edit_auxLightMaxDist;
+	GtkWidget *edit_auxLightDistributionRadius;
+	GtkWidget *edit_auxLightPre1x;
+	GtkWidget *edit_auxLightPre1y;
+	GtkWidget *edit_auxLightPre1z;
+	GtkWidget *edit_auxLightPre1intensity;
+	GtkWidget *edit_auxLightPre2x;
+	GtkWidget *edit_auxLightPre2y;
+	GtkWidget *edit_auxLightPre2z;
+	GtkWidget *edit_auxLightPre2intensity;
+	GtkWidget *edit_auxLightPre3x;
+	GtkWidget *edit_auxLightPre3y;
+	GtkWidget *edit_auxLightPre3z;
+	GtkWidget *edit_auxLightPre3intensity;
+	GtkWidget *edit_auxLightPre4x;
+	GtkWidget *edit_auxLightPre4y;
+	GtkWidget *edit_auxLightPre4z;
+	GtkWidget *edit_auxLightPre4intensity;
+	GtkWidget *edit_auxLightVisibility;
+	GtkWidget *edit_auxLightPlacementDistance;
+	GtkWidget *edit_auxLightRandomCentreX;
+	GtkWidget *edit_auxLightRandomCentreY;
+	GtkWidget *edit_auxLightRandomCentreZ;
+	GtkWidget *edit_mainLightAlfa;
+	GtkWidget *edit_mainLightBeta;
+	GtkWidget *edit_IFSAlfa;
+	GtkWidget *edit_IFSBeta;
+	GtkWidget *edit_IFSGamma;
+	GtkWidget *edit_IFSScale;
+	GtkWidget *edit_IFSOffsetX;
+	GtkWidget *edit_IFSOffsetY;
+	GtkWidget *edit_IFSOffsetZ;
+	GtkWidget *edit_IFSEdgeX;
+	GtkWidget *edit_IFSEdgeY;
+	GtkWidget *edit_IFSEdgeZ;
+	GtkWidget *edit_animationFramesPerKey;
+	GtkWidget *edit_animationStartFrame;
+	GtkWidget *edit_animationEndFrame;
+	GtkWidget *edit_hybridIter[HYBRID_COUNT];
+	GtkWidget *edit_hybridPower[HYBRID_COUNT];
+	GtkWidget *edit_NavigatorAbsoluteDistance;
+	GtkWidget *edit_stereoDistance;
+	GtkWidget *edit_mandelboxScale;
+	GtkWidget *edit_mandelboxFoldingLimit;
+	GtkWidget *edit_mandelboxFoldingValue;
+	GtkWidget *edit_mandelboxSpFoldingFixedRadius;
+	GtkWidget *edit_mandelboxSpFoldingMinRadius;
+	GtkWidget *edit_mandelboxRotation[MANDELBOX_FOLDS][3][3];
+	GtkWidget *edit_mandelboxRotationMain[3];
+	GtkWidget *edit_mandelboxColorFactorX;
+	GtkWidget *edit_mandelboxColorFactorY;
+	GtkWidget *edit_mandelboxColorFactorZ;
+	GtkWidget *edit_mandelboxColorFactorR;
+	GtkWidget *edit_mandelboxColorFactorSp1;
+	GtkWidget *edit_mandelboxColorFactorSp2;
+	GtkWidget *edit_mandelboxSharpness;
+	GtkWidget *edit_mandelboxOffsetX;
+	GtkWidget *edit_mandelboxOffsetY;
+	GtkWidget *edit_mandelboxOffsetZ;
+	GtkWidget *edit_mandelboxSolid;
+	GtkWidget *edit_mandelboxMelt;
+	GtkWidget *edit_viewMinDistance;
+	GtkWidget *edit_viewMaxDistance;
+	GtkWidget *edit_FractalConstantFactor;
+	GtkWidget *edit_FoldingIntPowZFactor;
+	GtkWidget *edit_FoldingIntPowFoldingFactor;
+	GtkWidget *edit_roughness;
+	GtkWidget *edit_volumetricLightMainIntensity;
+	GtkWidget *edit_volumetricLightAux1Intensity;
+	GtkWidget *edit_volumetricLightAux2Intensity;
+	GtkWidget *edit_volumetricLightAux3Intensity;
+	GtkWidget *edit_volumetricLightAux4Intensity;
+	GtkWidget *edit_reflectionsMax;
+	GtkWidget *edit_mandelboxVaryScale;
+	GtkWidget *edit_mandelboxVaryRPower;
+	GtkWidget *edit_mandelboxVaryFold;
+	GtkWidget *edit_mandelboxVaryMinR;
+	GtkWidget *edit_mandelboxVaryWAdd;
+	GtkWidget *edit_cadd;
+	GtkWidget *edit_volumetricFogDensity;
+	GtkWidget *edit_volumetricFogColorDistance;
+	GtkWidget *edit_volumetricFogColorDistance2;
+	GtkWidget *edit_volumetricFogDistanceFact;
+	GtkWidget *edit_fastAoTune;
+	GtkWidget *edit_primitivePlaneCentreX;
+	GtkWidget *edit_primitivePlaneCentreY;
+	GtkWidget *edit_primitivePlaneCentreZ;
+	GtkWidget *edit_primitivePlaneNormalX;
+	GtkWidget *edit_primitivePlaneNormalY;
+	GtkWidget *edit_primitivePlaneNormalZ;
+	GtkWidget *edit_primitivePlaneReflect;
+	GtkWidget *edit_primitiveBoxCentreX;
+	GtkWidget *edit_primitiveBoxCentreY;
+	GtkWidget *edit_primitiveBoxCentreZ;
+	GtkWidget *edit_primitiveBoxSizeX;
+	GtkWidget *edit_primitiveBoxSizeY;
+	GtkWidget *edit_primitiveBoxSizeZ;
+	GtkWidget *edit_primitiveBoxReflect;
+	GtkWidget *edit_primitiveInvertedBoxCentreX;
+	GtkWidget *edit_primitiveInvertedBoxCentreY;
+	GtkWidget *edit_primitiveInvertedBoxCentreZ;
+	GtkWidget *edit_primitiveInvertedBoxSizeX;
+	GtkWidget *edit_primitiveInvertedBoxSizeY;
+	GtkWidget *edit_primitiveInvertedBoxSizeZ;
+	GtkWidget *edit_primitiveInvertedBoxReflect;
+	GtkWidget *edit_primitiveSphereCentreX;
+	GtkWidget *edit_primitiveSphereCentreY;
+	GtkWidget *edit_primitiveSphereCentreZ;
+	GtkWidget *edit_primitiveSphereRadius;
+	GtkWidget *edit_primitiveSphereReflect;
+	GtkWidget *edit_primitiveInvertedSphereCentreX;
+	GtkWidget *edit_primitiveInvertedSphereCentreY;
+	GtkWidget *edit_primitiveInvertedSphereCentreZ;
+	GtkWidget *edit_primitiveInvertedSphereRadius;
+	GtkWidget *edit_primitiveInvertedSphereReflect;
+	GtkWidget *edit_primitiveWaterHeight;
+	GtkWidget *edit_primitiveWaterAmplitude;
+	GtkWidget *edit_primitiveWaterLength;
+	GtkWidget *edit_primitiveWaterRotation;
+	GtkWidget *edit_primitiveWaterIterations;
+	GtkWidget *edit_primitiveWaterReflect;
+	GtkWidget *edit_measureX;
+	GtkWidget *edit_measureY;
+	GtkWidget *edit_measureZ;
+	GtkWidget *edit_tiles;
+	GtkWidget *edit_OpenCLPixelsPerJob;
+	GtkWidget *edit_OpenCLProcessingCycleTime;
+	GtkWidget *edit_OpenCLMaxMem;
+	GtkWidget *edit_OpenCLTextEditor;
+	GtkWidget *edit_OpenCLDeltaDEStep;
+	GtkWidget *edit_iterFogOpacityTrim;
+	GtkWidget *edit_iterFogOpacity;
+	GtkWidget *edit_netRenderServerPort;
+	GtkWidget *edit_netRenderClientPort;
+	GtkWidget *edit_netRenderClientName;
+	GtkWidget *edit_fakeLightsOrbitTrapX;
+	GtkWidget *edit_fakeLightsOrbitTrapY;
+	GtkWidget *edit_fakeLightsOrbitTrapZ;
+	GtkWidget *edit_fakeLightsIntensity;
+	GtkWidget *edit_fakeLightsVisibility;
+	GtkWidget *edit_fakeLightsVisibilitySize;
+	GtkWidget *edit_fakeLightsMinIter;
+	GtkWidget *edit_fakeLightsMaxIter;
+	GtkWidget *edit_shadowConeAngle;
+	GtkWidget *edit_customParameters[15];
+	GtkWidget *edit_primitiveWaterAnimSpeed;
 
 	GtkWidget *label_animationFrame;
 	GtkWidget *label_animationSpeed;
@@ -702,7 +678,6 @@ struct sInterface
 	GtkWidget *label_sliderFog;
 	GtkWidget *label_sliderDOF;
 
-
 	GtkWidget *comboFractType;
 	GtkWidget *comboImageFormat;
 	GtkWidget *comboHybridFormula[HYBRID_COUNT];
@@ -718,9 +693,7 @@ struct sInterface
 	GtkWidget *comboOpenCLDEMode;
 	GtkWidget *comboOpenCLDOFMode;
 
-
 	GtkWidget *progressBar;
-
 
 	GtkWidget *checkAmbientOcclusion;
 	GtkWidget *checkFastAmbientOcclusion;
@@ -771,19 +744,15 @@ struct sInterface
 	GtkWidget *checkPrimitiveSphereEnabled;
 	GtkWidget *checkPrimitiveInvertedSphereEnabled;
 	GtkWidget *checkPrimitiveWaterEnabled;
-
+	GtkWidget *checkOpenClEnable;
 	GtkWidget *checkOpenClCustomEnable;
 	GtkWidget *checkIterFogEnable;
-
-	GtkWidget *checkPrimitiveOnlyPlane;
-	GtkWidget *checkFakeLightsEnabled;
-	GtkWidget *checkHDR;
-
-	//to keep
 	GtkWidget *checkNetRenderServerEnable;
 	GtkWidget *checkNetRenderServerScan;
 	GtkWidget *checkNetRenderClientEnable;
-	GtkWidget *checkOpenClEnable;
+	GtkWidget *checkPrimitiveOnlyPlane;
+	GtkWidget *checkFakeLightsEnabled;
+	GtkWidget *checkHDR;
 
 	GtkWidget *colorSelectionGlow1;
 	GtkWidget *colorSelectionGlow2;
@@ -964,8 +933,6 @@ extern GtkWidget *timeLineWindow;
 
 extern GtkClipboard *clipboard;
 
-extern sInterface Interface;
-
 //functions
 char* DoubleToString(double value);
 char* IntToString(int value);
@@ -979,10 +946,8 @@ void CreateTooltips(void);
 bool ReadComandlineParams(int argc, char *argv[]);
 double atofData(const gchar* text);
 void AddComboTextsFractalFormula(GtkComboBox *combo);
-fractal::enumFractalFormula HybridFormulaNumberGUI2Data(int formula);
-int HybridFormulaNumberData2GUI(fractal::enumFractalFormula formula);
-fractal::enumFractalFormula MainFormulaNumberGUI2Data(int formula);
-int MainFormulaNumberData2GUI(fractal::enumFractalFormula formula);
+enumFractalFormula FormulaNumberGUI2Data(int formula);
+int FormulaNumberData2GUI(enumFractalFormula formula);
 void Params2InterfaceData(sParamRender *source);
 void InterfaceData2Params(sParamRender *dest);
 void CheckPrameters(sParamRender *params);
@@ -991,26 +956,10 @@ GdkColor sRGB2GdkColor(sRGB color);
 sRGB sRGBDiv256(sRGB color);
 void ReadInterfaceAppSettings(sAppSettings *appParams);
 void WriteInterfaceAppSettings(sAppSettings *appParams);
-void ReadInterfaceNew(parameters::container *par);
-void WriteInterfaceNew(parameters::container *par);
-std::string gtk_entry_get_vector3(sGtkEditVector3 entry3);
-void gtk_entry_set_vector3(sGtkEditVector3 entry3, std::string text);
-
 #ifdef CLSUPPORT
 void Params2Cl(const sParamRender *params, sClInBuff *clInBuff, sClInConstants *clConstantsBuff);
 matrix33 RotMatrix2matrix33(CRotationMatrix rot);
 cl_float4 CVector2float3(CVector3 vect);
 cl_float4 sRGB2float3(sRGB colour, double factor);
-std::string gtk_entry_get_vector3(sGtkEditVector3 entry3);
-
-GtkWidget* CreateEditWithMap(std::string name, std::map<std::string, GtkWidget*> *map);
-sGtkEditVector3 CreateEditVector3WithMap(std::string name, std::map<std::string, sGtkEditVector3> *map);
-sGtkEditVector3 CreateEditVector3WithMapIndexed(std::string name, int index, std::map<std::string, sGtkEditVector3> *map);
-GtkWidget* CreateCheckBoxWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map);
-GtkWidget* CreateCheckBoxWithMapIndexed(std::string name, int index, std::string label, std::map<std::string, GtkWidget*> *map);
-void AddComboBoxToMap(std::string name, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
-void AddComboBoxToMapIndexed(std::string name, int index, GtkWidget* combo, std::map<std::string, GtkWidget*> *map);
-GtkWidget* CreateColorButtonWithMap(std::string name, std::string label, std::map<std::string, GtkWidget*> *map);
-
 #endif
 #endif /* INTERFACE_H_ */

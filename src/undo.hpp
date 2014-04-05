@@ -12,7 +12,7 @@
 #ifndef UNDO_HPP_
 #define UNDO_HPP_
 
-#include "fractparams.hpp"
+#include "fractparams.h"
 
 class CParamsUndo
 {

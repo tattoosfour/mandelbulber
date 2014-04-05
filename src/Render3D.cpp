@@ -37,7 +37,6 @@
 #include "undo.hpp"
 #include "callbacks.h"
 #include "netrender.hpp"
-#include "parameters.hpp"
 
 using namespace std;
 
@@ -64,9 +63,6 @@ bool isPostRendering = false;
 bool newLineRendered = false;
 
 cImage mainImage(800, 600);
-
-parameters::container gPar;
-parameters::container appPar;
 
 double real_clock(void)
 {
@@ -473,13 +469,13 @@ void *MainThread(void *ptr)
 							reflectBuff[ray].distThresh = distThresh;
 							reflectBuff[ray].objectType = calcParam.objectOut;
 
-							if(calcParam.objectOut == fractal::objFractal) reflectBuff[ray].reflect = param.doubles.imageAdjustments.reflect;
-							if(calcParam.objectOut == fractal::objWater) reflectBuff[ray].reflect = param.doubles.primitiveWaterReflect;
-							if(calcParam.objectOut == fractal::objPlane) reflectBuff[ray].reflect = param.doubles.primitivePlaneReflect;
-							if(calcParam.objectOut == fractal::objBox) reflectBuff[ray].reflect = param.doubles.primitiveBoxReflect;
-							if(calcParam.objectOut == fractal::objBoxInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedBoxReflect;
-							if(calcParam.objectOut == fractal::objSphere) reflectBuff[ray].reflect = param.doubles.primitiveSphereReflect;
-							if(calcParam.objectOut == fractal::objSphereInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedSphereReflect;
+							if(calcParam.objectOut == objFractal) reflectBuff[ray].reflect = param.doubles.imageAdjustments.reflect;
+							if(calcParam.objectOut == objWater) reflectBuff[ray].reflect = param.doubles.primitiveWaterReflect;
+							if(calcParam.objectOut == objPlane) reflectBuff[ray].reflect = param.doubles.primitivePlaneReflect;
+							if(calcParam.objectOut == objBox) reflectBuff[ray].reflect = param.doubles.primitiveBoxReflect;
+							if(calcParam.objectOut == objBoxInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedBoxReflect;
+							if(calcParam.objectOut == objSphere) reflectBuff[ray].reflect = param.doubles.primitiveSphereReflect;
+							if(calcParam.objectOut == objSphereInv) reflectBuff[ray].reflect = param.doubles.primitiveInvertedSphereReflect;
 
 							rayEnd = ray;
 							if(!reflectBuff[ray].found) break;
@@ -1501,7 +1497,7 @@ int main(int argc, char *argv[])
   strcpy(sharedDir, (string(pathCWD)+"\\").c_str());
 #else               /*other unix - try sysconf*/
 	sharedDir = new char[1000];
-	strcpy(sharedDir, (std::string(SHARED_DIR)+"/").c_str());
+	strcpy(sharedDir, (string(SHARED_DIR)+"/").c_str());
 #endif  /* WINDOWS */
 
 	//logfile
@@ -1515,10 +1511,6 @@ int main(int argc, char *argv[])
 
 	printf("Log file: %s\n", logfileName.c_str());
 	WriteLog("Log file created");
-
-	//initialization of parameter container
-	InitParams(&gPar);
-	WriteLog("All parameters defined");
 
 	//initialising GTK+
 	bool result = ReadComandlineParams(argc, argv);
@@ -1567,7 +1559,6 @@ int main(int argc, char *argv[])
 	timeline.reset(new cTimeline);
 
 	//initialising g_thread
-	/*
 	if (!g_thread_supported())
 	{
 		g_thread_init(NULL);
@@ -1580,7 +1571,6 @@ int main(int argc, char *argv[])
 		//return 1;
 	}
 	WriteLog("g_thread initialised");
-	*/
 
 	//OpenCL
 
@@ -1735,10 +1725,6 @@ int main(int argc, char *argv[])
 				//creating GTK+ GUI
 				Params2InterfaceData(&fractParamDefault);
 				CreateInterface(&fractParamDefault);
-				WriteInterfaceNew(&gPar);
-				gdk_threads_enter();
-				gtk_main();
-				gdk_threads_leave();
 			}
 			else
 			{
@@ -2558,8 +2544,8 @@ void ThumbnailRender2(sParamRender fractParamLoaded, cImage *miniImage)
 	fractParamLoaded.image_height = miniImage->GetHeight();
 	fractParamLoaded.doubles.resolution = 0.5 / fractParamLoaded.image_width;
 
-	if (fractParamLoaded.fractal.formula == fractal::trig_DE || fractParamLoaded.fractal.formula == fractal::trig_optim || fractParamLoaded.fractal.formula == fractal::menger_sponge || fractParamLoaded.fractal.formula == fractal::kaleidoscopic
-			|| fractParamLoaded.fractal.formula == fractal::tglad || fractParamLoaded.fractal.formula == fractal::smoothMandelbox) fractParamLoaded.fractal.analitycDE = true;
+	if (fractParamLoaded.fractal.formula == trig_DE || fractParamLoaded.fractal.formula == trig_optim || fractParamLoaded.fractal.formula == menger_sponge || fractParamLoaded.fractal.formula == kaleidoscopic
+			|| fractParamLoaded.fractal.formula == tglad || fractParamLoaded.fractal.formula == smoothMandelbox) fractParamLoaded.fractal.analitycDE = true;
 	else fractParamLoaded.fractal.analitycDE = false;
 	fractParamLoaded.recordMode = false;
 	fractParamLoaded.animMode = false;
