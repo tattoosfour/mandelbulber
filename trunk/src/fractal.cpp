@@ -66,8 +66,8 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	double orbitTrapTotal = 0.0;
 	double scale = par.mandelbox.doubles.scale;
 
-	fractal::enumFractalFormula actualFormula = par.formula;
-	if (actualFormula == fractal::kaleidoscopic || actualFormula == fractal::menger_sponge)
+	enumFractalFormula actualFormula = par.formula;
+	if (actualFormula == kaleidoscopic || actualFormula == menger_sponge) 
 		tgladDE = 1.0;
 
 	double tgladColor = 1.0;
@@ -82,7 +82,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	}
 
 	bool hybridEnabled = false;
-	if (actualFormula == fractal::hybrid) hybridEnabled = true;
+	if (actualFormula == hybrid) hybridEnabled = true;
 
 	double r = z.Length();
 
@@ -186,7 +186,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 		switch (actualFormula)
 		{
-			case fractal::trig_DE:
+			case trig_DE:
 			{
 				double r1 = pow(r, p - 1);
 				double r2 = r1 * r;
@@ -208,7 +208,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::trig_optim:
+			case trig_optim:
 			{
 				//optimisation based on: http://www.fractalforums.com/mandelbulb-implementation/realtime-renderingoptimisations/
 				double th0 = asin(z.z / r);
@@ -223,7 +223,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::mandelbulb2:
+			case mandelbulb2:
 			{
 				double temp, tempR;
 				tempR = sqrt(z.x * z.x + z.y * z.y);
@@ -252,7 +252,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::mandelbulb3:
+			case mandelbulb3:
 			{
 				double temp, tempR;
 
@@ -280,7 +280,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::mandelbulb4:
+			case mandelbulb4:
 			{
 				double rp = pow(r, p - 1);
 
@@ -297,7 +297,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::xenodreambuie:
+			case xenodreambuie:
 			{
 				double rp = pow(r, p);
 				double th = atan2(z.y, z.x);
@@ -318,7 +318,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::fast_trig:
+			case fast_trig:
 			{
 				double x2 = z.x * z.x;
 				double y2 = z.y * z.y;
@@ -333,7 +333,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::minus_fast_trig:
+			case minus_fast_trig:
 			{
 				double x2 = z.x * z.x;
 				double y2 = z.y * z.y;
@@ -348,7 +348,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::hypercomplex:
+			case hypercomplex:
 			{
 				CVector3 newz(z.x * z.x - z.y * z.y - z.z * z.z - w * w, 2.0 * z.x * z.y - 2.0 * w * z.z, 2.0 * z.x * z.z - 2.0 * z.y * w);
 				double neww = 2.0 * z.x * w - 2.0 * z.y * z.z;
@@ -357,7 +357,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
 				break;
 			}
-			case fractal::quaternion:
+			case quaternion:
 			{
 				CVector3 newz(z.x * z.x - z.y * z.y - z.z * z.z - w * w, 2.0 * z.x * z.y, 2.0 * z.x * z.z);
 				double neww = 2.0 * z.x * w;
@@ -366,7 +366,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
 				break;
 			}
-			case fractal::menger_sponge:
+			case menger_sponge:
 			{
 				double temp;
 				z.x = fabs(z.x);
@@ -391,7 +391,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					z.y = temp;
 				}
 
-				if (Mode == fractal::colouring)
+				if (Mode == colouring)
 				{
 					double length2 = z.Length();
 					if (length2 < min) min = length2;
@@ -406,7 +406,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				tgladDE *= 3.0;
 				break;
 			}
-			case fractal::tglad:
+			case tglad:
 			{
 				if (par.mandelbox.rotationsEnabled)
 				{
@@ -528,7 +528,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 
-			case fractal::generalizedFoldBox:
+			case generalizedFoldBox:
 			{
 				//Reference: http://www.fractalforums.com/new-theories-and-research/generalized-box-fold/msg36503/#msg36503
 
@@ -539,37 +539,37 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				Nv = par.genFoldBox.Nv_tet;
 				sides = par.genFoldBox.sides_tet;
 
-				if (par.genFoldBox.type == fractal::foldCube)
+				if (par.genFoldBox.type == foldCube)
 				{
 					Nv = par.genFoldBox.Nv_cube;
 					sides = par.genFoldBox.sides_cube;
 				}
-				else if (par.genFoldBox.type == fractal::foldOct)
+				else if (par.genFoldBox.type == foldOct)
 				{
 					Nv = par.genFoldBox.Nv_oct;
 					sides = par.genFoldBox.sides_oct;
 				}
-				else if (par.genFoldBox.type == fractal::foldDodeca)
+				else if (par.genFoldBox.type == foldDodeca)
 				{
 					Nv = par.genFoldBox.Nv_dodeca;
 					sides = par.genFoldBox.sides_dodeca;
 				}
-				else if (par.genFoldBox.type == fractal::foldOctCube)
+				else if (par.genFoldBox.type == foldOctCube)
 				{
 					Nv = par.genFoldBox.Nv_oct_cube;
 					sides = par.genFoldBox.sides_oct_cube;
 				}
-				else if (par.genFoldBox.type == fractal::foldIcosa)
+				else if (par.genFoldBox.type == foldIcosa)
 				{
 					Nv = par.genFoldBox.Nv_icosa;
 					sides = par.genFoldBox.sides_icosa;
 				}
-				else if (par.genFoldBox.type == fractal::foldBox6)
+				else if (par.genFoldBox.type == foldBox6)
 				{
 					Nv = par.genFoldBox.Nv_box6;
 					sides = par.genFoldBox.sides_box6;
 				}
-				else if (par.genFoldBox.type == fractal::foldBox5)
+				else if (par.genFoldBox.type == foldBox5)
 				{
 					Nv = par.genFoldBox.Nv_box5;
 					sides = par.genFoldBox.sides_box5;
@@ -748,7 +748,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 
-			case fractal::smoothMandelbox:
+			case smoothMandelbox:
 			{
 				double sm = par.mandelbox.doubles.sharpness;
 
@@ -791,7 +791,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::foldingIntPow2:
+			case foldingIntPow2:
 			{
 				if (z.x > par.doubles.FoldingIntPowFoldFactor) z.x = par.doubles.FoldingIntPowFoldFactor * 2.0 - z.x;
 				else if (z.x < -par.doubles.FoldingIntPowFoldFactor) z.x = -par.doubles.FoldingIntPowFoldFactor * 2.0 - z.x;
@@ -834,7 +834,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::kaleidoscopic:
+			case kaleidoscopic:
 			{
 
 				if (par.IFS.absX) z.x = fabs(z.x);
@@ -861,7 +861,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				if(par.IFS.doubles.edge.y > 0) z.y = par.IFS.doubles.edge.y - fabs(par.IFS.doubles.edge.y - z.y);
 				if(par.IFS.doubles.edge.z > 0) z.z = par.IFS.doubles.edge.z - fabs(par.IFS.doubles.edge.z - z.z);
 
-				if (Mode == fractal::colouring)
+				if (Mode == colouring)
 				{
 					double length2 = z.Length();
 					if (length2 < min) min = length2;
@@ -884,7 +884,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 				break;
 			}
-			case fractal::mandelboxVaryScale4D:
+			case mandelboxVaryScale4D:
 			{
 				scale = scale + par.mandelbox.doubles.vary4D.scaleVary * (fabs(scale) - 1.0);
 				CVector3 oldz = z;
@@ -913,7 +913,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
 				break;
 			}
-			case fractal::aexion:
+			case aexion:
 			{
 				if(L == 0)
 				{
@@ -945,7 +945,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = sqrt(z.x * z.x + z.y * z.y + z.z * z.z + w * w);
 				break;
 			}
-			case fractal::benesi:
+			case benesi:
 			{
 				double r1 = z.y*z.y + z.z*z.z;
 				double newx = 0;
@@ -968,7 +968,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::bristorbrot:
+			case bristorbrot:
 			{
 				double newx = z.x*z.x - z.y*z.y - z.z*z.z;
 				double newy = z.y * (2.0 * z.x - z.z);
@@ -981,25 +981,25 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::invertX:
+			case invertX:
 			{
 				z.x = z.x >= 0.0 ? z.x*z.x/(fabs(z.x) + p) : -z.x*z.x/(fabs(z.x) + p);
 				r = z.Length();
 				break;
 			}
-			case fractal::invertY:
+			case invertY:
 			{
 				z.y = z.y >= 0.0 ? z.y*z.y/(fabs(z.y) + p) : -z.y*z.y/(fabs(z.y) + p);
 				r = z.Length();
 				break;
 			}
-			case fractal::invertZ:
+			case invertZ:
 			{
 				z.z = z.z >= 0.0 ? z.z*z.z/(fabs(z.z) + p) : -z.z*z.z/(fabs(z.z) + p);
 				r = z.Length();
 				break;
 			}
-			case fractal::invertR:
+			case invertR:
 			{
 				double rInv = r*r/(r + p);
 				z.x = z.x / r * rInv;
@@ -1008,7 +1008,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::sphericalFold:
+			case sphericalFold:
 			{
 				double rr = r*r;
 				double pp = p*p;
@@ -1027,7 +1027,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::powXYZ:
+			case powXYZ:
 			{
 				z.x = z.x >= 0 ? pow(z.x,p) : -pow(-z.x,p);
 				z.y = z.y >= 0 ? pow(z.y,p) : -pow(-z.y,p);
@@ -1035,43 +1035,43 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::scaleX:
+			case scaleX:
 			{
 				z.x = z.x * p;
 				r = z.Length();
 				break;
 			}
-			case fractal::scaleY:
+			case scaleY:
 			{
 				z.y = z.y * p;
 				r = z.Length();
 				break;
 			}
-			case fractal::scaleZ:
+			case scaleZ:
 			{
 				z.z = z.z * p;
 				r = z.Length();
 				break;
 			}
-			case fractal::offsetX:
+			case offsetX:
 			{
 				z.x = z.x + p;
 				r = z.Length();
 				break;
 			}
-			case fractal::offsetY:
+			case offsetY:
 			{
 				z.y = z.y + p;
 				r = z.Length();
 				break;
 			}
-			case fractal::offsetZ:
+			case offsetZ:
 			{
 				z.z = z.z + p;
 				r = z.Length();
 				break;
 			}
-			case fractal::angleMultiplyX:
+			case angleMultiplyX:
 			{
 				double angle = atan2(z.z,z.y)*p;
 				double tempR = sqrt(z.z*z.z + z.y*z.y);
@@ -1080,7 +1080,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::angleMultiplyY:
+			case angleMultiplyY:
 			{
 				double angle = atan2(z.z,z.x)*p;
 				double tempR = sqrt(z.z*z.z + z.x*z.x);
@@ -1089,7 +1089,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::angleMultiplyZ:
+			case angleMultiplyZ:
 			{
 				double angle = atan2(z.y,z.x)*p;
 				double tempR = sqrt(z.x*z.x + z.y*z.y);
@@ -1098,27 +1098,27 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				r = z.Length();
 				break;
 			}
-			case fractal::hybrid:
+			case hybrid:
 				break;
-			case fractal::none:
+			case none:
 				break;
-			case fractal::ocl_custom:
+			case ocl_custom:
 				break;
 		}
 
 		//************************** iteration terminate conditions *****************
-		if (Mode == fractal::deltaDE1)
+		if (Mode == deltaDE1)
 		{
 			if (r > 1e10)
 				break;
 		}
-		else if (Mode == fractal::deltaDE2)
+		else if (Mode == deltaDE2)
 		{
 			if (L == *iter_count)
 				break;
 		}
 
-		if (Mode == fractal::orbitTrap)
+		if (Mode == orbitTrap)
 		{
 			CVector3 delta = z - par.doubles.fakeLightsOrbitTrap;
 			distance = delta.Length();
@@ -1130,7 +1130,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			}
 		}
 
-		if (actualFormula == fractal::menger_sponge || actualFormula == fractal::kaleidoscopic)
+		if (actualFormula == menger_sponge || actualFormula == kaleidoscopic)
 		{
 			if (r > 1000)
 			{
@@ -1138,7 +1138,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 				break;
 			}
 		}
-		else if (actualFormula == fractal::tglad || actualFormula == fractal::smoothMandelbox || actualFormula == fractal::mandelboxVaryScale4D || actualFormula == fractal::generalizedFoldBox)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D || actualFormula == generalizedFoldBox)
 		{
 			if (r > 1024)
 			{
@@ -1148,7 +1148,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 		}
 		else
 		{
-			if (Mode == fractal::normal) //condition for all other trigonometric and hypercomplex fractals
+			if (Mode == normal) //condition for all other trigonometric and hypercomplex fractals
 			{
 				if (r > 1e2)
 				{
@@ -1156,7 +1156,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					break;
 				}
 			}
-			else if (Mode == fractal::fake_AO) //mode 2
+			else if (Mode == fake_AO) //mode 2
 			{
 				if (r < min) min = r;
 				if (r > 1e15)
@@ -1165,7 +1165,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					break;
 				}
 			}
-			else if (Mode == fractal::colouring) //mode 1
+			else if (Mode == colouring) //mode 1
 			{
 				if(par.primitives.onlyPlane)
 				{
@@ -1202,25 +1202,25 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 	if (iter_count != NULL)
 		*iter_count = L;
 
-	if (Mode == fractal::normal)
+	if (Mode == normal)
 	{
 		if (L == N)
 			distance = 0;
 		return distance;
 	}
 
-	if (Mode == fractal::deltaDE1 || Mode == fractal::deltaDE2)
+	if (Mode == deltaDE1 || Mode == deltaDE2)
 		return r;
 
-	if (Mode == fractal::fake_AO)
+	if (Mode == fake_AO)
 		return distance;
 
-	if (Mode == fractal::orbitTrap)
+	if (Mode == orbitTrap)
 		return distance;
 
-	if (Mode == fractal::colouring)
+	if (Mode == colouring)
 	{
-		if (par.formula == fractal::hybrid)
+		if (par.formula == hybrid)
 		{
 			if (min > 100) 
 				min = 100;
@@ -1231,9 +1231,9 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 
 			return distance * 5000.0 + tgladColor * 100.0 + min * 1000.0;
 		} 
-		else if (actualFormula == fractal::tglad || actualFormula == fractal::smoothMandelbox || actualFormula == fractal::mandelboxVaryScale4D || actualFormula == fractal::generalizedFoldBox)
+		else if (actualFormula == tglad || actualFormula == smoothMandelbox || actualFormula == mandelboxVaryScale4D || actualFormula == generalizedFoldBox)
 			return tgladColor * 100.0 + z.Length()*par.mandelbox.doubles.colorFactorR;
-		else if (actualFormula == fractal::kaleidoscopic || actualFormula == fractal::menger_sponge)
+		else if (actualFormula == kaleidoscopic || actualFormula == menger_sponge)
 			return min * 1000.0;
 		else
 			return distance * 5000.0;
@@ -1246,7 +1246,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 {
 	int L;
 	double distance;
-	params.objectOut = fractal::objFractal;
+	params.objectOut = objFractal;
 
 	double limitBoxDist = 0.0;
 
@@ -1269,7 +1269,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	{
 		if (params.analitycDE)
 		{
-			distance = Compute<fractal::normal>(point, params, &L);
+			distance = Compute<normal>(point, params, &L);
 			if (max_iter != NULL)
 			{
 				if (L == (int)params.doubles.N) *max_iter = true;
@@ -1309,26 +1309,26 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 		{
 			double deltaDE = 1e-10;
 
-			double r = Compute<fractal::deltaDE1>(point, params, &L);
+			double r = Compute<deltaDE1>(point, params, &L);
 			int retval = L;
 			params.itersOut = L;
 
 			point.x += deltaDE;
 			point.y += 0;
 			point.z += 0;
-			double r2 = Compute<fractal::deltaDE2>(point, params, &L);
+			double r2 = Compute<deltaDE2>(point, params, &L);
 			double dr1 = fabs(r2 - r) / deltaDE;
 
 			point.x -= deltaDE;
 			point.y += deltaDE;
 			point.z += 0;
-			r2 = Compute<fractal::deltaDE2>(point, params, &L);
+			r2 = Compute<deltaDE2>(point, params, &L);
 			double dr2 = fabs(r2 - r) / deltaDE;
 
 			point.x += 0;
 			point.y -= deltaDE;
 			point.z += deltaDE;
-			r2 = Compute<fractal::deltaDE2>(point, params, &L);
+			r2 = Compute<deltaDE2>(point, params, &L);
 			double dr3 = fabs(r2 - r) / deltaDE;
 
 			double dr = sqrt(dr1 * dr1 + dr2 * dr2 + dr3 * dr3);
@@ -1390,7 +1390,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.planeEnable)
 	{
 		double planeDistance = PrimitivePlane(point, params.doubles.primitives.planeCentre, params.doubles.primitives.planeNormal);
-		if(!params.primitives.onlyPlane && planeDistance < distance) 	params.objectOut = fractal::objPlane;
+		if(!params.primitives.onlyPlane && planeDistance < distance) 	params.objectOut = objPlane;
 		distance = (planeDistance < distance) ? planeDistance : distance;
 
 	}
@@ -1399,7 +1399,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.boxEnable)
 	{
 		double boxDistance = PrimitiveBox(point, params.doubles.primitives.boxCentre, params.doubles.primitives.boxSize);
-		if(boxDistance < distance) 	params.objectOut = fractal::objBox;
+		if(boxDistance < distance) 	params.objectOut = objBox;
 		distance = (boxDistance < distance) ? boxDistance : distance;
 	}
 
@@ -1407,7 +1407,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.invertedBoxEnable)
 	{
 		double boxDistance = PrimitiveInvertedBox(point, params.doubles.primitives.invertedBoxCentre, params.doubles.primitives.invertedBoxSize);
-		if(boxDistance < distance) 	params.objectOut = fractal::objBoxInv;
+		if(boxDistance < distance) 	params.objectOut = objBoxInv;
 		distance = (boxDistance < distance) ? boxDistance : distance;
 	}
 
@@ -1415,7 +1415,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.sphereEnable)
 	{
 		double sphereDistance = PrimitiveSphere(point, params.doubles.primitives.sphereCentre, params.doubles.primitives.sphereRadius);
-		if(sphereDistance < distance) 	params.objectOut = fractal::objSphere;
+		if(sphereDistance < distance) 	params.objectOut = objSphere;
 		distance = (sphereDistance < distance) ? sphereDistance : distance;
 	}
 
@@ -1423,7 +1423,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	if (params.primitives.invertedSphereEnable)
 	{
 		double sphereDistance = PrimitiveInvertedSphere(point, params.doubles.primitives.invertedSphereCentre, params.doubles.primitives.invertedSphereRadius);
-		if(sphereDistance < distance) 	params.objectOut = fractal::objSphereInv;
+		if(sphereDistance < distance) 	params.objectOut = objSphereInv;
 		distance = (sphereDistance < distance) ? sphereDistance : distance;
 	}
 
@@ -1432,7 +1432,7 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 	{
 		double waterDistance = PrimitiveWater(point, params.doubles.primitives.waterHeight, params.doubles.primitives.waterAmplitude,
 				params.doubles.primitives.waterLength, params.doubles.primitives.waterRotation, params.primitives.waterIterations, params.doubles.primitives.waterAnimSpeed, params.frameNo);
-		if(waterDistance < distance) 	params.objectOut = fractal::objWater;
+		if(waterDistance < distance) 	params.objectOut = objWater;
 		distance = (waterDistance < distance) ? waterDistance : distance;
 	}
 
@@ -1448,9 +1448,9 @@ double CalculateDistance(CVector3 point, sFractal &params, bool *max_iter)
 }
 
 // force template instantiation
-template double Compute<fractal::normal>(CVector3, const sFractal&, int*);
-template double Compute<fractal::colouring>(CVector3, const sFractal&, int*);
-template double Compute<fractal::fake_AO>(CVector3, const sFractal&, int*);
-template double Compute<fractal::deltaDE1>(CVector3, const sFractal&, int*);
-template double Compute<fractal::deltaDE2>(CVector3, const sFractal&, int*);
-template double Compute<fractal::orbitTrap>(CVector3, const sFractal&, int*);
+template double Compute<normal>(CVector3, const sFractal&, int*);
+template double Compute<colouring>(CVector3, const sFractal&, int*);
+template double Compute<fake_AO>(CVector3, const sFractal&, int*);
+template double Compute<deltaDE1>(CVector3, const sFractal&, int*);
+template double Compute<deltaDE2>(CVector3, const sFractal&, int*);
+template double Compute<orbitTrap>(CVector3, const sFractal&, int*);

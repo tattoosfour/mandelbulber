@@ -15,7 +15,7 @@
 #include "algebra.hpp"
 #include "image.h"
 #include "texture.hpp"
-#include "fractparams.hpp"
+#include "fractparams.h"
 #include "cl_support.hpp"
 
 struct sParam
@@ -52,7 +52,7 @@ struct sReflect
 	double lastDist;
 	bool found;
 	double distThresh;
-	fractal::enumObjectType objectType;
+	enumObjectType objectType;
 	double reflect;
 };
 
@@ -72,8 +72,6 @@ extern int NR_THREADS;
 extern bool noGUI;
 
 extern cImage mainImage;
-extern parameters::container gPar;
-extern parameters::container appPar;
 
 double real_clock(void);
 void MainRender(void);

@@ -63,7 +63,7 @@ public:
 	bool checkErr(cl_int err, const char * name);
 	void InitDevice(void);
 	void InitFractal(void);
-	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, fractal::enumFractalFormula formula);
+	void SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula);
 	void Render(cImage *image, GtkWidget *outputDarea);
 	sClPixel * GetRgbBuff() {return rgbbuff;}
 	void PrepareBackgroundTexture(cTexture *texture);
@@ -148,7 +148,7 @@ private:
 
 	sClParams lastParams;
 	sClFractal lastFractal;
-	fractal::enumFractalFormula lastFormula;
+	enumFractalFormula lastFormula;
 	int lastStepSize;
 	int lastEngineNumber;
 

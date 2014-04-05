@@ -9,14 +9,11 @@
  /
  ********************************************************/
 
-#ifndef FRACTPARAMS_HPP_
-#define FRACTPARAMS_HPP_
+#ifndef FRACTPARAMS_H_
+#define FRACTPARAMS_H_
 
 #include "fractal.h"
 #include "texture.hpp"
-#include "parameters.hpp"
-
-void InitParams(parameters::container *par);
 
 struct sParamRenderD
 {
@@ -142,10 +139,10 @@ struct sParamRender
 	cTexture *backgroundTexture;
 	cTexture *envmapTexture;
 	cTexture *lightmapTexture;
-	std::vector<fractal::enumFractalFormula> formulaSequence;
+	std::vector<enumFractalFormula> formulaSequence;
 	std::vector<double> hybridPowerSequence;
 
 	double settingsVersion;
 };
 
-#endif /* FRACTPARAMS_HPP_ */
+#endif /* FRACTPARAMS_H_ */

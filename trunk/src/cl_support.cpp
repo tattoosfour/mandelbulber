@@ -56,7 +56,7 @@ CclSupport::CclSupport(void)
 	height = 600;
 	steps = 10;
 	recompileRequest = true;
-	lastFormula = fractal::trig_optim;
+	lastFormula = trig_optim;
 	lastEngineNumber = 0;
 	lastStepSize = 0;
 	inBuffer1 = new sClInBuff;
@@ -250,20 +250,20 @@ void CclSupport::InitFractal(void)
 
 	std::string strFormula = "mandelbulb";
 
-	if(lastFormula == fractal::trig_optim) strFormula = "mandelbulb";
-	if(lastFormula == fractal::trig_DE) strFormula = "mandelbulb2";
-	if(lastFormula == fractal::tglad)
+	if(lastFormula == trig_optim) strFormula = "mandelbulb";
+	if(lastFormula == trig_DE) strFormula = "mandelbulb2";
+	if(lastFormula == tglad)
 	{
 		if(lastFractal.mandelbox.rotEnabled)
 			strFormula = "mandelbox_full";
 		else
 			strFormula = "mandelbox";
 	}
-	if(lastFormula == fractal::menger_sponge) strFormula = "mengersponge";
-	if(lastFormula == fractal::hypercomplex) strFormula = "hypercomplex";
-	if(lastFormula == fractal::quaternion) strFormula = "quaternion";
-	if(lastFormula == fractal::kaleidoscopic) strFormula = "kaleidoscopic";
-	if(lastFormula == fractal::xenodreambuie) strFormula = "xenodreambuie";
+	if(lastFormula == menger_sponge) strFormula = "mengersponge";
+	if(lastFormula == hypercomplex) strFormula = "hypercomplex";
+	if(lastFormula == quaternion) strFormula = "quaternion";
+	if(lastFormula == kaleidoscopic) strFormula = "kaleidoscopic";
+	if(lastFormula == xenodreambuie) strFormula = "xenodreambuie";
 
 	std::string strFileEngine = clDir;
 	int engineNumber = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLEngine));
@@ -280,21 +280,21 @@ void CclSupport::InitFractal(void)
 	if(!checkErr(filePrimitives.is_open() ? CL_SUCCESS : -1, ("Can't open file:" + strFilePrimitives).c_str())) return;
 
 	std::string strFileDistance = clDir;
-	if(lastFormula == fractal::ocl_custom)
+	if(lastFormula == ocl_custom)
 	{
-		switch ((fractal::enumOCLDEMode) lastFractal.customOCLFormulaDEMode)
+		switch ((enumOCLDEMode) lastFractal.customOCLFormulaDEMode)
 		{
-			case fractal::calculated:
+			case calculated:
 			{
 				strFileDistance += "cl_distance.cl";
 				break;
 			}
-			case fractal::deltaDE:
+			case deltaDE:
 			{
 				strFileDistance += "cl_distance_deltaDE.cl";
 				break;
 			}
-			case fractal::noDE:
+			case noDE:
 			{
 				strFileDistance += "cl_distance_noDE.cl";
 				break;
@@ -303,7 +303,7 @@ void CclSupport::InitFractal(void)
 	}
 	else
 	{
-		if(lastFormula == fractal::xenodreambuie || lastFormula == fractal::hypercomplex)
+		if(lastFormula == xenodreambuie || lastFormula == hypercomplex)
 			strFileDistance += "cl_distance_deltaDE.cl";
 		else
 			strFileDistance += "cl_distance.cl";
@@ -319,7 +319,7 @@ void CclSupport::InitFractal(void)
 
 	std::string strFileFormulaInit;
 	std::string strFileFormula;
-	if(lastFormula == fractal::ocl_custom)
+	if(lastFormula == ocl_custom)
 	{
 		customFormulas->GetActual(&strFormula, &strFileFormula, &strFileFormulaInit);
 
@@ -479,7 +479,7 @@ void CclSupport::InitFractal(void)
 	ready = true;
 }
 
-void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, fractal::enumFractalFormula formula)
+void CclSupport::SetParams(sClInBuff *inBuff, sClInConstants *inConstants, enumFractalFormula formula)
 {
 	if(inConstants->fractal.juliaMode != lastFractal.juliaMode) recompileRequest = true;
 	if(formula != lastFormula) recompileRequest = true;

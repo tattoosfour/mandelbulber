@@ -302,7 +302,7 @@ sShaderOutput VolumetricShader(sShaderInputData input, sShaderOutput oldPixel, s
 		//fake lights (orbit trap)
 		if(input.param->fakeLightsEnabled)
 		{
-			double r = Compute<fractal::orbitTrap>(point, *input.calcParam);
+			double r = Compute<orbitTrap>(point, *input.calcParam);
 			r = sqrt(1.0f/(r + 1.0e-30f));
 			double fakeLight = 1.0 / (pow(r, 10.0 / input.param->doubles.fakeLightsVisibilitySize) * pow(10.0, 10.0 / input.param->doubles.fakeLightsVisibilitySize) + 1e-100);
 			output.R += fakeLight * step * input.param->doubles.fakeLightsVisibility;
@@ -572,7 +572,7 @@ sShaderOutput MainShadow(sShaderInputData &input)
 sShaderOutput FastAmbientOcclusion(sShaderInputData &input)
 {
 	sShaderOutput output;
-	double min_radius = Compute<fractal::fake_AO>(input.point, *input.calcParam);
+	double min_radius = Compute<fake_AO>(input.point, *input.calcParam);
 	double j = (min_radius - 0.65) * 1.0; //0.65
 	if (j > 1.0) j = 1.0;
 	if (j < 0) j = 0;
@@ -850,10 +850,10 @@ sShaderOutput SurfaceColour(sShaderInputData &input)
 
 	switch(input.objectType)
 	{
-		case fractal::objFractal:
+		case objFractal:
 		{
 			input.calcParam->doubles.N *= 10;
-			int nrCol = floor(Compute<fractal::colouring>(input.point, *input.calcParam));
+			int nrCol = floor(Compute<colouring>(input.point, *input.calcParam));
 			input.calcParam->doubles.N /= 10;
 			nrCol = abs(nrCol) % (248 * 256);
 
@@ -877,42 +877,42 @@ sShaderOutput SurfaceColour(sShaderInputData &input)
 			out.B = colour.B / 256.0;
 			break;
 		}
-		case fractal::objWater:
+		case objWater:
 		{
 			out.R = input.param->primitiveWaterColour.R / 65536.0;
 			out.G = input.param->primitiveWaterColour.G / 65536.0;
 			out.B = input.param->primitiveWaterColour.B / 65536.0;
 			break;
 		}
-		case fractal::objBox:
+		case objBox:
 		{
 			out.R = input.param->primitiveBoxColour.R / 65536.0;
 			out.G = input.param->primitiveBoxColour.G / 65536.0;
 			out.B = input.param->primitiveBoxColour.B / 65536.0;
 			break;
 		}
-		case fractal::objBoxInv:
+		case objBoxInv:
 		{
 			out.R = input.param->primitiveInvertedBoxColour.R / 65536.0;
 			out.G = input.param->primitiveInvertedBoxColour.G / 65536.0;
 			out.B = input.param->primitiveInvertedBoxColour.B / 65536.0;
 			break;
 		}
-		case fractal::objSphere:
+		case objSphere:
 		{
 			out.R = input.param->primitiveSphereColour.R / 65536.0;
 			out.G = input.param->primitiveSphereColour.G / 65536.0;
 			out.B = input.param->primitiveSphereColour.B / 65536.0;
 			break;
 		}
-		case fractal::objSphereInv:
+		case objSphereInv:
 		{
 			out.R = input.param->primitiveInvertedSphereColour.R / 65536.0;
 			out.G = input.param->primitiveInvertedSphereColour.G / 65536.0;
 			out.B = input.param->primitiveInvertedSphereColour.B / 65536.0;
 			break;
 		}
-		case fractal::objPlane:
+		case objPlane:
 		{
 			out.R = input.param->primitivePlaneColour.R / 65536.0;
 			out.G = input.param->primitivePlaneColour.G / 65536.0;
@@ -1226,16 +1226,16 @@ sShaderOutput FakeLights(sShaderInputData &input, sShaderOutput *fakeSpec)
 {
 	sShaderOutput fakeLights;
 	double delta = input.dist_thresh * input.param->doubles.smoothness;
-	double rr = Compute<fractal::orbitTrap>(input.point, *input.calcParam);
+	double rr = Compute<orbitTrap>(input.point, *input.calcParam);
 	double fakeLight = input.param->doubles.fakeLightsIntensity/rr;
 	double r = 1.0/(rr + 1e-30);
 
 	CVector3 deltax(delta, 0.0, 0.0);
-	double rx = 1.0/(Compute<fractal::orbitTrap>(input.point + deltax, *input.calcParam) + 1e-30);
+	double rx = 1.0/(Compute<orbitTrap>(input.point + deltax, *input.calcParam) + 1e-30);
 	CVector3 deltay(0.0, delta, 0.0);
-	double ry = 1.0/(Compute<fractal::orbitTrap>(input.point + deltay, *input.calcParam) + 1e-30);
+	double ry = 1.0/(Compute<orbitTrap>(input.point + deltay, *input.calcParam) + 1e-30);
 	CVector3 deltaz(0.0, 0.0, delta);
-	double rz = 1.0/(Compute<fractal::orbitTrap>(input.point + deltaz, *input.calcParam) + 1e-30);
+	double rz = 1.0/(Compute<orbitTrap>(input.point + deltaz, *input.calcParam) + 1e-30);
 
 	CVector3 fakeLightNormal;
 	fakeLightNormal.x = r - rx;
