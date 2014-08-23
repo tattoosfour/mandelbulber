@@ -148,6 +148,10 @@ void CclSupport::InitDevice(void)
 	if(!checkErr(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get")) return;
 	std::cout << "OpenCL Platform number is: " << platformList.size() << std::endl;
 
+	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
+	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
+	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+
 	if(platformIndex > platformList.size()-1)
 	{
 		platformIndex = platformList.size()-1;
@@ -243,9 +247,7 @@ void CclSupport::InitFractal(void)
 		customFormulas = new CCustomFormulas(data_directory);
 	}
 
-	useCPU = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLGPUCPU));
-	deviceIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLDeviceIndex));
-	platformIndex = gtk_combo_box_get_active(GTK_COMBO_BOX(Interface.comboOpenCLPlatformIndex));
+
 	memoryLimitByUser = atoi(gtk_entry_get_text(GTK_ENTRY(Interface.edit_OpenCLMaxMem))) * 1024 * 1024;
 
 	std::string strFormula = "mandelbulb";

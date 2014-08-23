@@ -119,7 +119,7 @@ sShaderOutput BackgroundShader(sShaderInputData input)
 	{
 		if(input.param->background_as_fulldome)
 		{
-			double alfaTexture = input.viewVector.GetAlfa();
+			double alfaTexture = input.viewVector.GetAlpha();
 			double betaTexture = input.viewVector.GetBeta();
 			int texWidth = input.param->backgroundTexture->Width()*0.5;
 			int texHeight = input.param->backgroundTexture->Height();
@@ -140,7 +140,7 @@ sShaderOutput BackgroundShader(sShaderInputData input)
 		}
 		else
 		{
-			double alfaTexture = fmod(input.viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
+			double alfaTexture = fmod(input.viewVector.GetAlpha() + 2.5 * M_PI, 2 * M_PI);
 			double betaTexture = input.viewVector.GetBeta();
 			if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
 			if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
@@ -789,7 +789,7 @@ sShaderOutput EnvMapping(sShaderInputData &input)
 	double dot = -input.viewVector.Dot(input.normal);
 	reflect = input.normal * 2.0 * dot + input.viewVector;
 
-	double alfaTexture = reflect.GetAlfa() + M_PI;
+	double alfaTexture = reflect.GetAlpha() + M_PI;
 	double betaTexture = reflect.GetBeta();
 	double texWidth = input.envMappingTexture->Width();
 	double texHeight = input.envMappingTexture->Height();
@@ -932,7 +932,7 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 	{
 		if(param->background_as_fulldome)
 		{
-			double alfaTexture = viewVector.GetAlfa();
+			double alfaTexture = viewVector.GetAlpha();
 			double betaTexture = viewVector.GetBeta();
 			int texWidth = param->backgroundTexture->Width()*0.5;
 			int texHeight = param->backgroundTexture->Height();
@@ -953,7 +953,7 @@ sShaderOutput TexturedBackground(sParamRender *param, CVector3 viewVector)
 		}
 		else
 		{
-			double alfaTexture = fmod(viewVector.GetAlfa() + 2.5 * M_PI, 2 * M_PI);
+			double alfaTexture = fmod(viewVector.GetAlpha() + 2.5 * M_PI, 2 * M_PI);
 			double betaTexture = viewVector.GetBeta();
 			if (betaTexture > 0.5 * M_PI) betaTexture = 0.5 * M_PI - betaTexture;
 			if (betaTexture < -0.5 * M_PI) betaTexture = -0.5 * M_PI + betaTexture;
