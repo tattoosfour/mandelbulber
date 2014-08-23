@@ -190,7 +190,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 			{
 				double r1 = pow(r, p - 1);
 				double r2 = r1 * r;
-				double th = z.GetAlfa();
+				double th = z.GetAlpha();
 				double ph = -z.GetBeta();
 				if (Mode == 0)
 				{
@@ -200,7 +200,7 @@ double Compute(CVector3 z, const sFractal &par, int *iter_count)
 					CVector3 rot(th_thdz, ph_phdz);
 					dz = rot * p_r1_rdz + one;
 					r_dz = dz.Length();
-					th_dz = dz.GetAlfa();
+					th_dz = dz.GetAlpha();
 					ph_dz = -dz.GetBeta();
 				}
 				CVector3 rot(p * th, p * ph);

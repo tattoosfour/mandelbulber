@@ -34,7 +34,7 @@ kernel void DOF(__global ushort4 *in_image, __global ushort4 *out_image, __globa
 	int2 scr = (int2){ii % p.width, ii / p.width};
 	float z = zBuffer[index].z;
 	float blur = fabs(z - p.focus) / z * p.radius;
-	blur = min(blur, 100.0f);
+	blur = min(blur, 500.0f);
 	float4 center = convert_float4(in_image[scr.x + scr.y * p.width]);
 	//float4 center = read_imagef(in_image, scr);
 	float factor = blur * blur * sqrt(blur)* M_PI_F/3.0f;
